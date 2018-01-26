@@ -22,29 +22,24 @@ export default {
   },
 
   methods: {
-    // check round
     checkRound () {
-      if (this.currentRound === 'work' && this.currentRound >= this.workRounds) {
-        // set currentRound to long-break
+      if (this.currentRound === 'work' && this.round >= this.workRounds) {
+        this.$store.dispatch('setCurrentRound', 'long-break')
         console.log('long-break ready')
       } else if (this.currentRound === 'work') {
-        // set currentRound to short-break
         this.$store.dispatch('setCurrentRound', 'short-break')
         console.log('short-break ready')
       } else if (this.currentRound === 'short-break') {
-        // set currentRound to work
         this.$store.dispatch('setCurrentRound', 'work')
-        // increment round
         this.$store.dispatch('incrementRound')
         console.log('short-break finished, work ready, increment round')
       } else if (this.currentRound === 'long-break') {
-        // set currentRound to work
-        // reset round to 1
+        this.$store.dispatch('setCurrentRound', 'work')
+        this.$store.dispatch('resetRound')
         console.log('long-break finished, reset round')
       }
       this.dispatchTimer()
     },
-    // call for new timer
     dispatchTimer () {
       EventBus.$emit('timer-init')
     }
