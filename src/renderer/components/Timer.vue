@@ -6,23 +6,48 @@
     <button @click="resetTimer">Reset</button>
     <p v-if="!timerStarted">{{ prettyMinutes }}</p>
     <p v-else>{{ prettyTime }}</p>
+    <app-timer-controller/>
   </div>
 </template>
 
 <script>
 import Timer from './../utils/timer'
+import appTimerController from '@/components/Timer-controller'
+import { EventBus } from '../utils/event-bus'
 
 export default {
+  components: {
+    appTimerController
+  },
+
   data () {
     return {
       minutes: 1,
-      workTimer: null,
+      timer: null,
       timerActive: false,
       timerStarted: false
     }
   },
 
   computed: {
+    // store getters
+    currentRound () {
+      return this.$store.getters.currentRound
+    },
+
+    timeLongBreak () {
+      return this.$store.getters.timeLongBreak
+    },
+
+    timeShortBreak () {
+      return this.$store.getters.timeShortBreak
+    },
+
+    timeWork () {
+      return this.$store.getters.timeWork
+    },
+
+    // local
     prettyMinutes () {
       return this.minutes + ':00'
     },
@@ -32,8 +57,8 @@ export default {
     },
 
     timeElapsed () {
-      if (this.workTimer.time !== null) {
-        const time = this.workTimer.time
+      if (this.timer.time !== null) {
+        const time = this.timer.time
         const minutes = Math.floor(time / 60)
         const seconds = time - (minutes * 60)
         return {
@@ -44,13 +69,11 @@ export default {
     },
 
     timeRemaining () {
-      if (this.workTimer.time !== null) {
+      if (this.timer.time !== null) {
         const minutes = this.minutes
-        const time = this.workTimer.time
+        const time = this.timer.time
         const elapsedMinutes = Math.floor(time / 60)
         const elapsedSeconds = time - (elapsedMinutes * 60)
-        // const remainingMinutes = (minutes - elapsedMinutes) - 1
-        // const remainingSeconds = 60 - elapsedSeconds
         const remainingSeconds = this.formatTimeDouble(60 - elapsedSeconds)
         let remainingMinutes = minutes - elapsedMinutes
 
@@ -62,22 +85,6 @@ export default {
           remainingMinutes,
           remainingSeconds
         }
-      }
-    },
-
-    seconds () {
-      if (this.workTimer !== null) {
-        if (this.workTimer.time < 60) {
-          return 60 - this.workTimer.time
-        } else {
-          return this.workTimer.time / 60
-        }
-      }
-    },
-
-    time () {
-      if (this.workTimer !== null) {
-        return this.workTimer.time
       }
     }
   },
@@ -93,31 +100,61 @@ export default {
       }
     },
 
+    createTimer (min) {
+      this.timer = new Timer(min)
+    },
+
+    initTimer () {
+      switch (this.currentRound) {
+        case 'work':
+          this.minutes = this.timeWork
+          this.createTimer(this.timeWork)
+          break
+        case 'short-break':
+          this.minutes = this.timeShortBreak
+          this.createTimer(this.timeShortBreak)
+          break
+        case 'long-break':
+          this.minutes = this.timeLongBreak
+          this.createTimer(this.timeShortBreak)
+          break
+        default:
+          this.createTimer(25)
+          break
+      }
+    },
+
     pauseTimer () {
-      this.workTimer.pause()
+      this.timer.pause()
       this.timerActive = !this.timerActive
     },
 
     resetTimer () {
-      this.workTimer.reset()
+      this.timer.reset()
       this.timerActive = !this.timerActive
       this.timerStarted = false
     },
 
     resumeTimer () {
-      this.workTimer.resume()
+      this.timer.resume()
       this.timerActive = !this.timerActive
     },
 
     startTimer () {
-      this.workTimer.start()
+      this.timer.start()
       this.timerActive = !this.timerActive
       this.timerStarted = true
     }
   },
 
   mounted () {
-    this.workTimer = new Timer(this.minutes)
+    this.initTimer()
+    EventBus.$on('timer-init', () => {
+      this.initTimer()
+      setTimeout(() => {
+        this.startTimer()
+      }, 1500)
+    })
   }
 }
 </script>
