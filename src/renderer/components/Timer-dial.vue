@@ -20,7 +20,7 @@
         fill="none"
         stroke-width="10" 
         stroke-linecap="round" 
-        stroke-miterlimit="10" 
+        stroke-miterlimit="10"
         d="M115,5c60.8,0,110,49.2,110,110s-49.2,110-110,110S5,175.8,5,115S54.2,5,115,5"
       />
     </svg>
@@ -49,11 +49,34 @@
 </template>
 
 <script>
+import anime from 'animejs'
+import { EventBus } from '../utils/event-bus'
+
 export default {
+  props: ['minutes'],
+
+  data () {
+    return {
+      dial: null
+    }
+  },
+
   computed: {
     // store getters
     currentRound () {
       return this.$store.getters.currentRound
+    },
+
+    timeLongBreak () {
+      return this.$store.getters.timeLongBreak * 60 * 1000
+    },
+
+    timeShortBreak () {
+      return this.$store.getters.timeShortBreak * 60 * 1000
+    },
+
+    timeWork () {
+      return this.$store.getters.timeWork * 60 * 1000
     },
 
     currentRoundDisplay () {
@@ -75,6 +98,51 @@ export default {
         return 'Dial-fill--longBreak'
       }
     }
+  },
+
+  methods: {
+    dialAnimation (duration) {
+      this.dial = anime({
+        targets: '.Dial-fill path',
+        strokeDashoffset: [anime.setDashoffset, 0],
+        easing: 'easeInOutSine',
+        duration: duration,
+        direction: 'reverse',
+        autoplay: false
+      })
+      this.dial.play()
+      setTimeout(() => {
+        this.dial.pause()
+      }, 60)
+    }
+  },
+
+  mounted () {
+    this.dialAnimation(this.timeWork)
+    EventBus.$on('timer-started', () => {
+      this.dial.play()
+    })
+    EventBus.$on('timer-paused', () => {
+      this.dial.pause()
+    })
+    EventBus.$on('timer-resumed', () => {
+      this.dial.play()
+    })
+    EventBus.$on('timer-reset', () => {
+      this.dial.restart()
+      setTimeout(() => {
+        this.dial.pause()
+      }, 60)
+    })
+    EventBus.$on('timer-init', () => {
+      if (this.currentRound === 'work') {
+        this.dialAnimation(this.timeWork)
+      } else if (this.currentRound === 'short-break') {
+        this.dialAnimation(this.timeShortBreak)
+      } else if (this.currentRound === 'long-break') {
+        this.dialAnimation(this.timeLongBreak)
+      }
+    })
   }
 }
 </script>
@@ -99,6 +167,7 @@ export default {
 
 .Dial-fill {
   position: absolute;
+  transform-origin: center;
 }
 
 .Dial-fill--work {
