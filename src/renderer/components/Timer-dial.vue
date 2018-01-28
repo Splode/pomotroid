@@ -128,6 +128,9 @@ export default {
     EventBus.$on('timer-resumed', () => {
       this.dial.play()
     })
+    EventBus.$on('timer-completed', () => {
+      this.dial.pause()
+    })
     EventBus.$on('timer-reset', () => {
       this.dial.restart()
       setTimeout(() => {
@@ -151,13 +154,15 @@ export default {
 .Dial-wrapper {
   display: flex;
   justify-content: center;
+  margin-top: 35px;
   position: relative;
+  -webkit-app-region: drag;
 }
 
 .Dial-label {
   letter-spacing: .1em;
   position: absolute;
-  top: 56%;
+  top: 66%;
   text-transform: uppercase;
 }
 
@@ -168,6 +173,7 @@ export default {
 .Dial-fill {
   position: absolute;
   transform-origin: center;
+  -webkit-app-region: no-drag;
 }
 
 .Dial-fill--work {

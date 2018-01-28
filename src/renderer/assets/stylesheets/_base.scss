@@ -1,4 +1,29 @@
 body {
   color: $colorWhite;
+  cursor: default;
   font-family: 'Lato', sans-serif;
+  margin: 0;
+  user-select: none;
+}
+
+h1, p {
+  margin: 0;
+  padding: 0;
+}
+
+.Container {
+  padding: 0 18px;
+}
+
+.Icon {
+  -webkit-app-region: no-drag;
+}
+
+.TextButton {
+  color: $colorBlueGrey;
+  margin-top: .5em;
+  transition: $transitionDefault;
+  &:hover {
+    color: $colorRed;
+  }
 }

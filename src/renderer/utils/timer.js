@@ -7,14 +7,16 @@ export default class {
   }
 
   start () {
-    this.timerInt = setInterval(() => {
-      this.time += 1
-      if (this.time >= this.totalSeconds) {
-        this.pause()
-        EventBus.$emit('timer-completed')
-      }
-    }, 1000)
-    EventBus.$emit('timer-started')
+    if (!this.timerInt) {
+      this.timerInt = setInterval(() => {
+        this.time += 1
+        if (this.time >= this.totalSeconds) {
+          this.pause()
+          EventBus.$emit('timer-completed')
+        }
+      }, 1000)
+      EventBus.$emit('timer-started')
+    }
   }
 
   pause () {

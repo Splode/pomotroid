@@ -1,13 +1,43 @@
 <template>
-  <div>
+  <div class="Timer-wrapper">
     <app-timer-dial :minutes="minutes">
       <p class="Dial-time" v-if="!timerStarted">{{ prettyMinutes }}</p>
       <p class="Dial-time" v-else>{{ prettyTime }}</p>
     </app-timer-dial>
-    <button @click="startTimer">Start</button>
-    <button @click="pauseTimer">Pause</button>
-    <button @click="resumeTimer">Resume</button>
-    <button @click="resetTimer">Reset</button>
+
+    <section class="Container Button-wrapper">
+      <transition name="fade" mode="out-in">
+        <div class="Button" v-if="!timerStarted" @click="startTimer" :key="'start'">
+          <div class="Button-icon-wrapper">
+            <svg version="1.2" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+              x="0px" y="0px" viewBox="0 0 7.6 15" xml:space="preserve" height="15px" class="Icon--start">
+              <polygon fill="#F6F2EB" points="0,0 0,15 7.6,7.4 "/>
+            </svg>
+          </div>
+        </div>
+        <div class="Button" v-if="timerStarted && !timerActive" @click="resumeTimer" :key="'resume'">
+          <div class="Button-icon-wrapper">
+            <svg version="1.2" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+              x="0px" y="0px" viewBox="0 0 7.6 15" xml:space="preserve" height="15px">
+              <polygon fill="#F6F2EB" points="0,0 0,15 7.6,7.4 "/>
+            </svg>
+          </div>
+        </div>
+        <div class="Button" v-else-if="timerStarted && timerActive" @click="pauseTimer" :key="'pause'">
+          <div class="Button-icon-wrapper">
+            <svg version="1.2" baseProfile="tiny" id="Layer_2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"   x="0px" y="0px" viewBox="0 0 10.9 18" xml:space="preserve" height="15px" class="Icon--pause">
+                <line fill="none" stroke="#F6F2EB" stroke-width="3" stroke-linecap="round" stroke-miterlimit="10" x1="1.5" y1="1.5" x2="1.5" y2="16.5"/>
+              
+                <line fill="none" stroke="#F6F2EB" stroke-width="3" stroke-linecap="round" stroke-miterlimit="10" x1="9.4" y1="1.5" x2="9.4" y2="16.5"/>
+            </svg>
+          </div>
+        </div>
+      </transition>
+    </section>
+
+    <app-timer-footer/>
+
+    <!-- <button @click="resetTimer">Reset</button> -->
     <app-timer-controller/>
   </div>
 </template>
@@ -16,12 +46,14 @@
 import Timer from './../utils/timer'
 import appTimerController from '@/components/Timer-controller'
 import appTimerDial from '@/components/Timer-dial'
+import appTimerFooter from '@/components/Timer-footer'
 import { EventBus } from '../utils/event-bus'
 
 export default {
   components: {
     appTimerController,
-    appTimerDial
+    appTimerDial,
+    appTimerFooter
   },
 
   data () {
@@ -120,7 +152,7 @@ export default {
           break
         case 'long-break':
           this.minutes = this.timeLongBreak
-          this.createTimer(this.timeShortBreak)
+          this.createTimer(this.timeLongBreak)
           break
         default:
           this.createTimer(25)
@@ -141,12 +173,12 @@ export default {
 
     resumeTimer () {
       this.timer.resume()
-      this.timerActive = !this.timerActive
+      this.timerActive = true
     },
 
     startTimer () {
       this.timer.start()
-      this.timerActive = !this.timerActive
+      this.timerActive = true
       this.timerStarted = true
     }
   },
@@ -164,11 +196,49 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.Button {
+  border: 2px solid $colorLightNavy;
+  border-radius: 100%;
+  display: flex;
+  justify-content: center;
+  transition: $transitionDefault;
+  width: 50px;
+  height: 50px;
+  -webkit-app-region: no-drag;
+  &:hover {
+    background-color: $colorLightNavy;
+    & .Icon--pause line {
+      stroke: $colorRed;
+    }
+    & .Icon--start polygon {
+      fill: $colorRed;
+    }
+  }
+}
+
+.Button-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0 10px 0;
+  -webkit-app-region: drag;
+}
+
+.Button-icon-wrapper {
+  align-items: center;
+  display: flex;
+  height: 100%;
+}
+
 .Dial-time {
   font-family: 'RobotoMono', monospace;
   font-size: 46px;
   margin: 0;
   position: absolute;
-  top: 33%;
+  top: 32%;
+}
+
+.Timer-wrapper {
+  display: flex;
+  flex-direction: column;
 }
 </style>

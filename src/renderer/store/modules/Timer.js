@@ -1,9 +1,9 @@
 const state = {
   round: 1,
-  workRounds: 2,
-  timeLongBreak: 3,
-  timeShortBreak: 1,
-  timeWork: 2,
+  workRounds: 4,
+  timeLongBreak: 15,
+  timeShortBreak: 5,
+  timeWork: 25,
   currentRound: 'work' // work, short-break, long-break
 }
 
