@@ -1,11 +1,13 @@
 <template>
   <div>
+    <app-timer-dial>
+      <p class="Dial-time" v-if="!timerStarted">{{ prettyMinutes }}</p>
+      <p class="Dial-time" v-else>{{ prettyTime }}</p>
+    </app-timer-dial>
     <button @click="startTimer">Start</button>
     <button @click="pauseTimer">Pause</button>
     <button @click="resumeTimer">Resume</button>
     <button @click="resetTimer">Reset</button>
-    <p v-if="!timerStarted">{{ prettyMinutes }}</p>
-    <p v-else>{{ prettyTime }}</p>
     <app-timer-controller/>
   </div>
 </template>
@@ -13,11 +15,13 @@
 <script>
 import Timer from './../utils/timer'
 import appTimerController from '@/components/Timer-controller'
+import appTimerDial from '@/components/Timer-dial'
 import { EventBus } from '../utils/event-bus'
 
 export default {
   components: {
-    appTimerController
+    appTimerController,
+    appTimerDial
   },
 
   data () {
@@ -159,6 +163,12 @@ export default {
 }
 </script>
 
-<style>
-
+<style lang="scss" scoped>
+.Dial-time {
+  font-family: 'RobotoMono', monospace;
+  font-size: 46px;
+  margin: 0;
+  position: absolute;
+  top: 33%;
+}
 </style>
