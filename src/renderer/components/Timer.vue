@@ -1,6 +1,6 @@
 <template>
   <div>
-    <app-timer-dial>
+    <app-timer-dial :minutes="minutes">
       <p class="Dial-time" v-if="!timerStarted">{{ prettyMinutes }}</p>
       <p class="Dial-time" v-else>{{ prettyTime }}</p>
     </app-timer-dial>
