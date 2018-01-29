@@ -19,6 +19,12 @@ h1, p {
   -webkit-app-region: no-drag;
 }
 
+.Icon-wrapper {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+}
+
 .TextButton {
   color: $colorBlueGrey;
   margin-top: .5em;

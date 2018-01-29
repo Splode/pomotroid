@@ -1,6 +1,24 @@
 .fade-enter-active, .fade-leave-active {
-  transition: $transitionDefault;
+  // transition: $transitionDefault;
+  transition: $transitionSnappy;
 }
 .fade-enter, .fade-leave-to {
   opacity: 0;
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: $transitionSnappy;
+  // transition: $transitionDefault;
+}
+
+.slide-left-enter,
+.slide-left-leave-to {
+  opacity: .5;
+  transform: translateX(-100vw);
+}
+
+.slide-left-enter-to,
+.slide-left-leave {
+  transform: translateX(0);
 }

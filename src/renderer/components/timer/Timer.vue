@@ -43,11 +43,11 @@
 </template>
 
 <script>
-import Timer from './../utils/timer'
-import appTimerController from '@/components/Timer-controller'
-import appTimerDial from '@/components/Timer-dial'
-import appTimerFooter from '@/components/Timer-footer'
-import { EventBus } from '../utils/event-bus'
+import Timer from '@/utils/timer'
+import appTimerController from '@/components/timer/Timer-controller'
+import appTimerDial from '@/components/timer/Timer-dial'
+import appTimerFooter from '@/components/timer/Timer-footer'
+import { EventBus } from '@/utils/event-bus'
 
 export default {
   components: {
@@ -197,7 +197,7 @@ export default {
 
 <style lang="scss" scoped>
 .Button {
-  border: 2px solid $colorLightNavy;
+  border: 2px solid $colorBlueGrey;
   border-radius: 100%;
   display: flex;
   justify-content: center;

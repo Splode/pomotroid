@@ -18,6 +18,7 @@ const winURL = process.env.NODE_ENV === 'development'
 function createWindow () {
   mainWindow = new BrowserWindow({
     backgroundColor: '#2F384B',
+    fullscreenable: false,
     frame: false,
     resizable: false,
     useContentSize: true,
@@ -48,6 +49,10 @@ app.on('activate', () => {
 
 ipcMain.on('window-close', (event, arg) => {
   mainWindow.close()
+})
+
+ipcMain.on('window-minimize', (event, arg) => {
+  mainWindow.minimize()
 })
 
 /**
