@@ -105,7 +105,7 @@ export default {
       this.dial = anime({
         targets: '.Dial-fill path',
         strokeDashoffset: [anime.setDashoffset, 0],
-        easing: 'easeInOutSine',
+        easing: 'linear',
         duration: duration,
         direction: 'reverse',
         autoplay: false
@@ -113,7 +113,7 @@ export default {
       this.dial.play()
       setTimeout(() => {
         this.dial.pause()
-      }, 60)
+      }, 50)
     }
   },
 
@@ -129,15 +129,16 @@ export default {
       this.dial.play()
     })
     EventBus.$on('timer-completed', () => {
-      this.dial.pause()
+      // this.dial.pause()
     })
     EventBus.$on('timer-reset', () => {
       this.dial.restart()
       setTimeout(() => {
         this.dial.pause()
-      }, 60)
+      }, 50)
     })
     EventBus.$on('timer-init', () => {
+      this.dial.pause()
       if (this.currentRound === 'work') {
         this.dialAnimation(this.timeWork)
       } else if (this.currentRound === 'short-break') {
@@ -156,7 +157,7 @@ export default {
   justify-content: center;
   margin-top: 35px;
   position: relative;
-  -webkit-app-region: drag;
+  // -webkit-app-region: drag;
 }
 
 .Dial-label {

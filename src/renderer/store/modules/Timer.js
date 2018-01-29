@@ -45,6 +45,22 @@ const mutations = {
     state.currentRound = payload
   },
 
+  SET_TIME_LONG_BREAK (state, payload) {
+    state.timeLongBreak = payload
+  },
+
+  SET_TIME_SHORT_BREAK (state, payload) {
+    state.timeShortBreak = payload
+  },
+
+  SET_TIME_WORK (state, payload) {
+    state.timeWork = payload
+  },
+
+  SET_WORK_ROUNDS (state, payload) {
+    state.workRounds = payload
+  },
+
   TOGGLE_MUTE (state) {
     state.isMuted = !state.isMuted
   }
@@ -61,6 +77,22 @@ const actions = {
 
   setCurrentRound ({ commit }, payload) {
     commit('SET_CURRENT_ROUND', payload)
+  },
+
+  setTimeLongBreak ({ commit }, payload) {
+    commit('SET_TIME_LONG_BREAK', payload)
+  },
+
+  setTimeShortBreak ({ commit }, payload) {
+    commit('SET_TIME_SHORT_BREAK', payload)
+  },
+
+  setTimeWork ({ commit }, payload) {
+    commit('SET_TIME_WORK', payload)
+  },
+
+  setWorkRounds ({ commit }, payload) {
+    commit('SET_WORK_ROUNDS', payload)
   },
 
   toggleMute ({ commit }) {

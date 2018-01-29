@@ -189,6 +189,7 @@ export default {
   mounted () {
     this.initTimer()
     EventBus.$on('timer-init', () => {
+      // clear previous timers
       this.timer.reset()
       this.initTimer()
       setTimeout(() => {
@@ -224,7 +225,7 @@ export default {
   display: flex;
   justify-content: center;
   margin: 20px 0 10px 0;
-  -webkit-app-region: drag;
+  // -webkit-app-region: drag;
 }
 
 .Button-icon-wrapper {

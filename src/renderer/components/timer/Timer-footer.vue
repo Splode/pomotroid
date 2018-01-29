@@ -74,7 +74,7 @@ export default {
   align-items: center;
   display: flex;
   justify-content: space-between;
-  -webkit-app-region: drag;
+  // -webkit-app-region: drag;
 }
 
 .Footer-icon-wrapper {
