@@ -2,8 +2,8 @@ const state = {
   round: 1,
   workRounds: 4,
   timeLongBreak: 15,
-  timeShortBreak: 1,
-  timeWork: 1,
+  timeShortBreak: 5,
+  timeWork: 25,
   currentRound: 'work', // work, short-break, long-break
   isMuted: false
 }

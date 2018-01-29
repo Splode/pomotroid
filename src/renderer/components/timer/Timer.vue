@@ -189,6 +189,7 @@ export default {
   mounted () {
     this.initTimer()
     EventBus.$on('timer-init', () => {
+      this.timer.reset()
       this.initTimer()
       setTimeout(() => {
         this.startTimer()
