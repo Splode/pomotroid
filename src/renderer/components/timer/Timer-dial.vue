@@ -110,10 +110,11 @@ export default {
         direction: 'reverse',
         autoplay: false
       })
-      this.dial.play()
-      setTimeout(() => {
-        this.dial.pause()
-      }, 50)
+      this.dial.seek(this.dial.duration)
+      // this.dial.play()
+      // setTimeout(() => {
+      //   this.dial.pause()
+      // }, 50)
     }
   },
 
