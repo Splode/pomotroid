@@ -2,9 +2,10 @@ const state = {
   round: 1,
   workRounds: 4,
   timeLongBreak: 15,
-  timeShortBreak: 5,
-  timeWork: 25,
-  currentRound: 'work' // work, short-break, long-break
+  timeShortBreak: 1,
+  timeWork: 1,
+  currentRound: 'work', // work, short-break, long-break
+  isMuted: false
 }
 
 const getters = {
@@ -25,6 +26,9 @@ const getters = {
   },
   currentRound () {
     return state.currentRound
+  },
+  isMuted () {
+    return state.isMuted
   }
 }
 
@@ -39,6 +43,10 @@ const mutations = {
 
   SET_CURRENT_ROUND (state, payload) {
     state.currentRound = payload
+  },
+
+  TOGGLE_MUTE (state) {
+    state.isMuted = !state.isMuted
   }
 }
 
@@ -53,6 +61,10 @@ const actions = {
 
   setCurrentRound ({ commit }, payload) {
     commit('SET_CURRENT_ROUND', payload)
+  },
+
+  toggleMute ({ commit }) {
+    commit('TOGGLE_MUTE')
   }
 }
 
