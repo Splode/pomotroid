@@ -25,17 +25,21 @@ export default {
     checkRound () {
       if (this.currentRound === 'work' && this.round >= this.workRounds) {
         this.$store.dispatch('setCurrentRound', 'long-break')
+        EventBus.$emit('ready-long-break')
         console.log('long-break ready')
       } else if (this.currentRound === 'work') {
         this.$store.dispatch('setCurrentRound', 'short-break')
+        EventBus.$emit('ready-short-break')
         console.log('short-break ready')
       } else if (this.currentRound === 'short-break') {
         this.$store.dispatch('setCurrentRound', 'work')
         this.$store.dispatch('incrementRound')
+        EventBus.$emit('ready-work')
         console.log('short-break finished, work ready, increment round')
       } else if (this.currentRound === 'long-break') {
         this.$store.dispatch('setCurrentRound', 'work')
         this.$store.dispatch('resetRound')
+        EventBus.$emit('ready-work')
         console.log('long-break finished, reset round')
       }
       this.dispatchTimer()
