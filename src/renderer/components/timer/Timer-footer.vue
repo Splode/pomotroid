@@ -78,14 +78,12 @@ export default {
   align-items: center;
   display: flex;
   justify-content: space-between;
-  // -webkit-app-region: drag;
 }
 
 .Footer-icon-wrapper {
   display: flex;
   justify-content: space-between;
   width: 40px;
-  -webkit-app-region: no-drag;
 }
 
 .Icon--mute {
@@ -117,6 +115,5 @@ export default {
 
 .Round-wrapper {
   text-align: center;
-  -webkit-app-region: no-drag;
 }
 </style>

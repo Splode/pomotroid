@@ -101,8 +101,10 @@ export default {
   methods: {
     checkToResetTimer (setting) {
       if (this.currentRound === setting) {
-        EventBus.$emit('timer-init')
-        console.log('reset from settings')
+        EventBus.$emit('timer-init', {
+          auto: false
+        })
+        EventBus.$emit('call-timer-reset')
       }
     },
 
@@ -116,6 +118,10 @@ export default {
     resetDefaults () {
       this.$store.dispatch('resetDefaults')
       this.initTimes()
+      EventBus.$emit('timer-init', {
+        auto: false
+      })
+      EventBus.$emit('call-timer-reset')
     },
 
     setTimeLongBreak (e, setting) {

@@ -45,7 +45,9 @@ export default {
       this.dispatchTimer()
     },
     dispatchTimer () {
-      EventBus.$emit('timer-init')
+      EventBus.$emit('timer-init', {
+        auto: true
+      })
     }
   },
 

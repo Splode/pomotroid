@@ -1,9 +1,23 @@
+import LocalStore from '@/utils/local-store'
+
+const defaults = {
+  workRounds: '4',
+  timeLongBreak: '15',
+  timeShortBreak: '5',
+  timeWork: '25'
+}
+
+const localStore = new LocalStore({
+  configName: 'user-preferences',
+  defaults
+})
+
 const state = {
   round: 1,
-  workRounds: 4,
-  timeLongBreak: 15,
-  timeShortBreak: 5,
-  timeWork: 25,
+  workRounds: parseInt(localStore.data.workRounds),
+  timeLongBreak: parseInt(localStore.data.timeLongBreak),
+  timeShortBreak: parseInt(localStore.data.timeShortBreak),
+  timeWork: parseInt(localStore.data.timeWork),
   currentRound: 'work', // work, short-break, long-break
   isMuted: false
 }
@@ -84,6 +98,12 @@ const actions = {
 
   resetDefaults ({ commit }) {
     commit('RESET_DEFAULTS')
+    localStore.setData({
+      workRounds: '4',
+      timeLongBreak: '15',
+      timeShortBreak: '5',
+      timeWork: '25'
+    })
   },
 
   setCurrentRound ({ commit }, payload) {
@@ -92,18 +112,22 @@ const actions = {
 
   setTimeLongBreak ({ commit }, payload) {
     commit('SET_TIME_LONG_BREAK', payload)
+    localStore.set('timeLongBreak', payload)
   },
 
   setTimeShortBreak ({ commit }, payload) {
     commit('SET_TIME_SHORT_BREAK', payload)
+    localStore.set('timeShortBreak', payload)
   },
 
   setTimeWork ({ commit }, payload) {
     commit('SET_TIME_WORK', payload)
+    localStore.set('timeWork', payload)
   },
 
   setWorkRounds ({ commit }, payload) {
     commit('SET_WORK_ROUNDS', payload)
+    localStore.set('workRounds', payload)
   },
 
   toggleMute ({ commit }) {

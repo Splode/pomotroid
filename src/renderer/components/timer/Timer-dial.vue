@@ -149,7 +149,6 @@ export default {
   justify-content: center;
   margin-top: 35px;
   position: relative;
-  // -webkit-app-region: drag;
 }
 
 .Dial-label {

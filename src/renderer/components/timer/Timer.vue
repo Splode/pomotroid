@@ -189,13 +189,15 @@ export default {
   mounted () {
     this.initTimer()
 
-    EventBus.$on('timer-init', () => {
+    EventBus.$on('timer-init', opts => {
       // clear previous timers
       this.timer.reset()
       this.initTimer()
-      setTimeout(() => {
-        this.startTimer()
-      }, 1500)
+      if (opts.auto) {
+        setTimeout(() => {
+          this.startTimer()
+        }, 1500)
+      }
     })
 
     EventBus.$on('call-timer-reset', () => {
@@ -230,7 +232,6 @@ export default {
   display: flex;
   justify-content: center;
   margin: 20px 0 10px 0;
-  // -webkit-app-region: drag;
 }
 
 .Button-icon-wrapper {
