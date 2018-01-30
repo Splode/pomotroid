@@ -1,5 +1,4 @@
 .fade-enter-active, .fade-leave-active {
-  // transition: $transitionDefault;
   transition: $transitionSnappy;
 }
 .fade-enter, .fade-leave-to {
@@ -9,7 +8,6 @@
 .slide-left-enter-active,
 .slide-left-leave-active {
   transition: $transitionSnappy;
-  // transition: $transitionDefault;
 }
 
 .slide-left-enter,

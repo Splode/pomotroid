@@ -2,11 +2,10 @@
   <nav class="Container Titlebar">
     <div class="Titlebar-icon-wrapper">
       <!-- menu -->
-      <svg version="1.2" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-    x="0px" y="0px" viewBox="0 0 22 9.7" xml:space="preserve" width="20px" class="Icon Icon--menu" @click="toggleDrawer">
-        <line fill="none" stroke="#F6F2EB" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" x1="1" y1="1" x2="21" y2="1"/>
-        <line fill="none" stroke="#F6F2EB" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" x1="1" y1="8.7" x2="13" y2="8.7" class="Icon--menu-secondLine"/>
-      </svg>
+      <div class="Icon Menu-wrapper" :class="drawerOpen ? 'is-collapsed' : ''" @click="toggleDrawer">
+        <div class="Menu-line"></div>
+        <div class="Menu-line"></div>
+      </div>
     </div>
     <h1 class="Title">Pomotroid</h1>
     <div class="Titlebar-icon-wrapper">
@@ -33,6 +32,13 @@
 import { ipcRenderer } from 'electron'
 
 export default {
+  computed: {
+    // store getters
+    drawerOpen () {
+      return this.$store.getters.drawerOpen
+    }
+  },
+
   methods: {
     toggleDrawer () {
       this.$store.dispatch('toggleDrawer')
@@ -63,12 +69,34 @@ export default {
   }
 }
 
-.Icon--menu {
-  & .Icon--menu-secondLine {
-    transition: $transitionDefault;
+.Menu-line {
+  background-color: $colorBlueGrey;
+  display: inline-block;
+  transition: $transitionDefault;
+  width: 20px;
+  height: 2px;
+  &:last-child {
+    width: 10px;
   }
-  &:hover .Icon--menu-secondLine {
-    width: 100%;
+}
+
+.Menu-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: 80%;
+  &:hover .Menu-line {
+    background-color: $colorRed;
+  }
+  &.is-collapsed {
+    & .Menu-line:first-child {
+      transform: rotate(-45deg);
+      width: 12px;
+    }
+    & .Menu-line:last-child {
+      transform: rotate(45deg);
+      width: 12px;
+    }
   }
 }
 
@@ -93,5 +121,6 @@ export default {
   align-items: center;
   justify-content: space-between;
   width: 45px;
+  height: 20px;
 }
 </style>
