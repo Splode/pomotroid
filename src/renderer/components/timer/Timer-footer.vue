@@ -2,7 +2,7 @@
   <section class="Container Footer">
     <div class="Round-wrapper">
       <p>{{ round + '/' + workRounds }}</p>
-      <p class="TextButton">Reset</p>
+      <p class="TextButton" @click="callForReset">Reset</p>
     </div>
     <div class="Footer-icon-wrapper">
       <!-- skip -->
@@ -58,6 +58,10 @@ export default {
   },
 
   methods: {
+    callForReset () {
+      EventBus.$emit('call-timer-reset')
+    },
+
     skipRound () {
       EventBus.$emit('timer-completed')
     },

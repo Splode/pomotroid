@@ -188,6 +188,7 @@ export default {
 
   mounted () {
     this.initTimer()
+
     EventBus.$on('timer-init', () => {
       // clear previous timers
       this.timer.reset()
@@ -195,6 +196,10 @@ export default {
       setTimeout(() => {
         this.startTimer()
       }, 1500)
+    })
+
+    EventBus.$on('call-timer-reset', () => {
+      this.resetTimer()
     })
   }
 }

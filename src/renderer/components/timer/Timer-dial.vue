@@ -111,10 +111,6 @@ export default {
         autoplay: false
       })
       this.dial.seek(this.dial.duration)
-      // this.dial.play()
-      // setTimeout(() => {
-      //   this.dial.pause()
-      // }, 50)
     }
   },
 
@@ -129,15 +125,9 @@ export default {
     EventBus.$on('timer-resumed', () => {
       this.dial.play()
     })
-    EventBus.$on('timer-completed', () => {
-      // this.dial.pause()
-    })
     EventBus.$on('timer-reset', () => {
+      this.dial.pause()
       this.dial.seek(this.dial.duration)
-      // this.dial.restart()
-      // setTimeout(() => {
-      //   this.dial.pause()
-      // }, 50)
     })
     EventBus.$on('timer-init', () => {
       this.dial.pause()
