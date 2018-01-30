@@ -10,7 +10,7 @@
         step="1" 
         class="Slider Slider--red" 
         v-model.number="localTimeWork" 
-        @change="setTimeWork"
+        @change="setTimeWork($event, 'work')"
       >
     </div>
 
@@ -24,7 +24,7 @@
         step="1" 
         class="Slider Slider--green" 
         v-model.number="localTimeShortBreak"
-        @change="setTimeShortBreak"
+        @change="setTimeShortBreak($event, 'short-break')"
       >
     </div>
 
@@ -38,7 +38,7 @@
         step="1" 
         class="Slider Slider--blue" 
         v-model.number="localTimeLongBreak"
-        @change="setTimeLongBreak"
+        @change="setTimeLongBreak($event, 'long-break')"
       >
     </div>
 
@@ -57,12 +57,14 @@
     </div>
 
     <div class="Setting-wrapper">
-      <p class="TextButton">Reset Defaults</p>
+      <p class="TextButton" @click="resetDefaults">Reset Defaults</p>
     </div>
   </div>
 </template>
 
 <script>
+import { EventBus } from '@/utils/event-bus'
+
 export default {
   data () {
     return {
@@ -75,6 +77,10 @@ export default {
 
   computed: {
     // store getters
+    currentRound () {
+      return this.$store.getters.currentRound
+    },
+
     timeLongBreak () {
       return this.$store.getters.timeLongBreak
     },
@@ -93,28 +99,47 @@ export default {
   },
 
   methods: {
-    setTimeLongBreak (e) {
+    checkToResetTimer (setting) {
+      if (this.currentRound === setting) {
+        EventBus.$emit('timer-init')
+        console.log('reset from settings')
+      }
+    },
+
+    initTimes () {
+      this.localTimeLongBreak = this.timeLongBreak
+      this.localTimeShortBreak = this.timeShortBreak
+      this.localTimeWork = this.timeWork
+      this.localWorkRounds = this.workRounds
+    },
+
+    resetDefaults () {
+      this.$store.dispatch('resetDefaults')
+      this.initTimes()
+    },
+
+    setTimeLongBreak (e, setting) {
       this.$store.dispatch('setTimeLongBreak', e.target.value)
+      this.checkToResetTimer(setting)
     },
 
-    setTimeShortBreak (e) {
+    setTimeShortBreak (e, setting) {
       this.$store.dispatch('setTimeShortBreak', e.target.value)
+      this.checkToResetTimer(setting)
     },
 
-    setTimeWork (e) {
+    setTimeWork (e, setting) {
       this.$store.dispatch('setTimeWork', e.target.value)
+      this.checkToResetTimer(setting)
     },
 
-    setWorkRounds (e) {
+    setWorkRounds (e, setting) {
       this.$store.dispatch('setWorkRounds', e.target.value)
     }
   },
 
   mounted () {
-    this.localTimeLongBreak = this.timeLongBreak
-    this.localTimeShortBreak = this.timeShortBreak
-    this.localTimeWork = this.timeWork
-    this.localWorkRounds = this.workRounds
+    this.initTimes()
   }
 }
 </script>

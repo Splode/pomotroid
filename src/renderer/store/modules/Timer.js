@@ -41,6 +41,13 @@ const mutations = {
     state.round = 1
   },
 
+  RESET_DEFAULTS (state) {
+    state.workRounds = 4
+    state.timeLongBreak = 15
+    state.timeShortBreak = 5
+    state.timeWork = 25
+  },
+
   SET_CURRENT_ROUND (state, payload) {
     state.currentRound = payload
   },
@@ -73,6 +80,10 @@ const actions = {
 
   resetRound ({ commit }) {
     commit('RESET_ROUND')
+  },
+
+  resetDefaults ({ commit }) {
+    commit('RESET_DEFAULTS')
   },
 
   setCurrentRound ({ commit }, payload) {
