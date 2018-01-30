@@ -133,10 +133,11 @@ export default {
       // this.dial.pause()
     })
     EventBus.$on('timer-reset', () => {
-      this.dial.restart()
-      setTimeout(() => {
-        this.dial.pause()
-      }, 50)
+      this.dial.seek(this.dial.duration)
+      // this.dial.restart()
+      // setTimeout(() => {
+      //   this.dial.pause()
+      // }, 50)
     })
     EventBus.$on('timer-init', () => {
       this.dial.pause()
