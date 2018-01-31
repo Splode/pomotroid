@@ -27,6 +27,8 @@ h1, p {
 
 .TextButton {
   color: $colorBlueGrey;
+  font-size: 14px;
+  letter-spacing: .05em;
   margin-top: .5em;
   transition: $transitionDefault;
   &:hover {

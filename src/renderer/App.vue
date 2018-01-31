@@ -32,6 +32,7 @@ export default {
 
 <style lang="scss">
 #app {
+  animation: fade-in .5s ease forwards;
   position: relative;
   overflow: hidden;
   height: 100vh;
