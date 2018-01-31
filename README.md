@@ -17,7 +17,7 @@ Pomotroid is in its early stages, so feedback and contributions are welcome! :se
 - Charming timer alert sounds (optional)
 
 ## Download
-Pomotroid is currently only available for Windows, Mac version in development.
+Pomotroid is currently available for Windows 32/64 and Mac OSX.
 
 Download the latest version from the [releases](https://github.com/Splode/pomotroid/releases) page.
 
