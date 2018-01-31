@@ -20,7 +20,7 @@
   },
   "build": {
     "productName": "Pomotroid",
-    "appId": "org.simulatedgreg.electron-vue",
+    "appId": "com.splode.pomotroid",
     "directories": {
       "output": "build"
     },
