@@ -12,14 +12,14 @@ Pomotroid is a simple and customizable Pomodoro timer. It aims to provide a visu
 
 Pomotroid is in its early stages, so feedback and contributions are welcome! :seedling:
 
-<!-- ### Features
-- Customize times and number of rounds
-- Charming timer alert sounds (optional) -->
+### Features
+- Customize times and number of rounds (persistent)
+- Charming timer alert sounds (optional)
 
 ## Download
-Pomotroid is currently only available for Windows with an installer or as a stand-alone executable.
+Pomotroid is currently only available for Windows, Mac version in development.
 
-<!-- Download the latest version from the releases page. -->
+Download the latest version from the [releases](https://github.com/Splode/pomotroid/releases) page.
 
 <!-- ## Roadmap
 
