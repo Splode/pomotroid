@@ -1,6 +1,6 @@
 {
   "name": "pomotroid",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Christopher Murphy <christopherianmurphy@gmail.com>",
   "description": "A simple and visually-pleasing Pomodoro timer",
   "license": null,
