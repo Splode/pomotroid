@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "author": "Christopher Murphy <christopherianmurphy@gmail.com>",
   "description": "A simple and visually-pleasing Pomodoro timer",
-  "license": null,
+  "license": "MIT",
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
