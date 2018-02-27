@@ -23,7 +23,7 @@ Pomotroid is in its early stages, so feedback and contributions are welcome! :se
 - Linux builds
 
 ## Download
-Pomotroid is currently available for Windows 32/64 and Mac OSX.
+Pomotroid is available for Windows 32/64, Mac OSX and Debian/Ubuntu flavored Linux.
 
 Download the latest version from the [releases](https://github.com/Splode/pomotroid/releases) page.
 
