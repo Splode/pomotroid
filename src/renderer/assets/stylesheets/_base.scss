@@ -15,14 +15,34 @@ h1, p {
   padding: 0 18px;
 }
 
-.Icon {
-  -webkit-app-region: no-drag;
+.Icon-group {
+  align-items: center;
+  display: flex;
+  justify-content: center;
 }
 
 .Icon-wrapper {
   align-items: center;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
+  width: 20px;
+  height: 20px;
+}
+
+.Icon-wrapper--double--right {
+  padding: 18px 18px 18px 9px;
+}
+
+.Icon-wrapper--double--left {
+  padding: 18px 9px 18px 18px;
+}
+
+.Icon-wrapper--single {
+  padding: 18px;
+}
+
+.Icon {
+  -webkit-app-region: no-drag;
 }
 
 .TextButton {

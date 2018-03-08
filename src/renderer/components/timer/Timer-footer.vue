@@ -4,17 +4,17 @@
       <p>{{ round + '/' + workRounds }}</p>
       <p class="TextButton" @click="callForReset">Reset</p>
     </div>
-    <div class="Footer-icon-wrapper">
+    <div class="Icon-group" style="position: absolute; right: 0;">
       <!-- skip -->
-      <div class="Icon-wrapper">
+      <div class="Icon-wrapper Icon-wrapper--double--left" @click="skipRound">
         <svg version="1.2" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-    x="0px" y="0px" viewBox="0 0 8 12" xml:space="preserve" height="15px" class="Icon--skip" @click="skipRound">
+    x="0px" y="0px" viewBox="0 0 8 12" xml:space="preserve" height="15px" class="Icon--skip">
           <polygon fill="#858C99" points="0,0 0,12 6.1,5.9"/>
           <rect x="6.9" y="0" fill="#858C99" width="1.1" height="12"/>
         </svg>
       </div>
       <!-- mute -->
-      <div class="Icon-wrapper" @click="toggleMute">
+      <div class="Icon-wrapper Icon-wrapper--double--right" @click="toggleMute">
         <transition name="fade" mode="out-in">
           <svg version="1.2" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
       x="0px" y="0px" viewBox="0 0 12.3 12" xml:space="preserve" height="15px" class="Icon--mute" v-if="!isMuted">
@@ -80,18 +80,9 @@ export default {
   justify-content: space-between;
 }
 
-.Footer-icon-wrapper {
-  display: flex;
-  justify-content: space-between;
-  width: 40px;
-}
-
 .Icon--mute {
   & path {
     transition: $transitionDefault;
-  }
-  &:hover path {
-    fill: $colorRed;
   }
 }
 
@@ -99,7 +90,17 @@ export default {
   & path {
     transition: $transitionDefault;
   }
-  &:hover path:first-child {
+}
+
+.Icon-wrapper {
+  &:hover .Icon--muted path:first-child {
+    fill: $colorRed;
+  }
+  &:hover .Icon--mute path {
+    fill: $colorRed;
+  }
+  &:hover .Icon--skip polygon, 
+  &:hover .Icon--skip rect {
     fill: $colorRed;
   }
 }
@@ -107,9 +108,6 @@ export default {
 .Icon--skip {
   & polygon, & rect {
     transition: $transitionDefault;
-  }
-  &:hover polygon, &:hover rect {
-    fill: $colorRed;
   }
 }
 
