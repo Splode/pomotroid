@@ -2,6 +2,31 @@
 
 import { app, BrowserWindow, ipcMain } from 'electron'
 
+// const WindowsToaster = require('node-notifier').WindowsToaster
+// const notifier = new WindowsToaster()
+// notifier.notify({
+//   appID: 'com.splode.pomotroid',
+//   title: 'foo',
+//   message: 'Hello World',
+//   id: 13
+// }, (error, response) => {
+//   if (error) {
+//     console.log(error)
+//   }
+//   console.log(response)
+// })
+
+// const notifier = require('node-notifier')
+// notifier.notify({
+//   title: 'Pomotroid Round Completed',
+//   message: 'Time to take a short break',
+//   sound: false
+// }, (err, res) => {
+//   if (err) {
+//     console.log(err)
+//   }
+// })
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
