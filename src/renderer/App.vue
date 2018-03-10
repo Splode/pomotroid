@@ -16,6 +16,7 @@ import appTitlebar from '@/components/Titlebar'
 const notifier = require('node-notifier')
 const path = require('path')
 console.log(__static)
+console.log(process.platform)
 notifier.notify(
   {
     appName: 'com.splode.pomotroid',
