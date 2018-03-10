@@ -5,45 +5,25 @@
       <app-drawer v-if="drawerOpen"/>
     </transition>
     <app-timer/>
+    <app-notification-win v-if="os === 'win32'"/>
+    <app-notification v-else/>
   </div>
 </template>
 
 <script>
 import appDrawer from '@/components/drawer/Drawer'
+import appNotification from '@/components/notification/Notification'
+import appNotificationWin from '@/components/notification/Notification-win'
 import appTimer from '@/components/timer/Timer'
 import appTitlebar from '@/components/Titlebar'
 
-const notifier = require('node-notifier')
-const path = require('path')
-console.log(__static)
-console.log(process.platform)
-notifier.notify(
-  {
-    appName: 'com.splode.pomotroid',
-    title: 'Round Completed',
-    message: 'Time to take a short break',
-    icon: path.join(__static, '256x256.png'),
-    sound: false
-  },
-  (err, res) => {
-    if (err) {
-      console.log(err)
-    }
-  }
-)
-
-let myNotification = new Notification('Title', {
-  body: 'Lorem Ipsum Dolor Sit Amet'
-})
-
-myNotification.onclick = () => {
-  console.log('Notification clicked')
-}
-
 export default {
   name: 'pomotroid',
+
   components: {
     appDrawer,
+    appNotification,
+    appNotificationWin,
     appTimer,
     appTitlebar
   },
@@ -52,6 +32,10 @@ export default {
     // store getters
     drawerOpen () {
       return this.$store.getters.drawerOpen
+    },
+
+    os () {
+      return process.platform
     }
   }
 }
