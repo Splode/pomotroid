@@ -3,13 +3,8 @@
 
 <script>
 import { EventBus } from '@/utils/event-bus'
-let myNotification = new Notification('Title', {
-  body: 'Lorem Ipsum Dolor Sit Amet'
-})
+const path = require('path')
 
-myNotification.onclick = () => {
-  console.log('Notification clicked')
-}
 export default {
   name: 'Notification',
 
@@ -22,7 +17,8 @@ export default {
   methods: {
     callNotification (opts) {
       this.notification = new Notification(opts.title, {
-        body: opts.body
+        body: opts.body,
+        icon: path.join('static', 'icon.png')
       })
     }
   },
