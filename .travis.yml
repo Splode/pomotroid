@@ -34,3 +34,4 @@ script:
 branches:
   only:
   - master
+  - dev
