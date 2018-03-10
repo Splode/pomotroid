@@ -20,7 +20,6 @@ Pomotroid is in its early stages, so feedback and contributions are welcome! :se
 :memo: Future plans for enhancements and development:
 - Desktop notifications
 - Minimize to tray
-- Linux builds
 
 ## Download
 Pomotroid is available for Windows 32/64, Mac OSX and Debian/Ubuntu flavored Linux.
