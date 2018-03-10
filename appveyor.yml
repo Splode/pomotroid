@@ -3,6 +3,7 @@ version: 0.1.{build}
 branches:
   only:
     - master
+    - dev
 
 image: Visual Studio 2017
 platform:
