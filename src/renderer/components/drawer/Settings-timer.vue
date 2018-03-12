@@ -1,5 +1,6 @@
 <template>
   <div class="Container">
+    <p class="Drawer-heading">Timer</p>
     <div class="Setting-wrapper">
       <p class="Setting-title">Work</p>
       <p class="Setting-value">{{ localTimeWork + ':00' }}</p>
@@ -196,7 +197,7 @@ export default {
 
 <style lang="scss" scoped>
 .Setting-wrapper {
-  margin: 16px 0;
+  margin: 10px 0;
   text-align: center;
 }
 

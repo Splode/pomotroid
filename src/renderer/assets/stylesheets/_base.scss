@@ -15,6 +15,11 @@ h1, p {
   padding: 0 18px;
 }
 
+.Drawer-heading {
+  padding-top: 10px;
+  text-align: center;
+}
+
 .Icon-group {
   align-items: center;
   display: flex;
@@ -24,7 +29,7 @@ h1, p {
 .Icon-wrapper {
   align-items: center;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   width: 20px;
   height: 20px;
 }
@@ -49,7 +54,7 @@ h1, p {
   color: $colorBlueGrey;
   font-size: 14px;
   letter-spacing: .05em;
-  margin-top: .5em;
+  margin-top: 12px;
   transition: $transitionDefault;
   &:hover {
     color: $colorRed;
