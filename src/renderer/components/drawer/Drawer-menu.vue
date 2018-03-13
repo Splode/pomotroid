@@ -1,7 +1,7 @@
 <template>
   <div class="Drawer-menu">
-    <div class="Drawer-menu-wrapper">
-      <div class="Drawer-menu-button is-active">
+    <div class="Drawer-menu-wrapper" @click="setDrawerComponent('appDrawerTimer')" :class="{ 'is-active': currentDrawer === 'appDrawerTimer' }">
+      <div class="Drawer-menu-button">
         <div class="Icon-wrapper">
           <svg version="1.2" baseProfile="tiny" id="timer-icon" class="Icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 20 20" width="18" xml:space="preserve">
             <g>
@@ -13,7 +13,7 @@
         </div>
       </div>
     </div>
-    <div class="Drawer-menu-wrapper">
+    <div class="Drawer-menu-wrapper" @click="setDrawerComponent('appDrawerSettings')" :class="{ 'is-active': currentDrawer === 'appDrawerSettings' }">
       <div class="Drawer-menu-button">
         <svg version="1.2" baseProfile="tiny" id="settings-icon" class="Icon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 19.5 20" width="18" xml:space="preserve">
           <path fill="#868C99" d="M17.2,11c0-0.3,0.1-0.6,0.1-1s0-0.7-0.1-1l2.1-1.6c0.2-0.1,0.2-0.4,0.1-0.6l-2-3.5C17.3,3.1,17,3,16.8,3.1
@@ -30,7 +30,23 @@
 
 <script>
 export default {
-  name: 'Drawer-menu'
+  name: 'Drawer-menu',
+
+  computed: {
+    currentDrawer () {
+      return this.$store.getters.currentDrawer
+    }
+  },
+
+  methods: {
+    setDrawerComponent (component) {
+      const payload = {
+        key: 'currentDrawer',
+        val: component
+      }
+      this.$store.dispatch('setViewState', payload)
+    }
+  }
 }
 </script>
 
@@ -50,10 +66,29 @@ export default {
   display: flex;
   flex: 1 1 auto;
   justify-content: center;
+  position: relative;
   transition: $transitionDefault;
   height: 100%;
   &:hover {
     background-color: $colorLightNavy;
+  }
+  // &:hover:not(.is-active) {
+  //   background-color: $colorLightNavy;
+  // }
+  &::after {
+    background-color: $colorRed;
+    content: '';
+    margin: 0 auto;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transition: $transitionSnappy;
+    width: 0;
+    height: 2px;
+  }
+  &.is-active::after {
+    width: 33%;
   }
 }
 

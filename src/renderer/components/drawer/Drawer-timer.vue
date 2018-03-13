@@ -91,6 +91,8 @@
 import { EventBus } from '@/utils/event-bus'
 
 export default {
+  name: 'Drawer-timer',
+
   data () {
     return {
       localTimeLongBreak: 0,
