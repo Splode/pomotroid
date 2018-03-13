@@ -5,8 +5,8 @@
       <app-drawer v-if="drawerOpen"/>
     </transition>
     <app-timer/>
-    <app-notification-win v-if="os === 'win32' && notifications === 'true'"/>
-    <app-notification v-else-if="os !== 'win32' && notifications === 'true'"/>
+    <app-notification-win v-if="os === 'win32' && notifications"/>
+    <app-notification v-else-if="os !== 'win32' && notifications"/>
   </div>
 </template>
 

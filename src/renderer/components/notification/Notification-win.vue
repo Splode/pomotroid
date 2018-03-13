@@ -23,28 +23,35 @@ export default {
           console.log(err)
         }
       })
-    }
-  },
-
-  mounted () {
-    EventBus.$on('ready-long-break', () => {
+    },
+    notifyLongBreak () {
       this.callNotification({
         message: 'Begin a long break.'
       })
-    })
-
-    EventBus.$on('ready-short-break', () => {
+    },
+    notifyShortBreak () {
       this.callNotification({
         message: 'Begin a short break.'
       })
-    })
-
-    EventBus.$on('ready-work', () => {
+    },
+    notifyWork () {
       this.callNotification({
         title: 'Break Finished',
         message: 'Begin working.'
       })
-    })
+    }
+  },
+
+  mounted () {
+    EventBus.$on('ready-long-break', this.notifyLongBreak)
+    EventBus.$on('ready-short-break', this.notifyShortBreak)
+    EventBus.$on('ready-work', this.notifyWork)
+  },
+
+  beforeDestroy () {
+    EventBus.$off('ready-long-break', this.notifyLongBreak)
+    EventBus.$off('ready-short-break', this.notifyShortBreak)
+    EventBus.$off('ready-work', this.notifyWork)
   }
 }
 </script>

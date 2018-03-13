@@ -13,6 +13,8 @@
 </template>
 
 <script>
+import { ipcRenderer } from 'electron'
+
 export default {
   name: 'Drawer-settings',
 
@@ -32,6 +34,7 @@ export default {
         key: 'alwaysOnTop',
         val: !this.alwaysOnTop
       }
+      ipcRenderer.send('toggle-alwaysOnTop', !this.alwaysOnTop)
       this.$store.dispatch('setSetting', payload)
       this.$store.dispatch('setViewState', payload)
     },
@@ -62,7 +65,11 @@ export default {
   }
   &.is-active {
     background-color: $colorRed;
-    border-color: $colorRed;
+    border-color: $colorNavy;
+    &:hover {
+      background-color: $colorNavy;
+      border-color: $colorRed;
+    }
   }
 }
 

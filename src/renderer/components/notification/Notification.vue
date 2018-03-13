@@ -20,30 +20,37 @@ export default {
         body: opts.body,
         icon: path.join('static', 'icon.png')
       })
-    }
-  },
-
-  mounted () {
-    EventBus.$on('ready-long-break', () => {
+    },
+    notifyLongBreak () {
       this.callNotification({
-        title: 'Work Round Complete',
+        title: 'Work Round Complte',
         body: 'Begin a long break.'
       })
-    })
-
-    EventBus.$on('ready-short-break', () => {
+    },
+    notifyShortBreak () {
       this.callNotification({
         title: 'Work Round Complete',
         body: 'Begin a short break.'
       })
-    })
-
-    EventBus.$on('ready-work', () => {
+    },
+    notifyWork () {
       this.callNotification({
         title: 'Break Finished',
         body: 'Begin working.'
       })
-    })
+    }
+  },
+
+  mounted () {
+    EventBus.$on('ready-long-break', this.notifyLongBreak)
+    EventBus.$on('ready-short-break', this.notifyShortBreak)
+    EventBus.$on('ready-work', this.notifyWork)
+  },
+
+  beforeDestroy () {
+    EventBus.$off('ready-long-break', this.notifyLongBreak)
+    EventBus.$off('ready-short-break', this.notifyShortBreak)
+    EventBus.$off('ready-work', this.notifyWork)
   }
 }
 </script>
