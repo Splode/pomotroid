@@ -1,23 +1,13 @@
-import LocalStore from '@/utils/local-store'
+import { createLocalStore } from '@/utils/local-store'
 
-const defaults = {
-  workRounds: '4',
-  timeLongBreak: '15',
-  timeShortBreak: '5',
-  timeWork: '25'
-}
-
-const localStore = new LocalStore({
-  configName: 'user-preferences',
-  defaults
-})
+const localStore = createLocalStore()
 
 const state = {
   round: 1,
-  workRounds: parseInt(localStore.data.workRounds),
-  timeLongBreak: parseInt(localStore.data.timeLongBreak),
-  timeShortBreak: parseInt(localStore.data.timeShortBreak),
-  timeWork: parseInt(localStore.data.timeWork),
+  workRounds: parseInt(localStore.get('workRounds')),
+  timeLongBreak: parseInt(localStore.get('timeLongBreak')),
+  timeShortBreak: parseInt(localStore.get('timeShortBreak')),
+  timeWork: parseInt(localStore.get('timeWork')),
   currentRound: 'work', // work, short-break, long-break
   isMuted: false
 }

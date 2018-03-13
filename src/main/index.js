@@ -1,31 +1,10 @@
 'use strict'
 
+import { createLocalStore } from './../renderer/utils/local-store'
+
 import { app, BrowserWindow, ipcMain } from 'electron'
 
-// const WindowsToaster = require('node-notifier').WindowsToaster
-// const notifier = new WindowsToaster()
-// notifier.notify({
-//   appID: 'com.splode.pomotroid',
-//   title: 'foo',
-//   message: 'Hello World',
-//   id: 13
-// }, (error, response) => {
-//   if (error) {
-//     console.log(error)
-//   }
-//   console.log(response)
-// })
-
-// const notifier = require('node-notifier')
-// notifier.notify({
-//   title: 'Pomotroid Round Completed',
-//   message: 'Time to take a short break',
-//   sound: false
-// }, (err, res) => {
-//   if (err) {
-//     console.log(err)
-//   }
-// })
+const localStore = createLocalStore()
 
 /**
  * Set `__static` path to static files in production
@@ -41,7 +20,9 @@ const winURL = process.env.NODE_ENV === 'development'
   : `file://${__dirname}/index.html`
 
 function createWindow () {
+  const alwaysOnTop = localStore.get('alwaysOnTop')
   mainWindow = new BrowserWindow({
+    alwaysOnTop,
     backgroundColor: '#2F384B',
     fullscreenable: false,
     frame: false,
@@ -70,6 +51,10 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow()
   }
+})
+
+ipcMain.on('toggle-alwaysOnTop', (event, arg) => {
+  mainWindow.setAlwaysOnTop(arg)
 })
 
 ipcMain.on('window-close', (event, arg) => {

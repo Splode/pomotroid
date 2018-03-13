@@ -1,15 +1,30 @@
 <template>
   <div class="Drawer">
-    <app-settings-timer/>
+    <transition name="fade" mode="out-in">
+      <component :is="currentDrawer"/>
+    </transition>
+    <app-drawer-menu/>
   </div>
 </template>
 
 <script>
-import appSettingsTimer from '@/components/drawer/Settings-timer'
+import appDrawerMenu from '@/components/drawer/Drawer-menu'
+import appDrawerSettings from '@/components/drawer/Drawer-settings'
+import appDrawerTimer from '@/components/drawer/Drawer-timer'
 
 export default {
+  name: 'Drawer',
+
   components: {
-    appSettingsTimer
+    appDrawerMenu,
+    appDrawerSettings,
+    appDrawerTimer
+  },
+
+  computed: {
+    currentDrawer () {
+      return this.$store.getters.currentDrawer
+    }
   }
 }
 </script>
@@ -17,9 +32,9 @@ export default {
 <style lang="scss" scoped>
 .Drawer {
   background-color: $colorLightNavy;
-  position: absolute;
+  position: relative;
   width: 100%;
-  height: 100%;
+  height: calc(100% - 68px);
   z-index: 1;
   -webkit-app-region: no-drag;
 }

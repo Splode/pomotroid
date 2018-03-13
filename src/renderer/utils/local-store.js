@@ -2,7 +2,24 @@ const electron = require('electron')
 const fs = require('fs')
 const path = require('path')
 
-export default class {
+export const defaults = {
+  alwaysOnTop: false,
+  notifications: true,
+  workRounds: '4',
+  timeLongBreak: '15',
+  timeShortBreak: '5',
+  timeWork: '25'
+}
+
+export function createLocalStore () {
+  const localStore = new LocalStore({
+    configName: 'user-preferences',
+    defaults
+  })
+  return localStore
+}
+
+export default class LocalStore {
   constructor (opts) {
     const userDataPath = (electron.app || electron.remote.app).getPath('userData')
     this.path = path.join(userDataPath, opts.configName + '.json')

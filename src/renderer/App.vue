@@ -5,8 +5,8 @@
       <app-drawer v-if="drawerOpen"/>
     </transition>
     <app-timer/>
-    <app-notification-win v-if="os === 'win32'"/>
-    <app-notification v-else/>
+    <app-notification-win v-if="os === 'win32' && notifications"/>
+    <app-notification v-else-if="os !== 'win32' && notifications"/>
   </div>
 </template>
 
@@ -32,6 +32,14 @@ export default {
     // store getters
     drawerOpen () {
       return this.$store.getters.drawerOpen
+    },
+
+    alwaysOnTop () {
+      return this.$store.getters.alwaysOnTop
+    },
+
+    notifications () {
+      return this.$store.getters.notifications
     },
 
     os () {
