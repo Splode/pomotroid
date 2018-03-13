@@ -3,8 +3,8 @@ const fs = require('fs')
 const path = require('path')
 
 export const defaults = {
-  alwaysOnTop: 'false',
-  notifications: 'true',
+  alwaysOnTop: false,
+  notifications: true,
   workRounds: '4',
   timeLongBreak: '15',
   timeShortBreak: '5',
