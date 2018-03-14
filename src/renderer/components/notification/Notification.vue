@@ -18,7 +18,8 @@ export default {
     callNotification (opts) {
       this.notification = new Notification(opts.title, {
         body: opts.body,
-        icon: path.join('static', 'icon.png')
+        icon: path.join('static', 'icon.png'),
+        silent: true
       })
     },
     notifyLongBreak () {

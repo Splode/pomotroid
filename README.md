@@ -2,23 +2,25 @@
   <img alt="Pomotroid" src=".github/images/pomotroid-title.png" width="800px">
 </div>
 <div align="center">
-  <img alt="Pomotroid in action" src=".github/images/pomotroid-screens.png" width="800px">
+  <img alt="Pomotroid in action" src=".github/images/pomotroid-screens.jpg" width="800px">
 </div>
 
 <p align="center">Simple and visually-pleasing Pomodoro timer.</p>
 
+---
+
 ## Overview
-Pomotroid is a simple and customizable Pomodoro timer. It aims to provide a visually-pleasing and reliable way to track productivity using the Pomodoro Technique.
+Pomotroid is a simple and configurable Pomodoro timer. It aims to provide a visually-pleasing and reliable way to track productivity using the Pomodoro Technique.
 
 Pomotroid is in its early stages, so feedback and contributions are welcome! :seedling:
 
 ### Features
 - Customize times and number of rounds (persistent)
 - Charming timer alert sounds (optional)
+- Desktop notifications (optional)
 
 ### Roadmap
 :memo: Future plans for enhancements and development:
-- Desktop notifications
 - Minimize to tray
 
 ## Download
@@ -28,6 +30,8 @@ Download the latest version from the [releases](https://github.com/Splode/pomotr
 
 ## Technical
 Pomotroid is built using HTML, CSS, and JavaScript. It's also built using [Vue.js](https://github.com/vuejs/vue), [Electron](https://github.com/electron/electron), and [electron-vue](https://github.com/SimulatedGREG/electron-vue).
+
+_Note: depending on your OS settings, you may receive a security warning upon installation. This has to do with Pomotroid being an unsigned application. You can find out more information by researching code-signing for Apple and Windows._
 
 ### Build Setup
 
@@ -43,7 +47,7 @@ npm run build
 
 ```
 
-### License
+## License
 MIT
 
 ---
