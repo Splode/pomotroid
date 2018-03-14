@@ -31,7 +31,7 @@ Download the latest version from the [releases](https://github.com/Splode/pomotr
 ## Technical
 Pomotroid is built using HTML, CSS, and JavaScript. It's also built using [Vue.js](https://github.com/vuejs/vue), [Electron](https://github.com/electron/electron), and [electron-vue](https://github.com/SimulatedGREG/electron-vue).
 
-_Note: depending on your OS settings, you may receive a security warning upon installation. This has to do with Pomotroid being an unsigned application. You can find out more information by researching code-signing for Apple and Windows._
+_Note: depending on your OS settings, you may receive a security warning upon installation. This has to do with Pomotroid being an unsigned application. You can find out more information by researching code-signing for Apple and Microsoft._
 
 ### Build Setup
 
@@ -48,7 +48,7 @@ npm run build
 ```
 
 ## License
-MIT
+MIT &copy; [Christopher Murphy](https://github.com/Splode)
 
 ---
 
