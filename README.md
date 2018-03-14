@@ -2,7 +2,7 @@
   <img alt="Pomotroid" src=".github/images/pomotroid-title.png" width="800px">
 </div>
 <div align="center">
-  <img alt="Pomotroid in action" src=".github/images/pomotroid-screens.png" width="800px">
+  <img alt="Pomotroid in action" src=".github/images/pomotroid-screens.jpg" width="800px">
 </div>
 
 <p align="center">Simple and visually-pleasing Pomodoro timer.</p>
