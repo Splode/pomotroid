@@ -1,8 +1,7 @@
 'use strict'
 
 import { createLocalStore } from './../renderer/utils/local-store'
-
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, Tray } from 'electron'
 
 const localStore = createLocalStore()
 
@@ -14,30 +13,10 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
-let mainWindow
+let mainWindow, tray
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
-
-function createWindow () {
-  const alwaysOnTop = localStore.get('alwaysOnTop')
-  mainWindow = new BrowserWindow({
-    alwaysOnTop,
-    backgroundColor: '#2F384B',
-    fullscreenable: false,
-    frame: false,
-    resizable: false,
-    useContentSize: true,
-    width: 360,
-    height: 478
-  })
-
-  mainWindow.loadURL(winURL)
-
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
-}
 
 app.on('ready', createWindow)
 
@@ -62,8 +41,42 @@ ipcMain.on('window-close', (event, arg) => {
 })
 
 ipcMain.on('window-minimize', (event, arg) => {
-  mainWindow.minimize()
+  if (arg) {
+    createTray()
+    mainWindow.hide()
+  } else {
+    mainWindow.minimize()
+  }
 })
+
+function createTray () {
+  tray = new Tray('./static/icon.png')
+  tray.setToolTip('Pomotroid\nClick to Restore')
+  tray.on('click', () => {
+    mainWindow.show()
+    tray.destroy()
+  })
+}
+
+function createWindow () {
+  const alwaysOnTop = localStore.get('alwaysOnTop')
+  mainWindow = new BrowserWindow({
+    alwaysOnTop,
+    backgroundColor: '#2F384B',
+    fullscreenable: false,
+    frame: false,
+    resizable: false,
+    useContentSize: true,
+    width: 360,
+    height: 478
+  })
+
+  mainWindow.loadURL(winURL)
+
+  mainWindow.on('closed', () => {
+    mainWindow = null
+  })
+}
 
 /**
  * Auto Updater

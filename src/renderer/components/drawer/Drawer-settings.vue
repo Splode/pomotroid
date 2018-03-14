@@ -9,6 +9,10 @@
       <p class="Setting-title">Desktop Notifications</p>
       <div class="Checkbox" @click="selectNotifications" :class="notifications ? 'is-active' : 'is-inactive'"></div>
     </div>
+    <div class="Setting-wrapper">
+      <p class="Setting-title">Minimize to Tray</p>
+      <div class="Checkbox" @click="selectMinToTray" :class="minToTray ? 'is-active' : 'is-inactive'"></div>
+    </div>
   </div>
 </template>
 
@@ -23,6 +27,10 @@ export default {
       return this.$store.getters.alwaysOnTop
     },
 
+    minToTray () {
+      return this.$store.getters.minToTray
+    },
+
     notifications () {
       return this.$store.getters.notifications
     }
@@ -35,6 +43,15 @@ export default {
         val: !this.alwaysOnTop
       }
       ipcRenderer.send('toggle-alwaysOnTop', !this.alwaysOnTop)
+      this.$store.dispatch('setSetting', payload)
+      this.$store.dispatch('setViewState', payload)
+    },
+
+    selectMinToTray () {
+      const payload = {
+        key: 'minToTray',
+        val: !this.minToTray
+      }
       this.$store.dispatch('setSetting', payload)
       this.$store.dispatch('setViewState', payload)
     },

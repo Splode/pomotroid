@@ -6,6 +6,7 @@ const state = {
   currentDrawer: 'appDrawerTimer',
   drawerOpen: false,
   alwaysOnTop: localStore.get('alwaysOnTop'),
+  minToTray: localStore.get('minToTray'),
   notifications: localStore.get('notifications')
 }
 
@@ -20,6 +21,10 @@ const getters = {
 
   alwaysOnTop () {
     return state.alwaysOnTop
+  },
+
+  minToTray () {
+    return state.minToTray
   },
 
   notifications () {
