@@ -21,6 +21,7 @@ Pomotroid is in its early stages, so feedback and contributions are welcome! :se
 
 ### Roadmap
 :memo: Future plans for enhancements and development:
+- Auto-start timer option toggle
 - Minimize to tray
 
 ## Download
