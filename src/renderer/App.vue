@@ -43,7 +43,7 @@ export default {
     },
 
     os () {
-      return process.platform
+      return this.$store.getters.os
     }
   }
 }

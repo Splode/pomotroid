@@ -9,7 +9,7 @@
       <p class="Setting-title">Desktop Notifications</p>
       <div class="Checkbox" @click="selectNotifications" :class="notifications ? 'is-active' : 'is-inactive'"></div>
     </div>
-    <div class="Setting-wrapper">
+    <div class="Setting-wrapper" v-if="os === 'win32'">
       <p class="Setting-title">Minimize to Tray</p>
       <div class="Checkbox" @click="selectMinToTray" :class="minToTray ? 'is-active' : 'is-inactive'"></div>
     </div>
@@ -33,6 +33,10 @@ export default {
 
     notifications () {
       return this.$store.getters.notifications
+    },
+
+    os () {
+      return this.$store.getters.os
     }
   },
 

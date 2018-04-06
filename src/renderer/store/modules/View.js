@@ -7,7 +7,8 @@ const state = {
   drawerOpen: false,
   alwaysOnTop: localStore.get('alwaysOnTop'),
   minToTray: localStore.get('minToTray'),
-  notifications: localStore.get('notifications')
+  notifications: localStore.get('notifications'),
+  os: process.platform
 }
 
 const getters = {
@@ -29,6 +30,10 @@ const getters = {
 
   notifications () {
     return state.notifications
+  },
+
+  os () {
+    return state.os
   }
 }
 
