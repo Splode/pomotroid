@@ -6,6 +6,10 @@
       <div class="Checkbox" @click="selectAlwaysOnTop" :class="alwaysOnTop ? 'is-active' : 'is-inactive'"></div>
     </div>
     <div class="Setting-wrapper">
+      <p class="Setting-title">Auto-start Timer</p>
+      <div class="Checkbox" @click="selectAutoStartTimer" :class="autoStartTimer ? 'is-active' : 'is-inactive'"></div>
+    </div>
+    <div class="Setting-wrapper">
       <p class="Setting-title">Desktop Notifications</p>
       <div class="Checkbox" @click="selectNotifications" :class="notifications ? 'is-active' : 'is-inactive'"></div>
     </div>
@@ -23,6 +27,10 @@ export default {
       return this.$store.getters.alwaysOnTop
     },
 
+    autoStartTimer () {
+      return this.$store.getters.autoStartTimer
+    },
+
     notifications () {
       return this.$store.getters.notifications
     }
@@ -35,6 +43,15 @@ export default {
         val: !this.alwaysOnTop
       }
       ipcRenderer.send('toggle-alwaysOnTop', !this.alwaysOnTop)
+      this.$store.dispatch('setSetting', payload)
+      this.$store.dispatch('setViewState', payload)
+    },
+
+    selectAutoStartTimer () {
+      const payload = {
+        key: 'autoStartTimer',
+        val: !this.autoStartTimer
+      }
       this.$store.dispatch('setSetting', payload)
       this.$store.dispatch('setViewState', payload)
     },

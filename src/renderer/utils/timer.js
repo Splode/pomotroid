@@ -22,7 +22,6 @@ export default class {
   pause () {
     clearInterval(this.timerInt)
     delete this.timerInt
-    console.log(this)
     EventBus.$emit('timer-paused')
   }
 

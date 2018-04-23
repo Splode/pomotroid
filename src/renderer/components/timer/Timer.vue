@@ -28,7 +28,6 @@
           <div class="Button-icon-wrapper">
             <svg version="1.2" baseProfile="tiny" id="Layer_2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"   x="0px" y="0px" viewBox="0 0 10.9 18" xml:space="preserve" height="15px" class="Icon--pause">
                 <line fill="none" stroke="#F6F2EB" stroke-width="3" stroke-linecap="round" stroke-miterlimit="10" x1="1.5" y1="1.5" x2="1.5" y2="16.5"/>
-              
                 <line fill="none" stroke="#F6F2EB" stroke-width="3" stroke-linecap="round" stroke-miterlimit="10" x1="9.4" y1="1.5" x2="9.4" y2="16.5"/>
             </svg>
           </div>
@@ -37,8 +36,6 @@
     </section>
 
     <app-timer-footer/>
-
-    <!-- <button @click="resetTimer">Reset</button> -->
     <app-timer-controller/>
   </div>
 </template>
@@ -197,6 +194,8 @@ export default {
         setTimeout(() => {
           this.startTimer()
         }, 1500)
+      } else {
+        this.timerActive = false
       }
     })
 
