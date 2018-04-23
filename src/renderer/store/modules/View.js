@@ -5,11 +5,18 @@ const localStore = createLocalStore()
 const state = {
   currentDrawer: 'appDrawerTimer',
   drawerOpen: false,
+  autoStartTimer: localStore.get('autoStartTimer') === undefined
+    ? true
+    : localStore.get('autoStartTimer'),
   alwaysOnTop: localStore.get('alwaysOnTop'),
   notifications: localStore.get('notifications')
 }
 
 const getters = {
+  autoStartTimer () {
+    return state.autoStartTimer
+  },
+
   currentDrawer () {
     return state.currentDrawer
   },

@@ -10,47 +10,50 @@
 ---
 
 ## Overview
+
 Pomotroid is a simple and configurable Pomodoro timer. It aims to provide a visually-pleasing and reliable way to track productivity using the Pomodoro Technique.
 
 Pomotroid is in its early stages, so feedback and contributions are welcome! :seedling:
 
-### Features
-- Customize times and number of rounds (persistent)
-- Charming timer alert sounds (optional)
-- Desktop notifications (optional)
+## Features
 
-### Roadmap
+* Customize times and number of rounds.
+* Charming timer alert sounds (optional).
+* Desktop notifications (optional).
+
+## Roadmap
+
 :memo: Future plans for enhancements and development:
-- Auto-start timer option toggle
-- Minimize to tray
+
+* Minimize to tray
 
 ## Download
+
 Pomotroid is available for Windows 32/64, Mac OSX and Debian/Ubuntu flavored Linux.
 
 Download the latest version from the [releases](https://github.com/Splode/pomotroid/releases) page.
 
 ## Technical
-Pomotroid is built using HTML, CSS, and JavaScript. It's also built using [Vue.js](https://github.com/vuejs/vue), [Electron](https://github.com/electron/electron), and [electron-vue](https://github.com/SimulatedGREG/electron-vue).
 
-_Note: depending on your OS settings, you may receive a security warning upon installation. This has to do with Pomotroid being an unsigned application. You can find out more information by researching code-signing for Apple and Microsoft._
+Pomotroid is built with [Vue.js](https://github.com/vuejs/vue), [Electron](https://github.com/electron/electron), and [electron-vue](https://github.com/SimulatedGREG/electron-vue).
+
+_Note: depending on your OS settings, you may receive a security warning upon installation. This has to do with Pomotroid being an unsigned application. You can find out more by researching code-signing for Apple and Microsoft._
 
 ### Build Setup
 
-``` bash
+```bash
 # install dependencies
-npm install
+npm i
 
 # serve with hot reload at localhost:9080
 npm run dev
 
 # build electron application for production
 npm run build
-
 ```
 
 ## License
+
 MIT &copy; [Christopher Murphy](https://github.com/Splode)
 
 ---
-
-This project was generated with [electron-vue](https://github.com/SimulatedGREG/electron-vue)@[1c165f7](https://github.com/SimulatedGREG/electron-vue/tree/1c165f7c5e56edaf48be0fbb70838a1af26bb015) using [vue-cli](https://github.com/vuejs/vue-cli). Documentation about the original structure can be found [here](https://simulatedgreg.gitbooks.io/electron-vue/content/index.html).

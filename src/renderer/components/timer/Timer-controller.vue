@@ -8,6 +8,10 @@ import { EventBus } from '@/utils/event-bus'
 export default {
   computed: {
     // store getters
+    autoStartTimer () {
+      return this.$store.getters.autoStartTimer
+    },
+
     currentRound () {
       return this.$store.getters.currentRound
     },
@@ -46,7 +50,7 @@ export default {
     },
     dispatchTimer () {
       EventBus.$emit('timer-init', {
-        auto: true
+        auto: this.autoStartTimer
       })
     }
   },

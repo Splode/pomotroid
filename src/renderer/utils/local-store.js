@@ -4,6 +4,7 @@ const path = require('path')
 
 export const defaults = {
   alwaysOnTop: false,
+  autoStartTimer: true,
   notifications: true,
   workRounds: '4',
   timeLongBreak: '15',
