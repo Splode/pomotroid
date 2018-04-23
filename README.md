@@ -13,7 +13,7 @@
 
 Pomotroid is a simple and configurable Pomodoro timer. It aims to provide a visually-pleasing and reliable way to track productivity using the Pomodoro Technique.
 
-Pomotroid is in its early stages, so feedback and contributions are welcome! :seedling:
+Pomotroid is in its early stages, so feedback and contributions are welcome and appreciated! :seedling:
 
 ## Features
 
@@ -48,12 +48,10 @@ npm i
 # serve with hot reload at localhost:9080
 npm run dev
 
-# build electron application for production
+# build Pomotroid for production
 npm run build
 ```
 
 ## License
 
 MIT &copy; [Christopher Murphy](https://github.com/Splode)
-
----
