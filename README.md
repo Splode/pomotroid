@@ -26,6 +26,7 @@ Pomotroid is in its early stages, so feedback and contributions are welcome and 
 :memo: Future plans for enhancements and development:
 
 * Minimize to tray
+* Mini-mode
 
 ## Download
 
