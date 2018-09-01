@@ -18,11 +18,11 @@ Pomotroid is in its early stages, so feedback and contributions are welcome! :se
 - Customize times and number of rounds (persistent)
 - Charming timer alert sounds (optional)
 - Desktop notifications (optional)
+- Minimize to tray (optional)
 
 ### Roadmap
 :memo: Future plans for enhancements and development:
 - Auto-start timer option toggle
-- Minimize to tray
 
 ## Download
 Pomotroid is available for Windows 32/64, Mac OSX and Debian/Ubuntu flavored Linux.

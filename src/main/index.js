@@ -1,7 +1,9 @@
 'use strict'
 
 import { createLocalStore } from './../renderer/utils/local-store'
-import { app, BrowserWindow, ipcMain, Tray } from 'electron'
+import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron'
+
+const path = require('path')
 
 const localStore = createLocalStore()
 
@@ -18,7 +20,13 @@ const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
-app.on('ready', createWindow)
+app.on('ready', () => {
+  createWindow()
+  const minToTray = localStore.get('minToTray')
+  if (minToTray) {
+    createTray()
+  }
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -36,13 +44,20 @@ ipcMain.on('toggle-alwaysOnTop', (event, arg) => {
   mainWindow.setAlwaysOnTop(arg)
 })
 
+ipcMain.on('toggle-minToTray', (event, arg) => {
+  if (arg) {
+    createTray()
+  } else {
+    tray.destroy()
+  }
+})
+
 ipcMain.on('window-close', (event, arg) => {
   mainWindow.close()
 })
 
 ipcMain.on('window-minimize', (event, arg) => {
   if (arg) {
-    createTray()
     mainWindow.hide()
   } else {
     mainWindow.minimize()
@@ -50,11 +65,16 @@ ipcMain.on('window-minimize', (event, arg) => {
 })
 
 function createTray () {
-  tray = new Tray('./static/icon.png')
+  tray = new Tray(path.join(__static, 'icon.png'))
   tray.setToolTip('Pomotroid\nClick to Restore')
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { role: 'quit' }
+  ]))
   tray.on('click', () => {
     mainWindow.show()
-    tray.destroy()
+  })
+  tray.on('right-click', () => {
+    tray.popUpContextMenu()
   })
 }
 
