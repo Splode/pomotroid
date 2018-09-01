@@ -1,7 +1,7 @@
 'use strict'
 
 import { createLocalStore } from './../renderer/utils/local-store'
-import { app, BrowserWindow, ipcMain, Tray, Menu } from 'electron'
+import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron'
 
 const path = require('path')
 
@@ -62,6 +62,11 @@ ipcMain.on('window-minimize', (event, arg) => {
   } else {
     mainWindow.minimize()
   }
+})
+
+ipcMain.on('tray-icon-update', (event, image) => {
+  const nativeImg = nativeImage.createFromDataURL(image)
+  tray.setImage(nativeImg)
 })
 
 function createTray () {

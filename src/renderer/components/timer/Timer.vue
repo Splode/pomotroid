@@ -1,6 +1,7 @@
 <template>
   <div class="Timer-wrapper">
     <app-audio/>
+    <app-tray-icon/>
     <app-timer-dial :minutes="minutes">
       <p class="Dial-time" v-if="!timerStarted">{{ prettyMinutes }}</p>
       <p class="Dial-time" v-else>{{ prettyTime }}</p>
@@ -46,6 +47,7 @@
 <script>
 import Timer from '@/utils/timer'
 import appAudio from '@/components/Audio'
+import appTrayIcon from '@/components/TrayIcon'
 import appTimerController from '@/components/timer/Timer-controller'
 import appTimerDial from '@/components/timer/Timer-dial'
 import appTimerFooter from '@/components/timer/Timer-footer'
@@ -54,6 +56,7 @@ import { EventBus } from '@/utils/event-bus'
 export default {
   components: {
     appAudio,
+    appTrayIcon,
     appTimerController,
     appTimerDial,
     appTimerFooter
