@@ -1,8 +1,9 @@
 'use strict'
 
 import { createLocalStore } from './../renderer/utils/local-store'
+import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron'
 
-import { app, BrowserWindow, ipcMain } from 'electron'
+const path = require('path')
 
 const localStore = createLocalStore()
 
@@ -14,10 +15,73 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
-let mainWindow
+let mainWindow, tray
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
+
+app.on('ready', () => {
+  createWindow()
+  const minToTray = localStore.get('minToTray')
+  if (minToTray) {
+    createTray()
+  }
+})
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
+
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow()
+  }
+})
+
+ipcMain.on('toggle-alwaysOnTop', (event, arg) => {
+  mainWindow.setAlwaysOnTop(arg)
+})
+
+ipcMain.on('toggle-minToTray', (event, arg) => {
+  if (arg) {
+    createTray()
+  } else {
+    tray.destroy()
+  }
+})
+
+ipcMain.on('window-close', (event, arg) => {
+  mainWindow.close()
+})
+
+ipcMain.on('window-minimize', (event, arg) => {
+  if (arg) {
+    mainWindow.hide()
+  } else {
+    mainWindow.minimize()
+  }
+})
+
+ipcMain.on('tray-icon-update', (event, image) => {
+  const nativeImg = nativeImage.createFromDataURL(image)
+  tray.setImage(nativeImg)
+})
+
+function createTray () {
+  tray = new Tray(path.join(__static, 'icon.png'))
+  tray.setToolTip('Pomotroid\nClick to Restore')
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { role: 'quit' }
+  ]))
+  tray.on('click', () => {
+    mainWindow.show()
+  })
+  tray.on('right-click', () => {
+    tray.popUpContextMenu()
+  })
+}
 
 function createWindow () {
   const alwaysOnTop = localStore.get('alwaysOnTop')
@@ -38,32 +102,6 @@ function createWindow () {
     mainWindow = null
   })
 }
-
-app.on('ready', createWindow)
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
-
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createWindow()
-  }
-})
-
-ipcMain.on('toggle-alwaysOnTop', (event, arg) => {
-  mainWindow.setAlwaysOnTop(arg)
-})
-
-ipcMain.on('window-close', (event, arg) => {
-  mainWindow.close()
-})
-
-ipcMain.on('window-minimize', (event, arg) => {
-  mainWindow.minimize()
-})
 
 /**
  * Auto Updater

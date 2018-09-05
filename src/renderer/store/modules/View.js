@@ -9,7 +9,9 @@ const state = {
     ? true
     : localStore.get('autoStartTimer'),
   alwaysOnTop: localStore.get('alwaysOnTop'),
-  notifications: localStore.get('notifications')
+  minToTray: localStore.get('minToTray'),
+  notifications: localStore.get('notifications'),
+  os: process.platform
 }
 
 const getters = {
@@ -29,8 +31,16 @@ const getters = {
     return state.alwaysOnTop
   },
 
+  minToTray () {
+    return state.minToTray
+  },
+
   notifications () {
     return state.notifications
+  },
+
+  os () {
+    return state.os
   }
 }
 

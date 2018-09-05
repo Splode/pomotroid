@@ -17,16 +17,15 @@ Pomotroid is in its early stages, so feedback and contributions are welcome and 
 
 ## Features
 
-* Customize times and number of rounds.
-* Charming timer alert sounds (optional).
-* Desktop notifications (optional).
+- Customize times and number of rounds (persistent)
+- Charming timer alert sounds (optional)
+- Desktop notifications (optional)
+- Minimize to tray (optional)
 
 ## Roadmap
-
 :memo: Future plans for enhancements and development:
 
-* Minimize to tray
-* Mini-mode
+- Mini-mode
 
 ## Download
 

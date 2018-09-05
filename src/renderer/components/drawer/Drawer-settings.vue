@@ -13,6 +13,10 @@
       <p class="Setting-title">Desktop Notifications</p>
       <div class="Checkbox" @click="selectNotifications" :class="notifications ? 'is-active' : 'is-inactive'"></div>
     </div>
+    <div class="Setting-wrapper" v-if="os === 'win32'">
+      <p class="Setting-title">Minimize to Tray</p>
+      <div class="Checkbox" @click="selectMinToTray" :class="minToTray ? 'is-active' : 'is-inactive'"></div>
+    </div>
   </div>
 </template>
 
@@ -31,8 +35,16 @@ export default {
       return this.$store.getters.autoStartTimer
     },
 
+    minToTray () {
+      return this.$store.getters.minToTray
+    },
+
     notifications () {
       return this.$store.getters.notifications
+    },
+
+    os () {
+      return this.$store.getters.os
     }
   },
 
@@ -52,6 +64,16 @@ export default {
         key: 'autoStartTimer',
         val: !this.autoStartTimer
       }
+      this.$store.dispatch('setSetting', payload)
+      this.$store.dispatch('setViewState', payload)
+    },
+
+    selectMinToTray () {
+      const payload = {
+        key: 'minToTray',
+        val: !this.minToTray
+      }
+      ipcRenderer.send('toggle-minToTray', !this.minToTray)
       this.$store.dispatch('setSetting', payload)
       this.$store.dispatch('setViewState', payload)
     },

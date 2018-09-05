@@ -39,9 +39,12 @@ import { ipcRenderer } from 'electron'
 
 export default {
   computed: {
-    // store getters
     drawerOpen () {
       return this.$store.getters.drawerOpen
+    },
+
+    minToTray () {
+      return this.$store.getters.minToTray
     }
   },
 
@@ -55,7 +58,7 @@ export default {
     },
 
     winMinimize () {
-      ipcRenderer.send('window-minimize')
+      ipcRenderer.send('window-minimize', this.minToTray)
     }
   }
 }

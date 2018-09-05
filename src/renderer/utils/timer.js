@@ -13,6 +13,8 @@ export default class {
         if (this.time >= this.totalSeconds) {
           this.pause()
           EventBus.$emit('timer-completed')
+        } else {
+          EventBus.$emit('timer-advanced', this.time, this.totalSeconds)
         }
       }, 1000)
       EventBus.$emit('timer-started')
