@@ -56,6 +56,7 @@ export default {
         key: 'minToTray',
         val: !this.minToTray
       }
+      ipcRenderer.send('toggle-minToTray', !this.minToTray)
       this.$store.dispatch('setSetting', payload)
       this.$store.dispatch('setViewState', payload)
     },
