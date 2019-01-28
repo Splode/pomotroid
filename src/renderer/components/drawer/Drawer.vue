@@ -1,9 +1,12 @@
 <template>
   <div class="Drawer">
-    <transition name="fade" mode="out-in">
-      <component :is="currentDrawer"/>
+    <transition
+      name="fade"
+      mode="out-in"
+    >
+      <component :is="currentDrawer" />
     </transition>
-    <app-drawer-menu/>
+    <app-drawer-menu />
   </div>
 </template>
 
@@ -22,7 +25,7 @@ export default {
   },
 
   computed: {
-    currentDrawer () {
+    currentDrawer() {
       return this.$store.getters.currentDrawer
     }
   }

@@ -11,30 +11,33 @@ export default {
   name: 'Notification-win',
 
   methods: {
-    callNotification (opts) {
-      notifier.notify({
-        appName: 'com.splode.pomotroid',
-        title: opts.title || 'Work Round Complete',
-        message: opts.message,
-        icon: path.join(__static, 'icon.png'),
-        sound: false
-      }, (err, res) => {
-        if (err) {
-          console.log(err)
+    callNotification(opts) {
+      notifier.notify(
+        {
+          appName: 'com.splode.pomotroid',
+          title: opts.title || 'Work Round Complete',
+          message: opts.message,
+          icon: path.join(__static, 'icon.png'),
+          sound: false
+        },
+        (err, res) => {
+          if (err) {
+            console.log(err)
+          }
         }
-      })
+      )
     },
-    notifyLongBreak () {
+    notifyLongBreak() {
       this.callNotification({
         message: 'Begin a long break.'
       })
     },
-    notifyShortBreak () {
+    notifyShortBreak() {
       this.callNotification({
         message: 'Begin a short break.'
       })
     },
-    notifyWork () {
+    notifyWork() {
       this.callNotification({
         title: 'Break Finished',
         message: 'Begin working.'
@@ -42,13 +45,13 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     EventBus.$on('ready-long-break', this.notifyLongBreak)
     EventBus.$on('ready-short-break', this.notifyShortBreak)
     EventBus.$on('ready-work', this.notifyWork)
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     EventBus.$off('ready-long-break', this.notifyLongBreak)
     EventBus.$off('ready-short-break', this.notifyShortBreak)
     EventBus.$off('ready-work', this.notifyWork)

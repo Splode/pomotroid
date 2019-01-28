@@ -8,33 +8,33 @@ const path = require('path')
 export default {
   name: 'Notification',
 
-  data () {
+  data() {
     return {
       notification: null
     }
   },
 
   methods: {
-    callNotification (opts) {
+    callNotification(opts) {
       this.notification = new Notification(opts.title, {
         body: opts.body,
         icon: path.join('static', 'icon.png'),
         silent: true
       })
     },
-    notifyLongBreak () {
+    notifyLongBreak() {
       this.callNotification({
         title: 'Work Round Complte',
         body: 'Begin a long break.'
       })
     },
-    notifyShortBreak () {
+    notifyShortBreak() {
       this.callNotification({
         title: 'Work Round Complete',
         body: 'Begin a short break.'
       })
     },
-    notifyWork () {
+    notifyWork() {
       this.callNotification({
         title: 'Break Finished',
         body: 'Begin working.'
@@ -42,13 +42,13 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     EventBus.$on('ready-long-break', this.notifyLongBreak)
     EventBus.$on('ready-short-break', this.notifyShortBreak)
     EventBus.$on('ready-work', this.notifyWork)
   },
 
-  beforeDestroy () {
+  beforeDestroy() {
     EventBus.$off('ready-long-break', this.notifyLongBreak)
     EventBus.$off('ready-short-break', this.notifyShortBreak)
     EventBus.$off('ready-work', this.notifyWork)

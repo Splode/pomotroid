@@ -3,19 +3,38 @@
     <p class="Drawer-heading">Settings</p>
     <div class="Setting-wrapper">
       <p class="Setting-title">Always On Top</p>
-      <div class="Checkbox" @click="selectAlwaysOnTop" :class="alwaysOnTop ? 'is-active' : 'is-inactive'"></div>
+      <div
+        class="Checkbox"
+        @click="selectAlwaysOnTop"
+        :class="alwaysOnTop ? 'is-active' : 'is-inactive'"
+      ></div>
     </div>
     <div class="Setting-wrapper">
       <p class="Setting-title">Auto-start Timer</p>
-      <div class="Checkbox" @click="selectAutoStartTimer" :class="autoStartTimer ? 'is-active' : 'is-inactive'"></div>
+      <div
+        class="Checkbox"
+        @click="selectAutoStartTimer"
+        :class="autoStartTimer ? 'is-active' : 'is-inactive'"
+      ></div>
     </div>
     <div class="Setting-wrapper">
       <p class="Setting-title">Desktop Notifications</p>
-      <div class="Checkbox" @click="selectNotifications" :class="notifications ? 'is-active' : 'is-inactive'"></div>
+      <div
+        class="Checkbox"
+        @click="selectNotifications"
+        :class="notifications ? 'is-active' : 'is-inactive'"
+      ></div>
     </div>
-    <div class="Setting-wrapper" v-if="os === 'win32'">
+    <div
+      class="Setting-wrapper"
+      v-if="os === 'win32'"
+    >
       <p class="Setting-title">Minimize to Tray</p>
-      <div class="Checkbox" @click="selectMinToTray" :class="minToTray ? 'is-active' : 'is-inactive'"></div>
+      <div
+        class="Checkbox"
+        @click="selectMinToTray"
+        :class="minToTray ? 'is-active' : 'is-inactive'"
+      ></div>
     </div>
   </div>
 </template>
@@ -27,29 +46,29 @@ export default {
   name: 'Drawer-settings',
 
   computed: {
-    alwaysOnTop () {
+    alwaysOnTop() {
       return this.$store.getters.alwaysOnTop
     },
 
-    autoStartTimer () {
+    autoStartTimer() {
       return this.$store.getters.autoStartTimer
     },
 
-    minToTray () {
+    minToTray() {
       return this.$store.getters.minToTray
     },
 
-    notifications () {
+    notifications() {
       return this.$store.getters.notifications
     },
 
-    os () {
+    os() {
       return this.$store.getters.os
     }
   },
 
   methods: {
-    selectAlwaysOnTop () {
+    selectAlwaysOnTop() {
       const payload = {
         key: 'alwaysOnTop',
         val: !this.alwaysOnTop
@@ -59,7 +78,7 @@ export default {
       this.$store.dispatch('setViewState', payload)
     },
 
-    selectAutoStartTimer () {
+    selectAutoStartTimer() {
       const payload = {
         key: 'autoStartTimer',
         val: !this.autoStartTimer
@@ -68,7 +87,7 @@ export default {
       this.$store.dispatch('setViewState', payload)
     },
 
-    selectMinToTray () {
+    selectMinToTray() {
       const payload = {
         key: 'minToTray',
         val: !this.minToTray
@@ -78,7 +97,7 @@ export default {
       this.$store.dispatch('setViewState', payload)
     },
 
-    selectNotifications () {
+    selectNotifications() {
       const payload = {
         key: 'notifications',
         val: !this.notifications
@@ -124,6 +143,6 @@ export default {
 .Setting-title {
   color: $colorBlueGrey;
   font-size: 14px;
-  letter-spacing: .05em;
+  letter-spacing: 0.05em;
 }
 </style>

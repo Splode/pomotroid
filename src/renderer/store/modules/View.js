@@ -5,9 +5,10 @@ const localStore = createLocalStore()
 const state = {
   currentDrawer: 'appDrawerTimer',
   drawerOpen: false,
-  autoStartTimer: localStore.get('autoStartTimer') === undefined
-    ? true
-    : localStore.get('autoStartTimer'),
+  autoStartTimer:
+    localStore.get('autoStartTimer') === undefined
+      ? true
+      : localStore.get('autoStartTimer'),
   alwaysOnTop: localStore.get('alwaysOnTop'),
   minToTray: localStore.get('minToTray'),
   notifications: localStore.get('notifications'),
@@ -15,59 +16,59 @@ const state = {
 }
 
 const getters = {
-  autoStartTimer () {
+  autoStartTimer() {
     return state.autoStartTimer
   },
 
-  currentDrawer () {
+  currentDrawer() {
     return state.currentDrawer
   },
 
-  drawerOpen () {
+  drawerOpen() {
     return state.drawerOpen
   },
 
-  alwaysOnTop () {
+  alwaysOnTop() {
     return state.alwaysOnTop
   },
 
-  minToTray () {
+  minToTray() {
     return state.minToTray
   },
 
-  notifications () {
+  notifications() {
     return state.notifications
   },
 
-  os () {
+  os() {
     return state.os
   }
 }
 
 const mutations = {
-  SET_SETTING (state, payload) {
+  SET_SETTING(state, payload) {
     localStore.set(payload.key, payload.val)
   },
 
-  SET_VIEW_STATE (state, payload) {
+  SET_VIEW_STATE(state, payload) {
     state[payload.key] = payload.val
   },
 
-  TOGGLE_DRAWER (state) {
+  TOGGLE_DRAWER(state) {
     state.drawerOpen = !state.drawerOpen
   }
 }
 
 const actions = {
-  setSetting ({ commit }, payload) {
+  setSetting({ commit }, payload) {
     commit('SET_SETTING', payload)
   },
 
-  setViewState ({ commit }, payload) {
+  setViewState({ commit }, payload) {
     commit('SET_VIEW_STATE', payload)
   },
 
-  toggleDrawer ({ commit }) {
+  toggleDrawer({ commit }) {
     commit('TOGGLE_DRAWER')
   }
 }

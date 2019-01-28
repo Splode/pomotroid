@@ -1,43 +1,126 @@
 <template>
   <div class="Timer-wrapper">
-    <app-audio/>
-    <app-tray-icon/>
+    <app-audio />
+    <app-tray-icon />
     <app-timer-dial :minutes="minutes">
-      <p class="Dial-time" v-if="!timerStarted">{{ prettyMinutes }}</p>
-      <p class="Dial-time" v-else>{{ prettyTime }}</p>
+      <p
+        class="Dial-time"
+        v-if="!timerStarted"
+      >{{ prettyMinutes }}</p>
+      <p
+        class="Dial-time"
+        v-else
+      >{{ prettyTime }}</p>
     </app-timer-dial>
 
     <section class="Container Button-wrapper">
-      <transition name="fade" mode="out-in">
-        <div class="Button" v-if="!timerStarted" @click="startTimer" :key="'start'">
+      <transition
+        name="fade"
+        mode="out-in"
+      >
+        <div
+          class="Button"
+          v-if="!timerStarted"
+          @click="startTimer"
+          :key="'start'"
+        >
           <div class="Button-icon-wrapper">
-            <svg version="1.2" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-              x="0px" y="0px" viewBox="0 0 7.6 15" xml:space="preserve" height="15px" class="Icon--start">
-              <polygon fill="#F6F2EB" points="0,0 0,15 7.6,7.4 "/>
+            <svg
+              version="1.2"
+              baseProfile="tiny"
+              id="Layer_1"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              x="0px"
+              y="0px"
+              viewBox="0 0 7.6 15"
+              xml:space="preserve"
+              height="15px"
+              class="Icon--start"
+            >
+              <polygon
+                fill="#F6F2EB"
+                points="0,0 0,15 7.6,7.4 "
+              />
             </svg>
           </div>
         </div>
-        <div class="Button" v-if="timerStarted && !timerActive" @click="resumeTimer" :key="'resume'">
+        <div
+          class="Button"
+          v-if="timerStarted && !timerActive"
+          @click="resumeTimer"
+          :key="'resume'"
+        >
           <div class="Button-icon-wrapper">
-            <svg version="1.2" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-              x="0px" y="0px" viewBox="0 0 7.6 15" xml:space="preserve" height="15px">
-              <polygon fill="#F6F2EB" points="0,0 0,15 7.6,7.4 "/>
+            <svg
+              version="1.2"
+              baseProfile="tiny"
+              id="Layer_1"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              x="0px"
+              y="0px"
+              viewBox="0 0 7.6 15"
+              xml:space="preserve"
+              height="15px"
+            >
+              <polygon
+                fill="#F6F2EB"
+                points="0,0 0,15 7.6,7.4 "
+              />
             </svg>
           </div>
         </div>
-        <div class="Button" v-else-if="timerStarted && timerActive" @click="pauseTimer" :key="'pause'">
+        <div
+          class="Button"
+          v-else-if="timerStarted && timerActive"
+          @click="pauseTimer"
+          :key="'pause'"
+        >
           <div class="Button-icon-wrapper">
-            <svg version="1.2" baseProfile="tiny" id="Layer_2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"   x="0px" y="0px" viewBox="0 0 10.9 18" xml:space="preserve" height="15px" class="Icon--pause">
-                <line fill="none" stroke="#F6F2EB" stroke-width="3" stroke-linecap="round" stroke-miterlimit="10" x1="1.5" y1="1.5" x2="1.5" y2="16.5"/>
-                <line fill="none" stroke="#F6F2EB" stroke-width="3" stroke-linecap="round" stroke-miterlimit="10" x1="9.4" y1="1.5" x2="9.4" y2="16.5"/>
+            <svg
+              version="1.2"
+              baseProfile="tiny"
+              id="Layer_2"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              x="0px"
+              y="0px"
+              viewBox="0 0 10.9 18"
+              xml:space="preserve"
+              height="15px"
+              class="Icon--pause"
+            >
+              <line
+                fill="none"
+                stroke="#F6F2EB"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-miterlimit="10"
+                x1="1.5"
+                y1="1.5"
+                x2="1.5"
+                y2="16.5"
+              />
+              <line
+                fill="none"
+                stroke="#F6F2EB"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-miterlimit="10"
+                x1="9.4"
+                y1="1.5"
+                x2="9.4"
+                y2="16.5"
+              />
             </svg>
           </div>
         </div>
       </transition>
     </section>
 
-    <app-timer-footer/>
-    <app-timer-controller/>
+    <app-timer-footer />
+    <app-timer-controller />
   </div>
 </template>
 
@@ -59,7 +142,7 @@ export default {
     appTimerFooter
   },
 
-  data () {
+  data() {
     return {
       minutes: 1,
       timer: null,
@@ -70,36 +153,38 @@ export default {
 
   computed: {
     // store getters
-    currentRound () {
+    currentRound() {
       return this.$store.getters.currentRound
     },
 
-    timeLongBreak () {
+    timeLongBreak() {
       return this.$store.getters.timeLongBreak
     },
 
-    timeShortBreak () {
+    timeShortBreak() {
       return this.$store.getters.timeShortBreak
     },
 
-    timeWork () {
+    timeWork() {
       return this.$store.getters.timeWork
     },
 
     // local
-    prettyMinutes () {
+    prettyMinutes() {
       return this.minutes + ':00'
     },
 
-    prettyTime () {
-      return `${this.timeRemaining.remainingMinutes}:${this.timeRemaining.remainingSeconds}`
+    prettyTime() {
+      return `${this.timeRemaining.remainingMinutes}:${
+        this.timeRemaining.remainingSeconds
+      }`
     },
 
-    timeElapsed () {
+    timeElapsed() {
       if (this.timer.time !== null) {
         const time = this.timer.time
         const minutes = Math.floor(time / 60)
-        const seconds = time - (minutes * 60)
+        const seconds = time - minutes * 60
         return {
           minutes,
           seconds
@@ -107,12 +192,12 @@ export default {
       }
     },
 
-    timeRemaining () {
+    timeRemaining() {
       if (this.timer.time !== null) {
         const minutes = this.minutes
         const time = this.timer.time
         const elapsedMinutes = Math.floor(time / 60)
-        const elapsedSeconds = time - (elapsedMinutes * 60)
+        const elapsedSeconds = time - elapsedMinutes * 60
         const remainingSeconds = this.formatTimeDouble(60 - elapsedSeconds)
         let remainingMinutes = minutes - elapsedMinutes
 
@@ -129,7 +214,7 @@ export default {
   },
 
   methods: {
-    formatTimeDouble (time) {
+    formatTimeDouble(time) {
       if (time === 60) {
         return '00'
       } else if (time < 10) {
@@ -139,11 +224,11 @@ export default {
       }
     },
 
-    createTimer (min) {
+    createTimer(min) {
       this.timer = new Timer(min)
     },
 
-    initTimer () {
+    initTimer() {
       switch (this.currentRound) {
         case 'work':
           this.minutes = this.timeWork
@@ -163,30 +248,30 @@ export default {
       }
     },
 
-    pauseTimer () {
+    pauseTimer() {
       this.timer.pause()
       this.timerActive = !this.timerActive
     },
 
-    resetTimer () {
+    resetTimer() {
       this.timer.reset()
       this.timerActive = !this.timerActive
       this.timerStarted = false
     },
 
-    resumeTimer () {
+    resumeTimer() {
       this.timer.resume()
       this.timerActive = true
     },
 
-    startTimer () {
+    startTimer() {
       this.timer.start()
       this.timerActive = true
       this.timerStarted = true
     }
   },
 
-  mounted () {
+  mounted() {
     this.initTimer()
 
     EventBus.$on('timer-init', opts => {

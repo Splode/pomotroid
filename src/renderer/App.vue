@@ -1,12 +1,15 @@
 <template>
   <div id="app">
-    <app-titlebar/>
-    <transition name="slide-left" mode="out-in">
-      <app-drawer v-if="drawerOpen"/>
+    <app-titlebar />
+    <transition
+      name="slide-left"
+      mode="out-in"
+    >
+      <app-drawer v-if="drawerOpen" />
     </transition>
-    <app-timer/>
-    <app-notification-win v-if="os === 'win32' && notifications"/>
-    <app-notification v-else-if="os !== 'win32' && notifications"/>
+    <app-timer />
+    <app-notification-win v-if="os === 'win32' && notifications" />
+    <app-notification v-else-if="os !== 'win32' && notifications" />
   </div>
 </template>
 
@@ -30,19 +33,19 @@ export default {
 
   computed: {
     // store getters
-    drawerOpen () {
+    drawerOpen() {
       return this.$store.getters.drawerOpen
     },
 
-    alwaysOnTop () {
+    alwaysOnTop() {
       return this.$store.getters.alwaysOnTop
     },
 
-    notifications () {
+    notifications() {
       return this.$store.getters.notifications
     },
 
-    os () {
+    os() {
       return this.$store.getters.os
     }
   }

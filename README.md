@@ -23,6 +23,7 @@ Pomotroid is in its early stages, so feedback and contributions are welcome and 
 - Minimize to tray (optional)
 
 ## Roadmap
+
 :memo: Future plans for enhancements and development:
 
 - Mini-mode

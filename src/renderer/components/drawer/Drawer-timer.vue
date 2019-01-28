@@ -5,18 +5,19 @@
       <p class="Setting-title">Work</p>
       <p class="Setting-value">{{ localTimeWork + ':00' }}</p>
       <div class="Slider-wrapper">
-        <input 
-          type="range" 
-          min="1" 
-          :max="maxTime" 
-          step="1" 
-          class="Slider Slider--red" 
-          v-model.number="localTimeWork" 
+        <input
+          type="range"
+          min="1"
+          :max="maxTime"
+          step="1"
+          class="Slider Slider--red"
+          v-model.number="localTimeWork"
           @change="setTimeWork($event, 'work')"
         >
-        <div 
-          class="Slider-bar Slider-bar--red" 
-          :style="{ width: calcPercentage(localTimeWork, maxTime) + '%' }">
+        <div
+          class="Slider-bar Slider-bar--red"
+          :style="{ width: calcPercentage(localTimeWork, maxTime) + '%' }"
+        >
         </div>
       </div>
     </div>
@@ -25,18 +26,19 @@
       <p class="Setting-title">Short Break</p>
       <p class="Setting-value">{{ localTimeShortBreak + ':00' }}</p>
       <div class="Slider-wrapper">
-        <input 
-          type="range" 
-          min="1" 
-          :max="maxTime" 
-          step="1" 
-          class="Slider Slider--green" 
+        <input
+          type="range"
+          min="1"
+          :max="maxTime"
+          step="1"
+          class="Slider Slider--green"
           v-model.number="localTimeShortBreak"
           @change="setTimeShortBreak($event, 'short-break')"
         >
-        <div 
-          class="Slider-bar Slider-bar--green" 
-          :style="{ width: calcPercentage(localTimeShortBreak, maxTime) + '%' }">
+        <div
+          class="Slider-bar Slider-bar--green"
+          :style="{ width: calcPercentage(localTimeShortBreak, maxTime) + '%' }"
+        >
         </div>
       </div>
     </div>
@@ -45,18 +47,19 @@
       <p class="Setting-title">Long Break</p>
       <p class="Setting-value">{{ localTimeLongBreak + ':00' }}</p>
       <div class="Slider-wrapper">
-        <input 
-          type="range" 
-          min="1" 
-          :max="maxTime" 
-          step="1" 
-          class="Slider Slider--blue" 
+        <input
+          type="range"
+          min="1"
+          :max="maxTime"
+          step="1"
+          class="Slider Slider--blue"
           v-model.number="localTimeLongBreak"
           @change="setTimeLongBreak($event, 'long-break')"
         >
-        <div 
-          class="Slider-bar Slider-bar--blue" 
-          :style="{ width: calcPercentage(localTimeLongBreak, maxTime) + '%' }">
+        <div
+          class="Slider-bar Slider-bar--blue"
+          :style="{ width: calcPercentage(localTimeLongBreak, maxTime) + '%' }"
+        >
         </div>
       </div>
     </div>
@@ -65,24 +68,28 @@
       <p class="Setting-title">Rounds</p>
       <p class="Setting-value">{{ localWorkRounds }}</p>
       <div class="Slider-wrapper">
-        <input 
-          type="range" 
-          min="1" 
-          :max="maxRounds" 
-          step="1" 
-          class="Slider" 
+        <input
+          type="range"
+          min="1"
+          :max="maxRounds"
+          step="1"
+          class="Slider"
           v-model.number="localWorkRounds"
           @change="setWorkRounds"
         >
-        <div 
-          class="Slider-bar Slider-bar--blueGrey" 
-          :style="{ width: calcRoundPercentage(localWorkRounds, maxRounds) + '%' }">
+        <div
+          class="Slider-bar Slider-bar--blueGrey"
+          :style="{ width: calcRoundPercentage(localWorkRounds, maxRounds) + '%' }"
+        >
         </div>
       </div>
     </div>
 
     <div class="Setting-wrapper">
-      <p class="TextButton" @click="resetDefaults">Reset Defaults</p>
+      <p
+        class="TextButton"
+        @click="resetDefaults"
+      >Reset Defaults</p>
     </div>
   </div>
 </template>
@@ -93,7 +100,7 @@ import { EventBus } from '@/utils/event-bus'
 export default {
   name: 'Drawer-timer',
 
-  data () {
+  data() {
     return {
       localTimeLongBreak: 0,
       localTimeShortBreak: 0,
@@ -106,35 +113,35 @@ export default {
 
   computed: {
     // store getters
-    currentRound () {
+    currentRound() {
       return this.$store.getters.currentRound
     },
 
-    timeLongBreak () {
+    timeLongBreak() {
       return this.$store.getters.timeLongBreak
     },
 
-    timeShortBreak () {
+    timeShortBreak() {
       return this.$store.getters.timeShortBreak
     },
 
-    timeWork () {
+    timeWork() {
       return this.$store.getters.timeWork
     },
 
-    workRounds () {
+    workRounds() {
       return this.$store.getters.workRounds
     }
   },
 
   methods: {
-    calcPercentage (val, max) {
-      return val / max * 100
+    calcPercentage(val, max) {
+      return (val / max) * 100
     },
 
     // complex conditional to correctly position slider-bar for round slider
-    calcRoundPercentage (val, max) {
-      const percentage = val / max * 100
+    calcRoundPercentage(val, max) {
+      const percentage = (val / max) * 100
       if (percentage > 25 && percentage < 34) {
         return percentage - 6
       } else if (percentage > 33 && percentage < 66) {
@@ -146,7 +153,7 @@ export default {
       }
     },
 
-    checkToResetTimer (setting) {
+    checkToResetTimer(setting) {
       if (this.currentRound === setting) {
         EventBus.$emit('timer-init', {
           auto: false
@@ -155,14 +162,14 @@ export default {
       }
     },
 
-    initTimes () {
+    initTimes() {
       this.localTimeLongBreak = this.timeLongBreak
       this.localTimeShortBreak = this.timeShortBreak
       this.localTimeWork = this.timeWork
       this.localWorkRounds = this.workRounds
     },
 
-    resetDefaults () {
+    resetDefaults() {
       this.$store.dispatch('resetDefaults')
       this.initTimes()
       EventBus.$emit('timer-init', {
@@ -171,27 +178,27 @@ export default {
       EventBus.$emit('call-timer-reset')
     },
 
-    setTimeLongBreak (e, setting) {
+    setTimeLongBreak(e, setting) {
       this.$store.dispatch('setTimeLongBreak', e.target.value)
       this.checkToResetTimer(setting)
     },
 
-    setTimeShortBreak (e, setting) {
+    setTimeShortBreak(e, setting) {
       this.$store.dispatch('setTimeShortBreak', e.target.value)
       this.checkToResetTimer(setting)
     },
 
-    setTimeWork (e, setting) {
+    setTimeWork(e, setting) {
       this.$store.dispatch('setTimeWork', e.target.value)
       this.checkToResetTimer(setting)
     },
 
-    setWorkRounds (e, setting) {
+    setWorkRounds(e, setting) {
       this.$store.dispatch('setWorkRounds', e.target.value)
     }
   },
 
-  mounted () {
+  mounted() {
     this.initTimes()
   }
 }
@@ -206,7 +213,7 @@ export default {
 .Setting-title {
   color: $colorBlueGrey;
   font-size: 14px;
-  letter-spacing: .05em;
+  letter-spacing: 0.05em;
   margin-bottom: 8px;
 }
 

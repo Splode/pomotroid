@@ -1,5 +1,5 @@
 <template>
-  
+
 </template>
 
 <script>
@@ -8,25 +8,25 @@ import { EventBus } from '@/utils/event-bus'
 export default {
   computed: {
     // store getters
-    autoStartTimer () {
+    autoStartTimer() {
       return this.$store.getters.autoStartTimer
     },
 
-    currentRound () {
+    currentRound() {
       return this.$store.getters.currentRound
     },
 
-    round () {
+    round() {
       return this.$store.getters.round
     },
 
-    workRounds () {
+    workRounds() {
       return this.$store.getters.workRounds
     }
   },
 
   methods: {
-    checkRound () {
+    checkRound() {
       if (this.currentRound === 'work' && this.round >= this.workRounds) {
         this.$store.dispatch('setCurrentRound', 'long-break')
         EventBus.$emit('ready-long-break')
@@ -48,14 +48,14 @@ export default {
       }
       this.dispatchTimer()
     },
-    dispatchTimer () {
+    dispatchTimer() {
       EventBus.$emit('timer-init', {
         auto: this.autoStartTimer
       })
     }
   },
 
-  mounted () {
+  mounted() {
     EventBus.$on('timer-completed', () => {
       this.checkRound()
     })

@@ -1,8 +1,17 @@
 <template>
   <div>
-    <audio id="audio-long-break" :src="'./static/audio/alert-long-break.mp3'"></audio>
-    <audio id="audio-short-break" :src="'./static/audio/alert-short-break.mp3'"></audio>
-    <audio id="audio-work" :src="'./static/audio/alert-work.mp3'"></audio>
+    <audio
+      id="audio-long-break"
+      :src="'./static/audio/alert-long-break.mp3'"
+    ></audio>
+    <audio
+      id="audio-short-break"
+      :src="'./static/audio/alert-short-break.mp3'"
+    ></audio>
+    <audio
+      id="audio-work"
+      :src="'./static/audio/alert-work.mp3'"
+    ></audio>
   </div>
 </template>
 
@@ -10,7 +19,7 @@
 import { EventBus } from '@/utils/event-bus'
 
 export default {
-  data () {
+  data() {
     return {
       audioLongBreak: null,
       audioShortBreak: null,
@@ -20,12 +29,12 @@ export default {
 
   computed: {
     // store getters
-    isMuted () {
+    isMuted() {
       return this.$store.getters.isMuted
     }
   },
 
-  mounted () {
+  mounted() {
     this.audioLongBreak = document.getElementById('audio-long-break')
     this.audioShortBreak = document.getElementById('audio-short-break')
     this.audioWork = document.getElementById('audio-work')
@@ -52,5 +61,4 @@ export default {
 </script>
 
 <style>
-
 </style>

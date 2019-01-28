@@ -1,12 +1,12 @@
 import { EventBus } from './event-bus'
 
 export default class {
-  constructor (min) {
+  constructor(min) {
     this.time = 0
     this.totalSeconds = min * 60
   }
 
-  start () {
+  start() {
     if (!this.timerInt) {
       this.timerInt = setInterval(() => {
         this.time += 1
@@ -21,20 +21,20 @@ export default class {
     }
   }
 
-  pause () {
+  pause() {
     clearInterval(this.timerInt)
     delete this.timerInt
     EventBus.$emit('timer-paused')
   }
 
-  reset () {
+  reset() {
     clearInterval(this.timerInt)
     delete this.timerInt
     this.time = 0
     EventBus.$emit('timer-reset')
   }
 
-  resume () {
+  resume() {
     if (!this.timerInt) {
       this.start()
       EventBus.$emit('timer-resumed')

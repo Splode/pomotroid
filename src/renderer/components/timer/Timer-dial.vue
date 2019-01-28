@@ -2,46 +2,48 @@
   <div class="Dial-wrapper">
     <slot></slot>
     <p class="Dial-label">{{ currentRoundDisplay }}</p>
-    <svg 
-      version="1.2" 
-      baseProfile="tiny" 
-      id="Layer_1" 
-      xmlns="http://www.w3.org/2000/svg" 
+    <svg
+      version="1.2"
+      baseProfile="tiny"
+      id="Layer_1"
+      xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      x="0px" y="0px" 
-      viewBox="0 0 230 230" 
+      x="0px"
+      y="0px"
+      viewBox="0 0 230 230"
       xml:space="preserve"
       width="220"
       height="220"
       class="Dial-fill"
       :class="dialClass"
     >
-      <path 
+      <path
         fill="none"
-        stroke-width="10" 
-        stroke-linecap="round" 
+        stroke-width="10"
+        stroke-linecap="round"
         stroke-miterlimit="10"
         d="M115,5c60.8,0,110,49.2,110,110s-49.2,110-110,110S5,175.8,5,115S54.2,5,115,5"
       />
     </svg>
-    <svg 
-      version="1.2" 
-      baseProfile="tiny" 
-      id="Layer_1" 
-      xmlns="http://www.w3.org/2000/svg" 
+    <svg
+      version="1.2"
+      baseProfile="tiny"
+      id="Layer_1"
+      xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
-      x="0px" y="0px" 
-      viewBox="0 0 230 230" 
+      x="0px"
+      y="0px"
+      viewBox="0 0 230 230"
       xml:space="preserve"
       width="220"
       height="220"
       class="Dial-bg"
     >
-      <path 
-        fill="none" 
-        stroke-width="2" 
-        stroke-linecap="round" 
-        stroke-miterlimit="10" 
+      <path
+        fill="none"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-miterlimit="10"
         d="M115,5c60.8,0,110,49.2,110,110s-49.2,110-110,110S5,175.8,5,115S54.2,5,115,5"
       />
     </svg>
@@ -55,7 +57,7 @@ import { EventBus } from '@/utils/event-bus'
 export default {
   props: ['minutes'],
 
-  data () {
+  data() {
     return {
       dial: null
     }
@@ -63,23 +65,23 @@ export default {
 
   computed: {
     // store getters
-    currentRound () {
+    currentRound() {
       return this.$store.getters.currentRound
     },
 
-    timeLongBreak () {
+    timeLongBreak() {
       return this.$store.getters.timeLongBreak * 60 * 1000
     },
 
-    timeShortBreak () {
+    timeShortBreak() {
       return this.$store.getters.timeShortBreak * 60 * 1000
     },
 
-    timeWork () {
+    timeWork() {
       return this.$store.getters.timeWork * 60 * 1000
     },
 
-    currentRoundDisplay () {
+    currentRoundDisplay() {
       if (this.currentRound === 'work') {
         return 'Work'
       } else if (this.currentRound === 'short-break') {
@@ -89,7 +91,7 @@ export default {
       }
     },
 
-    dialClass () {
+    dialClass() {
       if (this.currentRound === 'work') {
         return 'Dial-fill--work'
       } else if (this.currentRound === 'short-break') {
@@ -101,7 +103,7 @@ export default {
   },
 
   methods: {
-    dialAnimation (duration) {
+    dialAnimation(duration) {
       this.dial = anime({
         targets: '.Dial-fill path',
         strokeDashoffset: [anime.setDashoffset, 0],
@@ -114,7 +116,7 @@ export default {
     }
   },
 
-  mounted () {
+  mounted() {
     this.dialAnimation(this.timeWork)
     EventBus.$on('timer-started', () => {
       this.dial.play()
@@ -152,7 +154,7 @@ export default {
 }
 
 .Dial-label {
-  letter-spacing: .1em;
+  letter-spacing: 0.1em;
   position: absolute;
   top: 66%;
   text-transform: uppercase;

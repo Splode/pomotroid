@@ -6,7 +6,7 @@ import { ipcRenderer } from 'electron'
 import { EventBus } from '@/utils/event-bus'
 
 export default {
-  data () {
+  data() {
     return {
       state: null,
       lastUpdate: 0
@@ -14,17 +14,20 @@ export default {
   },
 
   computed: {
-    minToTray () {
+    minToTray() {
       return this.$store.getters.minToTray
     }
   },
 
-  mounted () {
+  mounted() {
     let updateTrayImage = (elapsed, total) => {
       if (!this.minToTray) {
         return
       }
-      if (this.lastUpdate < elapsed && (elapsed - this.lastUpdate) / total < 0.01) {
+      if (
+        this.lastUpdate < elapsed &&
+        (elapsed - this.lastUpdate) / total < 0.01
+      ) {
         // avoid updates without visual difference
         return
       }
@@ -54,7 +57,7 @@ export default {
   }
 }
 
-function createTrayImage (state, elapsed, total) {
+function createTrayImage(state, elapsed, total) {
   const size = 32
   const bgColor = '#2F384B'
   const workColor = '#FF4E4D'
@@ -64,8 +67,12 @@ function createTrayImage (state, elapsed, total) {
   const arcLineWidthRatio = 0.3
 
   const remainingTime = 1 - elapsed / total
-  const arcColor = state === 'short-break' ? shortBreakColor : (
-    state === 'long-break' ? longBreakColor : workColor)
+  const arcColor =
+    state === 'short-break'
+      ? shortBreakColor
+      : state === 'long-break'
+        ? longBreakColor
+        : workColor
   const outerRadius = size / 2
   const innerRadius = outerRadius * arcRadiusRatio
   const lineWidth = outerRadius * arcLineWidthRatio
@@ -96,6 +103,3 @@ function createTrayImage (state, elapsed, total) {
   return dataUrl
 }
 </script>
-
-<style>
-</style>
