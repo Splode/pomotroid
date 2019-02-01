@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
-  parser: 'babel-eslint',
   parserOptions: {
+    parser: 'babel-eslint',
     sourceType: 'module'
   },
   env: {
@@ -21,5 +21,5 @@ module.exports = {
     'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
     'space-before-function-paren': ['error', 'never']
   },
-  extends: 'standard'
+  extends: ['standard', 'plugin:vue/base']
 }
