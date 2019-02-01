@@ -1,6 +1,4 @@
-import { createLocalStore } from '@/utils/local-store'
-
-const localStore = createLocalStore()
+import { localStore } from './index'
 
 const state = {
   round: 1,
