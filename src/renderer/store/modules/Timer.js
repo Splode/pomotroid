@@ -1,4 +1,5 @@
 import { localStore } from './index'
+import { defaults } from './../../utils/local-store'
 
 const state = {
   round: 1,
@@ -44,10 +45,10 @@ const mutations = {
   },
 
   RESET_DEFAULTS(state) {
-    state.workRounds = 4
-    state.timeLongBreak = 15
-    state.timeShortBreak = 5
-    state.timeWork = 25
+    state.workRounds = defaults.workRounds
+    state.timeLongBreak = defaults.timeLongBreak
+    state.timeShortBreak = defaults.timeShortBreak
+    state.timeWork = defaults.timeWork
   },
 
   SET_CURRENT_ROUND(state, payload) {
@@ -86,12 +87,10 @@ const actions = {
 
   resetDefaults({ commit }) {
     commit('RESET_DEFAULTS')
-    localStore.setData({
-      workRounds: '4',
-      timeLongBreak: '15',
-      timeShortBreak: '5',
-      timeWork: '25'
-    })
+    localStore.set('workRounds', defaults.workRounds)
+    localStore.set('timeLongBreak', defaults.timeLongBreak)
+    localStore.set('timeShortBreak', defaults.timeShortBreak)
+    localStore.set('timeWork', defaults.timeWork)
   },
 
   setCurrentRound({ commit }, payload) {

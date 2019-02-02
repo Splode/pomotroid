@@ -13,41 +13,59 @@ export const defaults = {
   timeWork: '25'
 }
 
+/**
+ * Creates and returns an instance of LocalStore with defaults.
+ *
+ * @export
+ * @returns {LocalStore} Instance of LocalStore.
+ */
 export function createLocalStore() {
-  const localStore = new LocalStore({
-    configName: 'user-preferences',
-    defaults
-  })
-  return localStore
+  // copy defaults object
+  return new LocalStore('user-preferences', Object.assign({}, defaults))
 }
 
+/**
+ * Stores user configuration on the filesystem.
+ *
+ * @export
+ * @class LocalStore
+ */
 export default class LocalStore {
-  constructor(opts) {
+  /**
+   *Creates an instance of LocalStore.
+   * @param {string} filename - The filename to store.
+   * @param {object} data - Existing data or defaults to populate the LocalStore.
+   * @memberof LocalStore
+   */
+  constructor(filename, data) {
     const userDataPath = (electron.app || electron.remote.app).getPath(
       'userData'
     )
-    this.path = path.join(userDataPath, opts.configName + '.json')
-    this.data = parseDataFile(this.path, opts.defaults)
+    this.path = path.join(userDataPath, filename + '.json')
+    this.data = parseDataFile(this.path, data)
   }
 
+  /**
+   * Retrieve the value of a key-value pair from data.
+   *
+   * @param {string} key - The key to access.
+   * @returns {*} The accessed value.
+   * @memberof LocalStore
+   */
   get(key) {
     return this.data[key]
   }
 
+  /**
+   * Set and store a key-value pair in local storage data.
+   *
+   * @param {string} key - The key name.
+   * @param {*} val - The value of the key property.
+   * @memberof LocalStore
+   */
   set(key, val) {
     this.data[key] = val
-    fs.writeFile(this.path, JSON.stringify(this.data), err => {
-      if (err) {
-        console.log(err)
-      }
-    })
-    console.log(`wrote ${key}: ${val} to local store`)
-  }
-
-  setData(dataObj) {
-    this.data = dataObj
-    console.log(dataObj, this.data)
-    fs.writeFile(this.path, JSON.stringify(this.data), err => {
+    fs.writeFileSync(this.path, JSON.stringify(this.data), err => {
       if (err) {
         console.log(err)
       }
@@ -55,6 +73,14 @@ export default class LocalStore {
   }
 }
 
+/**
+ * Attempts to parse a JSON data file given a filepath,
+ * or returns given defaults.
+ *
+ * @param {string} filePath - The filepath of the file to be read.
+ * @param {*} defaults - Defaults to be returned in the event of an error.
+ * @returns {object|*}
+ */
 function parseDataFile(filePath, defaults) {
   try {
     return JSON.parse(fs.readFileSync(filePath))
