@@ -2,15 +2,24 @@ const electron = require('electron')
 const fs = require('fs')
 const path = require('path')
 
-export const defaults = {
-  alwaysOnTop: false,
-  autoStartTimer: true,
-  minToTray: false,
-  notifications: true,
-  workRounds: '4',
-  timeLongBreak: '15',
-  timeShortBreak: '5',
-  timeWork: '25'
+export const defaults = generateSettings()
+
+/**
+ * Returns a default user-settings object.
+ *
+ * @returns {object} The default user-settings.
+ */
+function generateSettings() {
+  return {
+    alwaysOnTop: false,
+    autoStartTimer: true,
+    minToTray: false,
+    notifications: true,
+    workRounds: '4',
+    timeLongBreak: '15',
+    timeShortBreak: '5',
+    timeWork: '25'
+  }
 }
 
 /**
