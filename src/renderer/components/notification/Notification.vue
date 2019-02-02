@@ -24,7 +24,7 @@ export default {
     },
     notifyLongBreak () {
       this.callNotification({
-        title: 'Work Round Complte',
+        title: 'Work Round Complete',
         body: 'Begin a long break.'
       })
     },
