@@ -26,9 +26,14 @@ const winURL =
 app.on('ready', () => {
   createWindow()
   const minToTray = localStore.get('minToTray')
+  const alwaysOnTop = localStore.get('alwaysOnTop')
+
   if (minToTray) {
     createTray()
   }
+
+  // this must be set after window has been created on ubuntu 18.04
+  mainWindow.setAlwaysOnTop(alwaysOnTop)
 })
 
 app.on('window-all-closed', () => {
