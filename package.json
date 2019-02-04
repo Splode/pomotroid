@@ -3,8 +3,10 @@
   "version": "0.4.1",
   "author": "Christopher Murphy <christopherianmurphy@gmail.com>",
   "description": "A simple and visually-pleasing Pomodoro timer",
+  "homepage": "https://github.com/Splode/pomotroid",
   "license": "MIT",
   "main": "./dist/electron/main.js",
+  "repository": "github:splode/pomotroid",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
     "build:32": "node .electron-vue/build.js && electron-builder --ia32",
