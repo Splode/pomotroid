@@ -13,7 +13,7 @@
   "repository": "github:splode/pomotroid",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
-    "build:32": "node .electron-vue/build.js && electron-builder --ia32",
+    "build:win32": "node .electron-vue/build.js && electron-builder --ia32",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
@@ -28,6 +28,7 @@
   "build": {
     "productName": "Pomotroid",
     "appId": "com.splode.pomotroid",
+    "artifactName": "${name}-setup-${version}-${arch}.${ext}",
     "directories": {
       "output": "build"
     },
