@@ -96,6 +96,7 @@ function createWindow() {
     backgroundColor: '#2F384B',
     fullscreenable: false,
     frame: false,
+    icon: path.join(__static, 'icon.png'),
     resizable: false,
     useContentSize: true,
     width: 360,
