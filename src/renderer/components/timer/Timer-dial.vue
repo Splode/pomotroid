@@ -53,9 +53,10 @@
 <script>
 import anime from 'animejs'
 import { EventBus } from '@/utils/event-bus'
+import { ipcRenderer } from 'electron'
 
 export default {
-  props: ['minutes'],
+  props: ['minutes', 'timer', 'timerActive'],
 
   data() {
     return {
@@ -113,11 +114,30 @@ export default {
         autoplay: false
       })
       this.dial.seek(this.dial.duration)
+    },
+
+    handleFocus() {
+      if (this.timerActive) {
+        this.dial.pause()
+        this.dial.seek(this.dial.duration - this.timer.time * 1000)
+        this.dial.play()
+      }
     }
   },
 
   mounted() {
+    // register listener for window-restore events
+    ipcRenderer.on('win-restore', (event, arg) => {
+      this.handleFocus()
+    })
+    // register listener for window-show events
+    ipcRenderer.on('win-show', (event, arg) => {
+      this.handleFocus()
+    })
+
+    // set timer to initial work time
     this.dialAnimation(this.timeWork)
+
     EventBus.$on('timer-started', () => {
       this.dial.play()
     })

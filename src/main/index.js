@@ -105,6 +105,16 @@ function createWindow() {
 
   mainWindow.loadURL(winURL)
 
+  // send event to renderer on window restore
+  mainWindow.on('restore', () => {
+    mainWindow.webContents.send('win-restore')
+  })
+
+  // send event to renderer on window show
+  mainWindow.on('show', () => {
+    mainWindow.webContents.send('win-show')
+  })
+
   mainWindow.on('closed', () => {
     mainWindow = null
   })

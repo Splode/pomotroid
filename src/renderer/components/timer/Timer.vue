@@ -2,7 +2,11 @@
   <div class="Timer-wrapper">
     <app-audio />
     <app-tray-icon />
-    <app-timer-dial :minutes="minutes">
+    <app-timer-dial
+      :minutes="minutes"
+      :timer="timer"
+      :timerActive="timerActive"
+    >
       <p
         class="Dial-time"
         v-if="!timerStarted"
