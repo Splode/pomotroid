@@ -78,7 +78,7 @@ h2 {
   color: $colorGreen;
   font-weight: 400;
   letter-spacing: 0.05em;
-  margin-top: 0.25em;
+  margin: 0.5em 0;
 }
 
 section {

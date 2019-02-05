@@ -28,7 +28,7 @@
   "build": {
     "productName": "Pomotroid",
     "appId": "com.splode.pomotroid",
-    "artifactName": "${name}-setup-${version}-${arch}.${ext}",
+    "artifactName": "${productName}-setup-${version}-${arch}.${ext}",
     "directories": {
       "output": "build"
     },
