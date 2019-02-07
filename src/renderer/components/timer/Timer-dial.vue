@@ -56,6 +56,7 @@ import { EventBus } from '@/utils/event-bus'
 import { ipcRenderer } from 'electron'
 
 export default {
+  // TODO: props type validation
   props: ['minutes', 'timer', 'timerActive'],
 
   data() {
@@ -104,7 +105,14 @@ export default {
   },
 
   methods: {
+    // TODO: document this
     dialAnimation(duration) {
+      // if instance of dial already exists, set to null and recreate
+      if (this.dial !== null) {
+        this.dial = null
+        anime.remove('.Dial-fill path')
+        this.dialAnimation(duration)
+      }
       this.dial = anime({
         targets: '.Dial-fill path',
         strokeDashoffset: [anime.setDashoffset, 0],
@@ -116,10 +124,17 @@ export default {
       this.dial.seek(this.dial.duration)
     },
 
+    /**
+     * Reset timer animation on window focus.
+     * Required due to RequestAnimationFrame not running in blurred windows.
+     */
     handleFocus() {
       if (this.timerActive) {
+        let duration = this.dial.duration
+        let position = this.dial.duration - this.timer.time * 1000
         this.dial.pause()
-        this.dial.seek(this.dial.duration - this.timer.time * 1000)
+        this.dialAnimation(duration)
+        this.dial.seek(position)
         this.dial.play()
       }
     }
