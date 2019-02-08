@@ -18,7 +18,8 @@ function generateSettings() {
     workRounds: 4,
     timeLongBreak: 15,
     timeShortBreak: 5,
-    timeWork: 25
+    timeWork: 25,
+    volume: 100
   }
 }
 

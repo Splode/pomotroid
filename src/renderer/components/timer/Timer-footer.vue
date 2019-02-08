@@ -46,6 +46,7 @@
       <div
         class="Icon-wrapper Icon-wrapper--double--right"
         @click="toggleMute"
+        @mouseenter="volumeSliderHidden = false"
       >
         <transition
           name="fade"
@@ -63,7 +64,7 @@
             xml:space="preserve"
             height="15px"
             class="Icon--mute"
-            v-if="!isMuted"
+            v-if="localVolume > 0"
           >
             <path
               fill="#858C99"
@@ -98,6 +99,25 @@
           </svg>
         </transition>
       </div>
+      <!-- volume slider -->
+      <transition name="fade">
+        <div
+          class="Slider-wrapper Slider-wrapper--vert"
+          v-show="!volumeSliderHidden"
+          @mouseleave="volumeSliderHidden = true"
+        >
+          <input
+            type="range"
+            min="0"
+            max="100"
+            class="Slider"
+            v-model="localVolume"
+            @change="setVolume"
+          >
+          <div class="Slider-bar Slider-bar--blueGrey"></div>
+        </div>
+      </transition>
+
     </div>
   </section>
 </template>
@@ -106,14 +126,17 @@
 import { EventBus } from '@/utils/event-bus'
 
 export default {
+  name: 'TimerFooter',
+  data() {
+    return {
+      localVolume: 0,
+      volumeSliderHidden: true
+    }
+  },
   computed: {
     // store getters
     currentRound() {
       return this.$store.getters.currentRound
-    },
-
-    isMuted() {
-      return this.$store.getters.isMuted
     },
 
     round() {
@@ -122,6 +145,10 @@ export default {
 
     workRounds() {
       return this.$store.getters.workRounds
+    },
+
+    volume() {
+      return this.$store.getters.volume
     }
   },
 
@@ -135,8 +162,24 @@ export default {
     },
 
     toggleMute() {
-      this.$store.dispatch('toggleMute')
+      // set volume to zero if not muted
+      // otherwise set to 100 (default)
+      if (this.localVolume === '0') {
+        this.localVolume = '100'
+        this.$store.dispatch('setVolume', 100)
+      } else {
+        this.localVolume = '0'
+        this.$store.dispatch('setVolume', 0)
+      }
+    },
+
+    setVolume(e) {
+      this.$store.dispatch('setVolume', parseInt(e.target.value))
     }
+  },
+
+  mounted() {
+    this.localVolume = this.volume
   }
 }
 </script>
@@ -182,5 +225,26 @@ export default {
 
 .Round-wrapper {
   text-align: center;
+}
+
+.Slider-wrapper {
+  padding: 8px;
+  position: absolute;
+  top: -61px;
+  right: -29px;
+}
+
+.Slider {
+  &::-webkit-slider-runnable-track {
+    background-color: $colorBlueGrey;
+  }
+  &::-webkit-slider-thumb {
+    margin-top: -7px;
+    transition: $transitionDefault;
+    &:hover {
+      background-color: $colorRed;
+      border-color: $colorRed;
+    }
+  }
 }
 </style>

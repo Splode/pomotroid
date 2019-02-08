@@ -1,0 +1,77 @@
+.Slider-wrapper {
+  position: relative;
+}
+
+.Slider-wrapper--vert {
+  transform: rotate(-90deg);
+}
+
+.Slider {
+  position: relative;
+  width: 100%;
+  -webkit-appearance: none;
+  &:focus {
+    outline: 0;
+  }
+  &::-webkit-slider-runnable-track {
+    background-color: $colorNavy;
+    width: 100%;
+    height: 3px;
+  }
+  &::-webkit-slider-thumb {
+    background-color: $colorBlueGrey;
+    border: 2px solid $colorBlueGrey;
+    border-radius: 100%;
+    margin-top: -8px;
+    width: 18px;
+    height: 18px;
+    -webkit-appearance: none;
+    -webkit-app-region: no-drag;
+  }
+}
+
+.Slider--blue {
+  &::-webkit-slider-thumb {
+    background-color: $colorBlue;
+    border: 2px solid $colorBlue;
+    -webkit-app-region: no-drag;
+  }
+}
+
+.Slider--green {
+  &::-webkit-slider-thumb {
+    background-color: $colorGreen;
+    border: 2px solid $colorGreen;
+    -webkit-app-region: no-drag;
+  }
+}
+
+.Slider--red {
+  &::-webkit-slider-thumb {
+    background-color: $colorRed;
+    border: 2px solid $colorRed;
+    -webkit-app-region: no-drag;
+  }
+}
+
+.Slider-bar {
+  position: absolute;
+  top: calc(50% + 3px);
+  height: 3px;
+}
+
+.Slider-bar--blue {
+  background-color: $colorBlue;
+}
+
+.Slider-bar--blueGrey {
+  background-color: $colorBlueGrey;
+}
+
+.Slider-bar--green {
+  background-color: $colorGreen;
+}
+
+.Slider-bar--red {
+  background-color: $colorRed;
+}

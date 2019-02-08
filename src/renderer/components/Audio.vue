@@ -2,14 +2,17 @@
   <div>
     <audio
       id="audio-long-break"
+      ref="audio-long-break"
       :src="'./static/audio/alert-long-break.mp3'"
     ></audio>
     <audio
       id="audio-short-break"
+      ref="audio-short-break"
       :src="'./static/audio/alert-short-break.mp3'"
     ></audio>
     <audio
       id="audio-work"
+      ref="audio-work"
       :src="'./static/audio/alert-work.mp3'"
     ></audio>
   </div>
@@ -29,36 +32,28 @@ export default {
 
   computed: {
     // store getters
-    isMuted() {
-      return this.$store.getters.isMuted
+    volume() {
+      return this.$store.getters.volume * 0.01
     }
   },
 
   mounted() {
-    this.audioLongBreak = document.getElementById('audio-long-break')
-    this.audioShortBreak = document.getElementById('audio-short-break')
-    this.audioWork = document.getElementById('audio-work')
-
+    // Volume attribute on audio is not supported
+    // and must be set programmatically.
     EventBus.$on('ready-long-break', () => {
-      if (!this.isMuted) {
-        this.audioLongBreak.play()
-      }
+      this.$refs['audio-long-break'].volume = this.volume
+      this.$refs['audio-long-break'].play()
     })
 
     EventBus.$on('ready-short-break', () => {
-      if (!this.isMuted) {
-        this.audioShortBreak.play()
-      }
+      this.$refs['audio-short-break'].volume = this.volume
+      this.$refs['audio-short-break'].play()
     })
 
     EventBus.$on('ready-work', () => {
-      if (!this.isMuted) {
-        this.audioWork.play()
-      }
+      this.$refs['audio-work'].volume = this.volume
+      this.$refs['audio-work'].play()
     })
   }
 }
 </script>
-
-<style>
-</style>

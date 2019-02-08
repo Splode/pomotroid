@@ -8,7 +8,7 @@ const state = {
   timeShortBreak: parseInt(localStore.get('timeShortBreak')),
   timeWork: parseInt(localStore.get('timeWork')),
   currentRound: 'work', // work, short-break, long-break
-  isMuted: false
+  volume: localStore.get('volume') || 100
 }
 
 const getters = {
@@ -30,8 +30,8 @@ const getters = {
   currentRound() {
     return state.currentRound
   },
-  isMuted() {
-    return state.isMuted
+  volume() {
+    return state.volume
   }
 }
 
@@ -71,8 +71,8 @@ const mutations = {
     state.workRounds = payload
   },
 
-  TOGGLE_MUTE(state) {
-    state.isMuted = !state.isMuted
+  SET_VOLUME(state, payload) {
+    state.volume = payload
   }
 }
 
@@ -117,8 +117,9 @@ const actions = {
     localStore.set('workRounds', payload)
   },
 
-  toggleMute({ commit }) {
-    commit('TOGGLE_MUTE')
+  setVolume({ commit }, payload) {
+    commit('SET_VOLUME', payload)
+    localStore.set('volume', payload)
   }
 }
 
