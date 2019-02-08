@@ -56,8 +56,20 @@ import { EventBus } from '@/utils/event-bus'
 import { ipcRenderer } from 'electron'
 
 export default {
-  // TODO: props type validation
-  props: ['minutes', 'timer', 'timerActive'],
+  props: {
+    minutes: {
+      type: Number,
+      required: true
+    },
+    timer: {
+      type: (Object | null),
+      required: true
+    },
+    timerActive: {
+      type: Boolean,
+      required: true
+    }
+  },
 
   data() {
     return {
@@ -105,9 +117,13 @@ export default {
   },
 
   methods: {
-    // TODO: document this
+    /**
+     * Set the time dial animation using a given duration in milliseconds.
+     * If a dial animation already exists, removes it and recreates it.
+     *
+     * @param {number} duration - The current round duration in milliseconds.
+     */
     dialAnimation(duration) {
-      // if instance of dial already exists, set to null and recreate
       if (this.dial !== null) {
         this.dial = null
         anime.remove('.Dial-fill path')
