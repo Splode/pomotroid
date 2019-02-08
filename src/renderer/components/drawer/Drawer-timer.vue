@@ -179,22 +179,22 @@ export default {
     },
 
     setTimeLongBreak(e, setting) {
-      this.$store.dispatch('setTimeLongBreak', e.target.value)
+      this.$store.dispatch('setTimeLongBreak', parseInt(e.target.value))
       this.checkToResetTimer(setting)
     },
 
     setTimeShortBreak(e, setting) {
-      this.$store.dispatch('setTimeShortBreak', e.target.value)
+      this.$store.dispatch('setTimeShortBreak', parseInt(e.target.value))
       this.checkToResetTimer(setting)
     },
 
     setTimeWork(e, setting) {
-      this.$store.dispatch('setTimeWork', e.target.value)
+      this.$store.dispatch('setTimeWork', parseInt(e.target.value))
       this.checkToResetTimer(setting)
     },
 
     setWorkRounds(e, setting) {
-      this.$store.dispatch('setWorkRounds', e.target.value)
+      this.$store.dispatch('setWorkRounds', parseInt(e.target.value))
     }
   },
 
@@ -246,9 +246,9 @@ export default {
     background-color: $colorBlueGrey;
     border: 2px solid $colorBlueGrey;
     border-radius: 100%;
-    margin-top: -7px;
-    width: 15px;
-    height: 15px;
+    margin-top: -8px;
+    width: 18px;
+    height: 18px;
     -webkit-appearance: none;
     -webkit-app-region: no-drag;
   }

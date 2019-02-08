@@ -15,10 +15,10 @@ function generateSettings() {
     autoStartTimer: true,
     minToTray: false,
     notifications: true,
-    workRounds: '4',
-    timeLongBreak: '15',
-    timeShortBreak: '5',
-    timeWork: '25'
+    workRounds: 4,
+    timeLongBreak: 15,
+    timeShortBreak: 5,
+    timeWork: 25
   }
 }
 
