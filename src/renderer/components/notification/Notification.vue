@@ -18,20 +18,22 @@ export default {
     callNotification(opts) {
       this.notification = new Notification(opts.title, {
         body: opts.body,
-        icon: path.join('static', 'icon.png'),
+        icon: opts.icon || path.join('static', 'icon.png'),
         silent: true
       })
     },
     notifyLongBreak() {
       this.callNotification({
         title: 'Work Round Complete',
-        body: 'Begin a long break.'
+        body: 'Begin a long break.',
+        icon: path.join('static', 'icon--blue.png')
       })
     },
     notifyShortBreak() {
       this.callNotification({
         title: 'Work Round Complete',
-        body: 'Begin a short break.'
+        body: 'Begin a short break.',
+        icon: path.join('static', 'icon--green.png')
       })
     },
     notifyWork() {

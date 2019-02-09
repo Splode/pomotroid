@@ -17,7 +17,7 @@ export default {
           appName: 'com.splode.pomotroid',
           title: opts.title || 'Work Round Complete',
           message: opts.message,
-          icon: path.join(__static, 'icon.png'),
+          icon: opts.icon || path.join(__static, 'icon.png'),
           sound: false
         },
         (err, res) => {
@@ -29,12 +29,14 @@ export default {
     },
     notifyLongBreak() {
       this.callNotification({
-        message: 'Begin a long break.'
+        message: 'Begin a long break.',
+        icon: path.join(__static, 'icon--blue.png')
       })
     },
     notifyShortBreak() {
       this.callNotification({
-        message: 'Begin a short break.'
+        message: 'Begin a short break.',
+        icon: path.join(__static, 'icon--green.png')
       })
     },
     notifyWork() {
