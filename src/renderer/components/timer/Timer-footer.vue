@@ -104,7 +104,6 @@
         <div
           class="Slider-wrapper Slider-wrapper--vert"
           v-show="!volumeSliderHidden"
-          @mouseleave="volumeSliderHidden = true"
         >
           <input
             type="range"
@@ -129,6 +128,10 @@ export default {
   name: 'TimerFooter',
   data() {
     return {
+      currentMousePosition: {
+        x: null,
+        y: null
+      },
       localVolume: 0,
       volumeSliderHidden: true
     }
@@ -157,6 +160,24 @@ export default {
       EventBus.$emit('call-timer-reset')
     },
 
+    /**
+     * Hides the volume slider unless the last recorded mouse position
+     * falls within a range containing the volume slider.
+     */
+    volumeSliderTimeout() {
+      setInterval(() => {
+        if (
+          this.currentMousePosition.x >= 305 &&
+          this.currentMousePosition.x <= 355 &&
+          (this.currentMousePosition.y >= 305 &&
+            this.currentMousePosition.y <= 455)
+        ) {
+        } else {
+          this.volumeSliderHidden = true
+        }
+      }, 6000)
+    },
+
     skipRound() {
       EventBus.$emit('timer-completed')
     },
@@ -180,6 +201,13 @@ export default {
 
   mounted() {
     this.localVolume = this.volume
+    this.volumeSliderTimeout()
+
+    // record last mouse position for volume slider timeout
+    window.addEventListener('mousemove', e => {
+      this.currentMousePosition.x = e.clientX
+      this.currentMousePosition.y = e.clientY
+    })
   }
 }
 </script>
