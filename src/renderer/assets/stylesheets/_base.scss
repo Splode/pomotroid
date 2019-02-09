@@ -6,7 +6,8 @@ body {
   user-select: none;
 }
 
-h1, p {
+h1,
+p {
   margin: 0;
   padding: 0;
 }
@@ -55,7 +56,7 @@ h1, p {
 .TextButton {
   color: $colorBlueGrey;
   font-size: 14px;
-  letter-spacing: .05em;
+  letter-spacing: 0.05em;
   margin-top: 12px;
   transition: $transitionDefault;
   &:hover {

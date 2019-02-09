@@ -10,13 +10,13 @@
   font-weight: 200;
 }
 
-$colorBlue: #0BBDDB;
-$colorBlueGrey: #858C99;
-$colorGreen: #05EC8C;
-$colorLightNavy: #3D4457;
-$colorNavy: #2F384B;
-$colorRed: #FF4E4D;
-$colorWhite: #F6F2EB;
+$colorBlue: #0bbddb;
+$colorBlueGrey: #858c99;
+$colorGreen: #05ec8c;
+$colorLightNavy: #3d4457;
+$colorNavy: #2f384b;
+$colorRed: #ff4e4d;
+$colorWhite: #f6f2eb;
 
-$transitionDefault: all .3s ease;
-$transitionSnappy: all .3s cubic-bezier(.07,.95,0,1);
+$transitionDefault: all 0.3s ease;
+$transitionSnappy: all 0.3s cubic-bezier(0.07, 0.95, 0, 1);

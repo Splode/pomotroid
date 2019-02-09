@@ -9,10 +9,12 @@
 
 // vue transitions
 
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: $transitionSnappy;
 }
-.fade-enter, .fade-leave-to {
+.fade-enter,
+.fade-leave-to {
   opacity: 0;
 }
 
@@ -23,7 +25,7 @@
 
 .slide-left-enter,
 .slide-left-leave-to {
-  opacity: .5;
+  opacity: 0.5;
   transform: translateX(-100vw);
 }
 
