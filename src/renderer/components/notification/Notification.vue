@@ -14,6 +14,19 @@ export default {
     }
   },
 
+  computed: {
+    // store getters
+    timeLongBreak() {
+      return this.$store.getters.timeLongBreak
+    },
+    timeShortBreak() {
+      return this.$store.getters.timeShortBreak
+    },
+    timeWork() {
+      return this.$store.getters.timeWork
+    }
+  },
+
   methods: {
     callNotification(opts) {
       this.notification = new Notification(opts.title, {
@@ -22,24 +35,27 @@ export default {
         silent: true
       })
     },
+
     notifyLongBreak() {
       this.callNotification({
         title: 'Work Round Complete',
-        body: 'Begin a long break.',
+        body: `Begin a ${this.timeLongBreak} minute long break.`,
         icon: path.join('static', 'icon--blue.png')
       })
     },
+
     notifyShortBreak() {
       this.callNotification({
         title: 'Work Round Complete',
-        body: 'Begin a short break.',
+        body: `Begin a ${this.timeShortBreak} minute short break.`,
         icon: path.join('static', 'icon--green.png')
       })
     },
+
     notifyWork() {
       this.callNotification({
         title: 'Break Finished',
-        body: 'Begin working.'
+        body: `Begin working for ${this.timeWork} minutes.`
       })
     }
   },

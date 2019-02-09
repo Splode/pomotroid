@@ -10,6 +10,19 @@ const path = require('path')
 export default {
   name: 'Notification-win',
 
+  computed: {
+    // store getters
+    timeLongBreak() {
+      return this.$store.getters.timeLongBreak
+    },
+    timeShortBreak() {
+      return this.$store.getters.timeShortBreak
+    },
+    timeWork() {
+      return this.$store.getters.timeWork
+    }
+  },
+
   methods: {
     callNotification(opts) {
       notifier.notify(
@@ -27,22 +40,25 @@ export default {
         }
       )
     },
+
     notifyLongBreak() {
       this.callNotification({
-        message: 'Begin a long break.',
+        message: `Begin a ${this.timeLongBreak} minute long break.`,
         icon: path.join(__static, 'icon--blue.png')
       })
     },
+
     notifyShortBreak() {
       this.callNotification({
-        message: 'Begin a short break.',
+        message: `Begin a ${this.timeShortBreak} minute short break.`,
         icon: path.join(__static, 'icon--green.png')
       })
     },
+
     notifyWork() {
       this.callNotification({
         title: 'Break Finished',
-        message: 'Begin working.'
+        message: `Begin working for ${this.timeWork} minutes.`
       })
     }
   },
