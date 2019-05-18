@@ -1,7 +1,7 @@
 language: node_js
 node_js:
   - 'lts/*'
-  - '8'
+  - '10'
 sudo: required
 dist: trusty
 cache:
