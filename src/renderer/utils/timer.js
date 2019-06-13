@@ -45,7 +45,8 @@ export default class Timer {
         // compute how many ms to wait before the next call
         // we do this because the callback takes time, so calling with 1000 ms of delay each time
         // makes us lag behind after a bit
-        const computedTimeout = 1000 - (new Date().getMilliseconds() - msOffset)
+        // Sometimes, the callback takes so much time that it goes to the next second (solved by taking the abs value)
+        const computedTimeout = 1000 - Math.abs((new Date().getMilliseconds() - msOffset))
         this.timerInt = setTimeout(timerLoop, computedTimeout)
       }
 
