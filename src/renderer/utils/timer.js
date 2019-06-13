@@ -30,7 +30,6 @@ export default class Timer {
     if (!this.timerInt) {
       // we are not calling back on fixed seconds, but on fixed seconds plus this offset
       const msOffset = new Date().getMilliseconds()
-
       const timerLoop = () => {
         this.time += 1
         if (this.time >= this.totalSeconds) {
@@ -46,7 +45,7 @@ export default class Timer {
         // we do this because the callback takes time, so calling with 1000 ms of delay each time
         // makes us lag behind after a bit
         // Sometimes, the callback takes so much time that it goes to the next second (solved by taking the abs value)
-        const computedTimeout = 1000 - Math.abs((new Date().getMilliseconds() - msOffset))
+        const computedTimeout = 1000 - Math.abs(msOffset - new Date().getMilliseconds())
         this.timerInt = setTimeout(timerLoop, computedTimeout)
       }
 
