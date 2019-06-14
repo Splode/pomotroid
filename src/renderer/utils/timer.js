@@ -27,30 +27,45 @@ export default class Timer {
    * @emits 'timer-completed' - Emitted when the timer has completed.
    */
   start() {
-    if (!this.timerInt) {
-      // we are not calling back on fixed seconds, but on fixed seconds plus this offset
-      const msOffset = new Date().getMilliseconds()
+    if (!this.timerHandle) {
+      // stores the last time at least one second passed
+      let previous = performance.now()
 
-      const timerLoop = () => {
-        this.time += 1
-        if (this.time >= this.totalSeconds) {
-          this.pause()
-          EventBus.$emit('timer-completed')
-          // return to prevent the next timeout
-          return
-        } else {
-          EventBus.$emit('timer-advanced', this.time, this.totalSeconds)
+      /**
+       * @param {number} now seconds since the page loaded (high precision)
+       */
+      const timerLoop = now => {
+        // count seconds since the last time at leat one second passed
+        const seconds = (now - previous) / 1000
+
+        if (seconds >= 1) {
+          const flooredSeconds = Math.floor(seconds)
+
+          // overwrite the previous, taking into account the uncounted milliseconds
+          const carryMillis = (seconds - flooredSeconds) * 1000
+          previous = now - carryMillis
+
+          // add seconds as integers
+          time += flooredSeconds
+
+          if (this.time >= this.totalSeconds) {
+            this.pause()
+            EventBus.$emit('timer-completed')
+            // return to prevent the next animation frame
+            return
+          } else {
+            // if the callback took more than a second, it is possible that multiple seconds are added at once
+            // if that is the case, "timer-advanced" will only fire once
+            // (it is possible to make a quick loop that will fire "timer-advanced" for each passed seconds if requires)
+            EventBus.$emit('timer-advanced', this.time, this.totalSeconds)
+          }
         }
 
-        // compute how many ms to wait before the next call
-        // we do this because the callback takes time, so calling with 1000 ms of delay each time
-        // makes us lag behind after a bit
-        const computedTimeout = 1000 - (new Date().getMilliseconds() - msOffset)
-        this.timerInt = setTimeout(timerLoop, computedTimeout)
+        this.timerHandle = requestAnimationFrame(timerLoop)
       }
 
       // first call is always in 1000 ms
-      this.timerInt = setTimeout(timerLoop, 1000)
+      this.timerHandle = requestAnimationFrame(timerLoop)
       EventBus.$emit('timer-started')
     }
   }
@@ -62,8 +77,8 @@ export default class Timer {
    * @memberof Timer
    */
   pause() {
-    clearTimeout(this.timerInt)
-    delete this.timerInt
+    cancelAnimationFrame(this.timerHandle)
+    delete this.timerHandle
     EventBus.$emit('timer-paused')
   }
 
@@ -74,8 +89,8 @@ export default class Timer {
    * @memberof Timer
    */
   reset() {
-    clearTimeout(this.timerInt)
-    delete this.timerInt
+    cancelAnimationFrame(this.timerHandle)
+    delete this.timerHandle
     this.time = 0
     EventBus.$emit('timer-reset')
   }
@@ -86,7 +101,7 @@ export default class Timer {
    * @memberof Timer
    */
   resume() {
-    if (!this.timerInt) {
+    if (!this.timerHandle) {
       this.start()
       EventBus.$emit('timer-resumed')
     }
