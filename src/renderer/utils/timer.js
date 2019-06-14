@@ -46,7 +46,7 @@ export default class Timer {
           previous = now - carryMillis
 
           // add seconds as integers
-          time += flooredSeconds
+          this.time += flooredSeconds
 
           if (this.time >= this.totalSeconds) {
             this.pause()
