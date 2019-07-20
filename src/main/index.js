@@ -82,7 +82,7 @@ function createTray() {
   tray.setToolTip('Pomotroid\nClick to Restore')
   tray.setContextMenu(Menu.buildFromTemplate([{ role: 'quit' }]))
   tray.on('click', () => {
-    mainWindow.show()
+    mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
   })
   tray.on('right-click', () => {
     tray.popUpContextMenu()
