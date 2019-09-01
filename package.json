@@ -1,6 +1,6 @@
 {
   "name": "pomotroid",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "author": {
     "email": "christopherianmurphy@gmail.com",
     "name": "Christopher Murphy",
@@ -28,7 +28,6 @@
   "build": {
     "productName": "Pomotroid",
     "appId": "com.splode.pomotroid",
-    "artifactName": "${productName}-setup-${version}-${arch}.${ext}",
     "directories": {
       "output": "build"
     },
@@ -54,7 +53,11 @@
       "icon": "build/icons/icon.icns"
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
     },
     "linux": {
       "icon": "build/icons"
