@@ -294,6 +294,17 @@ export default {
     EventBus.$on('call-timer-reset', () => {
       this.resetTimer()
     })
+
+    // Bind event listener to Space key
+    window.addEventListener('keypress', (e) => {
+      if (e.code === 'Space') {
+        if (this.timerActive) {
+          this.pauseTimer()
+        } else {
+          this.startTimer()
+        }
+      }
+    }, true)
   }
 }
 </script>
