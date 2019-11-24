@@ -34,6 +34,8 @@ Pomotroid is available for Windows 32/64, Mac OSX and Debian/Ubuntu flavored Lin
 
 Download the latest version from the [releases](https://github.com/Splode/pomotroid/releases) page.
 
+You can also install Pomotroid on macOS with [Homebrew](https://brew.sh) by typing `brew cask install pomotroid` in a terminal window.
+
 ## Technical
 
 Pomotroid is built with [Vue.js](https://github.com/vuejs/vue), [Electron](https://github.com/electron/electron), and [electron-vue](https://github.com/SimulatedGREG/electron-vue).
