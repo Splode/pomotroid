@@ -2,7 +2,7 @@
   "name": "pomotroid",
   "version": "0.6.2",
   "author": {
-    "email": "christopherianmurphy@gmail.com",
+    "email": "flyweight@pm.me",
     "name": "Christopher Murphy",
     "url": "https://github.com/splode"
   },
@@ -60,7 +60,15 @@
       ]
     },
     "linux": {
-      "icon": "build/icons"
+      "icon": "build/icons",
+      "target": [
+        "AppImage",
+        "snap",
+        "deb"
+      ]
+    },
+    "snap": {
+      "summary": "Pomotroid is a simple and visually-pleasing Pomodoro timer."
     }
   },
   "dependencies": {
