@@ -1,5 +1,4 @@
-<template>
-</template>
+<template> </template>
 
 <script>
 import { ipcRenderer } from 'electron'
@@ -20,7 +19,7 @@ export default {
   },
 
   mounted() {
-    let updateTrayImage = (elapsed, total) => {
+    const updateTrayImage = (elapsed, total) => {
       if (!this.minToTray) {
         return
       }
@@ -67,12 +66,7 @@ function createTrayImage(state, elapsed, total) {
   const arcLineWidthRatio = 0.3
 
   const remainingTime = 1 - elapsed / total
-  const arcColor =
-    state === 'short-break'
-      ? shortBreakColor
-      : state === 'long-break'
-        ? longBreakColor
-        : workColor
+  const arcColor = state === 'short-break' ? shortBreakColor : state === 'long-break' ? longBreakColor : workColor
   const outerRadius = size / 2
   const innerRadius = outerRadius * arcRadiusRatio
   const lineWidth = outerRadius * arcLineWidthRatio

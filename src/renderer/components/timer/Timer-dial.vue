@@ -146,8 +146,8 @@ export default {
      */
     handleFocus() {
       if (this.timerActive) {
-        let duration = this.dial.duration
-        let position = this.dial.duration - this.timer.time * 1000
+        const duration = this.dial.duration
+        const position = this.dial.duration - this.timer.time * 1000
         this.dial.pause()
         this.dialAnimation(duration)
         this.dial.seek(position)
