@@ -104,7 +104,7 @@
     "babel-loader": "^8.0.6",
     "babili-webpack-plugin": "^0.1.2",
     "cfonts": "^2.4.6",
-    "chalk": "^2.4.2",
+    "chalk": "^3.0.0",
     "copy-webpack-plugin": "^5.1.1",
     "cross-env": "^5.2.0",
     "css-loader": "^2.1.1",
