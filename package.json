@@ -131,7 +131,7 @@
     "node-loader": "^0.6.0",
     "node-sass": "^4.13.0",
     "sass-loader": "^7.1.0",
-    "style-loader": "^0.23.1",
+    "style-loader": "^1.1.2",
     "url-loader": "^1.1.2",
     "vue-html-loader": "^1.2.4",
     "vue-loader": "^15.8.3",
