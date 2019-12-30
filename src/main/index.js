@@ -20,7 +20,7 @@ if (process.env.NODE_ENV !== 'development') {
 let mainWindow, tray
 const winURL =
   process.env.NODE_ENV === 'development'
-    ? `http://localhost:9080`
+    ? 'http://localhost:9080'
     : `file://${__dirname}/index.html`
 
 app.on('ready', () => {
