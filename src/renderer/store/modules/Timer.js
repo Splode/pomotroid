@@ -1,5 +1,5 @@
 import { localStore } from './index'
-import { defaults } from './../../utils/local-store'
+import { defaults } from './../../utils/LocalStore'
 
 const state = {
   round: 1,

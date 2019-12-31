@@ -3,7 +3,7 @@
  * in a one-shot manner. There should not be any reason to edit this file.
  */
 
-import { createLocalStore } from '@/utils/local-store'
+import { createLocalStore } from '@/utils/LocalStore'
 
 const localStore = createLocalStore()
 const files = require.context('.', false, /\.js$/)
