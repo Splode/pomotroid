@@ -52,7 +52,7 @@
 
 <script>
 import anime from 'animejs'
-import { EventBus } from '@/utils/event-bus'
+import { EventBus } from '@/utils/EventBus'
 import { ipcRenderer } from 'electron'
 
 export default {

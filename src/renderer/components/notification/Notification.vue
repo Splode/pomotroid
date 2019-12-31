@@ -2,7 +2,7 @@
 </template>
 
 <script>
-import { EventBus } from '@/utils/event-bus'
+import { EventBus } from '@/utils/EventBus'
 const path = require('path')
 
 export default {

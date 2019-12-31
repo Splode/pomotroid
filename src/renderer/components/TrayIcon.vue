@@ -2,7 +2,7 @@
 
 <script>
 import { ipcRenderer } from 'electron'
-import { EventBus } from '@/utils/event-bus'
+import { EventBus } from '@/utils/EventBus'
 
 export default {
   data() {
