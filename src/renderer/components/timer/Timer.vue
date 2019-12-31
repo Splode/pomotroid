@@ -3,25 +3,16 @@
     <app-audio />
     <app-tray-icon />
     <app-timer-dial
+      :current-time="currentTime"
       :minutes="minutes"
-      :timer="timer"
       :timerActive="timerActive"
     >
-      <p
-        class="Dial-time"
-        v-if="!timerStarted"
-      >{{ prettyMinutes }}</p>
-      <p
-        class="Dial-time"
-        v-else
-      >{{ prettyTime }}</p>
+      <p class="Dial-time" v-if="!timerStarted">{{ prettyMinutes }}</p>
+      <p class="Dial-time" v-else>{{ prettyTime }}</p>
     </app-timer-dial>
 
     <section class="Container Button-wrapper">
-      <transition
-        name="fade"
-        mode="out-in"
-      >
+      <transition name="fade" mode="out-in">
         <div
           class="Button"
           v-if="!timerStarted"
@@ -42,10 +33,7 @@
               height="15px"
               class="Icon--start"
             >
-              <polygon
-                fill="#F6F2EB"
-                points="0,0 0,15 7.6,7.4 "
-              />
+              <polygon fill="#F6F2EB" points="0,0 0,15 7.6,7.4 " />
             </svg>
           </div>
         </div>
@@ -68,10 +56,7 @@
               xml:space="preserve"
               height="15px"
             >
-              <polygon
-                fill="#F6F2EB"
-                points="0,0 0,15 7.6,7.4 "
-              />
+              <polygon fill="#F6F2EB" points="0,0 0,15 7.6,7.4 " />
             </svg>
           </div>
         </div>
@@ -129,7 +114,7 @@
 </template>
 
 <script>
-import Timer from '@/utils/timer'
+import TimerWorker from '@/utils/timer.worker.js'
 import appAudio from '@/components/Audio'
 import appTrayIcon from '@/components/TrayIcon'
 import appTimerController from '@/components/timer/Timer-controller'
@@ -148,10 +133,11 @@ export default {
 
   data() {
     return {
+      currentTime: 0,
       minutes: 1,
-      timer: null,
       timerActive: false,
-      timerStarted: false
+      timerStarted: false,
+      timerWorker: null
     }
   },
 
@@ -179,40 +165,34 @@ export default {
     },
 
     prettyTime() {
-      return `${this.timeRemaining.remainingMinutes}:${
-        this.timeRemaining.remainingSeconds
-      }`
+      return `${this.timeRemaining.remainingMinutes}:${this.timeRemaining.remainingSeconds}`
     },
 
     timeElapsed() {
-      if (this.timer.time !== null) {
-        const time = this.timer.time
-        const minutes = Math.floor(time / 60)
-        const seconds = time - minutes * 60
-        return {
-          minutes,
-          seconds
-        }
+      const time = this.currentTime
+      const minutes = Math.floor(time / 60)
+      const seconds = time - minutes * 60
+      return {
+        minutes,
+        seconds
       }
     },
 
     timeRemaining() {
-      if (this.timer.time !== null) {
-        const minutes = this.minutes
-        const time = this.timer.time
-        const elapsedMinutes = Math.floor(time / 60)
-        const elapsedSeconds = time - elapsedMinutes * 60
-        const remainingSeconds = this.formatTimeDouble(60 - elapsedSeconds)
-        let remainingMinutes = minutes - elapsedMinutes
+      const minutes = this.minutes
+      const time = this.currentTime
+      const elapsedMinutes = Math.floor(time / 60)
+      const elapsedSeconds = time - elapsedMinutes * 60
+      const remainingSeconds = this.formatTimeDouble(60 - elapsedSeconds)
+      let remainingMinutes = minutes - elapsedMinutes
 
-        if (elapsedSeconds > 0) {
-          remainingMinutes -= 1
-        }
+      if (elapsedSeconds > 0) {
+        remainingMinutes -= 1
+      }
 
-        return {
-          remainingMinutes,
-          remainingSeconds
-        }
+      return {
+        remainingMinutes,
+        remainingSeconds
       }
     }
   },
@@ -228,8 +208,27 @@ export default {
       }
     },
 
-    createTimer(min) {
-      this.timer = new Timer(min)
+    handleMessage(message) {
+      switch (message.data.event) {
+        case 'complete':
+          EventBus.$emit('timer-completed')
+          break
+        case 'pause':
+          EventBus.$emit('timer-paused')
+          break
+        case 'reset':
+          EventBus.$emit('timer-reset')
+          break
+        case 'start':
+          EventBus.$emit('timer-started')
+          break
+        case 'tick':
+          this.currentTime = message.data.data.time
+          EventBus.$emit('timer-tick')
+          break
+        default:
+          break
+      }
     },
 
     initTimer() {
@@ -252,35 +251,47 @@ export default {
       }
     },
 
+    createTimer(min) {
+      if (!this.timerWorker) return
+      this.timerWorker.postMessage({ event: 'create', min })
+    },
+
     pauseTimer() {
-      this.timer.pause()
+      if (!this.timerWorker) return
+      this.timerWorker.postMessage({ event: 'pause' })
       this.timerActive = !this.timerActive
     },
 
     resetTimer() {
-      this.timer.reset()
+      if (!this.timerWorker) return
+      this.timerWorker.postMessage({ event: 'reset' })
       this.timerActive = !this.timerActive
       this.timerStarted = false
     },
 
     resumeTimer() {
-      this.timer.resume()
+      if (!this.timerWorker) return
+      this.timerWorker.postMessage({ event: 'resume' })
       this.timerActive = true
     },
 
     startTimer() {
-      this.timer.start()
+      if (!this.timerWorker) return
+      this.timerWorker.postMessage({ event: 'start' })
       this.timerActive = true
       this.timerStarted = true
     }
   },
 
   mounted() {
+    this.timerWorker = new TimerWorker()
+    this.timerWorker.addEventListener('message', this.handleMessage)
+
     this.initTimer()
 
     EventBus.$on('timer-init', opts => {
       // clear previous timers
-      this.timer.reset()
+      this.resetTimer()
       this.initTimer()
       if (opts.auto) {
         setTimeout(() => {
@@ -296,15 +307,19 @@ export default {
     })
 
     // Bind event listener to Space key
-    window.addEventListener('keypress', (e) => {
-      if (e.code === 'Space') {
-        if (this.timerActive) {
-          this.pauseTimer()
-        } else {
-          this.startTimer()
+    window.addEventListener(
+      'keypress',
+      e => {
+        if (e.code === 'Space') {
+          if (this.timerActive) {
+            this.pauseTimer()
+          } else {
+            this.startTimer()
+          }
         }
-      }
-    }, true)
+      },
+      true
+    )
   }
 }
 </script>
