@@ -50,8 +50,8 @@ export default {
       updateTrayImage(0, 1)
     })
 
-    EventBus.$on('timer-advanced', (elapsed, total) => {
-      updateTrayImage(elapsed, total)
+    EventBus.$on('timer-tick', payload => {
+      updateTrayImage(payload.elapsed, payload.total)
     })
   }
 }
