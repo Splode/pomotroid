@@ -63,8 +63,9 @@
       "icon": "build/icons",
       "target": [
         "AppImage",
+        "deb",
         "snap",
-        "deb"
+        "tar.gz"
       ]
     },
     "snap": {
