@@ -74,5 +74,9 @@ function handleTimerStart() {
 }
 
 function handleTimerTick(event) {
-  self.postMessage({ event: 'tick', data: event.detail })
+  self.postMessage({
+    event: 'tick',
+    elapsed: event.detail.time,
+    totalSeconds: event.detail.totalSeconds
+  })
 }
