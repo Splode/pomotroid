@@ -1,6 +1,6 @@
 'use strict'
 
-import { createLocalStore } from './../renderer/utils/local-store'
+import { createLocalStore } from './../renderer/utils/LocalStore'
 import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron'
 
 const path = require('path')

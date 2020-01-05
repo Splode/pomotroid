@@ -2,7 +2,7 @@
 </template>
 
 <script>
-import { EventBus } from '@/utils/event-bus'
+import { EventBus } from '@/utils/EventBus'
 
 const notifier = require('node-notifier')
 const path = require('path')

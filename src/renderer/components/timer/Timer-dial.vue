@@ -52,17 +52,17 @@
 
 <script>
 import anime from 'animejs'
-import { EventBus } from '@/utils/event-bus'
+import { EventBus } from '@/utils/EventBus'
 import { ipcRenderer } from 'electron'
 
 export default {
   props: {
-    minutes: {
+    currentTime: {
       type: Number,
       required: true
     },
-    timer: {
-      type: (Object | null),
+    minutes: {
+      type: Number,
       required: true
     },
     timerActive: {
@@ -147,7 +147,7 @@ export default {
     handleFocus() {
       if (this.timerActive) {
         const duration = this.dial.duration
-        const position = this.dial.duration - this.timer.time * 1000
+        const position = this.dial.duration - this.currentTime * 1000
         this.dial.pause()
         this.dialAnimation(duration)
         this.dial.seek(position)

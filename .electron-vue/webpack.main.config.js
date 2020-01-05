@@ -18,6 +18,10 @@ let mainConfig = {
   module: {
     rules: [
       {
+        test: /\.worker\.js$/,
+        use: { loader: 'worker-loader' }
+      },
+      {
         test: /\.(js)$/,
         enforce: 'pre',
         exclude: /node_modules/,
