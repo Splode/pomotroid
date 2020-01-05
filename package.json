@@ -50,17 +50,27 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "artifactName": "pomotroid-${version}-macos.${ext}",
+      "category": "public.app-category.productivity",
+      "icon": "./build/icons/icon.icns"
     },
     "win": {
-      "icon": "build/icons/icon.ico",
+      "icon": "./build/icons/icon.ico",
       "target": [
         "nsis",
         "portable"
       ]
     },
+    "nsis": {
+      "artifactName": "pomotroid-${version}-setup.${ext}"
+    },
+    "portable": {
+      "artifactName": "pomotroid-${version}-portable.${ext}"
+    },
     "linux": {
-      "icon": "build/icons",
+      "artifactName": "pomotroid-${version}-linux.${ext}",
+      "category": "Utility",
+      "icon": "./build/icons",
       "target": [
         "AppImage",
         "deb",
