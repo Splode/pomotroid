@@ -22,21 +22,36 @@ Pomotroid is in its early stages, so feedback and contributions are welcome and 
 - Desktop notifications (optional)
 - Minimize to tray (optional)
 
+## Install
+
+Pomotroid is available for Windows, Mac OSX and Linux.
+
+Download the latest version from the [releases](https://github.com/Splode/pomotroid/releases) page.
+
+### Homebrew
+
+You can also install Pomotroid on macOS with [Homebrew](https://brew.sh):
+
+```bash
+brew cask install pomotroid
+```
+
+### Scoop
+
+You can install Pomotroid on Windows with [scoop](https://scoop.sh/)
+
+```ps1
+scoop install https://raw.githubusercontent.com/Splode/pomotroid/master/pomotroid.json
+```
+
 ## Roadmap
 
 :memo: Future plans for enhancements and development:
 
 - Mini-mode
+- Themes
 
-## Download
-
-Pomotroid is available for Windows 32/64, Mac OSX and Debian/Ubuntu flavored Linux.
-
-Download the latest version from the [releases](https://github.com/Splode/pomotroid/releases) page.
-
-You can also install Pomotroid on macOS with [Homebrew](https://brew.sh) by typing `brew cask install pomotroid` in a terminal window.
-
-## Technical
+## Development
 
 Pomotroid is built with [Vue.js](https://github.com/vuejs/vue), [Electron](https://github.com/electron/electron), and [electron-vue](https://github.com/SimulatedGREG/electron-vue).
 
