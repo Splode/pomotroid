@@ -50,11 +50,11 @@ let rendererConfig = {
       },
       {
         test: /\.scss$/,
-        use: ['vue-style-loader', 'css-loader', 'sass-loader?data=@import "./src/renderer/assets/stylesheets/main";']
+        use: ['vue-style-loader', 'css-loader', 'sass-loader?prependData=@import "./src/renderer/assets/stylesheets/main";']
       },
       {
         test: /\.sass$/,
-        use: ['vue-style-loader', 'css-loader', 'sass-loader?indentedSyntax=1&data=@import "./src/renderer/assets/stylesheets/main"']
+        use: ['vue-style-loader', 'css-loader', 'sass-loader?indentedSyntax=1&prependData=@import "./src/renderer/assets/stylesheets/main"']
       },
       {
         test: /\.css$/,
@@ -81,9 +81,9 @@ let rendererConfig = {
             extractCSS: process.env.NODE_ENV === 'production',
             loaders: {
               sass:
-                'vue-style-loader!css-loader!sass-loader?indentedSyntax=1&data=@import "./src/renderer/assets/stylesheets/main"',
+                'vue-style-loader!css-loader!sass-loader?indentedSyntax=1&prependData=@import "./src/renderer/assets/stylesheets/main"',
               scss:
-                'vue-style-loader!css-loader!sass-loader?data=@import "./src/renderer/assets/stylesheets/main";'
+                'vue-style-loader!css-loader!sass-loader?prependData=@import "./src/renderer/assets/stylesheets/main";'
             }
           }
         }
