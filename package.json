@@ -122,7 +122,7 @@
     "css-loader": "^3.4.2",
     "del": "^5.1.0",
     "devtron": "^1.4.0",
-    "electron": "^7.1.11",
+    "electron": "^8.0.1",
     "electron-builder": "^22.3.2",
     "electron-debug": "^3.0.1",
     "electron-devtools-installer": "^2.2.4",
