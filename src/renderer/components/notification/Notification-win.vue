@@ -28,7 +28,7 @@ export default {
       notifier.notify(
         {
           appName: 'com.splode.pomotroid',
-          title: opts.title || 'Work Round Complete',
+          title: opts.title || 'Focus Round Complete',
           message: opts.message,
           icon: opts.icon || path.join(__static, 'icon.png'),
           sound: false
@@ -58,7 +58,7 @@ export default {
     notifyWork() {
       this.callNotification({
         title: 'Break Finished',
-        message: `Begin working for ${this.timeWork} minutes.`
+        message: `Begin focusing for ${this.timeWork} minutes.`
       })
     }
   },

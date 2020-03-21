@@ -2,7 +2,7 @@
   <div class="Container">
     <p class="Drawer-heading">Timer</p>
     <div class="Setting-wrapper">
-      <p class="Setting-title">Work</p>
+      <p class="Setting-title">Focus</p>
       <p class="Setting-value">{{ localTimeWork + ':00' }}</p>
       <div class="Slider-wrapper">
         <input

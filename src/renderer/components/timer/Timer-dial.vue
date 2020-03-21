@@ -97,7 +97,7 @@ export default {
 
     currentRoundDisplay() {
       if (this.currentRound === 'work') {
-        return 'Work'
+        return 'Focus'
       } else if (this.currentRound === 'short-break') {
         return 'Short Break'
       } else if (this.currentRound === 'long-break') {
