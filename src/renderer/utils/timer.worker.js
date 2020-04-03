@@ -69,8 +69,12 @@ function handleTimerReset() {
   self.postMessage({ event: 'reset' })
 }
 
-function handleTimerStart() {
-  self.postMessage({ event: 'start' })
+function handleTimerStart(event) {
+  self.postMessage({
+    event: 'start',
+    elapsed: event.detail.time,
+    totalSeconds: event.detail.totalSeconds
+  })
 }
 
 function handleTimerTick(event) {

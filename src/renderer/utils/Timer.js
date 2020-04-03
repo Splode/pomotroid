@@ -7,7 +7,6 @@ export default class Timer extends EventTarget {
     this._complete = new Event('complete')
     this._pause = new Event('pause')
     this._reset = new Event('reset')
-    this._start = new Event('start')
   }
 
   start() {
@@ -25,7 +24,11 @@ export default class Timer extends EventTarget {
           )
         }
       }, 1000)
-      this.dispatchEvent(this._start)
+      this.dispatchEvent(
+        new CustomEvent('start', {
+          detail: { time: this.time, totalSeconds: this.totalSeconds }
+        })
+      )
     }
   }
 
@@ -45,7 +48,11 @@ export default class Timer extends EventTarget {
   resume() {
     if (!this.timerInt) {
       this.start()
-      this.dispatchEvent(this._start)
+      this.dispatchEvent(
+        new CustomEvent('start', {
+          detail: { time: this.time, totalSeconds: this.totalSeconds }
+        })
+      )
     }
   }
 }

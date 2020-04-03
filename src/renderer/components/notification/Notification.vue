@@ -38,7 +38,7 @@ export default {
 
     notifyLongBreak() {
       this.callNotification({
-        title: 'Work Round Complete',
+        title: 'Focus Round Complete',
         body: `Begin a ${this.timeLongBreak} minute long break.`,
         icon: path.join('static', 'icon--blue.png')
       })
@@ -46,7 +46,7 @@ export default {
 
     notifyShortBreak() {
       this.callNotification({
-        title: 'Work Round Complete',
+        title: 'Focus Round Complete',
         body: `Begin a ${this.timeShortBreak} minute short break.`,
         icon: path.join('static', 'icon--green.png')
       })
@@ -55,7 +55,7 @@ export default {
     notifyWork() {
       this.callNotification({
         title: 'Break Finished',
-        body: `Begin working for ${this.timeWork} minutes.`
+        body: `Begin focusing for ${this.timeWork} minutes.`
       })
     }
   },
