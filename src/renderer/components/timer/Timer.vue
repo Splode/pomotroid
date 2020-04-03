@@ -221,6 +221,7 @@ export default {
           break
         case 'start':
           EventBus.$emit('timer-started')
+          this.currentTime = message.data.elapsed
           break
         case 'tick':
           this.currentTime = message.data.elapsed
