@@ -1,17 +1,11 @@
+os: osx
+osx_image: xcode11.3
 language: node_js
-node_js:
-  - 'lts/*'
-  - '10'
-sudo: required
-dist: trusty
+node_js: 'lts/*'
 cache:
   directories:
     - node_modules
     - '$HOME/.electron'
     - '$HOME/.cache'
 script:
-  - npm run build
-branches:
-  only:
-    - master
-    - dev
+  - npm run dist
