@@ -1,7 +1,7 @@
 'use strict'
 
 import { createLocalStore } from './../renderer/utils/LocalStore'
-import { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron'
+import { app, BrowserWindow, ipcMain, Tray, nativeImage } from 'electron'
 
 const path = require('path')
 
@@ -12,9 +12,7 @@ const localStore = createLocalStore()
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
 if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path')
-    .join(__dirname, '/static')
-    .replace(/\\/g, '\\\\')
+  global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
 let mainWindow, tray
@@ -77,15 +75,37 @@ ipcMain.on('tray-icon-update', (event, image) => {
   tray.setImage(nativeImg)
 })
 
-function createTray() {
-  tray = new Tray(path.join(__static, 'icon.png'))
-  tray.setToolTip('Pomotroid\nClick to Restore')
-  tray.setContextMenu(Menu.buildFromTemplate([{ role: 'quit' }]))
-  tray.on('click', () => {
+function getWindowPosition() {
+  const windowBounds = mainWindow.getBounds()
+  const trayBounds = tray.getBounds()
+
+  // Center window horizontally below the tray icon
+  const x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2))
+
+  // Position window 4 pixels vertically below the tray icon
+  const y = Math.round(trayBounds.y + trayBounds.height + 4)
+
+  return { x: x, y: y }
+}
+
+function toggleWindow() {
+  if (mainWindow === null) {
+    createWindow()
+  } else {
     mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
-  })
-  tray.on('right-click', () => {
-    tray.popUpContextMenu()
+  }
+  const position = getWindowPosition()
+  mainWindow.setPosition(position.x, position.y, false)
+}
+
+function createTray() {
+//   const quitWindowMenuItem = { label: 'Exit', role: 'quit' }
+  tray = new Tray(path.join(__static, 'icon-18.png'))
+  tray.setToolTip('Pomotroid\nClick to Restore')
+  //   tray.setContextMenu(Menu.buildFromTemplate([showWindowMenuItem, quitWindowMenuItem]))
+  tray.on('click', () => {
+    toggleWindow()
+    // tray.popUpContextMenu()
   })
 }
 
@@ -99,8 +119,8 @@ function createWindow() {
     icon: path.join(__static, 'icon.png'),
     resizable: false,
     useContentSize: true,
-    width: 360,
-    height: 478,
+    width: 280,
+    height: 430,
     webPreferences: {
       backgroundThrottling: false,
       nodeIntegration: true

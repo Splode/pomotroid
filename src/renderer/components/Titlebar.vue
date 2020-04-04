@@ -107,6 +107,7 @@
 
 <script>
 import { ipcRenderer } from 'electron'
+import { EventBus } from '@/utils/EventBus'
 
 export default {
   computed: {
@@ -126,6 +127,7 @@ export default {
 
     winClose() {
       ipcRenderer.send('window-close')
+      EventBus.$emit('call-timer-reset')
     },
 
     winMinimize() {

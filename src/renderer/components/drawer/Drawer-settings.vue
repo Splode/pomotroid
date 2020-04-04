@@ -27,7 +27,6 @@
     </div>
     <div
       class="Setting-wrapper"
-      v-if="os === 'win32'"
     >
       <p class="Setting-title">Minimize to Tray</p>
       <div
