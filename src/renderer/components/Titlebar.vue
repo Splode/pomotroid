@@ -126,8 +126,8 @@ export default {
     },
 
     winClose() {
-      ipcRenderer.send('window-close')
       EventBus.$emit('call-timer-reset')
+      ipcRenderer.send('window-close')
     },
 
     winMinimize() {
