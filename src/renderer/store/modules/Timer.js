@@ -2,6 +2,7 @@ import { localStore } from './index'
 import { defaults } from './../../utils/LocalStore'
 
 const state = {
+  totalRounds: 1,
   round: 1,
   workRounds: parseInt(localStore.get('workRounds')),
   timeLongBreak: parseInt(localStore.get('timeLongBreak')),
@@ -12,6 +13,9 @@ const state = {
 }
 
 const getters = {
+  totalRounds() {
+    return state.totalRounds
+  },
   round() {
     return state.round
   },
@@ -38,6 +42,7 @@ const getters = {
 const mutations = {
   INCREMENT_ROUND(state) {
     state.round += 1
+    state.totalRounds += 1
   },
 
   RESET_ROUND(state) {
