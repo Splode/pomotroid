@@ -1,7 +1,7 @@
 <template>
   <section class="Container Footer">
     <div class="Round-wrapper">
-      <p>{{ round + '/' + workRounds }} <span class="total-rounds">{{ totalRounds }}</span></p>
+      <p>{{ round + '/' + workRounds }} <span class="total-rounds">({{ totalRounds }})</span></p>
       <p
         class="TextButton"
         @click="callForReset"
