@@ -1,7 +1,7 @@
 <template>
   <section class="Container Footer">
     <div class="Round-wrapper">
-      <p>{{ round + '/' + workRounds }}</p>
+      <p>{{ round + '/' + workRounds }} <span class="total-rounds">{{ totalRounds }}</span></p>
       <p
         class="TextButton"
         @click="callForReset"
@@ -146,6 +146,10 @@ export default {
       return this.$store.getters.round
     },
 
+    totalRounds() {
+      return this.$store.getters.totalRounds
+    },
+
     workRounds() {
       return this.$store.getters.workRounds
     },
@@ -274,5 +278,10 @@ export default {
       border-color: $colorRed;
     }
   }
+}
+
+.total-rounds {
+  color: #858c99;
+  font-size: .7rem;
 }
 </style>
