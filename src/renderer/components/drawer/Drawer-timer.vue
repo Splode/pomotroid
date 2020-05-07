@@ -106,7 +106,7 @@ export default {
       localTimeShortBreak: 0,
       localTimeWork: 0,
       localWorkRounds: 0,
-      maxTime: 60,
+      maxTime: 90,
       maxRounds: 12
     }
   },
