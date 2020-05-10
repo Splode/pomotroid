@@ -127,7 +127,7 @@
     "electron-builder": "^22.6.0",
     "electron-debug": "^3.0.1",
     "electron-devtools-installer": "^3.0.0",
-    "eslint": "^6.8.0",
+    "eslint": "^7.0.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-friendly-formatter": "^4.0.1",
     "eslint-loader": "^4.0.2",
