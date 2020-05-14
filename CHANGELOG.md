@@ -1,4 +1,24 @@
 
+<a name="v0.8.0"></a>
+## [v0.8.0](https://github.com/Splode/pomotroid/compare/v0.7.1...v0.8.0)
+
+> 2020-05-09
+
+### Chore
+
+* cf857b6 add git-chglog config
+* ef77bc9 configure travis-ci to build on macos
+
+### Docs
+
+* 856ab3e add CHANGELOG
+* c508944 update screenshots, assets
+
+### Fix
+
+* 59a1ca8 capitalize app title
+
+
 <a name="v0.7.1"></a>
 ## [v0.7.1](https://github.com/Splode/pomotroid/compare/v0.7.0...v0.7.1)
 
