@@ -4,6 +4,7 @@ import { defaults } from './../../utils/LocalStore'
 const state = {
   round: 1,
   workRounds: parseInt(localStore.get('workRounds')),
+  totalWorkRounds: 0,
   timeLongBreak: parseInt(localStore.get('timeLongBreak')),
   timeShortBreak: parseInt(localStore.get('timeShortBreak')),
   timeWork: parseInt(localStore.get('timeWork')),
@@ -17,6 +18,9 @@ const getters = {
   },
   workRounds() {
     return state.workRounds
+  },
+  totalWorkRounds() {
+    return state.totalWorkRounds
   },
   timeLongBreak() {
     return state.timeLongBreak
@@ -42,6 +46,10 @@ const mutations = {
 
   RESET_ROUND(state) {
     state.round = 1
+  },
+
+  INCREMENT_TOTAL_WORK_ROUNDS(state) {
+    state.totalWorkRounds += 1
   },
 
   RESET_DEFAULTS(state) {
@@ -83,6 +91,10 @@ const actions = {
 
   resetRound({ commit }) {
     commit('RESET_ROUND')
+  },
+
+  incrementTotalWorkRounds({ commit }) {
+    commit('INCREMENT_TOTAL_WORK_ROUNDS')
   },
 
   resetDefaults({ commit }) {

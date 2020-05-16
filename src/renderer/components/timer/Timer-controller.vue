@@ -29,10 +29,12 @@ export default {
     checkRound() {
       if (this.currentRound === 'work' && this.round >= this.workRounds) {
         this.$store.dispatch('setCurrentRound', 'long-break')
+        this.$store.dispatch('incrementTotalWorkRounds')
         EventBus.$emit('ready-long-break')
         console.log('long-break ready')
       } else if (this.currentRound === 'work') {
         this.$store.dispatch('setCurrentRound', 'short-break')
+        this.$store.dispatch('incrementTotalWorkRounds')
         EventBus.$emit('ready-short-break')
         console.log('short-break ready')
       } else if (this.currentRound === 'short-break') {

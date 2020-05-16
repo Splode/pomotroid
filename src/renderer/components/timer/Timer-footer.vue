@@ -1,7 +1,7 @@
 <template>
   <section class="Container Footer">
     <div class="Round-wrapper">
-      <p>{{ round + '/' + workRounds }}</p>
+      <p>{{ round + '/' + workRounds }} <span v-if="totalWorkRounds > 0" class="Total-rounds">({{ totalWorkRounds }})</span></p>
       <p
         class="TextButton"
         @click="callForReset"
@@ -150,6 +150,10 @@ export default {
       return this.$store.getters.workRounds
     },
 
+    totalWorkRounds() {
+      return this.$store.getters.totalWorkRounds
+    },
+
     volume() {
       return this.$store.getters.volume
     }
@@ -253,6 +257,11 @@ export default {
 
 .Round-wrapper {
   text-align: center;
+
+  .Total-rounds {
+    color: #858c99;
+    font-size: .7rem;
+  }
 }
 
 .Slider-wrapper {
