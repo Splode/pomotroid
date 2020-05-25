@@ -249,7 +249,7 @@ export default {
   text-align: center;
 
   .Total-rounds {
-    color: #858c99;
+    color: $colorBlueGrey--lighter;
     font-size: 0.7rem;
   }
 }

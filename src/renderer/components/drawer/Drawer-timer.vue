@@ -13,12 +13,11 @@
           class="Slider Slider--red"
           v-model.number="localTimeWork"
           @change="setTimeWork($event, 'work')"
-        >
+        />
         <div
           class="Slider-bar Slider-bar--red"
           :style="{ width: calcPercentage(localTimeWork, maxTime) + '%' }"
-        >
-        </div>
+        ></div>
       </div>
     </div>
 
@@ -34,12 +33,11 @@
           class="Slider Slider--green"
           v-model.number="localTimeShortBreak"
           @change="setTimeShortBreak($event, 'short-break')"
-        >
+        />
         <div
           class="Slider-bar Slider-bar--green"
           :style="{ width: calcPercentage(localTimeShortBreak, maxTime) + '%' }"
-        >
-        </div>
+        ></div>
       </div>
     </div>
 
@@ -55,12 +53,11 @@
           class="Slider Slider--blue"
           v-model.number="localTimeLongBreak"
           @change="setTimeLongBreak($event, 'long-break')"
-        >
+        />
         <div
           class="Slider-bar Slider-bar--blue"
           :style="{ width: calcPercentage(localTimeLongBreak, maxTime) + '%' }"
-        >
-        </div>
+        ></div>
       </div>
     </div>
 
@@ -76,20 +73,18 @@
           class="Slider"
           v-model.number="localWorkRounds"
           @change="setWorkRounds"
-        >
+        />
         <div
           class="Slider-bar Slider-bar--blueGrey"
-          :style="{ width: calcRoundPercentage(localWorkRounds, maxRounds) + '%' }"
-        >
-        </div>
+          :style="{
+            width: calcRoundPercentage(localWorkRounds, maxRounds) + '%'
+          }"
+        ></div>
       </div>
     </div>
 
     <div class="Setting-wrapper">
-      <p
-        class="TextButton"
-        @click="resetDefaults"
-      >Reset Defaults</p>
+      <p class="TextButton" @click="resetDefaults">Reset Defaults</p>
     </div>
   </div>
 </template>
@@ -211,7 +206,7 @@ export default {
 }
 
 .Setting-title {
-  color: $colorBlueGrey;
+  color: $colorBlueWhite;
   font-size: 14px;
   letter-spacing: 0.05em;
   margin-bottom: 8px;
@@ -224,5 +219,9 @@ export default {
   font-family: 'RobotoMono', monospace;
   font-size: 12px;
   padding: 2px 6px;
+}
+
+.TextButton {
+  color: $colorBlueWhite;
 }
 </style>

@@ -25,10 +25,7 @@
         :class="notifications ? 'is-active' : 'is-inactive'"
       ></div>
     </div>
-    <div
-      class="Setting-wrapper"
-      v-if="os === 'win32'"
-    >
+    <div class="Setting-wrapper" v-if="os === 'win32'">
       <p class="Setting-title">Minimize to Tray</p>
       <div
         class="Checkbox"
@@ -141,7 +138,7 @@ export default {
 }
 
 .Setting-title {
-  color: $colorBlueGrey;
+  color: $colorBlueGrey--lighter;
   font-size: 14px;
   letter-spacing: 0.05em;
 }
