@@ -4,12 +4,10 @@
     <div
       class="Icon-wrapper Icon-wrapper--titlebar Icon-wrapper--single"
       style="position: absolute;"
+      title="Settings"
       @click="toggleDrawer"
     >
-      <div
-        class="Menu-wrapper"
-        :class="drawerOpen ? 'is-collapsed' : ''"
-      >
+      <div class="Menu-wrapper" :class="drawerOpen ? 'is-collapsed' : ''">
         <div class="Menu-line"></div>
         <div class="Menu-line"></div>
       </div>
@@ -17,10 +15,7 @@
 
     <h1 class="Title">Pomotroid</h1>
 
-    <div
-      class="Icon-group"
-      style="position: absolute; top: 0; right: 0;"
-    >
+    <div class="Icon-group" style="position: absolute; top: 0; right: 0;">
       <div
         class="Icon-wrapper Icon-wrapper--titlebar Icon-wrapper--double--left"
         style="padding-left: 18px"
