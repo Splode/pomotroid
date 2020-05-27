@@ -93,10 +93,19 @@ export default class LocalStore {
  * @returns {object|*}
  */
 function parseDataFile(filePath, defaults) {
-  try {
-    return JSON.parse(fs.readFileSync(filePath))
-  } catch (error) {
-    logger.error(error)
+  if (!fs.existsSync(filePath)) {
+    fs.writeFile(filePath, JSON.stringify(defaults), err => {
+      if (err) {
+        logger.error(err)
+      }
+    })
     return defaults
+  } else {
+    try {
+      return JSON.parse(fs.readFileSync(filePath))
+    } catch (error) {
+      logger.error(error)
+      return defaults
+    }
   }
 }
