@@ -2,6 +2,7 @@ import electron from 'electron'
 import os from 'os'
 import path from 'path'
 import winston from 'winston'
+require('winston-daily-rotate-file')
 
 const app = electron.app || electron.remote.app
 app.setAppLogsPath(path.join(app.getPath('userData'), 'logs'))
@@ -14,14 +15,16 @@ const jsonWithTimestamp = winston.format.combine(
 const logger = winston.createLogger({
   defaultMeta: { hostname: os.hostname() },
   format: jsonWithTimestamp,
-  level: 'info',
   transports: [
     new winston.transports.File({
-      filename: path.join(userDataPath, 'error.log'),
-      level: 'error'
+      filename: path.join(userDataPath, 'pomotroid-error.log'),
+      level: 'error',
+      maxsize: 1000
     }),
-    new winston.transports.File({
-      filename: path.join(userDataPath, 'combined.log')
+    new winston.transports.DailyRotateFile({
+      filename: path.join(userDataPath, 'pomotroid-%DATE%.log'),
+      maxFiles: '14d',
+      maxSize: '20m'
     })
   ]
 })
