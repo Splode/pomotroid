@@ -10,7 +10,8 @@ const state = {
   alwaysOnTop: localStore.get('alwaysOnTop'),
   minToTray: localStore.get('minToTray'),
   notifications: localStore.get('notifications'),
-  os: process.platform
+  os: process.platform,
+  theme: localStore.get('theme')
 }
 
 const getters = {
@@ -40,6 +41,10 @@ const getters = {
 
   os() {
     return state.os
+  },
+
+  theme() {
+    return state.theme
   }
 }
 

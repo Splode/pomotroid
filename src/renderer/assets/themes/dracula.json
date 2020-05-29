@@ -1,0 +1,11 @@
+{
+  "--color-long-round": "purple",
+  "--color-short-round": "yellow",
+  "--color-focus-round": "blue",
+  "--color-background": "dodgerblue",
+  "--color-background-light": "mintcream",
+  "--color-background-lightest": "seagreen",
+  "--color-foreground": "black",
+  "--color-foreground-darker": "grey",
+  "--color-foreground-darkest": "pink"
+}

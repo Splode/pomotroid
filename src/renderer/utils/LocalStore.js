@@ -16,6 +16,7 @@ function generateSettings() {
     minToTray: false,
     notifications: true,
     workRounds: 4,
+    theme: null,
     timeLongBreak: 15,
     timeShortBreak: 5,
     timeWork: 25,
