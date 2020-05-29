@@ -75,7 +75,7 @@ export default {
 
 <style lang="scss" scoped>
 h2 {
-  color: $colorGreen;
+  color: var(--color-short-round);
   font-weight: 400;
   letter-spacing: 0.05em;
   margin: 0.5em 0;
@@ -98,7 +98,7 @@ section {
     cursor: pointer;
     transition: $transitionDefault;
     &:hover {
-      color: $colorGreen;
+      color: var(--color-short-round);
     }
   }
 }

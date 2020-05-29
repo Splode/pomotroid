@@ -227,14 +227,14 @@ export default {
 
 .Icon-wrapper {
   &:hover .Icon--muted path:first-child {
-    fill: $colorRed;
+    fill: var(--color-focus-round);
   }
   &:hover .Icon--mute path {
-    fill: $colorRed;
+    fill: var(--color-focus-round);
   }
   &:hover .Icon--skip polygon,
   &:hover .Icon--skip rect {
-    fill: $colorRed;
+    fill: var(--color-focus-round);
   }
 }
 
@@ -249,7 +249,7 @@ export default {
   text-align: center;
 
   .Total-rounds {
-    color: $colorBlueGrey--lighter;
+    color: var(--color-foreground-darker);
     font-size: 0.7rem;
   }
 }
@@ -263,14 +263,14 @@ export default {
 
 .Slider {
   &::-webkit-slider-runnable-track {
-    background-color: $colorBlueGrey;
+    background-color: var(--color-background-lightest);
   }
   &::-webkit-slider-thumb {
     margin-top: -7px;
     transition: $transitionDefault;
     &:hover {
-      background-color: $colorRed;
-      border-color: $colorRed;
+      background-color: var(--color-focus-round);
+      border-color: var(--color-focus-round);
     }
   }
 }

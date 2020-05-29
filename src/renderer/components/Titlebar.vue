@@ -134,13 +134,13 @@ export default {
 .Icon--close,
 .Icon--minimize {
   & line {
-    stroke: $colorBlueGrey;
+    stroke: var(--color-background-lightest);
     transition: $transitionDefault;
   }
 }
 
 .Menu-line {
-  background-color: $colorBlueGrey;
+  background-color: var(--color-background-lightest);
   display: inline-block;
   transition: $transitionDefault;
   width: 20px;
@@ -168,7 +168,7 @@ export default {
 }
 
 .Title {
-  color: $colorGreen;
+  color: var(--color-short-round);
   font-size: 1rem;
   font-weight: 200;
   padding-top: 18px;
@@ -186,11 +186,11 @@ export default {
 .Icon-wrapper--titlebar {
   -webkit-app-region: no-drag;
   &:hover .Menu-line {
-    background-color: $colorRed;
+    background-color: var(--color-focus-round);
   }
   &:hover .Icon--close line,
   &:hover .Icon--minimize line {
-    stroke: $colorRed;
+    stroke: var(--color-focus-round);
   }
 }
 </style>

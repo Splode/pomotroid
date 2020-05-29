@@ -36,7 +36,7 @@ export default {
 
 <style lang="scss" scoped>
 .Drawer {
-  background-color: $colorLightNavy;
+  background-color: var(--color-background-light);
   position: relative;
   width: 100%;
   height: calc(100% - 68px);

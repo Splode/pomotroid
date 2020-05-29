@@ -14,13 +14,13 @@
     outline: 0;
   }
   &::-webkit-slider-runnable-track {
-    background-color: $colorNavy;
+    background-color: var(--color-background);
     width: 100%;
     height: 3px;
   }
   &::-webkit-slider-thumb {
-    background-color: $colorBlueGrey;
-    border: 2px solid $colorBlueGrey;
+    background-color: var(--color-background-lightest);
+    border: 2px solid var(--color-background-lightest);
     border-radius: 100%;
     margin-top: -8px;
     width: 18px;
@@ -32,24 +32,24 @@
 
 .Slider--blue {
   &::-webkit-slider-thumb {
-    background-color: $colorBlue;
-    border: 2px solid $colorBlue;
+    background-color: var(--color-long-round);
+    border: 2px solid var(--color-long-round);
     -webkit-app-region: no-drag;
   }
 }
 
 .Slider--green {
   &::-webkit-slider-thumb {
-    background-color: $colorGreen;
-    border: 2px solid $colorGreen;
+    background-color: var(--color-short-round);
+    border: 2px solid var(--color-short-round);
     -webkit-app-region: no-drag;
   }
 }
 
 .Slider--red {
   &::-webkit-slider-thumb {
-    background-color: $colorRed;
-    border: 2px solid $colorRed;
+    background-color: var(--color-focus-round);
+    border: 2px solid var(--color-focus-round);
     -webkit-app-region: no-drag;
   }
 }
@@ -61,17 +61,17 @@
 }
 
 .Slider-bar--blue {
-  background-color: $colorBlue;
+  background-color: var(--color-long-round);
 }
 
 .Slider-bar--blueGrey {
-  background-color: $colorBlueGrey;
+  background-color: var(--color-background-lightest);
 }
 
 .Slider-bar--green {
-  background-color: $colorGreen;
+  background-color: var(--color-short-round);
 }
 
 .Slider-bar--red {
-  background-color: $colorRed;
+  background-color: var(--color-focus-round);
 }

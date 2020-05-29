@@ -330,7 +330,7 @@ export default {
 
 <style lang="scss" scoped>
 .Button {
-  border: 2px solid $colorBlueGrey;
+  border: 2px solid var(--color-background-lightest);
   border-radius: 100%;
   display: flex;
   justify-content: center;
@@ -339,12 +339,12 @@ export default {
   height: 50px;
   -webkit-app-region: no-drag;
   &:hover {
-    background-color: $colorLightNavy;
+    background-color: var(--color-background-light);
     & .Icon--pause line {
-      stroke: $colorRed;
+      stroke: var(--color-focus-round);
     }
     & .Icon--start polygon {
-      fill: $colorRed;
+      fill: var(--color-focus-round);
     }
   }
 }

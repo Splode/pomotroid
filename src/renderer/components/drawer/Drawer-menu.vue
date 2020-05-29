@@ -118,7 +118,7 @@ export default {
 
 <style lang="scss" scoped>
 .Drawer-menu {
-  background-color: $colorNavy;
+  background-color: var(--color-background);
   display: flex;
   position: absolute;
   bottom: 0;
@@ -136,13 +136,13 @@ export default {
   transition: $transitionDefault;
   height: 100%;
   &:hover {
-    background-color: $colorLightNavy;
+    background-color: var(--color-background-light);
   }
   // &:hover:not(.is-active) {
-  //   background-color: $colorLightNavy;
+  //   background-color: var(--color-background-light);
   // }
   &::after {
-    background-color: $colorRed;
+    background-color: var(--color-focus-round);
     content: '';
     margin: 0 auto;
     position: absolute;
@@ -165,7 +165,7 @@ export default {
   width: 45px;
   height: 100%;
   &.is-active {
-    border-bottom: 4px solid $colorRed;
+    border-bottom: 4px solid var(--color-focus-round);
   }
 }
 </style>

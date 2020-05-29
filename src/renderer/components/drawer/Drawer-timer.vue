@@ -206,14 +206,14 @@ export default {
 }
 
 .Setting-title {
-  color: $colorBlueWhite;
+  color: var(--color-foreground-darkest);
   font-size: 14px;
   letter-spacing: 0.05em;
   margin-bottom: 8px;
 }
 
 .Setting-value {
-  background-color: $colorNavy;
+  background-color: var(--color-background);
   border-radius: 4px;
   display: inline-block;
   font-family: 'RobotoMono', monospace;
@@ -222,6 +222,6 @@ export default {
 }
 
 .TextButton {
-  color: $colorBlueWhite;
+  color: var(--color-foreground-darkest);
 }
 </style>
