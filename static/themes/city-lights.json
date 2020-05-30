@@ -1,0 +1,14 @@
+{
+  "name": "City Lights",
+  "colors": {
+    "--color-long-round": "#6796E6",
+    "--color-short-round": "#33CED8",
+    "--color-focus-round": "#D470CB",
+    "--color-background": "#171D23",
+    "--color-background-light": "#1d252c",
+    "--color-background-lightest": "#718CA1",
+    "--color-foreground": "#b7c5d3",
+    "--color-foreground-darker": "#718CA1",
+    "--color-foreground-darkest": "#9EFFFF"
+  }
+}
