@@ -60,7 +60,7 @@ class Themer {
    */
   _load() {
     // TODO check dir existence
-    const dir = join(__dirname, './../assets/themes')
+    const dir = join(__static, 'themes')
     const files = readdirSync(dir)
     files.forEach(f => {
       const filename = f.replace('.json', '')
