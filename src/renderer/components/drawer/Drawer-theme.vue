@@ -2,14 +2,37 @@
   <div class="Container">
     <p class="Drawer-heading">Themes</p>
     <div
-      v-for="(theme, i) in themer.themes"
+      v-for="(t, i) in themer.themes"
       :key="i"
       class="Setting-wrapper"
-      @click="selectTheme(getThemeName(theme))"
+      :style="
+        `background-color: ${themer.getThemeValue(t, '--color-background')}`
+      "
+      @click="selectTheme(themer.getThemeName(t))"
     >
-      <p class="Setting-title">
-        {{ titleCase(getThemeName(theme)) }}
+      <p
+        class="Setting-title"
+        :style="
+          `color: ${themer.getThemeValue(t, '--color-background-lightest')}`
+        "
+      >
+        {{ titleCase(themer.getThemeName(t)) }}
       </p>
+      <transition name="fade">
+        <svg
+          v-if="theme === themer.getThemeName(t)"
+          xmlns="http://www.w3.org/2000/svg"
+          height="24"
+          viewBox="0 0 24 24"
+          width="24"
+        >
+          <path d="M0 0h24v24H0z" fill="none" />
+          <path
+            d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"
+            fill="var(--color-focus-round)"
+          />
+        </svg>
+      </transition>
     </div>
   </div>
 </template>
@@ -32,12 +55,10 @@ export default {
   },
 
   methods: {
-    getThemeName(theme) {
-      return Object.keys(theme)[0]
-    },
     selectTheme(themeName) {
       const payload = { key: 'theme', val: themeName }
       this.$store.dispatch('setSetting', payload)
+      this.$store.dispatch('setViewState', payload)
       this.themer.apply(themeName)
     },
     titleCase(string) {
@@ -49,16 +70,17 @@ export default {
 
 <style lang="scss" scoped>
 .Setting-wrapper {
-  background-color: var(--color-background);
+  align-items: center;
+  border: 2px solid var(--color-background);
   border-radius: 4px;
   display: flex;
   justify-content: space-between;
   margin: 12px 0;
-  padding: 12px;
+  padding: 0 12px;
+  min-height: 48px;
 }
 
 .Setting-title {
-  color: var(--color-foreground-darker);
   font-size: 14px;
   letter-spacing: 0.05em;
 }
