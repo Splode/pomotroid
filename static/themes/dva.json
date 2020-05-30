@@ -1,14 +1,14 @@
 {
-  "name": "D.VA",
+  "name": "D.Va",
   "colors": {
-    "--color-long-round": "#279ee6",
+    "--color-long-round": "#26adff",
     "--color-short-round": "#0de2c9",
-    "--color-focus-round": "#d360e0",
-    "--color-background": "#2d2731",
-    "--color-background-light": "#332d38",
-    "--color-background-lightest": "#e8d3ea",
-    "--color-foreground": "#f8f8f2",
+    "--color-focus-round": "#ec57fd",
+    "--color-background": "#2e2733",
+    "--color-background-light": "#35303a",
+    "--color-background-lightest": "#aba3b3",
+    "--color-foreground": "#f2f8f7",
     "--color-foreground-darker": "#e8d3ea",
-    "--color-foreground-darkest": "#afe2dc"
+    "--color-foreground-darkest": "#d5bbd8"
   }
 }
