@@ -1,9 +1,6 @@
 <template>
   <div class="Drawer">
-    <transition
-      name="fade"
-      mode="out-in"
-    >
+    <transition name="fade" mode="out-in">
       <component :is="currentDrawer" />
     </transition>
     <app-drawer-menu />
