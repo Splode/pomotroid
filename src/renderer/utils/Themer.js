@@ -16,15 +16,43 @@ class Themer {
    * Apply a theme with the given name. The name should correspond to the
    * filename _without_ its extension. For example, 'dracula'.
    *
-   * @param string themeName The name of the theme.
+   * @param string themeName - The name of the theme.
    */
   apply(themeName) {
-    const theme = this.themes.find(e => {
-      return Object.keys(e)[0] === themeName
-    })[themeName]
+    const theme = this.getTheme(themeName)
     for (const k in theme) {
       document.documentElement.style.setProperty(k, theme[k])
     }
+  }
+
+  /**
+   * Get a theme by name.
+   *
+   * @param string themeName - The name of the theme.
+   */
+  getTheme(themeName) {
+    return this.themes.find(e => {
+      return Object.keys(e)[0] === themeName
+    })[themeName]
+  }
+
+  /**
+   * Get the name of a given theme.
+   *
+   * @param {object} theme - The theme.
+   */
+  getThemeName(theme) {
+    return Object.keys(theme)[0]
+  }
+
+  /**
+   * Get the value of a given theme's property.
+   *
+   * @param {object} theme - The theme.
+   * @param string value - The theme key to query.
+   */
+  getThemeValue(theme, value) {
+    return theme[this.getThemeName(theme)][value]
   }
 
   /**
