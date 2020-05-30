@@ -1,0 +1,14 @@
+{
+  "name": "Gruvbox",
+  "colors": {
+    "--color-long-round": "#83A598",
+    "--color-short-round": "#8EC07C",
+    "--color-focus-round": "#D3869B",
+    "--color-background": "#282828",
+    "--color-background-light": "#3c3836",
+    "--color-background-lightest": "#FABD2F",
+    "--color-foreground": "#ebdbb2",
+    "--color-foreground-darker": "#bdae93",
+    "--color-foreground-darkest": "#928374"
+  }
+}
