@@ -6,7 +6,7 @@ import { join } from 'path'
 /**
  * Themer provides custom application styling.
  */
-export default class Themer {
+class Themer {
   constructor() {
     this.themes = []
     this._load()
@@ -43,3 +43,5 @@ export default class Themer {
     })
   }
 }
+
+export default new Themer()

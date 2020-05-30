@@ -16,7 +16,7 @@ import appNotification from '@/components/notification/Notification'
 import appNotificationWin from '@/components/notification/Notification-win'
 import appTimer from '@/components/timer/Timer'
 import appTitlebar from '@/components/Titlebar'
-import Themer from '@/utils/Themer'
+import themer from '@/utils/Themer'
 
 export default {
   name: 'pomotroid',
@@ -53,9 +53,8 @@ export default {
   },
 
   created() {
-    const t = new Themer()
-    // if (!this.theme || this.theme === 'pomotroid') return
-    t.apply('dracula')
+    if (!this.theme || this.theme === 'pomotroid') return
+    themer.apply(this.theme)
   }
 }
 </script>
