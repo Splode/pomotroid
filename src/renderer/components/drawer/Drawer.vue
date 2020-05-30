@@ -14,6 +14,7 @@
 import appDrawerMenu from '@/components/drawer/Drawer-menu'
 import appDrawerAbout from '@/components/drawer/Drawer-about'
 import appDrawerSettings from '@/components/drawer/Drawer-settings'
+import appDrawerTheme from '@/components/drawer/Drawer-theme'
 import appDrawerTimer from '@/components/drawer/Drawer-timer'
 
 export default {
@@ -23,6 +24,7 @@ export default {
     appDrawerMenu,
     appDrawerAbout,
     appDrawerSettings,
+    appDrawerTheme,
     appDrawerTimer
   },
 
