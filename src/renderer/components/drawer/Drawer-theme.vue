@@ -6,7 +6,10 @@
       :key="i"
       class="Setting-wrapper"
       :style="
-        `background-color: ${themer.getThemeValue(t, '--color-background')}`
+        `background-color: ${themer.getThemeValue(
+          t,
+          '--color-background'
+        )}; border-color: ${themer.getThemeValue(t, '--color-background-lightest')}`
       "
       @click="selectTheme(themer.getThemeName(t))"
     >
@@ -71,13 +74,13 @@ export default {
 <style lang="scss" scoped>
 .Setting-wrapper {
   align-items: center;
-  border: 2px solid var(--color-background);
-  border-radius: 4px;
+  border-left: 3px solid;
+  border-radius: 0 4px 4px 0;
   display: flex;
   justify-content: space-between;
   margin: 12px 0;
-  padding: 0 12px;
   min-height: 48px;
+  padding: 0 12px;
 }
 
 .Setting-title {
