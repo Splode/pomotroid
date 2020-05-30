@@ -57,16 +57,31 @@ export default {
 }
 
 function createTrayImage(state, elapsed, total) {
+  const bgVar = document.documentElement.style.getPropertyValue(
+    '--color-background'
+  )
+  const focusVar = document.documentElement.style.getPropertyValue(
+    '--color-focus-round'
+  )
+  const shortVar = document.documentElement.style.getPropertyValue(
+    '--color-short-round'
+  )
+  const longVar = document.documentElement.style.getPropertyValue(
+    '--color-long-round'
+  )
   const size = 32
-  const bgColor = '#2F384B'
-  const workColor = '#FF4E4D'
-  const shortBreakColor = '#05EB8B'
-  const longBreakColor = '#0BBCDA'
+  const bgColor = !bgVar ? '#2F384B' : bgVar
+  const workColor = !focusVar ? '#FF4E4D' : focusVar
+  const shortBreakColor = !shortVar ? '#05EB8B' : shortVar
+  const longBreakColor = !longVar ? '#0BBCDA' : longVar
   const arcRadiusRatio = 0.55
   const arcLineWidthRatio = 0.3
 
   const remainingTime = 1 - elapsed / total
-  const arcColor = state === 'short-break' ? shortBreakColor : state === 'long-break' ? longBreakColor : workColor
+  const arcColor =
+    state === 'short-break' ? shortBreakColor : state === 'long-break'
+      ? longBreakColor
+      : workColor
   const outerRadius = size / 2
   const innerRadius = outerRadius * arcRadiusRatio
   const lineWidth = outerRadius * arcLineWidthRatio

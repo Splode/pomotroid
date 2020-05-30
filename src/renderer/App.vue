@@ -54,7 +54,7 @@ export default {
 
   created() {
     const t = new Themer()
-    if (!this.theme || this.theme === 'pomotroid') return
+    // if (!this.theme || this.theme === 'pomotroid') return
     t.apply('dracula')
   }
 }
