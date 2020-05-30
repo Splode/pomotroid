@@ -1,0 +1,14 @@
+{
+  "name": "D.VA",
+  "colors": {
+    "--color-long-round": "#279ee6",
+    "--color-short-round": "#0de2c9",
+    "--color-focus-round": "#d360e0",
+    "--color-background": "#2d2731",
+    "--color-background-light": "#332d38",
+    "--color-background-lightest": "#e8d3ea",
+    "--color-foreground": "#f8f8f2",
+    "--color-foreground-darker": "#e8d3ea",
+    "--color-foreground-darkest": "#afe2dc"
+  }
+}

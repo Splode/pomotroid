@@ -9,7 +9,10 @@
         `background-color: ${themer.getThemeValue(
           t,
           '--color-background'
-        )}; border-color: ${themer.getThemeValue(t, '--color-background-lightest')}`
+        )}; border-color: ${themer.getThemeValue(
+          t,
+          '--color-background-lightest'
+        )}`
       "
       @click="selectTheme(themer.getThemeName(t))"
     >
@@ -19,7 +22,7 @@
           `color: ${themer.getThemeValue(t, '--color-background-lightest')}`
         "
       >
-        {{ titleCase(themer.getThemeName(t)) }}
+        {{ themer.getThemeName(t) }}
       </p>
       <transition name="fade">
         <svg
@@ -63,9 +66,6 @@ export default {
       this.$store.dispatch('setSetting', payload)
       this.$store.dispatch('setViewState', payload)
       this.themer.apply(themeName)
-    },
-    titleCase(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1)
     }
   }
 }

@@ -20,8 +20,8 @@ class Themer {
    */
   apply(themeName) {
     const theme = this.getTheme(themeName)
-    for (const k in theme) {
-      document.documentElement.style.setProperty(k, theme[k])
+    for (const k in theme.colors) {
+      document.documentElement.style.setProperty(k, theme.colors[k])
     }
   }
 
@@ -32,8 +32,8 @@ class Themer {
    */
   getTheme(themeName) {
     return this.themes.find(e => {
-      return Object.keys(e)[0] === themeName
-    })[themeName]
+      return e.name === themeName
+    })
   }
 
   /**
@@ -42,17 +42,17 @@ class Themer {
    * @param {object} theme - The theme.
    */
   getThemeName(theme) {
-    return Object.keys(theme)[0]
+    return theme.name
   }
 
   /**
-   * Get the value of a given theme's property.
+   * Get the value of a given theme's color property.
    *
    * @param {object} theme - The theme.
    * @param string value - The theme key to query.
    */
   getThemeValue(theme, value) {
-    return theme[this.getThemeName(theme)][value]
+    return theme.colors[value]
   }
 
   /**
@@ -63,10 +63,7 @@ class Themer {
     const dir = join(__static, 'themes')
     const files = readdirSync(dir)
     files.forEach(f => {
-      const filename = f.replace('.json', '')
-      const data = JSON.parse(readFileSync(join(dir, f)))
-      const theme = {}
-      theme[filename] = data
+      const theme = JSON.parse(readFileSync(join(dir, f)))
       this.themes.push(theme)
     })
   }
