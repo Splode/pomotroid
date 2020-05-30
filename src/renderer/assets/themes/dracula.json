@@ -1,11 +1,11 @@
 {
-  "--color-long-round": "purple",
-  "--color-short-round": "yellow",
-  "--color-focus-round": "blue",
-  "--color-background": "dodgerblue",
-  "--color-background-light": "mintcream",
-  "--color-background-lightest": "seagreen",
-  "--color-foreground": "black",
-  "--color-foreground-darker": "grey",
-  "--color-foreground-darkest": "pink"
+  "--color-long-round": "#8be9fd",
+  "--color-short-round": "#50fa7b",
+  "--color-focus-round": "#ff5555",
+  "--color-background": "#282a36",
+  "--color-background-light": "#363846",
+  "--color-background-lightest": "#bd93f9",
+  "--color-foreground": "#f8f8f2",
+  "--color-foreground-darker": "#ff79c6",
+  "--color-foreground-darkest": "#bd93f9"
 }

@@ -17,7 +17,7 @@
       >
         <g>
           <circle
-            fill="#2F384B"
+            fill="var(--color-background)"
             cx="128"
             cy="128"
             r="126.81"
@@ -25,7 +25,7 @@
 
           <circle
             fill="none"
-            stroke="#FF4E4D"
+            stroke="var(--color-focus-round)"
             stroke-width="40"
             stroke-linecap="round"
             stroke-miterlimit="10"
