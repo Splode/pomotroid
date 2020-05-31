@@ -1,0 +1,15 @@
+{
+  "name": "GitHub",
+  "colors": {
+    "--color-long-round": "#6F42C1",
+    "--color-short-round": "#005CC5",
+    "--color-focus-round": "#CD3131",
+    "--color-background": "#FFFFFF",
+    "--color-background-light": "#f6f8fa",
+    "--color-background-lightest": "#24292e",
+    "--color-foreground": "#24292e",
+    "--color-foreground-darker": "#586069",
+    "--color-foreground-darkest": "#80878e",
+    "--color-accent": "#005CC5"
+  }
+}
