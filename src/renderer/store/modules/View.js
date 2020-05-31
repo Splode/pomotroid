@@ -11,7 +11,7 @@ const state = {
   minToTray: localStore.get('minToTray'),
   notifications: localStore.get('notifications'),
   os: process.platform,
-  theme: localStore.get('theme')
+  theme: localStore.get('theme') || 'Pomotroid'
 }
 
 const getters = {
