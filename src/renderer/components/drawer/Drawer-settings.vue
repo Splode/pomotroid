@@ -116,14 +116,14 @@ export default {
   width: 16px;
   height: 16px;
   &:hover {
-    border-color: var(--color-focus-round);
+    border-color: var(--color-accent);
   }
   &.is-active {
-    background-color: var(--color-focus-round);
+    background-color: var(--color-accent);
     border-color: var(--color-background);
     &:hover {
       background-color: var(--color-background);
-      border-color: var(--color-focus-round);
+      border-color: var(--color-accent);
     }
   }
 }

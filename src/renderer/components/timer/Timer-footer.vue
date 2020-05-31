@@ -236,14 +236,14 @@ export default {
 
 .Icon-wrapper {
   &:hover .Icon--muted path:first-child {
-    fill: var(--color-focus-round);
+    fill: var(--color-accent);
   }
   &:hover .Icon--mute path {
-    fill: var(--color-focus-round);
+    fill: var(--color-accent);
   }
   &:hover .Icon--skip polygon,
   &:hover .Icon--skip rect {
-    fill: var(--color-focus-round);
+    fill: var(--color-accent);
   }
 }
 
@@ -278,8 +278,8 @@ export default {
     margin-top: -7px;
     transition: $transitionDefault;
     &:hover {
-      background-color: var(--color-focus-round);
-      border-color: var(--color-focus-round);
+      background-color: var(--color-accent);
+      border-color: var(--color-accent);
     }
   }
 }

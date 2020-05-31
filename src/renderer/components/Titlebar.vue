@@ -22,7 +22,6 @@
         @click="winMinimize"
       >
         <!-- minimize -->
-        <!-- <div class="Icon-wrapper"> -->
         <svg
           version="1.2"
           baseProfile="tiny"
@@ -49,7 +48,6 @@
             y2="1"
           />
         </svg>
-        <!-- </div> -->
       </div>
       <div
         class="Icon-wrapper Icon-wrapper--titlebar Icon-wrapper--double--right"
@@ -57,7 +55,6 @@
         @click="winClose"
       >
         <!-- close -->
-        <!-- <div class="Icon-wrapper"> -->
         <svg
           version="1.2"
           baseProfile="tiny"
@@ -94,7 +91,6 @@
             y2="11.6"
           />
         </svg>
-        <!-- </div> -->
       </div>
     </div>
   </nav>
@@ -186,11 +182,13 @@ export default {
 .Icon-wrapper--titlebar {
   -webkit-app-region: no-drag;
   &:hover .Menu-line {
-    background-color: var(--color-focus-round);
+    background-color: var(--color-accent);
   }
-  &:hover .Icon--close line,
-  &:hover .Icon--minimize line {
+  &:hover .Icon--close line {
     stroke: var(--color-focus-round);
+  }
+  &:hover .Icon--minimize line {
+    stroke: var(--color-accent);
   }
 }
 </style>

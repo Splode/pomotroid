@@ -222,6 +222,6 @@ export default {
 }
 
 .TextButton {
-  color: var(--color-foreground-darkest);
+  color: var(--color-foreground-darker);
 }
 </style>

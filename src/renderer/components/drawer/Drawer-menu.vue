@@ -160,11 +160,8 @@ export default {
   &:hover {
     background-color: var(--color-background-light);
   }
-  // &:hover:not(.is-active) {
-  //   background-color: var(--color-background-light);
-  // }
   &::after {
-    background-color: var(--color-focus-round);
+    background-color: var(--color-accent);
     content: '';
     margin: 0 auto;
     position: absolute;
@@ -187,7 +184,7 @@ export default {
   width: 45px;
   height: 100%;
   &.is-active {
-    border-bottom: 4px solid var(--color-focus-round);
+    border-bottom: 4px solid var(--color-accent);
   }
 }
 </style>

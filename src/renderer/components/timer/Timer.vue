@@ -347,10 +347,10 @@ export default {
   &:hover {
     background-color: var(--color-background-light);
     & .Icon--pause line {
-      stroke: var(--color-focus-round);
+      stroke: var(--color-accent);
     }
     & .Icon--start polygon {
-      fill: var(--color-focus-round);
+      fill: var(--color-accent);
     }
   }
 }
