@@ -1,0 +1,15 @@
+{
+  "name": "Spandex",
+  "colors": {
+    "--color-long-round": "#00dcff",
+    "--color-short-round": "#09ffbb",
+    "--color-focus-round": "#c92fdc",
+    "--color-background": "#181a1b",
+    "--color-background-light": "#212425",
+    "--color-background-lightest": "#5e696d",
+    "--color-foreground": "#e0e3e6",
+    "--color-foreground-darker": "#b9bdc1",
+    "--color-foreground-darkest": "#9da2a7",
+    "--color-accent": "#f0ff09"
+  }
+}
