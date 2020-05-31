@@ -6,9 +6,10 @@
     "--color-focus-round": "#f42c3e",
     "--color-background": "#1C1D26",
     "--color-background-light": "#21222D",
-    "--color-background-lightest": "#d79921",
+    "--color-background-lightest": "#f9f5d7",
     "--color-foreground": "#f2e5bc",
     "--color-foreground-darker": "#f9f5d7",
-    "--color-foreground-darkest": "#ebdbb2"
+    "--color-foreground-darkest": "#ebdbb2",
+    "--color-accent": "#d79921"
   }
 }
