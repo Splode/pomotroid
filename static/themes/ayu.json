@@ -5,11 +5,11 @@
     "--color-short-round": "#BAE67E",
     "--color-focus-round": "#F28779",
     "--color-background": "#1F2430",
-    "--color-background-light": "#232834",
+    "--color-background-light": "#2a3546",
     "--color-background-lightest": "#707a8c",
     "--color-foreground": "#CBCCC6",
-    "--color-foreground-darker": "#707a8c",
-    "--color-foreground-darkest": "#586070",
+    "--color-foreground-darker": "#CBCCC6",
+    "--color-foreground-darkest": "#5ccfe6",
     "--color-accent": "#FFCC66"
   }
 }
