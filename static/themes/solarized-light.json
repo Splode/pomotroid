@@ -1,0 +1,15 @@
+{
+  "name": "Solarized Light",
+  "colors": {
+    "--color-long-round": "#2AA198",
+    "--color-short-round": "#859900",
+    "--color-focus-round": "#B58900",
+    "--color-background": "#FDF6E3",
+    "--color-background-light": "#EEE8D5",
+    "--color-background-lightest": "#657b83",
+    "--color-foreground": "#586e75",
+    "--color-foreground-darker": "#93A1A1",
+    "--color-foreground-darkest": "#AC9D57",
+    "--color-accent": "#268BD2"
+  }
+}

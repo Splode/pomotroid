@@ -16,16 +16,11 @@
         xml:space="preserve"
       >
         <g>
-          <circle
-            fill="#2F384B"
-            cx="128"
-            cy="128"
-            r="126.81"
-          />
+          <circle fill="var(--color-background)" cx="128" cy="128" r="126.81" />
 
           <circle
             fill="none"
-            stroke="#FF4E4D"
+            stroke="var(--color-focus-round)"
             stroke-width="40"
             stroke-linecap="round"
             stroke-miterlimit="10"
@@ -36,14 +31,16 @@
         </g>
       </svg>
       <h2>Pomotroid</h2>
-      <p class="label">Version: {{ version }} <span
-          class="link"
-          @click="openUrl(releaseUrl)"
-        >(release notes)</span></p>
+      <p class="label">
+        Version: {{ version }}
+        <span class="link" @click="openUrl(releaseUrl)">(release notes)</span>
+      </p>
       <p
         class="label link"
         @click="openUrl('https://github.com/splode/pomotroid')"
-      >License and Documentation</p>
+      >
+        License and Documentation
+      </p>
     </section>
   </div>
 </template>
@@ -75,7 +72,7 @@ export default {
 
 <style lang="scss" scoped>
 h2 {
-  color: $colorGreen;
+  color: var(--color-short-round);
   font-weight: 400;
   letter-spacing: 0.05em;
   margin: 0.5em 0;
@@ -98,7 +95,7 @@ section {
     cursor: pointer;
     transition: $transitionDefault;
     &:hover {
-      color: $colorGreen;
+      color: var(--color-accent);
     }
   }
 }

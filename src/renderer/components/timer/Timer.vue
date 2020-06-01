@@ -33,7 +33,10 @@
               height="15px"
               class="Icon--start"
             >
-              <polygon fill="#F6F2EB" points="0,0 0,15 7.6,7.4 " />
+              <polygon
+                fill="var(--color-foreground)"
+                points="0,0 0,15 7.6,7.4 "
+              />
             </svg>
           </div>
         </div>
@@ -56,7 +59,10 @@
               xml:space="preserve"
               height="15px"
             >
-              <polygon fill="#F6F2EB" points="0,0 0,15 7.6,7.4 " />
+              <polygon
+                fill="var(--color-foreground)"
+                points="0,0 0,15 7.6,7.4 "
+              />
             </svg>
           </div>
         </div>
@@ -82,7 +88,7 @@
             >
               <line
                 fill="none"
-                stroke="#F6F2EB"
+                stroke="var(--color-foreground)"
                 stroke-width="3"
                 stroke-linecap="round"
                 stroke-miterlimit="10"
@@ -93,7 +99,7 @@
               />
               <line
                 fill="none"
-                stroke="#F6F2EB"
+                stroke="var(--color-foreground)"
                 stroke-width="3"
                 stroke-linecap="round"
                 stroke-miterlimit="10"
@@ -348,7 +354,7 @@ export default {
 
 <style lang="scss" scoped>
 .Button {
-  border: 2px solid $colorBlueGrey;
+  border: 2px solid var(--color-background-lightest);
   border-radius: 100%;
   display: flex;
   justify-content: center;
@@ -357,12 +363,12 @@ export default {
   height: 50px;
   -webkit-app-region: no-drag;
   &:hover {
-    background-color: $colorLightNavy;
+    background-color: var(--color-background-light);
     & .Icon--pause line {
-      stroke: $colorRed;
+      stroke: var(--color-accent);
     }
     & .Icon--start polygon {
-      fill: $colorRed;
+      fill: var(--color-accent);
     }
   }
 }

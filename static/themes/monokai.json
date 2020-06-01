@@ -1,0 +1,15 @@
+{
+  "name": "Monokai",
+  "colors": {
+    "--color-long-round": "#66d9ef",
+    "--color-short-round": "#a6e22e",
+    "--color-focus-round": "#f92672",
+    "--color-background": "#272822",
+    "--color-background-light": "#393a34",
+    "--color-background-lightest": "#9c9e92",
+    "--color-foreground": "#FDF9F3",
+    "--color-foreground-darker": "#dad2c6",
+    "--color-foreground-darkest": "#d8cbb6",
+    "--color-accent": "#AE81FF"
+  }
+}

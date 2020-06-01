@@ -1,0 +1,15 @@
+{
+  "name": "One Dark Pro",
+  "colors": {
+    "--color-long-round": "#61AFEF",
+    "--color-short-round": "#98C379",
+    "--color-focus-round": "#E06C75",
+    "--color-background": "#282c34",
+    "--color-background-light": "#3b4048",
+    "--color-background-lightest": "#7f848e",
+    "--color-foreground": "#abb2bf",
+    "--color-foreground-darker": "#abb2bf",
+    "--color-foreground-darkest": "#E5C07B",
+    "--color-accent": "#C678DD"
+  }
+}

@@ -124,28 +124,28 @@ export default {
 
 <style lang="scss" scoped>
 .Checkbox {
-  background-color: $colorNavy;
-  border: 2px solid $colorBlueGrey;
+  background-color: var(--color-background);
+  border: 2px solid var(--color-background-lightest);
   border-radius: 100%;
   display: inline-block;
   transition: $transitionDefault;
   width: 16px;
   height: 16px;
   &:hover {
-    border-color: $colorRed;
+    border-color: var(--color-accent);
   }
   &.is-active {
-    background-color: $colorRed;
-    border-color: $colorNavy;
+    background-color: var(--color-accent);
+    border-color: var(--color-background);
     &:hover {
-      background-color: $colorNavy;
-      border-color: $colorRed;
+      background-color: var(--color-background);
+      border-color: var(--color-accent);
     }
   }
 }
 
 .Setting-wrapper {
-  background-color: $colorNavy;
+  background-color: var(--color-background);
   border-radius: 4px;
   display: flex;
   justify-content: space-between;
@@ -154,7 +154,7 @@ export default {
 }
 
 .Setting-title {
-  color: $colorBlueGrey--lighter;
+  color: var(--color-foreground-darker);
   font-size: 14px;
   letter-spacing: 0.05em;
 }

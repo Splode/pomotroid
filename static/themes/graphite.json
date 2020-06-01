@@ -1,0 +1,15 @@
+{
+  "name": "Graphite",
+  "colors": {
+    "--color-long-round": "#505154",
+    "--color-short-round": "#505154",
+    "--color-focus-round": "#505154",
+    "--color-background": "#ebebea",
+    "--color-background-light": "#fcfcfc",
+    "--color-background-lightest": "#adafb1",
+    "--color-foreground": "#27292d",
+    "--color-foreground-darker": "#4a4e56",
+    "--color-foreground-darkest": "#656a75",
+    "--color-accent": "#08568c"
+  }
+}

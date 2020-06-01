@@ -1,0 +1,15 @@
+{
+  "name": "Ayu",
+  "colors": {
+    "--color-long-round": "#5CCFE6",
+    "--color-short-round": "#BAE67E",
+    "--color-focus-round": "#F28779",
+    "--color-background": "#1F2430",
+    "--color-background-light": "#2a3546",
+    "--color-background-lightest": "#707a8c",
+    "--color-foreground": "#CBCCC6",
+    "--color-foreground-darker": "#CBCCC6",
+    "--color-foreground-darkest": "#5ccfe6",
+    "--color-accent": "#FFCC66"
+  }
+}
