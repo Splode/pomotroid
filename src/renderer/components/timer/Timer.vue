@@ -121,6 +121,7 @@ import appTimerController from '@/components/timer/Timer-controller'
 import appTimerDial from '@/components/timer/Timer-dial'
 import appTimerFooter from '@/components/timer/Timer-footer'
 import { EventBus } from '@/utils/EventBus'
+import { logger } from '@/utils/logger'
 
 export default {
   components: {
@@ -145,6 +146,16 @@ export default {
     // store getters
     currentRound() {
       return this.$store.getters.currentRound
+    },
+
+    currentRoundDisplay() {
+      if (this.currentRound === 'work') {
+        return 'focus round'
+      } else if (this.currentRound === 'short-break') {
+        return 'short break'
+      } else if (this.currentRound === 'long-break') {
+        return 'long break'
+      }
     },
 
     timeLongBreak() {
@@ -219,9 +230,14 @@ export default {
         case 'reset':
           EventBus.$emit('timer-reset')
           break
+        case 'resume':
+          EventBus.$emit('timer-started')
+          this.currentTime = message.data.elapsed
+          break
         case 'start':
           EventBus.$emit('timer-started')
           this.currentTime = message.data.elapsed
+          logger.info(`${this.currentRoundDisplay} round started`)
           break
         case 'tick':
           this.currentTime = message.data.elapsed
@@ -264,6 +280,7 @@ export default {
       if (!this.timerWorker) return
       this.timerWorker.postMessage({ event: 'pause' })
       this.timerActive = !this.timerActive
+      logger.info(`${this.currentRoundDisplay} round paused`)
     },
 
     resetTimer() {
@@ -308,6 +325,7 @@ export default {
 
     EventBus.$on('call-timer-reset', () => {
       this.resetTimer()
+      logger.info(`${this.currentRoundDisplay} round reset`)
     })
 
     // Bind event listener to Space key

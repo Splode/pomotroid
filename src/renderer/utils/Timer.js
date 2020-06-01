@@ -49,7 +49,7 @@ export default class Timer extends EventTarget {
     if (!this.timerInt) {
       this.start()
       this.dispatchEvent(
-        new CustomEvent('start', {
+        new CustomEvent('resume', {
           detail: { time: this.time, totalSeconds: this.totalSeconds }
         })
       )

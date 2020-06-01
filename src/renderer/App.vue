@@ -1,10 +1,7 @@
 <template>
   <div id="app">
     <app-titlebar />
-    <transition
-      name="slide-left"
-      mode="out-in"
-    >
+    <transition name="slide-left" mode="out-in">
       <app-drawer v-if="drawerOpen" />
     </transition>
     <app-timer />

@@ -1,3 +1,4 @@
+import { logger } from './../utils/logger'
 const electron = require('electron')
 const fs = require('fs')
 const path = require('path')
@@ -78,7 +79,7 @@ export default class LocalStore {
     this.data[key] = val
     fs.writeFileSync(this.path, JSON.stringify(this.data), err => {
       if (err) {
-        console.log(err)
+        logger.error(err)
       }
     })
   }
@@ -93,9 +94,19 @@ export default class LocalStore {
  * @returns {object|*}
  */
 function parseDataFile(filePath, defaults) {
-  try {
-    return JSON.parse(fs.readFileSync(filePath))
-  } catch (error) {
+  if (!fs.existsSync(filePath)) {
+    fs.writeFile(filePath, JSON.stringify(defaults), err => {
+      if (err) {
+        logger.error(err)
+      }
+    })
     return defaults
+  } else {
+    try {
+      return JSON.parse(fs.readFileSync(filePath))
+    } catch (error) {
+      logger.error(error)
+      return defaults
+    }
   }
 }
