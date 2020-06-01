@@ -11,6 +11,18 @@
 
 [![Build Status](https://travis-ci.org/Splode/pomotroid.svg?branch=master)](https://travis-ci.org/Splode/pomotroid)
 
+- [Overview](#overview)
+- [Features](#features)
+  - [Themes](#themes)
+- [Install](#install)
+  - [Download](#download)
+  - [Homebrew](#homebrew)
+  - [Scoop](#scoop)
+- [Roadmap](#roadmap)
+- [Development](#development)
+  - [Build Setup](#build-setup)
+- [License](#license)
+
 ## Overview
 
 Pomotroid is a simple and configurable Pomodoro timer. It aims to provide a visually-pleasing and reliable way to track productivity using the Pomodoro Technique.
@@ -23,8 +35,18 @@ Pomotroid is in its early stages, so feedback and contributions are welcome and 
 - Charming timer alert sounds (optional)
 - Desktop notifications (optional)
 - Minimize to tray (optional)
+- Several themes included with the ability to create custom themes.
+- Timer activity logging.
+
+### Themes
+
+Pomotroid provides many themes. It's also theme-able, allowing you to customize its appearance.
+
+Visit the [theme documentation](./docs/themes/themes.md) to view the full list of official themes and for instruction on creating your own.
 
 ## Install
+
+### Download
 
 Download the latest version from the [releases](https://github.com/Splode/pomotroid/releases) page.
 
@@ -51,7 +73,6 @@ scoop install https://raw.githubusercontent.com/Splode/pomotroid/master/pomotroi
 :memo: Future plans for enhancements and development:
 
 - Mini-mode
-- Themes
 
 ## Development
 
