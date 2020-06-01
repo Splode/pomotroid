@@ -1,15 +1,17 @@
 import { readdirSync, readFileSync } from 'fs'
 import { join } from 'path'
-
-// TODO load user themes
+import { initDirectory, userDir } from './LocalStore'
 
 /**
  * Themer provides custom application styling.
  */
 class Themer {
   constructor() {
+    const localDir = join(__static, 'themes')
+    const customDir = join(userDir(), 'themes')
+    initDirectory(customDir)
     this.themes = []
-    this._load()
+    this._load([localDir, customDir])
   }
 
   /**
@@ -58,13 +60,13 @@ class Themer {
   /**
    * Load themes from theme files.
    */
-  _load() {
-    // TODO check dir existence
-    const dir = join(__static, 'themes')
-    const files = readdirSync(dir)
-    files.forEach(f => {
-      const theme = JSON.parse(readFileSync(join(dir, f)))
-      this.themes.push(theme)
+  _load(directories) {
+    directories.forEach(d => {
+      const files = readdirSync(d)
+      files.forEach(f => {
+        const theme = JSON.parse(readFileSync(join(d, f)))
+        this.themes.push(theme)
+      })
     })
   }
 }

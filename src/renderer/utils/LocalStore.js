@@ -111,3 +111,32 @@ function parseDataFile(filePath, defaults) {
     }
   }
 }
+
+/**
+ * Create a directory at the given path if it doesn't exist.
+ *
+ * @export
+ * @param {string} path - The directory path.
+ */
+export function initDirectory(path) {
+  if (!fs.existsSync(path)) {
+    logger.info(`creating directory: ${path}`)
+    fs.mkdirSync(path)
+  }
+}
+
+/**
+ * Get the 'userData' directory in the current environment.
+ *
+ * @export
+ * @returns {string} The userData path.
+ */
+export function userDir() {
+  let path
+  try {
+    path = (electron.app || electron.remote.app).getPath('userData')
+  } catch (error) {
+    logger.errror('failed to get user direoctory', error)
+  }
+  return path
+}
