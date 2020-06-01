@@ -18,6 +18,14 @@
       ></div>
     </div>
     <div class="Setting-wrapper">
+      <p class="Setting-title">Tick Sounds</p>
+      <div
+        class="Checkbox"
+        @click="selectTickSounds"
+        :class="tickSounds ? 'is-active' : 'is-inactive'"
+      ></div>
+    </div>
+    <div class="Setting-wrapper">
       <p class="Setting-title">Desktop Notifications</p>
       <div
         class="Checkbox"
@@ -61,6 +69,10 @@ export default {
 
     os() {
       return this.$store.getters.os
+    },
+
+    tickSounds() {
+      return this.$store.getters.tickSounds
     }
   },
 
@@ -101,6 +113,10 @@ export default {
       }
       this.$store.dispatch('setSetting', payload)
       this.$store.dispatch('setViewState', payload)
+    },
+
+    selectTickSounds() {
+      this.$store.dispatch('setTickSounds', !this.tickSounds)
     }
   }
 }

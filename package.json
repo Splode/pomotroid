@@ -89,6 +89,8 @@
     "vue": "^2.6.11",
     "vue-electron": "^1.0.6",
     "vuex": "^3.4.0",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^4.4.2",
     "worker-loader": "^2.0.0"
   },
   "devDependencies": {

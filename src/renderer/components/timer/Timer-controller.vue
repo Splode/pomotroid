@@ -1,9 +1,8 @@
-<template>
-
-</template>
+<template></template>
 
 <script>
 import { EventBus } from '@/utils/EventBus'
+import { logger } from '@/utils/logger'
 
 export default {
   computed: {
@@ -31,22 +30,22 @@ export default {
         this.$store.dispatch('setCurrentRound', 'long-break')
         this.$store.dispatch('incrementTotalWorkRounds')
         EventBus.$emit('ready-long-break')
-        console.log('long-break ready')
+        logger.info('focus round completed')
       } else if (this.currentRound === 'work') {
         this.$store.dispatch('setCurrentRound', 'short-break')
         this.$store.dispatch('incrementTotalWorkRounds')
         EventBus.$emit('ready-short-break')
-        console.log('short-break ready')
+        logger.info('focus round completed')
       } else if (this.currentRound === 'short-break') {
         this.$store.dispatch('setCurrentRound', 'work')
         this.$store.dispatch('incrementRound')
         EventBus.$emit('ready-work')
-        console.log('short-break finished, work ready, increment round')
+        logger.info('short break completed')
       } else if (this.currentRound === 'long-break') {
         this.$store.dispatch('setCurrentRound', 'work')
         this.$store.dispatch('resetRound')
         EventBus.$emit('ready-work')
-        console.log('long-break finished, reset round')
+        logger.info('long break completed')
       }
       this.dispatchTimer()
     },

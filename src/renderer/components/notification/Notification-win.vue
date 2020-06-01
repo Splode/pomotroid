@@ -1,8 +1,8 @@
-<template>
-</template>
+<template></template>
 
 <script>
 import { EventBus } from '@/utils/EventBus'
+import { logger } from '@/utils/logger'
 
 const notifier = require('node-notifier')
 const path = require('path')
@@ -35,7 +35,7 @@ export default {
         },
         (err, res) => {
           if (err) {
-            console.log(err)
+            logger.error(err)
           }
         }
       )
