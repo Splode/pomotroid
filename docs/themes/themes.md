@@ -1,10 +1,14 @@
 # Pomotroid Themes
 
+Pomotroid comes with many officially supported themes. You can also add any number of custom themes.
+
 - [Pomotroid Themes](#pomotroid-themes)
   - [Available Themes](#available-themes)
   - [Creating a Custom Theme](#creating-a-custom-theme)
 
 ## Available Themes
+
+These themes are available by default.
 
 | Theme               | Main App                                                                | Timer Colors                                                            |
 | ------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- |
@@ -55,6 +59,6 @@ To add your custom theme, copy your theme definition to the `themes` directory i
 - `$XDG_CONFIG_HOME` or `~/.config` on **Linux**
 - `~/Library/Application Support` on **macOS**
 
-Copy your theme definition to the `themes` directory. For example, add the theme to the following directory on Windows: `C:\Users\{User}\AppData\Roaming\pomotroid\themes`
+For example, add the theme file to the following directory on Windows: `C:\Users\{User}\AppData\Roaming\pomotroid\themes`
 
-Restart the application, and you should see your new theme available as an option.
+Restart the application to see your new theme available as an option.
