@@ -1,10 +1,10 @@
 {
-  "version": "0.9.0",
-  "bin": [["pomotroid-0.9.0-portable.exe", "pomotroid"]],
-  "url": "https://github.com/Splode/pomotroid/releases/download/v0.9.0/pomotroid-0.9.0-portable.exe",
-  "hash": "5f66cbff7f228d2185344d2143abe3e1a4bb65d21fb2312ae653039e0f77cb8f",
+  "version": "0.10.0",
+  "bin": [["pomotroid-0.10.0-portable.exe", "pomotroid"]],
+  "url": "https://github.com/Splode/pomotroid/releases/download/v0.10.0/pomotroid-0.10.0-portable.exe",
+  "hash": "18af5bb9e6fab934d30330409049735a418c8279d69d389653612ad4e2f48a49",
   "description": "A simple and configurable Pomodoro timer. It provides a visually-pleasing and reliable way to track productivity using the Pomodoro Technique.",
   "homepage": "https://github.com/splode/pomotroid",
   "license": "MIT",
-  "shortcuts": [["pomotroid-0.9.0-portable.exe", "Pomotroid"]]
+  "shortcuts": [["pomotroid-0.10.0-portable.exe", "Pomotroid"]]
 }
