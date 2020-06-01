@@ -1,15 +1,15 @@
 {
-  "name": "Tokyo Night",
+  "name": "Tokyo Night Storm",
   "colors": {
-    "--color-long-round": "#0DB9D7",
+    "--color-long-round": "#7AA2F7",
     "--color-short-round": "#73DACA",
     "--color-focus-round": "#F7768E",
-    "--color-background": "#16161E",
-    "--color-background-light": "#1A1B26",
-    "--color-background-lightest": "#a9b1d6",
+    "--color-background": "#24283b",
+    "--color-background-light": "#1b1e2e",
+    "--color-background-lightest": "#9AA5CE",
     "--color-foreground": "#c0caf5",
-    "--color-foreground-darker": "#a9b1d6",
-    "--color-foreground-darkest": "#acb0d0",
+    "--color-foreground-darker": "#9AA5CE",
+    "--color-foreground-darkest": "#89DDFF",
     "--color-accent": "#9D7CD8"
   }
 }
