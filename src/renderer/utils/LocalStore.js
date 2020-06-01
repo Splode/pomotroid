@@ -51,9 +51,7 @@ export default class LocalStore {
    * @memberof LocalStore
    */
   constructor(filename, data) {
-    const userDataPath = (electron.app || electron.remote.app).getPath(
-      'userData'
-    )
+    const userDataPath = userDir()
     this.path = path.join(userDataPath, filename + '.json')
     this.data = parseDataFile(this.path, data)
   }
