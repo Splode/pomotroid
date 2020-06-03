@@ -43,6 +43,8 @@ Pomotroid is in its early stages, so feedback and contributions are welcome and 
 
 Pomotroid provides many themes. It's also theme-able, allowing you to customize its appearance.
 
+![Screenshots of Pomotroid using various themes](./.github/images/pomotroid_themes-preview--800x192.png)
+
 Visit the [theme documentation](./docs/themes/themes.md) to view the full list of official themes and for instruction on creating your own.
 
 ## Install
