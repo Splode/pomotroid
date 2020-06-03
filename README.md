@@ -18,6 +18,7 @@
   - [Download](#download)
   - [Homebrew](#homebrew)
   - [Scoop](#scoop)
+  - [AppGet](#appget)
 - [Roadmap](#roadmap)
 - [Development](#development)
   - [Build Setup](#build-setup)
@@ -56,7 +57,7 @@ Pomotroid is available for Windows, Mac OSX and Linux.
 
 You can also install Pomotroid on macOS with [Homebrew](https://brew.sh):
 
-```bash
+```sh
 brew cask install pomotroid
 ```
 
@@ -64,8 +65,16 @@ brew cask install pomotroid
 
 You can install Pomotroid on Windows with [scoop](https://scoop.sh/)
 
-```
+```sh
 scoop install https://raw.githubusercontent.com/Splode/pomotroid/master/pomotroid.json
+```
+
+### AppGet
+
+You can install Pomotroid on Windows with [AppGet](https://appget.net/)
+
+```sh
+appget install pomotroid
 ```
 
 ## Roadmap
