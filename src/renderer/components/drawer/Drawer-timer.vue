@@ -218,7 +218,6 @@ export default {
   display: inline-block;
   font-family: 'RobotoMono', monospace;
   font-size: 12px;
-  margin-left: 10px;
   padding: 2px 6px;
 }
 
