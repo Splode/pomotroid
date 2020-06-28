@@ -1,5 +1,6 @@
 body {
-  color: $colorWhite;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
   cursor: default;
   font-family: 'Lato', sans-serif;
   margin: 0;
@@ -54,12 +55,12 @@ p {
 }
 
 .TextButton {
-  color: $colorBlueGrey;
+  color: var(--color-foreground-darker);
   font-size: 14px;
   letter-spacing: 0.05em;
   margin-top: 12px;
   transition: $transitionDefault;
   &:hover {
-    color: $colorRed;
+    color: var(--color-accent);
   }
 }

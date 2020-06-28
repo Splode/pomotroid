@@ -1,0 +1,15 @@
+{
+  "name": "Theme Name",
+  "colors": {
+    "--color-long-round": "",
+    "--color-short-round": "",
+    "--color-focus-round": "",
+    "--color-background": "",
+    "--color-background-light": "",
+    "--color-background-lightest": "",
+    "--color-foreground": "",
+    "--color-foreground-darker": "",
+    "--color-foreground-darkest": "",
+    "--color-accent": ""
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Synthwave",
+  "colors": {
+    "--color-long-round": "#36F9F6",
+    "--color-short-round": "#72F1B8",
+    "--color-focus-round": "#FF7EDB",
+    "--color-background": "#262335",
+    "--color-background-light": "#372d4b",
+    "--color-background-lightest": "#495495",
+    "--color-foreground": "#e0e3e6",
+    "--color-foreground-darker": "#b893ce",
+    "--color-foreground-darkest": "#DD5500",
+    "--color-accent": "#CD9731"
+  }
+}

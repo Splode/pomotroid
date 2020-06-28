@@ -1,0 +1,15 @@
+{
+  "name": "Nord",
+  "colors": {
+    "--color-long-round": "#5E81AC",
+    "--color-short-round": "#8FBCBB",
+    "--color-focus-round": "#B48EAD",
+    "--color-background": "#2e3440",
+    "--color-background-light": "#3b4252",
+    "--color-background-lightest": "#616E88",
+    "--color-foreground": "#d8dee9",
+    "--color-foreground-darker": "#8FBCBB",
+    "--color-foreground-darkest": "#88C0D0",
+    "--color-accent": "#A3BE8C"
+  }
+}

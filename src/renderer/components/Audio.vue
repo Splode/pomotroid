@@ -15,6 +15,11 @@
       ref="audio-work"
       :src="'./static/audio/alert-work.mp3'"
     ></audio>
+    <audio
+      id="audio-tick"
+      ref="audio-tick"
+      :src="'./static/audio/tick.mp3'"
+    ></audio>
   </div>
 </template>
 
@@ -25,6 +30,7 @@ export default {
   data() {
     return {
       audioLongBreak: null,
+      audioTick: null,
       audioShortBreak: null,
       audioWork: null
     }
@@ -32,6 +38,9 @@ export default {
 
   computed: {
     // store getters
+    tickSounds() {
+      return this.$store.getters.tickSounds
+    },
     volume() {
       return this.$store.getters.volume * 0.01
     }
@@ -48,6 +57,12 @@ export default {
     EventBus.$on('ready-short-break', () => {
       this.$refs['audio-short-break'].volume = this.volume
       this.$refs['audio-short-break'].play()
+    })
+
+    EventBus.$on('timer-tick', () => {
+      this.$refs['audio-tick'].volume = this.volume
+      if (!this.tickSounds) return
+      this.$refs['audio-tick'].play()
     })
 
     EventBus.$on('ready-work', () => {

@@ -212,7 +212,7 @@ export default {
 }
 
 .Dial-bg {
-  stroke: $colorBlueGrey;
+  stroke: var(--color-background-lightest);
 }
 
 .Dial-fill {
@@ -222,14 +222,14 @@ export default {
 }
 
 .Dial-fill--work {
-  stroke: $colorRed;
+  stroke: var(--color-focus-round);
 }
 
 .Dial-fill--shortBreak {
-  stroke: $colorGreen;
+  stroke: var(--color-short-round);
 }
 
 .Dial-fill--longBreak {
-  stroke: $colorBlue;
+  stroke: var(--color-long-round);
 }
 </style>

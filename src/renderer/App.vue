@@ -1,10 +1,7 @@
 <template>
   <div id="app">
     <app-titlebar />
-    <transition
-      name="slide-left"
-      mode="out-in"
-    >
+    <transition name="slide-left" mode="out-in">
       <app-drawer v-if="drawerOpen" />
     </transition>
     <app-timer />
@@ -19,6 +16,7 @@ import appNotification from '@/components/notification/Notification'
 import appNotificationWin from '@/components/notification/Notification-win'
 import appTimer from '@/components/timer/Timer'
 import appTitlebar from '@/components/Titlebar'
+import themer from '@/utils/Themer'
 
 export default {
   name: 'pomotroid',
@@ -47,7 +45,16 @@ export default {
 
     os() {
       return this.$store.getters.os
+    },
+
+    theme() {
+      return this.$store.getters.theme
     }
+  },
+
+  created() {
+    if (!this.theme || this.theme === 'pomotroid') return
+    themer.apply(this.theme)
   }
 }
 </script>

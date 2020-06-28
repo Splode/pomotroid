@@ -1,3 +1,4 @@
+import { logger } from './../utils/logger'
 const electron = require('electron')
 const fs = require('fs')
 const path = require('path')
@@ -16,6 +17,8 @@ function generateSettings() {
     minToTray: false,
     notifications: true,
     workRounds: 4,
+    theme: null,
+    tickSounds: false,
     timeLongBreak: 15,
     timeShortBreak: 5,
     timeWork: 25,
@@ -48,9 +51,7 @@ export default class LocalStore {
    * @memberof LocalStore
    */
   constructor(filename, data) {
-    const userDataPath = (electron.app || electron.remote.app).getPath(
-      'userData'
-    )
+    const userDataPath = userDir()
     this.path = path.join(userDataPath, filename + '.json')
     this.data = parseDataFile(this.path, data)
   }
@@ -77,7 +78,7 @@ export default class LocalStore {
     this.data[key] = val
     fs.writeFileSync(this.path, JSON.stringify(this.data), err => {
       if (err) {
-        console.log(err)
+        logger.error(err)
       }
     })
   }
@@ -92,9 +93,48 @@ export default class LocalStore {
  * @returns {object|*}
  */
 function parseDataFile(filePath, defaults) {
-  try {
-    return JSON.parse(fs.readFileSync(filePath))
-  } catch (error) {
+  if (!fs.existsSync(filePath)) {
+    fs.writeFile(filePath, JSON.stringify(defaults), err => {
+      if (err) {
+        logger.error(err)
+      }
+    })
     return defaults
+  } else {
+    try {
+      return JSON.parse(fs.readFileSync(filePath))
+    } catch (error) {
+      logger.error(error)
+      return defaults
+    }
   }
+}
+
+/**
+ * Create a directory at the given path if it doesn't exist.
+ *
+ * @export
+ * @param {string} path - The directory path.
+ */
+export function initDirectory(path) {
+  if (!fs.existsSync(path)) {
+    logger.info(`creating directory: ${path}`)
+    fs.mkdirSync(path)
+  }
+}
+
+/**
+ * Get the 'userData' directory in the current environment.
+ *
+ * @export
+ * @returns {string} The userData path.
+ */
+export function userDir() {
+  let path
+  try {
+    path = (electron.app || electron.remote.app).getPath('userData')
+  } catch (error) {
+    logger.errror('failed to get user direoctory', error)
+  }
+  return path
 }

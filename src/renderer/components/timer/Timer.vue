@@ -33,7 +33,10 @@
               height="15px"
               class="Icon--start"
             >
-              <polygon fill="#F6F2EB" points="0,0 0,15 7.6,7.4 " />
+              <polygon
+                fill="var(--color-foreground)"
+                points="0,0 0,15 7.6,7.4 "
+              />
             </svg>
           </div>
         </div>
@@ -56,7 +59,10 @@
               xml:space="preserve"
               height="15px"
             >
-              <polygon fill="#F6F2EB" points="0,0 0,15 7.6,7.4 " />
+              <polygon
+                fill="var(--color-foreground)"
+                points="0,0 0,15 7.6,7.4 "
+              />
             </svg>
           </div>
         </div>
@@ -82,7 +88,7 @@
             >
               <line
                 fill="none"
-                stroke="#F6F2EB"
+                stroke="var(--color-foreground)"
                 stroke-width="3"
                 stroke-linecap="round"
                 stroke-miterlimit="10"
@@ -93,7 +99,7 @@
               />
               <line
                 fill="none"
-                stroke="#F6F2EB"
+                stroke="var(--color-foreground)"
                 stroke-width="3"
                 stroke-linecap="round"
                 stroke-miterlimit="10"
@@ -121,6 +127,7 @@ import appTimerController from '@/components/timer/Timer-controller'
 import appTimerDial from '@/components/timer/Timer-dial'
 import appTimerFooter from '@/components/timer/Timer-footer'
 import { EventBus } from '@/utils/EventBus'
+import { logger } from '@/utils/logger'
 
 export default {
   components: {
@@ -145,6 +152,16 @@ export default {
     // store getters
     currentRound() {
       return this.$store.getters.currentRound
+    },
+
+    currentRoundDisplay() {
+      if (this.currentRound === 'work') {
+        return 'focus round'
+      } else if (this.currentRound === 'short-break') {
+        return 'short break'
+      } else if (this.currentRound === 'long-break') {
+        return 'long break'
+      }
     },
 
     timeLongBreak() {
@@ -219,9 +236,14 @@ export default {
         case 'reset':
           EventBus.$emit('timer-reset')
           break
+        case 'resume':
+          EventBus.$emit('timer-started')
+          this.currentTime = message.data.elapsed
+          break
         case 'start':
           EventBus.$emit('timer-started')
           this.currentTime = message.data.elapsed
+          logger.info(`${this.currentRoundDisplay} round started`)
           break
         case 'tick':
           this.currentTime = message.data.elapsed
@@ -264,6 +286,7 @@ export default {
       if (!this.timerWorker) return
       this.timerWorker.postMessage({ event: 'pause' })
       this.timerActive = !this.timerActive
+      logger.info(`${this.currentRoundDisplay} round paused`)
     },
 
     resetTimer() {
@@ -308,6 +331,7 @@ export default {
 
     EventBus.$on('call-timer-reset', () => {
       this.resetTimer()
+      logger.info(`${this.currentRoundDisplay} round reset`)
     })
 
     // Bind event listener to Space key
@@ -330,7 +354,7 @@ export default {
 
 <style lang="scss" scoped>
 .Button {
-  border: 2px solid $colorBlueGrey;
+  border: 2px solid var(--color-background-lightest);
   border-radius: 100%;
   display: flex;
   justify-content: center;
@@ -339,12 +363,12 @@ export default {
   height: 50px;
   -webkit-app-region: no-drag;
   &:hover {
-    background-color: $colorLightNavy;
+    background-color: var(--color-background-light);
     & .Icon--pause line {
-      stroke: $colorRed;
+      stroke: var(--color-accent);
     }
     & .Icon--start polygon {
-      fill: $colorRed;
+      fill: var(--color-accent);
     }
   }
 }

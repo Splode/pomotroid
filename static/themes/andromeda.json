@@ -1,0 +1,15 @@
+{
+  "name": "Andromeda",
+  "colors": {
+    "--color-long-round": "#C74DED",
+    "--color-short-round": "#00E8C6",
+    "--color-focus-round": "#EE5D43",
+    "--color-background": "#23262E",
+    "--color-background-light": "#2e323d",
+    "--color-background-lightest": "#746f77",
+    "--color-foreground": "#d5ced9",
+    "--color-foreground-darker": "#746f77",
+    "--color-foreground-darkest": "#CD9731",
+    "--color-accent": "#FFE66D"
+  }
+}

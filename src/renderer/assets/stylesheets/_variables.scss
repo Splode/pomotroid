@@ -11,12 +11,26 @@
 }
 
 $colorBlue: #0bbddb;
-$colorBlueGrey: #858c99;
 $colorGreen: #05ec8c;
+$colorRed: #ff4e4d;
+$colorBlueGrey: #858c99;
 $colorLightNavy: #3d4457;
 $colorNavy: #2f384b;
-$colorRed: #ff4e4d;
 $colorWhite: #f6f2eb;
+$colorBlueGrey--lighter: #c0c9da;
+$colorBlueWhite: #dbe1ef;
 
 $transitionDefault: all 0.3s ease;
 $transitionSnappy: all 0.3s cubic-bezier(0.07, 0.95, 0, 1);
+
+:root {
+  --color-long-round: #{$colorBlue};
+  --color-short-round: #{$colorGreen};
+  --color-focus-round: #{$colorRed};
+  --color-background: #{$colorNavy};
+  --color-background-light: #{$colorLightNavy};
+  --color-background-lightest: #{$colorBlueGrey};
+  --color-foreground: #{$colorWhite};
+  --color-foreground-darker: #{$colorBlueGrey--lighter};
+  --color-foreground-darkest: #{$colorBlueWhite};
+}

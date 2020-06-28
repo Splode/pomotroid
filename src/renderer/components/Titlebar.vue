@@ -4,12 +4,10 @@
     <div
       class="Icon-wrapper Icon-wrapper--titlebar Icon-wrapper--single"
       style="position: absolute;"
+      title="Settings"
       @click="toggleDrawer"
     >
-      <div
-        class="Menu-wrapper"
-        :class="drawerOpen ? 'is-collapsed' : ''"
-      >
+      <div class="Menu-wrapper" :class="drawerOpen ? 'is-collapsed' : ''">
         <div class="Menu-line"></div>
         <div class="Menu-line"></div>
       </div>
@@ -17,17 +15,13 @@
 
     <h1 class="Title">Pomotroid</h1>
 
-    <div
-      class="Icon-group"
-      style="position: absolute; top: 0; right: 0;"
-    >
+    <div class="Icon-group" style="position: absolute; top: 0; right: 0;">
       <div
         class="Icon-wrapper Icon-wrapper--titlebar Icon-wrapper--double--left"
         style="padding-left: 18px"
         @click="winMinimize"
       >
         <!-- minimize -->
-        <!-- <div class="Icon-wrapper"> -->
         <svg
           version="1.2"
           baseProfile="tiny"
@@ -54,7 +48,6 @@
             y2="1"
           />
         </svg>
-        <!-- </div> -->
       </div>
       <div
         class="Icon-wrapper Icon-wrapper--titlebar Icon-wrapper--double--right"
@@ -62,7 +55,6 @@
         @click="winClose"
       >
         <!-- close -->
-        <!-- <div class="Icon-wrapper"> -->
         <svg
           version="1.2"
           baseProfile="tiny"
@@ -99,7 +91,6 @@
             y2="11.6"
           />
         </svg>
-        <!-- </div> -->
       </div>
     </div>
   </nav>
@@ -141,13 +132,13 @@ export default {
 .Icon--close,
 .Icon--minimize {
   & line {
-    stroke: $colorBlueGrey;
+    stroke: var(--color-background-lightest);
     transition: $transitionDefault;
   }
 }
 
 .Menu-line {
-  background-color: $colorBlueGrey;
+  background-color: var(--color-background-lightest);
   display: inline-block;
   transition: $transitionDefault;
   width: 20px;
@@ -175,7 +166,7 @@ export default {
 }
 
 .Title {
-  color: $colorGreen;
+  color: var(--color-short-round);
   font-size: 1rem;
   font-weight: 200;
   padding-top: 18px;
@@ -193,11 +184,13 @@ export default {
 .Icon-wrapper--titlebar {
   -webkit-app-region: no-drag;
   &:hover .Menu-line {
-    background-color: $colorRed;
+    background-color: var(--color-accent);
   }
-  &:hover .Icon--close line,
+  &:hover .Icon--close line {
+    stroke: var(--color-focus-round);
+  }
   &:hover .Icon--minimize line {
-    stroke: $colorRed;
+    stroke: var(--color-accent);
   }
 }
 </style>

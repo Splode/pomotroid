@@ -18,6 +18,14 @@
       ></div>
     </div>
     <div class="Setting-wrapper">
+      <p class="Setting-title">Tick Sounds</p>
+      <div
+        class="Checkbox"
+        @click="selectTickSounds"
+        :class="tickSounds ? 'is-active' : 'is-inactive'"
+      ></div>
+    </div>
+    <div class="Setting-wrapper">
       <p class="Setting-title">Desktop Notifications</p>
       <div
         class="Checkbox"
@@ -25,9 +33,7 @@
         :class="notifications ? 'is-active' : 'is-inactive'"
       ></div>
     </div>
-    <div
-      class="Setting-wrapper"
-    >
+    <div class="Setting-wrapper" v-if="os === 'win32'">
       <p class="Setting-title">Minimize to Tray</p>
       <div
         class="Checkbox"
@@ -63,6 +69,10 @@ export default {
 
     os() {
       return this.$store.getters.os
+    },
+
+    tickSounds() {
+      return this.$store.getters.tickSounds
     }
   },
 
@@ -103,6 +113,10 @@ export default {
       }
       this.$store.dispatch('setSetting', payload)
       this.$store.dispatch('setViewState', payload)
+    },
+
+    selectTickSounds() {
+      this.$store.dispatch('setTickSounds', !this.tickSounds)
     }
   }
 }
@@ -110,28 +124,28 @@ export default {
 
 <style lang="scss" scoped>
 .Checkbox {
-  background-color: $colorNavy;
-  border: 2px solid $colorBlueGrey;
+  background-color: var(--color-background);
+  border: 2px solid var(--color-background-lightest);
   border-radius: 100%;
   display: inline-block;
   transition: $transitionDefault;
   width: 16px;
   height: 16px;
   &:hover {
-    border-color: $colorRed;
+    border-color: var(--color-accent);
   }
   &.is-active {
-    background-color: $colorRed;
-    border-color: $colorNavy;
+    background-color: var(--color-accent);
+    border-color: var(--color-background);
     &:hover {
-      background-color: $colorNavy;
-      border-color: $colorRed;
+      background-color: var(--color-background);
+      border-color: var(--color-accent);
     }
   }
 }
 
 .Setting-wrapper {
-  background-color: $colorNavy;
+  background-color: var(--color-background);
   border-radius: 4px;
   display: flex;
   justify-content: space-between;
@@ -140,7 +154,7 @@ export default {
 }
 
 .Setting-title {
-  color: $colorBlueGrey;
+  color: var(--color-foreground-darker);
   font-size: 14px;
   letter-spacing: 0.05em;
 }

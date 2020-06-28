@@ -1,0 +1,15 @@
+{
+  "name": "Popping and Locking",
+  "colors": {
+    "--color-long-round": "#458588",
+    "--color-short-round": "#7ec16e",
+    "--color-focus-round": "#f42c3e",
+    "--color-background": "#21222d",
+    "--color-background-light": "#313242",
+    "--color-background-lightest": "#7f7d7a",
+    "--color-foreground": "#f2e5bc",
+    "--color-foreground-darker": "#f9f5d7",
+    "--color-foreground-darkest": "#ebdbb2",
+    "--color-accent": "#d79921"
+  }
+}
