@@ -200,7 +200,7 @@ export default {
 .Dial-wrapper {
   display: flex;
   justify-content: center;
-//   margin-top: 35px;
+  margin-top: 35px;
   position: relative;
 }
 

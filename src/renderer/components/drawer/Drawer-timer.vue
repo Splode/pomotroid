@@ -2,7 +2,7 @@
   <div class="Container">
     <p class="Drawer-heading">Timer</p>
     <div class="Setting-wrapper">
-      <span class="Setting-title">Focus</span>
+      <p class="Setting-title">Focus</p>
       <p class="Setting-value">{{ localTimeWork + ':00' }}</p>
       <div class="Slider-wrapper">
         <input
@@ -22,7 +22,7 @@
     </div>
 
     <div class="Setting-wrapper">
-      <span class="Setting-title">Short Break</span>
+      <p class="Setting-title">Short Break</p>
       <p class="Setting-value">{{ localTimeShortBreak + ':00' }}</p>
       <div class="Slider-wrapper">
         <input
@@ -42,7 +42,7 @@
     </div>
 
     <div class="Setting-wrapper">
-      <span class="Setting-title">Long Break</span>
+      <p class="Setting-title">Long Break</p>
       <p class="Setting-value">{{ localTimeLongBreak + ':00' }}</p>
       <div class="Slider-wrapper">
         <input
@@ -62,7 +62,7 @@
     </div>
 
     <div class="Setting-wrapper">
-      <span class="Setting-title">Rounds</span>
+      <p class="Setting-title">Rounds</p>
       <p class="Setting-value">{{ localWorkRounds }}</p>
       <div class="Slider-wrapper">
         <input
@@ -201,8 +201,8 @@ export default {
 
 <style lang="scss" scoped>
 .Setting-wrapper {
-  margin: 23px 0;
-  text-align: justify;
+  margin: 10px 0;
+  text-align: center;
 }
 
 .Setting-title {

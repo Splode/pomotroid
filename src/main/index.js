@@ -4,6 +4,7 @@ import { logger } from './../renderer/utils/logger'
 import { createLocalStore } from './../renderer/utils/LocalStore'
 import { app, BrowserWindow, ipcMain, Tray, nativeImage } from 'electron'
 
+const electron = require('electron')
 const path = require('path')
 const localStore = createLocalStore()
 
@@ -77,15 +78,22 @@ ipcMain.on('tray-icon-update', (event, image) => {
   tray.setImage(nativeImg)
 })
 
-function getWindowPosition() {
+function getNewWindowPosition() {
   const windowBounds = mainWindow.getBounds()
   const trayBounds = tray.getBounds()
+
+  const electronScreen = electron.screen
+  const primaryDisplay = electronScreen.getPrimaryDisplay()
 
   // Center window horizontally below the tray icon
   const x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2))
 
   // Position window 4 pixels vertically below the tray icon
-  const y = Math.round(trayBounds.y + trayBounds.height + 4)
+  // Adjust according if tray is at the bottom
+  let y = Math.round(trayBounds.y + trayBounds.height + 4)
+  if (y > primaryDisplay.workAreaSize.height) {
+    y = trayBounds.y - trayBounds.height - windowBounds.height
+  }
 
   return { x: x, y: y }
 }
@@ -96,18 +104,15 @@ function toggleWindow() {
   } else {
     mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
   }
-  const position = getWindowPosition()
+  const position = getNewWindowPosition()
   mainWindow.setPosition(position.x, position.y, false)
 }
 
 function createTray() {
-//   const quitWindowMenuItem = { label: 'Exit', role: 'quit' }
   tray = new Tray(path.join(__static, 'icon-18.png'))
   tray.setToolTip('Pomotroid\nClick to Restore')
-  //   tray.setContextMenu(Menu.buildFromTemplate([showWindowMenuItem, quitWindowMenuItem]))
   tray.on('click', () => {
     toggleWindow()
-    // tray.popUpContextMenu()
   })
 }
 
@@ -121,8 +126,8 @@ function createWindow() {
     icon: path.join(__static, 'icon.png'),
     resizable: false,
     useContentSize: true,
-    width: 280,
-    height: 430,
+    width: 360,
+    height: 478,
     webPreferences: {
       backgroundThrottling: false,
       nodeIntegration: true
