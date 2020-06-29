@@ -7,8 +7,12 @@ import { logger } from '@/utils/logger'
 export default {
   computed: {
     // store getters
-    autoStartTimer() {
-      return this.$store.getters.autoStartTimer
+    autoStartWorkTimer() {
+      return this.$store.getters.autoStartWorkTimer
+    },
+
+    autoStartBreakTimer() {
+      return this.$store.getters.autoStartBreakTimer
     },
 
     currentRound() {
@@ -51,7 +55,10 @@ export default {
     },
     dispatchTimer() {
       EventBus.$emit('timer-init', {
-        auto: this.autoStartTimer
+        auto:
+          this.currentRound === 'work'
+            ? this.autoStartWorkTimer
+            : this.autoStartBreakTimer
       })
     }
   },
