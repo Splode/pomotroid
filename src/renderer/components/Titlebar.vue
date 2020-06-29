@@ -108,6 +108,10 @@ export default {
 
     minToTray() {
       return this.$store.getters.minToTray
+    },
+
+    minToTrayOnClose() {
+      return this.$store.getters.minToTrayOnClose
     }
   },
 
@@ -117,8 +121,9 @@ export default {
     },
 
     winClose() {
-      EventBus.$emit('call-timer-reset')
-      ipcRenderer.send('window-close')
+      this.minToTrayOnClose
+        ? this.winMinimize()
+        : ipcRenderer.send('window-close')
     },
 
     winMinimize() {
