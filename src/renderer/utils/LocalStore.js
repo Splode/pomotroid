@@ -13,7 +13,8 @@ export const defaults = generateSettings()
 function generateSettings() {
   return {
     alwaysOnTop: false,
-    autoStartTimer: true,
+    autoStartWorkTimer: true,
+    autoStartBreakTimer: true,
     minToTray: false,
     notifications: true,
     workRounds: 4,

@@ -3,10 +3,14 @@ import { localStore } from './index'
 const state = {
   currentDrawer: 'appDrawerTimer',
   drawerOpen: false,
-  autoStartTimer:
-    localStore.get('autoStartTimer') === undefined
+  autoStartWorkTimer:
+    localStore.get('autoStartWorkTimer') === undefined
       ? true
-      : localStore.get('autoStartTimer'),
+      : localStore.get('autoStartWorkTimer'),
+  autoStartBreakTimer:
+    localStore.get('autoStartBreakTimer') === undefined
+      ? true
+      : localStore.get('autoStartBreakTimer'),
   alwaysOnTop: localStore.get('alwaysOnTop'),
   minToTray: localStore.get('minToTray'),
   notifications: localStore.get('notifications'),
@@ -15,8 +19,12 @@ const state = {
 }
 
 const getters = {
-  autoStartTimer() {
-    return state.autoStartTimer
+  autoStartWorkTimer() {
+    return state.autoStartWorkTimer
+  },
+
+  autoStartBreakTimer() {
+    return state.autoStartBreakTimer
   },
 
   currentDrawer() {

@@ -10,11 +10,19 @@
       ></div>
     </div>
     <div class="Setting-wrapper">
-      <p class="Setting-title">Auto-start Timer</p>
+      <p class="Setting-title">Auto-start Work Timer</p>
       <div
         class="Checkbox"
-        @click="selectAutoStartTimer"
-        :class="autoStartTimer ? 'is-active' : 'is-inactive'"
+        @click="selectAutoStartWorkTimer"
+        :class="autoStartWorkTimer ? 'is-active' : 'is-inactive'"
+      ></div>
+    </div>
+    <div class="Setting-wrapper">
+      <p class="Setting-title">Auto-start Break Timer</p>
+      <div
+        class="Checkbox"
+        @click="selectAutoStartBreakTimer"
+        :class="autoStartBreakTimer ? 'is-active' : 'is-inactive'"
       ></div>
     </div>
     <div class="Setting-wrapper">
@@ -55,8 +63,12 @@ export default {
       return this.$store.getters.alwaysOnTop
     },
 
-    autoStartTimer() {
-      return this.$store.getters.autoStartTimer
+    autoStartWorkTimer() {
+      return this.$store.getters.autoStartWorkTimer
+    },
+
+    autoStartBreakTimer() {
+      return this.$store.getters.autoStartBreakTimer
     },
 
     minToTray() {
@@ -87,10 +99,19 @@ export default {
       this.$store.dispatch('setViewState', payload)
     },
 
-    selectAutoStartTimer() {
+    selectAutoStartWorkTimer() {
       const payload = {
-        key: 'autoStartTimer',
-        val: !this.autoStartTimer
+        key: 'autoStartWorkTimer',
+        val: !this.autoStartWorkTimer
+      }
+      this.$store.dispatch('setSetting', payload)
+      this.$store.dispatch('setViewState', payload)
+    },
+
+    selectAutoStartBreakTimer() {
+      const payload = {
+        key: 'autoStartBreakTimer',
+        val: !this.autoStartBreakTimer
       }
       this.$store.dispatch('setSetting', payload)
       this.$store.dispatch('setViewState', payload)
