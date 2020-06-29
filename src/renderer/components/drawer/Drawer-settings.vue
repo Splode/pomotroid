@@ -49,6 +49,14 @@
         :class="minToTray ? 'is-active' : 'is-inactive'"
       ></div>
     </div>
+    <div class="Setting-wrapper" v-if="os === 'win32'">
+      <p class="Setting-title">Minimize to Tray on Close</p>
+      <div
+        class="Checkbox"
+        @click="selectMinToTrayOnClose"
+        :class="minToTrayOnClose ? 'is-active' : 'is-inactive'"
+      ></div>
+    </div>
   </div>
 </template>
 
@@ -73,6 +81,10 @@ export default {
 
     minToTray() {
       return this.$store.getters.minToTray
+    },
+
+    minToTrayOnClose() {
+      return this.$store.getters.minToTrayOnClose
     },
 
     notifications() {
@@ -127,6 +139,15 @@ export default {
       this.$store.dispatch('setViewState', payload)
     },
 
+    selectMinToTrayOnClose() {
+      const payload = {
+        key: 'minToTrayOnClose',
+        val: !this.minToTrayOnClose
+      }
+      this.$store.dispatch('setSetting', payload)
+      this.$store.dispatch('setViewState', payload)
+    },
+
     selectNotifications() {
       const payload = {
         key: 'notifications',
@@ -163,6 +184,11 @@ export default {
       border-color: var(--color-accent);
     }
   }
+}
+
+.Container {
+  max-height: calc(100% - 36px);
+  overflow-y: auto;
 }
 
 .Setting-wrapper {

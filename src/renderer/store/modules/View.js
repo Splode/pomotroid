@@ -13,6 +13,7 @@ const state = {
       : localStore.get('autoStartBreakTimer'),
   alwaysOnTop: localStore.get('alwaysOnTop'),
   minToTray: localStore.get('minToTray'),
+  minToTrayOnClose: localStore.get('minToTrayOnClose'),
   notifications: localStore.get('notifications'),
   os: process.platform,
   theme: localStore.get('theme') || 'Pomotroid'
@@ -41,6 +42,10 @@ const getters = {
 
   minToTray() {
     return state.minToTray
+  },
+
+  minToTrayOnClose() {
+    return state.minToTrayOnClose
   },
 
   notifications() {
