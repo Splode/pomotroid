@@ -98,7 +98,6 @@
 
 <script>
 import { ipcRenderer } from 'electron'
-import { EventBus } from '@/utils/EventBus'
 
 export default {
   computed: {
