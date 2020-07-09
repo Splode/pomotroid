@@ -104,8 +104,11 @@ function toggleWindow() {
   } else {
     mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
   }
-  const position = getNewWindowPosition()
-  mainWindow.setPosition(position.x, position.y, false)
+
+  if (process.platform === 'darwin') {
+    const position = getNewWindowPosition()
+    mainWindow.setPosition(position.x, position.y, false)
+  }
 }
 
 function createTray() {

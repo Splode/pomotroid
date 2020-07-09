@@ -41,7 +41,7 @@
         :class="notifications ? 'is-active' : 'is-inactive'"
       ></div>
     </div>
-    <div class="Setting-wrapper" v-if="os === 'win32'">
+    <div class="Setting-wrapper">
       <p class="Setting-title">Minimize to Tray</p>
       <div
         class="Checkbox"
@@ -49,7 +49,7 @@
         :class="minToTray ? 'is-active' : 'is-inactive'"
       ></div>
     </div>
-    <div class="Setting-wrapper" v-if="os === 'win32'">
+    <div class="Setting-wrapper">
       <p class="Setting-title">Minimize to Tray on Close</p>
       <div
         class="Checkbox"
