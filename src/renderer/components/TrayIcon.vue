@@ -35,25 +35,35 @@ export default {
       ipcRenderer.send('tray-icon-update', image)
     }
 
-    EventBus.$on('ready-long-break', () => {
-      this.state = 'long-break'
+    const updateStateAndResetTimer = (state) => {
+      this.state = state
       updateTrayImage(0, 1)
+    }
+
+    EventBus.$on('ready-long-break', () => {
+      updateStateAndResetTimer('long-break')
     })
 
     EventBus.$on('ready-short-break', () => {
-      this.state = 'short-break'
-      updateTrayImage(0, 1)
+      updateStateAndResetTimer('short-break')
     })
 
     EventBus.$on('ready-work', () => {
-      this.state = 'work'
-      updateTrayImage(0, 1)
+      updateStateAndResetTimer('work')
+    })
+
+    EventBus.$on('call-timer-reset', () => {
+      updateStateAndResetTimer('work')
     })
 
     EventBus.$on('timer-tick', payload => {
       updateTrayImage(payload.elapsed, payload.total)
     })
   }
+}
+
+function setSizeTrayImage() {
+  return process.platform === 'darwin' ? 19 : 32
 }
 
 function createTrayImage(state, elapsed, total) {
@@ -69,7 +79,7 @@ function createTrayImage(state, elapsed, total) {
   const longVar = document.documentElement.style.getPropertyValue(
     '--color-long-round'
   )
-  const size = 32
+  const size = setSizeTrayImage()
   const bgColor = !bgVar ? '#2F384B' : bgVar
   const workColor = !focusVar ? '#FF4E4D' : focusVar
   const shortBreakColor = !shortVar ? '#05EB8B' : shortVar
