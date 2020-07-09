@@ -112,7 +112,8 @@ function toggleWindow() {
 }
 
 function createTray() {
-  tray = new Tray(path.join(__static, 'icon-18.png'))
+  const trayIconFile = process.platform === 'darwin' ? 'icon--macos--tray.png' : 'icon.png'
+  tray = new Tray(path.join(__static, trayIconFile))
   tray.setToolTip('Pomotroid\nClick to Restore')
   tray.on('click', () => {
     toggleWindow()
