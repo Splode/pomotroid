@@ -35,7 +35,12 @@ export default {
       }
       this.lastElapsed = elapsed
       this.total = total
-      const image = createTrayImage(this.currentRound, this.paused, this.lastElapsed, this.total)
+      const image = createTrayImage(
+        this.currentRound,
+        this.paused,
+        this.lastElapsed,
+        this.total
+      )
       ipcRenderer.send('tray-icon-update', image)
     }
 
@@ -53,6 +58,12 @@ export default {
 
     EventBus.$on('ready-work', () => {
       this.currentRound = 'work'
+      this.lastElapsed = -1
+      updateTrayImage(0, 1)
+    })
+
+    EventBus.$on('timer-reset', () => {
+      this.paused = true
       this.lastElapsed = -1
       updateTrayImage(0, 1)
     })
