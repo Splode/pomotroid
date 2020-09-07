@@ -7,8 +7,10 @@ import { EventBus } from '@/utils/EventBus'
 export default {
   data() {
     return {
-      state: null,
-      lastUpdate: 0
+      currentRound: null,
+      paused: true,
+      lastElapsed: 0,
+      total: 1
     }
   },
 
@@ -24,49 +26,61 @@ export default {
         return
       }
       if (
-        this.lastUpdate < elapsed &&
-        (elapsed - this.lastUpdate) / total < 0.01
+        !this.paused &&
+        this.lastElapsed < elapsed &&
+        (elapsed - this.lastElapsed) / total < 0.01
       ) {
         // avoid updates without visual difference
         return
       }
-      this.lastUpdate = elapsed
-      const image = createTrayImage(this.state, elapsed, total)
+      this.lastElapsed = elapsed
+      this.total = total
+      const image = createTrayImage(this.currentRound, this.paused, this.lastElapsed, this.total)
       ipcRenderer.send('tray-icon-update', image)
     }
 
-    const updateStateAndResetTimer = (state) => {
-      this.state = state
-      updateTrayImage(0, 1)
-    }
-
     EventBus.$on('ready-long-break', () => {
-      updateStateAndResetTimer('long-break')
+      this.currentRound = 'long-break'
+      this.lastElapsed = -1
+      updateTrayImage(0, 1)
     })
 
     EventBus.$on('ready-short-break', () => {
-      updateStateAndResetTimer('short-break')
+      this.currentRound = 'short-break'
+      this.lastElapsed = -1
+      updateTrayImage(0, 1)
     })
 
     EventBus.$on('ready-work', () => {
-      updateStateAndResetTimer('work')
-    })
-
-    EventBus.$on('call-timer-reset', () => {
-      updateStateAndResetTimer('work')
+      this.currentRound = 'work'
+      this.lastElapsed = -1
+      updateTrayImage(0, 1)
     })
 
     EventBus.$on('timer-tick', payload => {
       updateTrayImage(payload.elapsed, payload.total)
     })
+
+    EventBus.$on('timer-started', () => {
+      this.paused = false
+      updateTrayImage(this.lastElapsed, this.total)
+    })
+
+    EventBus.$on('timer-paused', () => {
+      this.paused = true
+      updateTrayImage(this.lastElapsed, this.total)
+    })
+
+    EventBus.$on('timer-completed', () => {
+      this.paused = true
+      updateTrayImage(this.lastElapsed, this.total)
+    })
+
+    updateTrayImage(this.lastElapsed, this.total)
   }
 }
 
-function setSizeTrayImage() {
-  return process.platform === 'darwin' ? 19 : 32
-}
-
-function createTrayImage(state, elapsed, total) {
+function createTrayImage(currentRound, paused, elapsed, total) {
   const bgVar = document.documentElement.style.getPropertyValue(
     '--color-background'
   )
@@ -88,8 +102,8 @@ function createTrayImage(state, elapsed, total) {
   const arcLineWidthRatio = 0.3
 
   const remainingTime = 1 - elapsed / total
-  const arcColor =
-    state === 'short-break' ? shortBreakColor : state === 'long-break'
+  const fgColor =
+    currentRound === 'short-break' ? shortBreakColor : currentRound === 'long-break'
       ? longBreakColor
       : workColor
   const outerRadius = size / 2
@@ -99,6 +113,7 @@ function createTrayImage(state, elapsed, total) {
   const startAngle = -Math.PI / 2
   const endAngle = remainingTime * fullCircle + startAngle
   const center = outerRadius
+  const pauseStrokesHalfDistance = innerRadius / 1.7
 
   const canvas = document.createElement('canvas')
   canvas.width = size
@@ -107,18 +122,31 @@ function createTrayImage(state, elapsed, total) {
   const ctx = canvas.getContext('2d')
 
   ctx.fillStyle = bgColor
-  ctx.strokeStyle = arcColor
+  ctx.strokeStyle = fgColor
   ctx.lineWidth = lineWidth
 
   ctx.beginPath()
   ctx.arc(center, center, outerRadius, 0, fullCircle, false)
   ctx.fill()
 
-  ctx.beginPath()
-  ctx.arc(center, center, innerRadius, startAngle, endAngle, false)
-  ctx.stroke()
+  if (paused) {
+    ctx.beginPath()
+    ctx.moveTo(center - pauseStrokesHalfDistance, center - innerRadius)
+    ctx.lineTo(center - pauseStrokesHalfDistance, center + innerRadius)
+    ctx.moveTo(center + pauseStrokesHalfDistance, center - innerRadius)
+    ctx.lineTo(center + pauseStrokesHalfDistance, center + innerRadius)
+    ctx.stroke()
+  } else {
+    ctx.beginPath()
+    ctx.arc(center, center, innerRadius, startAngle, endAngle, false)
+    ctx.stroke()
+  }
 
   const dataUrl = canvas.toDataURL('image/png')
   return dataUrl
+}
+
+function setSizeTrayImage() {
+  return process.platform === 'darwin' ? 19 : 32
 }
 </script>
