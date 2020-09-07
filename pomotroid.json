@@ -2,7 +2,7 @@
   "version": "0.12.0",
   "bin": [["pomotroid-0.12.0-portable.exe", "pomotroid"]],
   "url": "https://github.com/Splode/pomotroid/releases/download/v0.12.0/pomotroid-0.12.0-portable.exe",
-  "hash": "3ea0f81d7a4ee2d8993e9ad83e7513b4a6a83d6cb11809518086a3b3a07e3b25",
+  "hash": "8e743f94164376b38856ef71e09b9e2f6226d68f994306e99955d68c8a1a7a74",
   "description": "A simple and configurable Pomodoro timer. It provides a visually-pleasing and reliable way to track productivity using the Pomodoro Technique.",
   "homepage": "https://github.com/splode/pomotroid",
   "license": "MIT",
