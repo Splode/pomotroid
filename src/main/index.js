@@ -34,6 +34,9 @@ app.on('ready', () => {
 
   // this must be set after window has been created on ubuntu 18.04
   mainWindow.setAlwaysOnTop(alwaysOnTop)
+
+  // remove menu to stop the window being closed on Ctrl+W. See #121
+  mainWindow.setMenu(null)
 })
 
 app.on('window-all-closed', () => {
