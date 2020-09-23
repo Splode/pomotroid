@@ -26,11 +26,19 @@
       ></div>
     </div>
     <div class="Setting-wrapper">
-      <p class="Setting-title">Tick Sounds</p>
+      <p class="Setting-title">Tick Sounds - Work</p>
       <div
         class="Checkbox"
         @click="selectTickSounds"
         :class="tickSounds ? 'is-active' : 'is-inactive'"
+      ></div>
+    </div>
+    <div class="Setting-wrapper">
+      <p class="Setting-title">Tick Sounds - Break</p>
+      <div
+        class="Checkbox"
+        @click="selectTickSoundsDuringBreak"
+        :class="tickSoundsDuringBreak ? 'is-active' : 'is-inactive'"
       ></div>
     </div>
     <div class="Setting-wrapper">
@@ -97,6 +105,10 @@ export default {
 
     tickSounds() {
       return this.$store.getters.tickSounds
+    },
+
+    tickSoundsDuringBreak() {
+      return this.$store.getters.tickSoundsDuringBreak
     }
   },
 
@@ -159,6 +171,10 @@ export default {
 
     selectTickSounds() {
       this.$store.dispatch('setTickSounds', !this.tickSounds)
+    },
+
+    selectTickSoundsDuringBreak() {
+      this.$store.dispatch('setTickSoundsDuringBreak', !this.tickSoundsDuringBreak)
     }
   }
 }
