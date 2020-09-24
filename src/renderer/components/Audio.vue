@@ -67,9 +67,9 @@ export default {
 
     EventBus.$on('timer-tick', () => {
       this.$refs['audio-tick'].volume = this.volume
-      if (!this.tickSounds) return
       const isBreak = this.currentRound === 'short-break' || this.currentRound === 'long-break'
-      if (!this.tickSoundsDuringBreak && isBreak) return
+      if (isBreak && !this.tickSoundsDuringBreak) return
+      if (!isBreak && !this.tickSounds) return
       this.$refs['audio-tick'].play()
     })
 
