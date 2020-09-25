@@ -38,8 +38,14 @@ export default {
 
   computed: {
     // store getters
+    currentRound() {
+      return this.$store.getters.currentRound
+    },
     tickSounds() {
       return this.$store.getters.tickSounds
+    },
+    tickSoundsDuringBreak() {
+      return this.$store.getters.tickSoundsDuringBreak
     },
     volume() {
       return this.$store.getters.volume * 0.01
@@ -61,7 +67,9 @@ export default {
 
     EventBus.$on('timer-tick', () => {
       this.$refs['audio-tick'].volume = this.volume
-      if (!this.tickSounds) return
+      const isBreak = this.currentRound === 'short-break' || this.currentRound === 'long-break'
+      if (isBreak && !this.tickSoundsDuringBreak) return
+      if (!isBreak && !this.tickSounds) return
       this.$refs['audio-tick'].play()
     })
 
