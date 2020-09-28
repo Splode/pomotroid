@@ -2,7 +2,7 @@
 
 import { logger } from './../renderer/utils/logger'
 import { createLocalStore } from './../renderer/utils/LocalStore'
-import { app, BrowserWindow, ipcMain, Tray, nativeImage } from 'electron'
+import { app, globalShortcut, BrowserWindow, ipcMain, Tray, nativeImage } from 'electron'
 
 const electron = require('electron')
 const path = require('path')
@@ -22,7 +22,7 @@ const winURL =
     ? 'http://localhost:9080'
     : `file://${__dirname}/index.html`
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   logger.info('app ready')
   createWindow()
   const minToTray = localStore.get('minToTray')
@@ -37,6 +37,9 @@ app.on('ready', () => {
 
   // remove menu to stop the window being closed on Ctrl+W. See #121
   mainWindow.setMenu(null)
+
+  // load shortcuts from storage
+  loadGlobalShortcuts(localStore.get('globalShortcuts'))
 })
 
 app.on('window-all-closed', () => {
@@ -79,6 +82,13 @@ ipcMain.on('window-minimize', (event, arg) => {
 ipcMain.on('tray-icon-update', (event, image) => {
   const nativeImg = nativeImage.createFromDataURL(image)
   tray.setImage(nativeImg)
+})
+
+ipcMain.on('reload-global-shortcuts', (event, shortcuts) => {
+  // reload shortcuts when they are modified.
+  logger.info('reload global shortcuts')
+  globalShortcut.unregisterAll()
+  loadGlobalShortcuts(shortcuts)
 })
 
 function getNewWindowPosition() {
@@ -158,6 +168,16 @@ function createWindow() {
 
   mainWindow.on('closed', () => {
     mainWindow = null
+  })
+}
+
+function loadGlobalShortcuts(globalShortcuts) {
+  Object.keys(globalShortcuts).forEach((key) => {
+    logger.info(`Registering shortcut for ${key}: ${globalShortcuts[key]}`)
+    globalShortcut.register(globalShortcuts[key], () => {
+      logger.info(`Command received: ${key}`)
+      mainWindow.webContents.send('event-bus', key)
+    })
   })
 }
 

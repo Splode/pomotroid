@@ -11,7 +11,8 @@ const state = {
   timeShortBreak: parseInt(localStore.get('timeShortBreak')),
   timeWork: parseInt(localStore.get('timeWork')),
   currentRound: 'work', // work, short-break, long-break
-  volume: localStore.get('volume') || 100
+  volume: localStore.get('volume') || 100,
+  globalShortcuts: localStore.get('globalShortcuts') || {}
 }
 
 const getters = {
@@ -44,6 +45,9 @@ const getters = {
   },
   volume() {
     return state.volume
+  },
+  globalShortcuts() {
+    return state.globalShortcuts
   }
 }
 
@@ -97,6 +101,10 @@ const mutations = {
 
   SET_VOLUME(state, payload) {
     state.volume = payload
+  },
+
+  SET_GLOBAL_SHORTCUTS(state, shortcuts) {
+    state.globalShortcuts = shortcuts
   }
 }
 
@@ -158,6 +166,11 @@ const actions = {
   setVolume({ commit }, payload) {
     commit('SET_VOLUME', payload)
     localStore.set('volume', payload)
+  },
+
+  setGlobalShortcuts({ commit }, globalShortcuts) {
+    commit('SET_GLOBAL_SHORTCUTS', globalShortcuts)
+    localStore.set('globalShortcuts', globalShortcuts)
   }
 }
 
