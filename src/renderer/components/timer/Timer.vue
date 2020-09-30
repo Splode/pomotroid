@@ -128,6 +128,7 @@ import appTimerDial from '@/components/timer/Timer-dial'
 import appTimerFooter from '@/components/timer/Timer-footer'
 import { EventBus } from '@/utils/EventBus'
 import { logger } from '@/utils/logger'
+import { ipcRenderer } from 'electron'
 
 export default {
   components: {
@@ -307,6 +308,13 @@ export default {
       this.timerWorker.postMessage({ event: 'start' })
       this.timerActive = true
       this.timerStarted = true
+    },
+    toggleTimer() {
+      if (this.timerActive) {
+        this.pauseTimer()
+      } else {
+        this.startTimer()
+      }
     }
   },
 
@@ -334,16 +342,27 @@ export default {
       logger.info(`${this.currentRoundDisplay} round reset`)
     })
 
+    EventBus.$on('call-timer-toggle', () => {
+      logger.info(`${this.currentRoundDisplay} toggle`)
+      this.toggleTimer()
+    })
+
+    EventBus.$on('call-timer-skip', () => {
+      EventBus.$emit('timer-completed')
+    })
+
+    ipcRenderer.on('event-bus', (event, arg) => {
+      // Event Bus events from main
+      logger.info(`event-bus ${arg}`)
+      EventBus.$emit(arg)
+    })
+
     // Bind event listener to Space key
     window.addEventListener(
       'keypress',
       e => {
         if (e.code === 'Space') {
-          if (this.timerActive) {
-            this.pauseTimer()
-          } else {
-            this.startTimer()
-          }
+          this.toggleTimer()
         }
       },
       true
