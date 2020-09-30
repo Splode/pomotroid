@@ -21,10 +21,16 @@ function generateSettings() {
     workRounds: 4,
     theme: null,
     tickSounds: false,
+    tickSoundsDuringBreak: true,
     timeLongBreak: 15,
     timeShortBreak: 5,
     timeWork: 25,
-    volume: 100
+    volume: 100,
+    globalShortcuts: { // If new shortcuts are added, the migrations of this should be handled
+      'call-timer-toggle': 'Control+F1',
+      'call-timer-reset': 'Control+F2',
+      'call-timer-skip': 'Control+F3'
+    }
   }
 }
 
@@ -56,6 +62,7 @@ export default class LocalStore {
     const userDataPath = userDir()
     this.path = path.join(userDataPath, filename + '.json')
     this.data = parseDataFile(this.path, data)
+    logger.info(`Preferences loaded from ${this.path}`)
   }
 
   /**

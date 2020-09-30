@@ -6,11 +6,13 @@ const state = {
   workRounds: parseInt(localStore.get('workRounds')),
   totalWorkRounds: 0,
   tickSounds: localStore.get('tickSounds'),
+  tickSoundsDuringBreak: localStore.get('tickSoundsDuringBreak'),
   timeLongBreak: parseInt(localStore.get('timeLongBreak')),
   timeShortBreak: parseInt(localStore.get('timeShortBreak')),
   timeWork: parseInt(localStore.get('timeWork')),
   currentRound: 'work', // work, short-break, long-break
-  volume: localStore.get('volume') || 100
+  volume: localStore.get('volume') || 100,
+  globalShortcuts: localStore.get('globalShortcuts') || {}
 }
 
 const getters = {
@@ -22,6 +24,9 @@ const getters = {
   },
   tickSounds() {
     return state.tickSounds
+  },
+  tickSoundsDuringBreak() {
+    return state.tickSoundsDuringBreak
   },
   totalWorkRounds() {
     return state.totalWorkRounds
@@ -40,6 +45,9 @@ const getters = {
   },
   volume() {
     return state.volume
+  },
+  globalShortcuts() {
+    return state.globalShortcuts
   }
 }
 
@@ -71,6 +79,10 @@ const mutations = {
     state.tickSounds = payload
   },
 
+  SET_TICK_SOUNDS_DURING_BREAK(state, payload) {
+    state.tickSoundsDuringBreak = payload
+  },
+
   SET_TIME_LONG_BREAK(state, payload) {
     state.timeLongBreak = payload
   },
@@ -89,6 +101,10 @@ const mutations = {
 
   SET_VOLUME(state, payload) {
     state.volume = payload
+  },
+
+  SET_GLOBAL_SHORTCUTS(state, shortcuts) {
+    state.globalShortcuts = shortcuts
   }
 }
 
@@ -122,6 +138,11 @@ const actions = {
     localStore.set('tickSounds', payload)
   },
 
+  setTickSoundsDuringBreak({ commit }, payload) {
+    commit('SET_TICK_SOUNDS_DURING_BREAK', payload)
+    localStore.set('tickSoundsDuringBreak', payload)
+  },
+
   setTimeLongBreak({ commit }, payload) {
     commit('SET_TIME_LONG_BREAK', payload)
     localStore.set('timeLongBreak', payload)
@@ -145,6 +166,11 @@ const actions = {
   setVolume({ commit }, payload) {
     commit('SET_VOLUME', payload)
     localStore.set('volume', payload)
+  },
+
+  setGlobalShortcuts({ commit }, globalShortcuts) {
+    commit('SET_GLOBAL_SHORTCUTS', globalShortcuts)
+    localStore.set('globalShortcuts', globalShortcuts)
   }
 }
 
