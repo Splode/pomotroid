@@ -69,19 +69,25 @@
     <p class="Drawer-heading">Global Shortcuts</p>
 
     <div class="Setting-wrapper">
-      <p class="Setting-title">Shortcut for toggle timer</p>
-      <shortcut-input :value="globalShortcuts['call-timer-toggle']"
-                      @input="(shortcut) => setGlobalShortcut('call-timer-toggle', shortcut)" />
+      <p class="Setting-title">Toggle Timer</p>
+      <shortcut-input
+        :value="globalShortcuts['call-timer-toggle']"
+        @input="shortcut => setGlobalShortcut('call-timer-toggle', shortcut)"
+      />
     </div>
     <div class="Setting-wrapper">
-      <p class="Setting-title">Shortcut for reset timer</p>
-      <shortcut-input :value="globalShortcuts['call-timer-reset']"
-                      @input="(shortcut) => setGlobalShortcut('call-timer-reset', shortcut)" />
+      <p class="Setting-title">Reset Timer</p>
+      <shortcut-input
+        :value="globalShortcuts['call-timer-reset']"
+        @input="shortcut => setGlobalShortcut('call-timer-reset', shortcut)"
+      />
     </div>
     <div class="Setting-wrapper">
-      <p class="Setting-title">Shortcut for skip timer</p>
-      <shortcut-input :value="globalShortcuts['call-timer-skip']"
-                      @input="(shortcut) => setGlobalShortcut('call-timer-skip', shortcut)" />
+      <p class="Setting-title">Skip Round</p>
+      <shortcut-input
+        :value="globalShortcuts['call-timer-skip']"
+        @input="shortcut => setGlobalShortcut('call-timer-skip', shortcut)"
+      />
     </div>
   </div>
 </template>
@@ -197,7 +203,10 @@ export default {
     },
 
     selectTickSoundsDuringBreak() {
-      this.$store.dispatch('setTickSoundsDuringBreak', !this.tickSoundsDuringBreak)
+      this.$store.dispatch(
+        'setTickSoundsDuringBreak',
+        !this.tickSoundsDuringBreak
+      )
     },
 
     setGlobalShortcut(event, shortcut) {
