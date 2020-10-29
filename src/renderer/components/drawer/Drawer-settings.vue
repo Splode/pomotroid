@@ -196,8 +196,8 @@ export default {
     background-color: var(--color-accent);
     border-color: var(--color-background);
     &:hover {
-      background-color: var(--color-background);
-      border-color: var(--color-accent);
+      background-color: var(--color-accent);
+      border-color: var(--color-background-lightest);
     }
   }
 }
