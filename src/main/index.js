@@ -56,6 +56,21 @@ ipcMain.on('toggle-alwaysOnTop', (event, arg) => {
   mainWindow.setAlwaysOnTop(arg)
 })
 
+let breakAlwaysOnTop
+
+ipcMain.on('toggle-breakAlwaysOnTop', (event, arg) => {
+  breakAlwaysOnTop = arg
+  if (breakAlwaysOnTop === false) {
+    mainWindow.setAlwaysOnTop(true)
+  }
+})
+
+ipcMain.on('onBreak', (event, arg) => {
+  if (breakAlwaysOnTop === true) {
+    mainWindow.setAlwaysOnTop(!arg)
+  }
+})
+
 ipcMain.on('toggle-minToTray', (event, arg) => {
   if (arg) {
     createTray()

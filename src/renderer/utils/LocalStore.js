@@ -13,6 +13,7 @@ export const defaults = generateSettings()
 function generateSettings() {
   return {
     alwaysOnTop: false,
+    breakAlwaysOnTop: false,
     autoStartWorkTimer: true,
     autoStartBreakTimer: true,
     minToTray: false,
