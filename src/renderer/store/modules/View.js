@@ -12,6 +12,7 @@ const state = {
       ? true
       : localStore.get('autoStartBreakTimer'),
   alwaysOnTop: localStore.get('alwaysOnTop'),
+  breakAlwaysOnTop: localStore.get('breakAlwaysOnTop'),
   minToTray: localStore.get('minToTray'),
   minToTrayOnClose: localStore.get('minToTrayOnClose'),
   notifications: localStore.get('notifications'),
@@ -38,6 +39,10 @@ const getters = {
 
   alwaysOnTop() {
     return state.alwaysOnTop
+  },
+
+  breakAlwaysOnTop() {
+    return state.breakAlwaysOnTop
   },
 
   minToTray() {

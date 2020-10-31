@@ -9,6 +9,17 @@
         :class="alwaysOnTop ? 'is-active' : 'is-inactive'"
       ></div>
     </div>
+    <transition name="slide-left" mode="in-out">
+      <div class="Setting-wrapper" v-show="alwaysOnTop">
+        <p class="Setting-title">Deactivate Always On Top on Breaks</p>
+        <div
+          class="Checkbox"
+          @click="selectBreakAlwaysOnTop"
+          :class="breakAlwaysOnTop ? 'is-active' : 'is-inactive'"
+          ref="breakAlwaysOnTopCheckbox"
+        ></div>
+      </div>
+    </transition>
     <div class="Setting-wrapper">
       <p class="Setting-title">Auto-start Work Timer</p>
       <div
@@ -104,6 +115,10 @@ export default {
       return this.$store.getters.alwaysOnTop
     },
 
+    breakAlwaysOnTop() {
+      return this.$store.getters.breakAlwaysOnTop
+    },
+
     autoStartWorkTimer() {
       return this.$store.getters.autoStartWorkTimer
     },
@@ -148,6 +163,21 @@ export default {
         val: !this.alwaysOnTop
       }
       ipcRenderer.send('toggle-alwaysOnTop', !this.alwaysOnTop)
+      this.$store.dispatch('setSetting', payload)
+      this.$store.dispatch('setViewState', payload)
+
+      if (this.alwaysOnTop === false && this.breakAlwaysOnTop === true) {
+        this.$refs.breakAlwaysOnTopCheckbox.click()
+      }
+    },
+
+    selectBreakAlwaysOnTop() {
+      const payload = {
+        key: 'breakAlwaysOnTop',
+        val: !this.breakAlwaysOnTop
+      }
+
+      ipcRenderer.send('toggle-breakAlwaysOnTop', !this.breakAlwaysOnTop)
       this.$store.dispatch('setSetting', payload)
       this.$store.dispatch('setViewState', payload)
     },
