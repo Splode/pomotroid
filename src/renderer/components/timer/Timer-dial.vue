@@ -132,7 +132,11 @@ export default {
       this.dial = anime({
         targets: '.Dial-fill path',
         strokeDashoffset: [anime.setDashoffset, 0],
-        easing: 'linear',
+        easing: function(el, i, total) {
+          return function(t) {
+            return t.toFixed(3)
+          }
+        },
         duration: duration,
         direction: 'reverse',
         autoplay: false
