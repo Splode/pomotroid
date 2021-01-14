@@ -9,8 +9,6 @@
 
 ---
 
-[![Build Status](https://travis-ci.org/Splode/pomotroid.svg?branch=master)](https://travis-ci.org/Splode/pomotroid)
-
 - [Overview](#overview)
 - [Features](#features)
   - [Themes](#themes)
