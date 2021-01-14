@@ -2,7 +2,14 @@
 
 import { logger } from './../renderer/utils/logger'
 import { createLocalStore } from './../renderer/utils/LocalStore'
-import { app, globalShortcut, BrowserWindow, ipcMain, Tray, nativeImage } from 'electron'
+import {
+  app,
+  globalShortcut,
+  BrowserWindow,
+  ipcMain,
+  Tray,
+  nativeImage
+} from 'electron'
 
 const electron = require('electron')
 const path = require('path')
@@ -21,6 +28,8 @@ const winURL =
   process.env.NODE_ENV === 'development'
     ? 'http://localhost:9080'
     : `file://${__dirname}/index.html`
+
+app.disableHardwareAcceleration()
 
 app.whenReady().then(() => {
   logger.info('app ready')
@@ -114,7 +123,9 @@ function getNewWindowPosition() {
   const primaryDisplay = electronScreen.getPrimaryDisplay()
 
   // Center window horizontally below the tray icon
-  const x = Math.round(trayBounds.x + (trayBounds.width / 2) - (windowBounds.width / 2))
+  const x = Math.round(
+    trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2
+  )
 
   // Position window 4 pixels vertically below the tray icon
   // Adjust according if tray is at the bottom
@@ -140,7 +151,8 @@ function toggleWindow() {
 }
 
 function createTray() {
-  const trayIconFile = process.platform === 'darwin' ? 'icon--macos--tray.png' : 'icon.png'
+  const trayIconFile =
+    process.platform === 'darwin' ? 'icon--macos--tray.png' : 'icon.png'
   tray = new Tray(path.join(__static, trayIconFile))
   tray.setToolTip('Pomotroid\nClick to Restore')
   tray.on('click', () => {
@@ -187,7 +199,7 @@ function createWindow() {
 }
 
 function loadGlobalShortcuts(globalShortcuts) {
-  Object.keys(globalShortcuts).forEach((key) => {
+  Object.keys(globalShortcuts).forEach(key => {
     logger.info(`Registering shortcut for ${key}: ${globalShortcuts[key]}`)
     globalShortcut.register(globalShortcuts[key], () => {
       logger.info(`Command received: ${key}`)
