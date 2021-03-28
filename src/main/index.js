@@ -14,6 +14,7 @@ import {
 const electron = require('electron')
 const path = require('path')
 const localStore = createLocalStore()
+const WebSocket = require('ws')
 
 /**
  * Set `__static` path to static files in production
@@ -115,6 +116,17 @@ ipcMain.on('reload-global-shortcuts', (event, shortcuts) => {
   loadGlobalShortcuts(shortcuts)
 })
 
+ipcMain.on('round-change', (event, round) => {
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify({
+        event: 'round-change',
+        state: round
+      }))
+    }
+  })
+})
+
 function getNewWindowPosition() {
   const windowBounds = mainWindow.getBounds()
   const trayBounds = tray.getBounds()
@@ -177,7 +189,8 @@ function createWindow() {
     height: 478,
     webPreferences: {
       backgroundThrottling: false,
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true
     }
   })
 
@@ -207,6 +220,24 @@ function loadGlobalShortcuts(globalShortcuts) {
     })
   })
 }
+
+// eslint-disable-next-line no-new
+const wss = new WebSocket.Server({
+  port: 8080
+
+})
+
+wss.on('event', (data) => {
+  logger.info(`New Websocket Message ${data}`)
+})
+
+wss.on('error', (err) => {
+  console.error(err)
+})
+
+wss.on('connection', (ws) => {
+  logger.info('New Websocket Connection')
+})
 
 /**
  * Auto Updater
