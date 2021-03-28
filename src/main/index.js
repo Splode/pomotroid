@@ -16,6 +16,8 @@ const path = require('path')
 const localStore = createLocalStore()
 const WebSocket = require('ws')
 
+let timerState = null
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -117,6 +119,8 @@ ipcMain.on('reload-global-shortcuts', (event, shortcuts) => {
 })
 
 ipcMain.on('round-change', (event, round) => {
+  timerState = round
+
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify({
@@ -227,16 +231,25 @@ const wss = new WebSocket.Server({
 
 })
 
-wss.on('event', (data) => {
+wss.on('message', (data) => {
   logger.info(`New Websocket Message ${data}`)
 })
 
 wss.on('error', (err) => {
-  console.error(err)
+  logger.error(err)
 })
 
 wss.on('connection', (ws) => {
   logger.info('New Websocket Connection')
+
+  ws.on('message', (data) => {
+    if (data === 'get-current-state') {
+      ws.send(JSON.stringify({
+        event: 'round-change',
+        state: timerState
+      }))
+    }
+  })
 })
 
 /**
