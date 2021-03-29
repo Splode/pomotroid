@@ -15,6 +15,9 @@ const electron = require('electron')
 const path = require('path')
 const localStore = createLocalStore()
 const WebSocket = require('ws')
+const fs = require('fs')
+
+let blacklistSites = []
 
 let timerState = null
 
@@ -125,7 +128,9 @@ ipcMain.on('round-change', (event, round) => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(JSON.stringify({
         event: 'round-change',
-        state: round
+        data: {
+          state: timerState
+        }
       }))
     }
   })
@@ -225,6 +230,12 @@ function loadGlobalShortcuts(globalShortcuts) {
   })
 }
 
+if (process.env.POMOTROID_LIST) {
+  const blacklistContents = fs.readFileSync(process.env.POMOTROID_LIST, 'utf8')
+
+  blacklistSites = blacklistContents.split('\n')
+}
+
 // eslint-disable-next-line no-new
 const wss = new WebSocket.Server({
   port: 8080
@@ -246,7 +257,14 @@ wss.on('connection', (ws) => {
     if (data === 'get-current-state') {
       ws.send(JSON.stringify({
         event: 'round-change',
-        state: timerState
+        data: {
+          state: timerState
+        }
+      }))
+    } else if (data === 'get-blacklist-sites') {
+      ws.send(JSON.stringify({
+        event: 'blacklist-sites',
+        data: blacklistSites
       }))
     }
   })
