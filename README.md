@@ -58,7 +58,7 @@ Pomotroid is available for Windows, Mac OSX and Linux.
 You can also install Pomotroid on macOS with [Homebrew](https://brew.sh):
 
 ```sh
-brew cask install pomotroid
+brew install --cask pomotroid
 ```
 
 ### Scoop
