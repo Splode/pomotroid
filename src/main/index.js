@@ -14,6 +14,7 @@ import {
 const electron = require('electron')
 const path = require('path')
 const localStore = createLocalStore()
+import { init as websocketInit } from './sockets'
 
 /**
  * Set `__static` path to static files in production
@@ -49,6 +50,9 @@ app.whenReady().then(() => {
 
   // load shortcuts from storage
   loadGlobalShortcuts(localStore.get('globalShortcuts'))
+
+  // launch local websocket on port 1314
+  websocketInit(1314)
 })
 
 app.on('window-all-closed', () => {
