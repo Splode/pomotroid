@@ -4,14 +4,21 @@
 
 > 2021-01-14
 
-### Chore
+### Bug Fixes
+
+* 2695b5c [#108](https://github.com/Splode/pomotroid/issues/108) Visual feedback for settings checkbox
+* a26fc10 tick sounds correctly during break
+* dfca313 disable menu so Ctrl+W doesn't close app
+* 8f54ba7 scoop manifest hash for v0.12.0
+
+### Chores
 
 * b4eeef1 update various deps
 * 6888de6 update various deps
 * 8e34a5f add codeql github action
 * 561073e update scoop manifest for v0.12.0
 
-### Ci
+### Continuous Integration
 
 * ba5c617 add electron-builder workflow
 
@@ -19,19 +26,12 @@
 
 * 4c36ec6 add contributing guide
 
-### Feat
+### Features
 
 * 432a118 default to hardware acceleration disabled
 * 1919001 adjust shortcut input styling
 * adf449d set tick sounds during break default to true
 * 351d14a Add option to disable tick sounds during break
-
-### Fix
-
-* 2695b5c [#108](https://github.com/Splode/pomotroid/issues/108) Visual feedback for settings checkbox
-* a26fc10 tick sounds correctly during break
-* dfca313 disable menu so Ctrl+W doesn't close app
-* 8f54ba7 scoop manifest hash for v0.12.0
 
 
 <a name="v0.12.0"></a>
@@ -39,15 +39,15 @@
 
 > 2020-09-06
 
-### Chore
+### Bug Fixes
+
+* d09e775 update tray icon state on timer-reset event
+
+### Chores
 
 * a79e03e update mini-css-extract-plugin
 * badd6b5 update various deps
 * 350dd44 update scoop manifest for v0.11.1
-
-### Fix
-
-* d09e775 update tray icon state on timer-reset event
 
 
 <a name="v0.11.1"></a>
@@ -55,11 +55,11 @@
 
 > 2020-07-01
 
-### Chore
+### Chores
 
 * 0a1eae9 update pomotroid scoop manifest for v0.11.0
 
-### Feat
+### Features
 
 * ca0908b update macOS runtime, build icons
 
@@ -69,7 +69,7 @@
 
 > 2020-06-28
 
-### Chore
+### Chores
 
 * 9059f08 update scoop manifest to v0.10.0
 
@@ -79,7 +79,7 @@
 * c7869d0 add theme preview img to README
 * e06381f add AppGet install instructions to README
 
-### Feat
+### Features
 
 * dfef070 add setting to minimize to tray on close
 * abf604e update macos runtime and build icons
@@ -92,16 +92,33 @@
 
 > 2020-06-01
 
-### Chore
+### Bug Fixes
+
+* c5ddf9f set default theme if not present in config
+* 423fc19 adjust various theme accent colors
+* 1386dc3 timer play and pause button using css variables
+* 750c917 contrast of pomotroid theme color
+* 203d3b5 theme asset pathing in production
+* 87e119d color timer footer icons using theme colors
+* 8e85bfa add css variables to logo in about view
+* e334eab check for existence of config, create if non-existing
+
+### Chores
 
 * 6fe7d1b update scoop manifest for v0.9.0
+
+### Code Refactoring
+
+* fb5350f use userDir func in LocalStore
+* ef4d51b Themer exports a singleton
+* 3c57dac implement color scss variables as css variables
 
 ### Docs
 
 * f17069d update to theme docs
 * 67109a1 update README, add theme docs
 
-### Feat
+### Features
 
 * 60b5278 load custom user themes
 * d82ce60 add tooltips to setting tabs
@@ -138,30 +155,17 @@
 * 210dcba add daily log rotation for activity logs
 * d19f177 log application activity to file
 
-### Fix
-
-* c5ddf9f set default theme if not present in config
-* 423fc19 adjust various theme accent colors
-* 1386dc3 timer play and pause button using css variables
-* 750c917 contrast of pomotroid theme color
-* 203d3b5 theme asset pathing in production
-* 87e119d color timer footer icons using theme colors
-* 8e85bfa add css variables to logo in about view
-* e334eab check for existence of config, create if non-existing
-
-### Refactor
-
-* fb5350f use userDir func in LocalStore
-* ef4d51b Themer exports a singleton
-* 3c57dac implement color scss variables as css variables
-
 
 <a name="v0.9.0"></a>
 ## [v0.9.0](https://github.com/Splode/pomotroid/compare/v0.8.0...v0.9.0)
 
 > 2020-05-25
 
-### Chore
+### Bug Fixes
+
+* 59a1ca8 capitalize app title
+
+### Chores
 
 * 6fc784b update scoop manifest for v0.8.0
 * cf857b6 add git-chglog config
@@ -171,14 +175,10 @@
 * cc7b6e9 update CHANGELOG
 * 856ab3e add CHANGELOG
 
-### Feat
+### Features
 
 * 20a56b7 improve accessibility of text elements
 * 5bd03d6 add tooltips to various UI components
-
-### Fix
-
-* 59a1ca8 capitalize app title
 
 
 <a name="v0.8.0"></a>
@@ -186,7 +186,7 @@
 
 > 2020-05-09
 
-### Chore
+### Chores
 
 * ef77bc9 configure travis-ci to build on macos
 
@@ -201,19 +201,19 @@
 
 > 2020-04-03
 
+### Bug Fixes
+
+* b7a2419 time display issue during round transition
+
 ### Docs
 
 * 269cabb minor edit to README
 * f0ec86e add scoop install instruction to README
 
-### Feat
+### Features
 
 * b6a7159 change "work" display to "focus"
 * 010a941 add scoop manifest
-
-### Fix
-
-* b7a2419 time display issue during round transition
 
 
 <a name="v0.7.0"></a>
@@ -221,26 +221,26 @@
 
 > 2020-01-05
 
-### Chore
+### Bug Fixes
+
+* 1bcc01a TrayIcon EventBus listener uses new 'timer-tick' event
+* f29a5da [#57](https://github.com/Splode/pomotroid/issues/57) Hotkey to start/stop timer
+
+### Chores
 
 * bbfcd35 explicitly define artifact names per build target
 * bfe563b add tar archive as a linux build target
 * 3730a0a add snap, deb build targets
 
-### Feat
-
-* 1388945 offload timer to web worker
-
-### Fix
-
-* 1bcc01a TrayIcon EventBus listener uses new 'timer-tick' event
-* f29a5da [#57](https://github.com/Splode/pomotroid/issues/57) Hotkey to start/stop timer
-
-### Refactor
+### Code Refactoring
 
 * 85e795a change timer tick event payload structure, key name
 * 9691b95 rename local-store filename to LocalStore
 * e282f74 change event-bus filename to EventBus
+
+### Features
+
+* 1388945 offload timer to web worker
 
 ### Style
 
@@ -252,13 +252,13 @@
 
 > 2019-09-01
 
-### Chore
-
-* e4b17fc build win portable and nsis versions
-
-### Fix
+### Bug Fixes
 
 * b76b045 revert to using interval in timer
+
+### Chores
+
+* e4b17fc build win portable and nsis versions
 
 
 <a name="v0.6.1"></a>
@@ -266,7 +266,7 @@
 
 > 2019-05-17
 
-### Chore
+### Chores
 
 * eda9ed7 update node version 8 -> 10 CI configs
 * 6001cb8 upgrade various deps
@@ -292,22 +292,22 @@
 
 > 2019-02-09
 
+### Bug Fixes
+
+* 83c0681 ensure timer minute values are stored and passed as numbers (int)
+* 58f13b6 ensure only 1 instance of dial is animating, destroy/recreate dial
+* eeabedc set timer dial length on window focus, sync RAF and timer
+
 ### Docs
 
 * ab258cb add documentation to timer-dial methods, props validation
 
-### Feat
+### Features
 
 * fa61e23 display timer durations in notifications
 * 2a8151e display color-coded icons in notifications
 * 93302b6 auto-hide the volume slider after a set time, unless in use
 * 6cdec04 set volume via slider, remove explicit reference to isMuted prop
-
-### Fix
-
-* 83c0681 ensure timer minute values are stored and passed as numbers (int)
-* 58f13b6 ensure only 1 instance of dial is animating, destroy/recreate dial
-* eeabedc set timer dial length on window focus, sync RAF and timer
 
 ### Style
 
@@ -319,12 +319,12 @@
 
 > 2019-02-04
 
-### Chore
+### Chores
 
 * a042945 use product name for artifact generation, adjust about spacing
 * adf86a1 use electron-build macros for artifact name generation
 
-### Feat
+### Features
 
 * c8303ca style and structure, native open project links in about drawer
 * 6aeeef3 set icon in window constructor
@@ -336,7 +336,12 @@
 
 > 2019-02-02
 
-### Chore
+### Bug Fixes
+
+* 9f72b03 also set alwaysOnTop after window ready per ubuntu 18.04 bug
+* b42e5c2 create single localstore instance to guard against invalidation
+
+### Chores
 
 * 3a037a5 add build script for ia32 arch
 * 8efe921 minor dep upgrade
@@ -344,12 +349,7 @@
 * f4b839c upgrade anime major v3
 * d322b7f upgrade minor and patch dep versions
 
-### Fix
-
-* 9f72b03 also set alwaysOnTop after window ready per ubuntu 18.04 bug
-* b42e5c2 create single localstore instance to guard against invalidation
-
-### Refactor
+### Code Refactoring
 
 * 0573107 generate new default settings object instead of using assign
 * 2c8fe5f simplify and document local-store utility
@@ -368,7 +368,7 @@
 
 * 6444525 add mini-mode to feature roadmap
 
-### Feat
+### Features
 
 * 45dbf80 add tray icon fixes and features from [@letmaik](https://github.com/letmaik)
 
