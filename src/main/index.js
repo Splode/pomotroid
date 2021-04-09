@@ -14,12 +14,6 @@ import {
 const electron = require('electron')
 const path = require('path')
 const localStore = createLocalStore()
-const WebSocket = require('ws')
-const fs = require('fs')
-
-let blacklistSites = []
-
-let timerState = null
 
 /**
  * Set `__static` path to static files in production
@@ -121,21 +115,6 @@ ipcMain.on('reload-global-shortcuts', (event, shortcuts) => {
   loadGlobalShortcuts(shortcuts)
 })
 
-ipcMain.on('round-change', (event, round) => {
-  timerState = round
-
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({
-        event: 'round-change',
-        data: {
-          state: timerState
-        }
-      }))
-    }
-  })
-})
-
 function getNewWindowPosition() {
   const windowBounds = mainWindow.getBounds()
   const trayBounds = tray.getBounds()
@@ -229,46 +208,6 @@ function loadGlobalShortcuts(globalShortcuts) {
     })
   })
 }
-
-if (process.env.POMOTROID_LIST) {
-  const blacklistContents = fs.readFileSync(process.env.POMOTROID_LIST, 'utf8')
-
-  blacklistSites = blacklistContents.split('\n')
-}
-
-// eslint-disable-next-line no-new
-const wss = new WebSocket.Server({
-  port: 8080
-
-})
-
-wss.on('message', (data) => {
-  logger.info(`New Websocket Message ${data}`)
-})
-
-wss.on('error', (err) => {
-  logger.error(err)
-})
-
-wss.on('connection', (ws) => {
-  logger.info('New Websocket Connection')
-
-  ws.on('message', (data) => {
-    if (data === 'get-current-state') {
-      ws.send(JSON.stringify({
-        event: 'round-change',
-        data: {
-          state: timerState
-        }
-      }))
-    } else if (data === 'get-blacklist-sites') {
-      ws.send(JSON.stringify({
-        event: 'blacklist-sites',
-        data: blacklistSites
-      }))
-    }
-  })
-})
 
 /**
  * Auto Updater
