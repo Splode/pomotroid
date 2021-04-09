@@ -1,11 +1,12 @@
-const WebSocket = require('ws')
 import { ipcMain } from 'electron'
+import { logger } from './../renderer/utils/logger'
+const WebSocket = require('ws')
 
 let wss
-let timerState = null
+let timerState = 'idle'
 
 // Events
-const GET_STATE = 'state'
+const GET_STATE = 'getState'
 const ROUND_CHANGE = 'roundChange'
 
 /* Handle a round change from the renderer */
@@ -32,14 +33,13 @@ export const handleMessage = (ws, data) => {
 
   switch (parsedData.event) {
     case GET_STATE:
-      const response = {
+      sendMessage(ws, {
         event: GET_STATE,
         data: {
           state: timerState
         }
-      }
+      })
 
-      sendMessage(ws, response)
       break
     default:
   }
@@ -94,4 +94,6 @@ export const init = port => {
       handleMessage(ws, data)
     })
   })
+
+  logger.info(`Initialized local websocket on ${port}`)
 }

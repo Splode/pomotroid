@@ -10,11 +10,11 @@ import {
   Tray,
   nativeImage
 } from 'electron'
+import { init as websocketInit } from './sockets'
 
 const electron = require('electron')
 const path = require('path')
 const localStore = createLocalStore()
-import { init as websocketInit } from './sockets'
 
 /**
  * Set `__static` path to static files in production
