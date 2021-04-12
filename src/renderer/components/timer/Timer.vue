@@ -233,7 +233,7 @@ export default {
           break
         case 'pause':
           EventBus.$emit('timer-paused')
-          ipcRenderer.send('round-change', 'paused')
+          ipcRenderer.send('roundChange', 'paused')
           break
         case 'reset':
           EventBus.$emit('timer-reset')
@@ -241,13 +241,13 @@ export default {
         case 'resume':
           EventBus.$emit('timer-started')
           this.currentTime = message.data.elapsed
-          ipcRenderer.send('round-change', this.$store.getters.currentRound)
+          ipcRenderer.send('roundChange', this.$store.getters.currentRound)
           break
         case 'start':
           EventBus.$emit('timer-started')
           this.currentTime = message.data.elapsed
           logger.info(`${this.currentRoundDisplay} round started`)
-          ipcRenderer.send('round-change', this.$store.getters.currentRound)
+          ipcRenderer.send('roundChange', this.$store.getters.currentRound)
           break
         case 'tick':
           this.currentTime = message.data.elapsed
