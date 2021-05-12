@@ -150,14 +150,29 @@ function toggleWindow() {
   }
 }
 
+const Menu = require('electron')
+
 function createTray() {
   const trayIconFile =
     process.platform === 'darwin' ? 'icon--macos--tray.png' : 'icon.png'
   tray = new Tray(path.join(__static, trayIconFile))
   tray.setToolTip('Pomotroid\nClick to Restore')
-  tray.on('click', () => {
-    toggleWindow()
-  })
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Show',
+      click: function() {
+        toggleWindow()
+      }
+    },
+    {
+      label: 'Exit',
+      click: function() {
+        app.isQuiting = true
+        app.quit()
+      }
+    }
+  ])
+  tray.setContextMenu(contextMenu)
 }
 
 function createWindow() {
