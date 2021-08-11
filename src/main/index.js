@@ -141,11 +141,11 @@ function getNewWindowPosition() {
   return { x: x, y: y }
 }
 
-function toggleWindow() {
+function showWindow() {
   if (mainWindow === null) {
     createWindow()
   } else {
-    mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show()
+    mainWindow.show()
   }
 
   if (process.platform === 'darwin') {
@@ -163,7 +163,7 @@ function createTray() {
     {
       label: 'View',
       click: function() {
-        toggleWindow()
+        showWindow()
       }
     },
     {
@@ -174,9 +174,6 @@ function createTray() {
       }
     }
   ])
-  tray.on('click', () => {
-    toggleWindow()
-  })
   tray.setContextMenu(contextMenu)
 }
 
