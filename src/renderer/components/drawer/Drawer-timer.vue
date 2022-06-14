@@ -102,7 +102,7 @@ export default {
       localTimeWork: 0,
       localWorkRounds: 0,
       maxTime: 90,
-      maxRounds: 12
+      maxRounds: 16
     }
   },
 
