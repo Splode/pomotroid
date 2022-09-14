@@ -38,7 +38,7 @@ export default {
   background-color: var(--color-background-light);
   position: relative;
   width: 100%;
-  height: calc(100% - 68px);
+  height: calc(100% - 18.89vw);
   z-index: 1;
   -webkit-app-region: no-drag;
 }

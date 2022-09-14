@@ -18,7 +18,7 @@
             x="0px"
             y="0px"
             viewBox="0 0 20 20"
-            width="18"
+            width="5vw"
             xml:space="preserve"
           >
             <g>
@@ -53,7 +53,7 @@
           x="0px"
           y="0px"
           viewBox="0 0 19.5 20"
-          width="18"
+          width="5vw"
           xml:space="preserve"
         >
           <path
@@ -80,7 +80,7 @@
             xmlns="http://www.w3.org/2000/svg"
             height="24"
             viewBox="0 0 24 24"
-            width="24"
+            width="6.6vw"
             id="theme-icon"
             class="Icon"
           >
@@ -105,8 +105,8 @@
             xmlns="http://www.w3.org/2000/svg"
             id="about-icon"
             class="Icon"
-            width="24"
-            height="24"
+            width="6.6vw"
+            height="6.6vw"
             viewBox="0 0 24 24"
           >
             <path fill="none" d="M0 0h24v24H0V0z" />
@@ -151,7 +151,7 @@ export default {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 36px;
+  height: 10vw;
 }
 
 .Drawer-menu-wrapper {
@@ -175,7 +175,7 @@ export default {
     left: 0;
     transition: $transitionSnappy;
     width: 0;
-    height: 2px;
+    height: 0.5vw;
   }
   &.is-active::after {
     width: 33%;
@@ -186,10 +186,10 @@ export default {
   align-items: center;
   display: flex;
   justify-content: center;
-  width: 45px;
+  width: 12.5vw;
   height: 100%;
   &.is-active {
-    border-bottom: 4px solid var(--color-accent);
+    border-bottom: 1.1vw solid var(--color-accent);
   }
 }
 </style>

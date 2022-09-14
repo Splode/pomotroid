@@ -191,7 +191,7 @@ function createWindow() {
       process.platform === 'darwin'
         ? path.join(__static, 'icon--macos.png')
         : path.join(__static, 'icon.png'),
-    resizable: false,
+    resizable: true,
     useContentSize: true,
     width: 360,
     height: 478,
@@ -201,6 +201,7 @@ function createWindow() {
       enableRemoteModule: true
     }
   })
+  mainWindow.setAspectRatio(360 / 478)
 
   mainWindow.loadURL(winURL)
 

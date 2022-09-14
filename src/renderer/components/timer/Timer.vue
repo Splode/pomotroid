@@ -30,7 +30,7 @@
               y="0px"
               viewBox="0 0 7.6 15"
               xml:space="preserve"
-              height="15px"
+              height="4vw"
               class="Icon--start"
             >
               <polygon
@@ -57,7 +57,7 @@
               y="0px"
               viewBox="0 0 7.6 15"
               xml:space="preserve"
-              height="15px"
+              height="4vw"
             >
               <polygon
                 fill="var(--color-foreground)"
@@ -83,7 +83,7 @@
               y="0px"
               viewBox="0 0 10.9 18"
               xml:space="preserve"
-              height="15px"
+              height="4vw"
               class="Icon--pause"
             >
               <line
@@ -381,8 +381,8 @@ export default {
   display: flex;
   justify-content: center;
   transition: $transitionDefault;
-  width: 50px;
-  height: 50px;
+  width: 13.8vw;
+  height: 13.8vw;
   -webkit-app-region: no-drag;
   &:hover {
     background-color: var(--color-background-light);
@@ -398,7 +398,7 @@ export default {
 .Button-wrapper {
   display: flex;
   justify-content: center;
-  margin: 20px 0 10px 0;
+  margin: 5.5vw 0;
 }
 
 .Button-icon-wrapper {
@@ -409,7 +409,7 @@ export default {
 
 .Dial-time {
   font-family: 'RobotoMono', monospace;
-  font-size: 46px;
+  font-size: 12.7vw;
   margin: 0;
   position: absolute;
   top: 32%;
