@@ -10,8 +10,8 @@
         xmlns:xlink="http://www.w3.org/1999/xlink"
         x="0px"
         y="0px"
-        width="72px"
-        height="72px"
+        width="20vw"
+        height="20vw"
         viewBox="0 0 256 256"
         xml:space="preserve"
       >
@@ -74,21 +74,22 @@ export default {
 h2 {
   color: var(--color-short-round);
   font-weight: 400;
-  letter-spacing: 0.05em;
-  margin: 0.5em 0;
+  letter-spacing: 0.05rem;
+  margin: 0.5rem 0;
+  font-size: 1.5rem;
 }
 
 section {
   align-items: center;
   display: flex;
   flex-direction: column;
-  padding-top: 2em;
+  padding-top: 2rem;
   height: 100%;
 }
 
 .label {
-  font-size: 14px;
-  letter-spacing: 0.05em;
+  font-size: 0.7rem;
+  letter-spacing: 0.05rem;
   line-height: 2;
   & .link,
   &.link {

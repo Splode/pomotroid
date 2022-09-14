@@ -18,7 +18,7 @@
     <div class="Icon-group" style="position: absolute; top: 0; right: 0;">
       <div
         class="Icon-wrapper Icon-wrapper--titlebar Icon-wrapper--double--left"
-        style="padding-left: 18px"
+        style="padding-left: 5vw"
         @click="winMinimize"
       >
         <!-- minimize -->
@@ -32,8 +32,8 @@
           y="0px"
           viewBox="0 0 14 2"
           xml:space="preserve"
-          width="15px"
-          height="20px"
+          width="4.2vw"
+          height="5.5vw"
           class="Icon Icon--minimize"
         >
           <line
@@ -51,7 +51,7 @@
       </div>
       <div
         class="Icon-wrapper Icon-wrapper--titlebar Icon-wrapper--double--right"
-        style="padding-right: 18px"
+        style="padding-right: 5vw"
         @click="winClose"
       >
         <!-- close -->
@@ -65,7 +65,7 @@
           y="0px"
           viewBox="0 0 12.6 12.6"
           xml:space="preserve"
-          height="15px"
+          height="4.2vw"
           class="Icon Icon--close"
         >
           <line
@@ -145,10 +145,10 @@ export default {
   background-color: var(--color-background-lightest);
   display: inline-block;
   transition: $transitionDefault;
-  width: 20px;
-  height: 2px;
+  width: 5.5vw;
+  height: 0.5vw;
   &:last-child {
-    width: 10px;
+    width: 2.8vw;
   }
 }
 
@@ -160,11 +160,11 @@ export default {
   &.is-collapsed {
     & .Menu-line:first-child {
       transform: rotate(-45deg);
-      width: 12px;
+      width: 3.3vw;
     }
     & .Menu-line:last-child {
       transform: rotate(45deg);
-      width: 12px;
+      width: 3.3vw;
     }
   }
 }
@@ -173,15 +173,15 @@ export default {
   color: var(--color-short-round);
   font-size: 1rem;
   font-weight: 200;
-  padding-top: 18px;
+  padding-top: 5vw;
 }
 
 .Titlebar {
   letter-spacing: 0.05em;
-  margin-bottom: 18px;
+  margin-bottom: 5vw;
   position: relative;
   text-align: center;
-  height: 50px;
+  height: 13.9vw;
   -webkit-app-region: drag;
 }
 

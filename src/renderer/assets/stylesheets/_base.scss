@@ -14,13 +14,13 @@ p {
 }
 
 .Container {
-  padding: 0 18px;
+  padding: 0 5vw;
 }
 
 .Drawer-heading {
-  font-size: 14px;
+  font-size: 0.7rem;
   letter-spacing: 0.05rem;
-  padding-top: 10px;
+  padding-top: 2.8vw;
   text-align: center;
 }
 
@@ -34,20 +34,20 @@ p {
   align-items: center;
   display: flex;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 5.5vw;
+  height: 5.5vw;
 }
 
 .Icon-wrapper--double--right {
-  padding: 18px 18px 18px 9px;
+  padding: 5vw 5vw 5vw 2.5vw;
 }
 
 .Icon-wrapper--double--left {
-  padding: 18px 9px 18px 18px;
+  padding: 5vw 2.5vw 5vw 5vw;
 }
 
 .Icon-wrapper--single {
-  padding: 18px;
+  padding: 5vw;
 }
 
 .Icon {
@@ -56,9 +56,9 @@ p {
 
 .TextButton {
   color: var(--color-foreground-darker);
-  font-size: 14px;
-  letter-spacing: 0.05em;
-  margin-top: 12px;
+  font-size: 0.7rem;
+  letter-spacing: 0.05rem;
+  margin-top: 3.3vw;
   transition: $transitionDefault;
   &:hover {
     color: var(--color-accent);

@@ -28,9 +28,9 @@
         <svg
           v-if="theme === themer.getThemeName(t)"
           xmlns="http://www.w3.org/2000/svg"
-          height="24"
+          width="6.6vw"
+          height="6.6vw"
           viewBox="0 0 24 24"
-          width="24"
         >
           <path d="M0 0h24v24H0z" fill="none" />
           <path
@@ -73,23 +73,23 @@ export default {
 
 <style lang="scss" scoped>
 .Container {
-  max-height: calc(100% - 36px);
+  max-height: calc(100% - 10vw);
   overflow-y: auto;
 }
 
 .Setting-wrapper {
   align-items: center;
-  border-left: 3px solid;
-  border-radius: 0 4px 4px 0;
+  border-left: 0.83vw solid;
+  border-radius: 0 1.1vw 1.1vw 0;
   display: flex;
   justify-content: space-between;
-  margin: 12px 0;
-  min-height: 48px;
-  padding: 0 12px;
+  margin: 3.3vw 0;
+  min-height: 13.3vw;
+  padding: 0 3.3vw;
 }
 
 .Setting-title {
-  font-size: 14px;
-  letter-spacing: 0.05em;
+  font-size: 0.7rem;
+  letter-spacing: 0.05rem;
 }
 </style>

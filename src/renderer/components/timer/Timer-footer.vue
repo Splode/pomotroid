@@ -10,7 +10,7 @@
           >({{ totalWorkRounds }})</span
         >
       </p>
-      <p class="TextButton" title="Reset current round" @click="callForReset">
+      <p class="TextButton" title="Reset current round" @click="callForReset" style="font-size: 0.7rem;">
         Reset
       </p>
     </div>
@@ -31,7 +31,7 @@
           y="0px"
           viewBox="0 0 8 12"
           xml:space="preserve"
-          height="15px"
+          height="4vw"
           class="Icon--skip"
         >
           <polygon
@@ -65,7 +65,7 @@
             y="0px"
             viewBox="0 0 12.3 12"
             xml:space="preserve"
-            height="15px"
+            height="4vw"
             class="Icon--mute"
             v-if="localVolume > 0"
           >
@@ -85,7 +85,7 @@
             viewBox="-467 269 24 24"
             style="enable-background:new -467 269 24 24;"
             xml:space="preserve"
-            height="20px"
+            height="5vw"
             class="Icon--muted"
             v-else
           >
@@ -264,10 +264,10 @@ export default {
 }
 
 .Slider-wrapper {
-  padding: 8px;
+  padding: 2vw;
   position: absolute;
-  top: -61px;
-  right: -29px;
+  top: -17vw;
+  right: -8vw;
 }
 
 .Slider {
@@ -275,7 +275,7 @@ export default {
     background-color: var(--color-background-lightest);
   }
   &::-webkit-slider-thumb {
-    margin-top: -7px;
+    margin-top: -2vw;
     transition: $transitionDefault;
     &:hover {
       background-color: var(--color-accent);

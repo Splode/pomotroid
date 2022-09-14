@@ -12,8 +12,8 @@
       y="0px"
       viewBox="0 0 230 230"
       xml:space="preserve"
-      width="220"
-      height="220"
+      width="60vw"
+      height="60vw"
       class="Dial-fill"
       :class="dialClass"
     >
@@ -35,8 +35,8 @@
       y="0px"
       viewBox="0 0 230 230"
       xml:space="preserve"
-      width="220"
-      height="220"
+      width="60vw"
+      height="60vw"
       class="Dial-bg"
     >
       <path
@@ -204,7 +204,7 @@ export default {
 .Dial-wrapper {
   display: flex;
   justify-content: center;
-  margin-top: 35px;
+  margin-top: 10vw;
   position: relative;
 }
 
@@ -213,6 +213,7 @@ export default {
   position: absolute;
   top: 66%;
   text-transform: uppercase;
+  font-size: 4vw;
 }
 
 .Dial-bg {

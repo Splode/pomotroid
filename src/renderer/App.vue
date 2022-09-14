@@ -60,6 +60,9 @@ export default {
 </script>
 
 <style lang="scss">
+:root {
+  font-size: 5vw;
+}
 #app {
   animation: fade-in 0.5s ease forwards;
   position: relative;

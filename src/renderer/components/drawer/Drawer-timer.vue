@@ -201,24 +201,24 @@ export default {
 
 <style lang="scss" scoped>
 .Setting-wrapper {
-  margin: 10px 0;
+  margin: 2.8vw 0;
   text-align: center;
 }
 
 .Setting-title {
   color: var(--color-foreground-darkest);
-  font-size: 14px;
-  letter-spacing: 0.05em;
-  margin-bottom: 8px;
+  font-size: 0.7rem;
+  letter-spacing: 0.05rem;
+  margin-bottom: 2.2vw;
 }
 
 .Setting-value {
   background-color: var(--color-background);
-  border-radius: 4px;
+  border-radius: 1.1vw;
   display: inline-block;
   font-family: 'RobotoMono', monospace;
-  font-size: 12px;
-  padding: 2px 6px;
+  font-size: 3.3vw;
+  padding: 0.56vw 1.6vw;
 }
 
 .TextButton {

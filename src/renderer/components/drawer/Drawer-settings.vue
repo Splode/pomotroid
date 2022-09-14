@@ -255,12 +255,12 @@ export default {
 <style lang="scss" scoped>
 .Checkbox {
   background-color: var(--color-background);
-  border: 2px solid var(--color-background-lightest);
+  border: 0.56vw solid var(--color-background-lightest);
   border-radius: 100%;
   display: inline-block;
   transition: $transitionDefault;
-  width: 16px;
-  height: 16px;
+  width: 4.4vw;
+  height: 4.4vw;
   &:hover {
     border-color: var(--color-accent);
   }
@@ -275,22 +275,22 @@ export default {
 }
 
 .Container {
-  max-height: calc(100% - 36px);
+  max-height: calc(100% - 10vw);
   overflow-y: auto;
 }
 
 .Setting-wrapper {
   background-color: var(--color-background);
-  border-radius: 4px;
+  border-radius: 1.1vw;
   display: flex;
   justify-content: space-between;
-  margin: 12px 0;
-  padding: 12px;
+  margin: 3.3vw 0;
+  padding: 3.3vw;
 }
 
 .Setting-title {
   color: var(--color-foreground-darker);
-  font-size: 14px;
+  font-size: 0.7rem;
   letter-spacing: 0.05em;
 }
 </style>
