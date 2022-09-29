@@ -18,6 +18,7 @@ function generateSettings() {
     autoStartBreakTimer: true,
     minToTray: false,
     minToTrayOnClose: false,
+    openOnStart: false,
     notifications: true,
     workRounds: 4,
     theme: null,

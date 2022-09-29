@@ -37,8 +37,9 @@ app.whenReady().then(() => {
   createWindow()
   const minToTray = localStore.get('minToTray')
   const alwaysOnTop = localStore.get('alwaysOnTop')
+  const openOnStart = localStore.get('openOnStart')
 
-  if (minToTray) {
+  if (minToTray || openOnStart) {
     createTray()
   }
 
@@ -47,6 +48,10 @@ app.whenReady().then(() => {
 
   // remove menu to stop the window being closed on Ctrl+W. See #121
   mainWindow.setMenu(null)
+
+  if (openOnStart) {
+    mainWindow.hide()
+  }
 
   // load shortcuts from storage
   loadGlobalShortcuts(localStore.get('globalShortcuts'))
@@ -117,6 +122,13 @@ ipcMain.on('reload-global-shortcuts', (event, shortcuts) => {
   logger.info('reload global shortcuts')
   globalShortcut.unregisterAll()
   loadGlobalShortcuts(shortcuts)
+})
+
+ipcMain.on('open-on-start', (event, status) => {
+  electron.app.setLoginItemSettings({
+    openAtLogin: status,
+    path: electron.app.getPath('exe')
+  })
 })
 
 function getNewWindowPosition() {
