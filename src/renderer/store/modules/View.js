@@ -15,6 +15,7 @@ const state = {
   breakAlwaysOnTop: localStore.get('breakAlwaysOnTop'),
   minToTray: localStore.get('minToTray'),
   minToTrayOnClose: localStore.get('minToTrayOnClose'),
+  openOnStart: localStore.get('openOnStart'),
   notifications: localStore.get('notifications'),
   os: process.platform,
   theme: localStore.get('theme') || 'Pomotroid'
@@ -51,6 +52,10 @@ const getters = {
 
   minToTrayOnClose() {
     return state.minToTrayOnClose
+  },
+
+  openOnStart() {
+    return state.openOnStart
   },
 
   notifications() {

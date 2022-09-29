@@ -76,6 +76,14 @@
         :class="minToTrayOnClose ? 'is-active' : 'is-inactive'"
       ></div>
     </div>
+    <div class="Setting-wrapper">
+      <p class="Setting-title">Open when system starts</p>
+      <div
+        class="Checkbox"
+        @click="selectOpenOnStart"
+        :class="openOnStart ? 'is-active' : 'is-inactive'"
+      ></div>
+    </div>
 
     <p class="Drawer-heading">Global Shortcuts</p>
 
@@ -133,6 +141,10 @@ export default {
 
     minToTrayOnClose() {
       return this.$store.getters.minToTrayOnClose
+    },
+
+    openOnStart() {
+      return this.$store.getters.openOnStart
     },
 
     notifications() {
@@ -215,6 +227,16 @@ export default {
         key: 'minToTrayOnClose',
         val: !this.minToTrayOnClose
       }
+      this.$store.dispatch('setSetting', payload)
+      this.$store.dispatch('setViewState', payload)
+    },
+
+    selectOpenOnStart() {
+      const payload = {
+        key: 'openOnStart',
+        val: !this.openOnStart
+      }
+      ipcRenderer.send('open-on-start', !this.openOnStart)
       this.$store.dispatch('setSetting', payload)
       this.$store.dispatch('setViewState', payload)
     },
