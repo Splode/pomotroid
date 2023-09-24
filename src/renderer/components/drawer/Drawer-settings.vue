@@ -76,6 +76,14 @@
         :class="minToTrayOnClose ? 'is-active' : 'is-inactive'"
       ></div>
     </div>
+    <div class="Setting-wrapper">
+      <p class="Setting-title">Right Click to Reset Round</p>
+      <div
+        class="Checkbox"
+        @click="selectRightClickToResetRound"
+        :class="rightClickToResetRound ? 'is-active' : 'is-inactive'"
+      ></div>
+    </div>
 
     <p class="Drawer-heading">Global Shortcuts</p>
 
@@ -137,6 +145,10 @@ export default {
 
     notifications() {
       return this.$store.getters.notifications
+    },
+
+    rightClickToResetRound() {
+      return this.$store.getters.rightClickToResetRound
     },
 
     os() {
@@ -237,6 +249,15 @@ export default {
         'setTickSoundsDuringBreak',
         !this.tickSoundsDuringBreak
       )
+    },
+
+    selectRightClickToResetRound() {
+      const payload = {
+        key: 'rightClickToResetRound',
+        val: !this.rightClickToResetRound
+      }
+      this.$store.dispatch('setSetting', payload)
+      this.$store.dispatch('setViewState', payload)
     },
 
     setGlobalShortcut(event, shortcut) {

@@ -300,6 +300,12 @@ export default {
       this.timerStarted = false
     },
 
+    resetRound() {
+      this.$store.dispatch('setCurrentRound', 'work')
+      this.$store.dispatch('resetRound')
+      EventBus.$emit('timer-init', { auto: false })
+    },
+
     resumeTimer() {
       if (!this.timerWorker) return
       this.timerWorker.postMessage({ event: 'resume' })
@@ -342,6 +348,11 @@ export default {
 
     EventBus.$on('call-timer-reset', () => {
       this.resetTimer()
+      logger.info(`${this.currentRoundDisplay} timer reset`)
+    })
+
+    EventBus.$on('call-timer-reset-round', () => {
+      this.resetRound()
       logger.info(`${this.currentRoundDisplay} round reset`)
     })
 
