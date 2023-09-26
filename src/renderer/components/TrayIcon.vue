@@ -7,7 +7,6 @@ import { EventBus } from '@/utils/EventBus'
 export default {
   data() {
     return {
-      currentRound: null,
       paused: true,
       lastElapsed: 0,
       total: 1
@@ -15,6 +14,10 @@ export default {
   },
 
   computed: {
+    currentRound() {
+      return this.$store.getters.currentRound
+    },
+
     minToTray() {
       return this.$store.getters.minToTray
     }
@@ -45,19 +48,16 @@ export default {
     }
 
     EventBus.$on('ready-long-break', () => {
-      this.currentRound = 'long-break'
       this.lastElapsed = -1
       updateTrayImage(0, 1)
     })
 
     EventBus.$on('ready-short-break', () => {
-      this.currentRound = 'short-break'
       this.lastElapsed = -1
       updateTrayImage(0, 1)
     })
 
     EventBus.$on('ready-work', () => {
-      this.currentRound = 'work'
       this.lastElapsed = -1
       updateTrayImage(0, 1)
     })

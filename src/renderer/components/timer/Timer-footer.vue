@@ -10,7 +10,7 @@
           >({{ totalWorkRounds }})</span
         >
       </p>
-      <p class="TextButton" title="Reset current round" @click="callForReset">
+      <p class="TextButton" title="Reset current round" @click="callForReset" @click.right="callForResetRound">
         Reset
       </p>
     </div>
@@ -161,6 +161,12 @@ export default {
   methods: {
     callForReset() {
       EventBus.$emit('call-timer-reset')
+    },
+
+    callForResetRound() {
+      if (this.$store.getters.rightClickToResetRound) {
+        EventBus.$emit('call-timer-reset-round')
+      }
     },
 
     /**

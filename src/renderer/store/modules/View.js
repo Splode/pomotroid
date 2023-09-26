@@ -16,6 +16,7 @@ const state = {
   minToTray: localStore.get('minToTray'),
   minToTrayOnClose: localStore.get('minToTrayOnClose'),
   notifications: localStore.get('notifications'),
+  rightClickToResetRound: localStore.get('rightClickToResetRound'),
   os: process.platform,
   theme: localStore.get('theme') || 'Pomotroid'
 }
@@ -55,6 +56,10 @@ const getters = {
 
   notifications() {
     return state.notifications
+  },
+
+  rightClickToResetRound() {
+    return state.rightClickToResetRound
   },
 
   os() {
