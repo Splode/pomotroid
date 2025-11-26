@@ -293,8 +293,14 @@ export default {
       logger.info(`${this.currentRoundDisplay} round paused`)
     },
 
-    resetTimer() {
+    resetTimer(skipInterrupt = false) {
       if (!this.timerWorker) return
+
+      // 如果是工作番茄钟，记录为中断（除非是轮次切换时的自动重置）
+      if (!skipInterrupt && this.currentRound === 'work' && this.timerStarted && this.$store.getters.currentSession) {
+        this.$store.dispatch('interruptSession')
+      }
+
       this.timerWorker.postMessage({ event: 'reset' })
       this.timerActive = !this.timerActive
       this.timerStarted = false
@@ -308,6 +314,17 @@ export default {
 
     startTimer() {
       if (!this.timerWorker) return
+
+      // 创建统计会话记录
+      if (this.currentRound === 'work') {
+        this.$store.dispatch('startSession', {
+          type: this.currentRound,
+          duration: this.minutes,
+          taskName: null, // 可以后续扩展任务功能
+          taskId: null
+        })
+      }
+
       this.timerWorker.postMessage({ event: 'start' })
       this.timerActive = true
       this.timerStarted = true
@@ -328,8 +345,8 @@ export default {
     this.initTimer()
 
     EventBus.$on('timer-init', opts => {
-      // clear previous timers
-      this.resetTimer()
+      // clear previous timers (跳过中断处理，因为这是正常的轮次切换)
+      this.resetTimer(true)
       this.initTimer()
       if (opts.auto) {
         setTimeout(() => {
@@ -337,6 +354,16 @@ export default {
         }, 1500)
       } else {
         this.timerActive = false
+      }
+    })
+
+    EventBus.$on('timer-completed', () => {
+      // 记录完成的工作番茄钟
+      if (this.currentRound === 'work' && this.$store.getters.currentSession) {
+        this.$store.dispatch('completeSession', {
+          completed: true,
+          interruptReason: null
+        })
       }
     })
 

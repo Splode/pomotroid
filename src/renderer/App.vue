@@ -7,11 +7,13 @@
     <app-timer />
     <app-notification-win v-if="os === 'win32' && notifications" />
     <app-notification v-else-if="os !== 'win32' && notifications" />
+    <app-interrupt-dialog />
   </div>
 </template>
 
 <script>
 import appDrawer from '@/components/drawer/Drawer'
+import appInterruptDialog from '@/components/InterruptDialog'
 import appNotification from '@/components/notification/Notification'
 import appNotificationWin from '@/components/notification/Notification-win'
 import appTimer from '@/components/timer/Timer'
@@ -23,6 +25,7 @@ export default {
 
   components: {
     appDrawer,
+    appInterruptDialog,
     appNotification,
     appNotificationWin,
     appTimer,
