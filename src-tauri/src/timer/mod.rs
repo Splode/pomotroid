@@ -346,9 +346,13 @@ fn listen_events(
                 }
 
                 // Update tray to reflect new round type and reset progress.
+                // Use -1.0 (same as initialisation and Reset) so the very
+                // first tick of the new round always passes the ≥1% threshold,
+                // regardless of how long the round is.  Using 0.0 here caused
+                // a ≥15-second blank period before the arc started animating.
                 let rt = sequence.lock().unwrap().current_round.as_str().to_string();
                 tray::update_icon(&tray, &rt, false, 0.0);
-                last_tray_progress = 0.0;
+                last_tray_progress = -1.0;
 
                 // Broadcast round-change to any connected WebSocket clients.
                 if let Some(ws) = app.try_state::<Arc<WsState>>() {
