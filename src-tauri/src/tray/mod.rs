@@ -1,0 +1,346 @@
+/// System tray management with dynamic arc icon via tiny-skia.
+///
+/// The tray icon is a 32×32 RGBA image:
+///   - Solid filled background circle in the theme's background color.
+///   - Progress arc from 12 o'clock sweeping clockwise, colored by round type.
+///   - While paused: two vertical bars drawn over the background (no arc).
+///
+/// Colors come from the active theme, updated when theme changes.
+/// The tray is created/destroyed when `min_to_tray` setting changes.
+use std::f32::consts::{FRAC_PI_2, PI, TAU};
+use std::sync::{Arc, Mutex};
+
+use tauri::{
+    image::Image,
+    menu::{Menu, MenuItem},
+    tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent},
+    AppHandle, Manager,
+};
+use tiny_skia::{Color, Paint, PathBuilder, Pixmap, Stroke, Transform};
+
+// ---------------------------------------------------------------------------
+// Theme colors for tray rendering
+// ---------------------------------------------------------------------------
+
+/// Color tokens needed for tray icon rendering.
+#[derive(Clone)]
+pub struct TrayColors {
+    pub background: [u8; 4],
+    pub focus_round: [u8; 4],
+    pub short_round: [u8; 4],
+    pub long_round: [u8; 4],
+    pub foreground: [u8; 4],
+}
+
+impl Default for TrayColors {
+    fn default() -> Self {
+        // Pomotroid theme defaults (matches pomotroid.json bundled theme).
+        Self {
+            background: [47, 56, 75, 255],    // #2F384B
+            focus_round: [226, 93, 96, 255],  // #E25D60
+            short_round: [53, 188, 174, 255], // #35BCAE
+            long_round: [89, 174, 209, 255],  // #59AED1
+            foreground: [255, 255, 255, 255], // #FFFFFF
+        }
+    }
+}
+
+/// Parse a CSS hex color (#RRGGBB or #RRGGBBAA) into [r, g, b, a].
+pub fn parse_hex_color(hex: &str) -> Option<[u8; 4]> {
+    let h = hex.strip_prefix('#')?;
+    match h.len() {
+        6 => {
+            let r = u8::from_str_radix(&h[0..2], 16).ok()?;
+            let g = u8::from_str_radix(&h[2..4], 16).ok()?;
+            let b = u8::from_str_radix(&h[4..6], 16).ok()?;
+            Some([r, g, b, 255])
+        }
+        8 => {
+            let r = u8::from_str_radix(&h[0..2], 16).ok()?;
+            let g = u8::from_str_radix(&h[2..4], 16).ok()?;
+            let b = u8::from_str_radix(&h[4..6], 16).ok()?;
+            let a = u8::from_str_radix(&h[6..8], 16).ok()?;
+            Some([r, g, b, a])
+        }
+        _ => None,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Shared tray state
+// ---------------------------------------------------------------------------
+
+/// Tauri-managed state for the tray icon (uses the default Wry runtime).
+pub struct TrayState {
+    pub icon: Mutex<Option<TrayIcon<tauri::Wry>>>,
+    pub colors: Mutex<TrayColors>,
+}
+
+impl TrayState {
+    pub fn new() -> Arc<Self> {
+        Arc::new(Self {
+            icon: Mutex::new(None),
+            colors: Mutex::new(TrayColors::default()),
+        })
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tray lifecycle
+// ---------------------------------------------------------------------------
+
+/// Build the initial idle tray icon image.
+fn initial_icon_image() -> Image<'static> {
+    let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.0, "work");
+    Image::new_owned(bytes, SIZE, SIZE)
+}
+
+/// Create the system tray with a "Show" / "Exit" context menu.
+/// Safe to call multiple times — replaces any existing tray handle.
+pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
+    let show_item = match MenuItem::with_id(app, "show", "Show", true, None::<&str>) {
+        Ok(i) => i,
+        Err(e) => { eprintln!("[tray] menu item error: {e}"); return; }
+    };
+    let exit_item = match MenuItem::with_id(app, "exit", "Exit", true, None::<&str>) {
+        Ok(i) => i,
+        Err(e) => { eprintln!("[tray] menu item error: {e}"); return; }
+    };
+    let menu = match Menu::with_items(app, &[&show_item, &exit_item]) {
+        Ok(m) => m,
+        Err(e) => { eprintln!("[tray] menu error: {e}"); return; }
+    };
+
+    let image = initial_icon_image();
+
+    let tray = TrayIconBuilder::new()
+        .icon(image)
+        .tooltip("Pomotroid")
+        .menu(&menu)
+        .on_tray_icon_event(|tray_icon, event| {
+            // Left-click: toggle window visibility.
+            if let TrayIconEvent::Click {
+                button: MouseButton::Left,
+                button_state: MouseButtonState::Up,
+                ..
+            } = event
+            {
+                let app = tray_icon.app_handle();
+                if let Some(window) = app.get_webview_window("main") {
+                    match window.is_visible() {
+                        Ok(true) => { let _ = window.hide(); }
+                        _ => {
+                            let _ = window.show();
+                            let _ = window.set_focus();
+                        }
+                    }
+                }
+            }
+        })
+        .on_menu_event(|app, event| {
+            match event.id().as_ref() {
+                "show" => {
+                    if let Some(window) = app.get_webview_window("main") {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                }
+                "exit" => app.exit(0),
+                _ => {}
+            }
+        })
+        .build(app);
+
+    match tray {
+        Ok(t) => { *state.icon.lock().unwrap() = Some(t); }
+        Err(e) => eprintln!("[tray] failed to build tray icon: {e}"),
+    }
+}
+
+/// Remove the system tray icon (called when `min_to_tray` is disabled).
+pub fn destroy_tray(state: &Arc<TrayState>) {
+    *state.icon.lock().unwrap() = None;
+}
+
+// ---------------------------------------------------------------------------
+// Icon update (called from the timer event listener)
+// ---------------------------------------------------------------------------
+
+/// Re-render and push a new RGBA icon to the tray.
+///
+/// - `round_type`: "work" | "short-break" | "long-break"
+/// - `paused`: show pause bars instead of an arc
+/// - `progress`: 0.0 (empty) to 1.0 (full, i.e. elapsed/total)
+pub fn update_icon(state: &Arc<TrayState>, round_type: &str, paused: bool, progress: f32) {
+    let guard = state.icon.lock().unwrap();
+    let Some(tray) = guard.as_ref() else { return };
+
+    let colors = state.colors.lock().unwrap().clone();
+    let bytes = render_tray_icon_rgba(&colors, paused, progress, round_type);
+
+    let image = Image::new_owned(bytes, SIZE, SIZE);
+    let _ = tray.set_icon(Some(image));
+}
+
+// ---------------------------------------------------------------------------
+// Icon rendering (tiny-skia)
+// ---------------------------------------------------------------------------
+
+// Render at 64×64 so the icon looks sharp on HiDPI displays (Ubuntu often
+// runs at 1.5× or 2× scale).  The tray host scales it down on standard
+// density displays; the larger source means the circle stays clean either way.
+const SIZE: u32 = 64;
+const CENTER: f32 = SIZE as f32 / 2.0;
+const RADIUS: f32 = CENTER - 5.0; // 5 px margin keeps the stroke inside the canvas
+const STROKE_WIDTH: f32 = 6.0;
+// Track opacity: the "empty" part of the ring at this brightness on a dark panel.
+// 22% white on #1a1a1a ≈ #383838 — invisible. 65% ≈ #a6a6a6 — clearly visible.
+const TRACK_ALPHA: u8 = 165; // ≈ 65 %
+
+fn rgba_color(c: [u8; 4]) -> Color {
+    Color::from_rgba8(c[0], c[1], c[2], c[3])
+}
+
+/// Render a 64×64 RGBA tray icon as a **ring** with a progress arc.
+///
+/// Using a ring (stroke-only circle) on a transparent background means the
+/// icon reads as a clear circle regardless of panel colour or scale factor,
+/// unlike a solid filled disc which looks like a dark blob at small sizes.
+pub fn render_tray_icon_rgba(
+    colors: &TrayColors,
+    paused: bool,
+    progress: f32,
+    round_type: &str,
+) -> Vec<u8> {
+    let mut pixmap = Pixmap::new(SIZE, SIZE).expect("pixmap alloc");
+
+    let mut paint = Paint::default();
+    paint.anti_alias = true;
+
+    let mut stroke = Stroke::default();
+    stroke.width = STROKE_WIDTH;
+    stroke.line_cap = tiny_skia::LineCap::Round;
+
+    // Track ring: full circle at low opacity — defines the circular shape.
+    {
+        let [r, g, b, _] = colors.foreground;
+        paint.set_color(Color::from_rgba8(r, g, b, TRACK_ALPHA));
+    }
+    let ring = {
+        let mut pb = PathBuilder::new();
+        pb.push_circle(CENTER, CENTER, RADIUS);
+        pb.finish().expect("ring path")
+    };
+    pixmap.stroke_path(&ring, &paint, &stroke, Transform::identity(), None);
+
+    if paused {
+        // Two vertical bars centred in the ring.
+        paint.set_color(rgba_color(colors.foreground));
+        let bar_h = RADIUS * 0.75;
+        let bar_w = STROKE_WIDTH * 0.7;
+        let bar_gap = STROKE_WIDTH * 1.1;
+        let bar_y = CENTER - bar_h / 2.0;
+        for x in [CENTER - bar_gap / 2.0 - bar_w, CENTER + bar_gap / 2.0] {
+            if let Some(rect) = tiny_skia::Rect::from_xywh(x, bar_y, bar_w, bar_h) {
+                let p = PathBuilder::from_rect(rect);
+                pixmap.fill_path(
+                    &p, &paint, tiny_skia::FillRule::Winding,
+                    Transform::identity(), None,
+                );
+            }
+        }
+    } else {
+        // Progress arc from 12 o'clock, clockwise, in the round-type colour.
+        let arc_color = match round_type {
+            "short-break" => rgba_color(colors.short_round),
+            "long-break"  => rgba_color(colors.long_round),
+            _             => rgba_color(colors.focus_round),
+        };
+        paint.set_color(arc_color);
+
+        let sweep = progress.clamp(0.0, 1.0) * TAU;
+        if sweep > 0.001 {
+            let start = -FRAC_PI_2;
+            let end   = start + sweep;
+            let path  = build_arc_path(CENTER, CENTER, RADIUS, start, end);
+            pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
+        }
+    }
+
+    pixmap.take()
+}
+
+/// Approximate a circular arc with cubic Bézier segments (max π/2 per segment).
+fn build_arc_path(cx: f32, cy: f32, r: f32, start: f32, end: f32) -> tiny_skia::Path {
+    let total = end - start;
+    let n = ((total / (PI / 2.0)).ceil() as usize).max(1);
+    let step = total / n as f32;
+    let mut pb = PathBuilder::new();
+
+    for i in 0..n {
+        let a0 = start + step * i as f32;
+        let a1 = a0 + step;
+        arc_segment(&mut pb, cx, cy, r, a0, a1, i == 0);
+    }
+
+    pb.finish().unwrap_or_else(|| {
+        PathBuilder::from_rect(tiny_skia::Rect::from_xywh(cx, cy, 1.0, 1.0).unwrap())
+    })
+}
+
+/// Append one arc segment (≤ π/2) as a cubic Bézier.
+fn arc_segment(pb: &mut PathBuilder, cx: f32, cy: f32, r: f32, a0: f32, a1: f32, first: bool) {
+    let alpha = ((a1 - a0) / 4.0).tan() * 4.0 / 3.0;
+    let (s0, c0) = a0.sin_cos();
+    let (s1, c1) = a1.sin_cos();
+    let x0 = cx + r * c0; let y0 = cy + r * s0;
+    let x3 = cx + r * c1; let y3 = cy + r * s1;
+    let x1 = x0 - alpha * r * s0; let y1 = y0 + alpha * r * c0;
+    let x2 = x3 + alpha * r * s1; let y2 = y3 - alpha * r * c1;
+    if first { pb.move_to(x0, y0); }
+    pb.cubic_to(x1, y1, x2, y2, x3, y3);
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn render_returns_correct_byte_count() {
+        let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.5, "work");
+        assert_eq!(bytes.len(), (SIZE * SIZE * 4) as usize);
+    }
+
+    #[test]
+    fn render_paused_returns_correct_byte_count() {
+        let bytes = render_tray_icon_rgba(&TrayColors::default(), true, 0.0, "work");
+        assert_eq!(bytes.len(), (SIZE * SIZE * 4) as usize);
+    }
+
+    #[test]
+    fn render_zero_progress_returns_correct_byte_count() {
+        let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.0, "work");
+        assert_eq!(bytes.len(), (SIZE * SIZE * 4) as usize);
+    }
+
+    #[test]
+    fn parse_hex_6_digit() {
+        assert_eq!(parse_hex_color("#FF8800"), Some([255, 136, 0, 255]));
+    }
+
+    #[test]
+    fn parse_hex_8_digit() {
+        assert_eq!(parse_hex_color("#FF880080"), Some([255, 136, 0, 128]));
+    }
+
+    #[test]
+    fn parse_hex_invalid() {
+        assert_eq!(parse_hex_color("not-a-color"), None);
+        assert_eq!(parse_hex_color("#ZZZ"), None);
+        assert_eq!(parse_hex_color(""), None);
+    }
+}

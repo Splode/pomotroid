@@ -83,24 +83,86 @@ appget install pomotroid
 
 - Mini-mode
 
+## Custom Themes
+
+Pomotroid supports custom themes defined as JSON files placed in the app's configuration directory:
+
+- **Linux**: `~/.config/pomotroid/themes/`
+- **macOS**: `~/Library/Application Support/pomotroid/themes/`
+- **Windows**: `%APPDATA%\pomotroid\themes\`
+
+Custom themes are hot-reloaded automatically — no restart required.
+
+Each theme file must follow this format:
+
+```json
+{
+  "name": "My Theme",
+  "colors": {
+    "--color-long-round": "#c75000",
+    "--color-short-round": "#417505",
+    "--color-focus-round": "#b01c2e",
+    "--color-background": "#2f384b",
+    "--color-background-light": "#3e4a5d",
+    "--color-foreground": "#d7e1f4",
+    "--color-foreground-darker": "#a3aec4",
+    "--color-accent": "#ff6347",
+    "--color-accent-extra": "#f0c050",
+    "--color-gradient": "#1e2430"
+  }
+}
+```
+
+## WebSocket API
+
+Pomotroid exposes an optional WebSocket server (disabled by default) for integration with external tools, stream overlays, and automation scripts.
+
+**Enable it** in Settings → WebSocket Server, then connect to `ws://127.0.0.1:<port>` (default port: 1314).
+
+### Messages
+
+**Client → Server**
+
+| Message | Description |
+|---|---|
+| `getState` | Request the current timer state |
+
+**Server → Client**
+
+| Event | Payload | Description |
+|---|---|---|
+| `state` | `TimerState` object | Response to `getState` |
+| `roundChange` | `{ roundType, workRoundNumber, workRoundsTotal }` | Fired whenever the timer advances to a new round |
+| `error` | `{ message }` | Protocol error |
+
+`TimerState` object fields: `elapsed_secs`, `total_secs`, `is_running`, `is_paused`, `round_type`, `work_round_number`, `work_rounds_total`.
+
 ## Development
 
-Pomotroid is built with [Vue.js](https://github.com/vuejs/vue), [Electron](https://github.com/electron/electron), and [electron-vue](https://github.com/SimulatedGREG/electron-vue).
+Pomotroid is built with [Tauri 2](https://tauri.app), [Rust](https://www.rust-lang.org), and [Svelte 5](https://svelte.dev).
 
-_Note: depending on your OS settings, you may receive a security warning upon installation. This has to do with Pomotroid being an unsigned application. You can find out more by researching code-signing for Apple and Microsoft._
+_Note: depending on your OS settings you may receive a security warning upon installation because Pomotroid is currently unsigned. See PKG-02 in the project task list for code-signing status._
+
+### Prerequisites
+
+- [Rust](https://rustup.rs) (stable toolchain)
+- [Node.js](https://nodejs.org) 18+
+- Platform build dependencies — see the [Tauri prerequisites guide](https://tauri.app/start/prerequisites/)
 
 ### Build Setup
 
 ```bash
-# install dependencies
-npm i
+# Install Node dependencies
+npm install
 
-# serve with hot reload at localhost:9080
-npm run dev
+# Run in development mode (hot-reload)
+npm run tauri dev
 
-# build Pomotroid for production
-npm run build
+# Build a production release
+npm run tauri build
 ```
+
+The packaged output is written to `src-tauri/target/release/bundle/`.
 
 ## License
 

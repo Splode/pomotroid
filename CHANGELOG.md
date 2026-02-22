@@ -1,4 +1,36 @@
 
+<a name="v1.0.0"></a>
+## [v1.0.0](https://github.com/Splode/pomotroid/releases/tag/v1.0.0)
+
+> 2026-02-21
+
+### Complete Rewrite — Electron → Tauri 2 + Rust + Svelte 5
+
+This release replaces the previous Electron + Vue.js stack with a fully native Tauri 2 application.
+
+### Highlights
+
+* **Tauri 2 + Rust backend** — drastically reduced bundle size and memory footprint compared to Electron
+* **Svelte 5 frontend** — modern reactive UI using Svelte 5 runes
+* **SQLite settings and session storage** — persistent settings and all-time session statistics via embedded SQLite (WAL mode)
+* **Drift-correcting timer engine** — pure Rust timer thread with `Instant`-based scheduling; eliminates cumulative drift
+* **Rust audio engine** (`rodio`) — guaranteed sound playback even when the window is hidden to the system tray
+* **Dynamic tray icon** (`tiny-skia`) — arc rendering reflects timer progress and round type in real time
+* **Custom theme hot-reload** (`notify` crate) — drop a JSON theme into the custom themes folder; applied instantly without restart
+* **WebSocket server** (opt-in, default off) — external integrations and stream overlays via `ws://127.0.0.1:<port>`
+* **Global shortcuts** — Ctrl+F1 / F2 / F3 defaults; fully configurable; work even when the window is hidden
+* **Desktop notifications** — native OS notifications on round transitions via `tauri-plugin-notification`
+* **Sleep / wake handling** — timer pauses on OS sleep and resumes from the correct position on wake
+* **All 17 built-in themes** preserved from the previous release
+* **Custom theme format unchanged** — existing theme files are fully compatible
+
+### Breaking Changes
+
+* Settings are no longer stored in `user-preferences.json`. Preferences are reset to defaults on first launch. _(OQ-7: deliberate decision to start fresh; see PROPOSAL.md)_
+* The minimum OS requirement follows Tauri 2 system minimums (Windows 10+, macOS 10.13+, major Linux distributions with GTK 3.24+).
+
+---
+
 <a name="v0.13.0"></a>
 ## [v0.13.0](https://github.com/Splode/pomotroid/compare/v0.12.0...v0.13.0)
 

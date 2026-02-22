@@ -1,0 +1,60 @@
+/* Global CSS — CSS custom properties for theming.
+   The active theme overrides these values at runtime via Tauri IPC. */
+
+:root {
+  /* Theme colors (defaults; overridden by the active theme at runtime) */
+  --color-long-round: #c75000;
+  --color-short-round: #417505;
+  --color-focus-round: #b01c2e;
+  --color-background: #2f384b;
+  --color-background-light: #3e4a5d;
+  --color-foreground: #d7e1f4;
+  --color-foreground-darker: #a3aec4;
+  --color-accent: #ff6347;
+  --color-accent-extra: #f0c050;
+  --color-gradient: #1e2430;
+
+  /* Transition timing tokens — components reference these for consistency */
+  --transition-default: 0.2s ease;
+  --transition-snappy: 0.12s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.35s ease;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  user-select: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Keyframes (available to all scoped component stylesheets)
+   --------------------------------------------------------------------------- */
+
+@keyframes app-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes icon-fade-in {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}

@@ -11,3 +11,4 @@ thumbs.db
 *.pem
 *.key
 *.cert
+.svelte-kit/
