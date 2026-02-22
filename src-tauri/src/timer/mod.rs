@@ -96,12 +96,14 @@ impl TimerController {
                 listen_events(
                     app,
                     event_rx,
-                    seq_thread,
-                    settings_thread,
-                    shared_thread,
-                    engine_thread,
-                    tray_thread,
-                    db,
+                    ListenContext {
+                        sequence: seq_thread,
+                        settings: settings_thread,
+                        shared: shared_thread,
+                        engine: engine_thread,
+                        tray: tray_thread,
+                        db,
+                    },
                 );
             })
             .expect("failed to spawn timer event listener");
@@ -213,16 +215,21 @@ impl TimerController {
 // Background event listener thread
 // ---------------------------------------------------------------------------
 
-fn listen_events(
-    app: AppHandle,
-    event_rx: std::sync::mpsc::Receiver<TimerEvent>,
+struct ListenContext {
     sequence: Arc<Mutex<SequenceState>>,
     settings: Arc<Mutex<Settings>>,
     shared: Arc<Mutex<TimerShared>>,
     engine: EngineHandle,
     tray: Arc<TrayState>,
     db: DbState,
+}
+
+fn listen_events(
+    app: AppHandle,
+    event_rx: std::sync::mpsc::Receiver<TimerEvent>,
+    ctx: ListenContext,
 ) {
+    let ListenContext { sequence, settings, shared, engine, tray, db } = ctx;
     // Track last tray progress to throttle redraws to ≥ 1% delta.
     let mut last_tray_progress: f32 = -1.0;
     // Active session row ID for recording (None = not started yet).

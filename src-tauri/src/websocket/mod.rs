@@ -141,7 +141,7 @@ async fn handle_socket(socket: WebSocket, state: ServerState) {
                 Ok(s) => s,
                 Err(_) => continue,
             };
-            if sender.send(Message::Text(json.into())).await.is_err() {
+            if sender.send(Message::Text(json)).await.is_err() {
                 break;
             }
         }
@@ -178,21 +178,18 @@ async fn handle_client_message(
         return;
     };
 
-    match msg.get("type").and_then(|t| t.as_str()) {
-        Some("getState") => {
-            if let Some(timer) = app.try_state::<TimerController>() {
-                let snapshot = timer.get_snapshot();
-                let response = serde_json::json!({
-                    "type": "state",
-                    "payload": snapshot,
-                });
-                // Note: we can't send directly here without the sender;
-                // the client will receive state via the next broadcast.
-                // For an immediate reply, broadcast it.
-                let _ = app.emit("timer:state-query", response);
-            }
+    if let Some("getState") = msg.get("type").and_then(|t| t.as_str()) {
+        if let Some(timer) = app.try_state::<TimerController>() {
+            let snapshot = timer.get_snapshot();
+            let response = serde_json::json!({
+                "type": "state",
+                "payload": snapshot,
+            });
+            // Note: we can't send directly here without the sender;
+            // the client will receive state via the next broadcast.
+            // For an immediate reply, broadcast it.
+            let _ = app.emit("timer:state-query", response);
         }
-        _ => {}
     }
 }
 

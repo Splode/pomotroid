@@ -214,12 +214,13 @@ pub fn render_tray_icon_rgba(
 ) -> Vec<u8> {
     let mut pixmap = Pixmap::new(SIZE, SIZE).expect("pixmap alloc");
 
-    let mut paint = Paint::default();
-    paint.anti_alias = true;
+    let mut paint = Paint { anti_alias: true, ..Default::default() };
 
-    let mut stroke = Stroke::default();
-    stroke.width = STROKE_WIDTH;
-    stroke.line_cap = tiny_skia::LineCap::Round;
+    let stroke = Stroke {
+        width: STROKE_WIDTH,
+        line_cap: tiny_skia::LineCap::Round,
+        ..Default::default()
+    };
 
     // Track ring: full circle at low opacity — defines the circular shape.
     {

@@ -73,13 +73,7 @@ fn debounce_loop(
     app_data_dir: &Path,
     app: &AppHandle,
 ) {
-    loop {
-        // Block until at least one event arrives.
-        let first = match rx.recv() {
-            Ok(evt) => evt,
-            Err(_) => break, // channel closed — watcher was dropped
-        };
-
+    while let Ok(first) = rx.recv() {
         // Log and ignore watcher errors.
         if let Err(e) = first {
             eprintln!("[themes/watcher] watch error: {e}");
