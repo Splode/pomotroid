@@ -19,7 +19,7 @@ use commands::{
     shortcuts_reload,
     stats_get_all_time, stats_get_session,
     theme_apply, themes_list,
-    timer_get_state, timer_reset, timer_skip, timer_toggle,
+    timer_get_state, timer_reset, timer_restart_round, timer_skip, timer_toggle,
     window_set_always_on_top, window_set_visibility,
 };
 
@@ -147,6 +147,7 @@ pub fn run() {
             // Timer
             timer_toggle,
             timer_reset,
+            timer_restart_round,
             timer_skip,
             timer_get_state,
             // Settings

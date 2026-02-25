@@ -140,6 +140,13 @@ impl TimerController {
         self.engine.send(TimerCommand::Reset);
     }
 
+    /// Restart only the current round's timer without touching the sequence.
+    /// Round type, round number, and position in the work/break cycle are all
+    /// preserved — only the elapsed time is zeroed.
+    pub fn restart_round(&self) {
+        self.engine.send(TimerCommand::Reset);
+    }
+
     pub fn skip(&self) {
         // Guard: Skip while Idle is a no-op.  The engine would silently drop
         // the command, but skip_pending would remain set — poisoning the next

@@ -38,6 +38,13 @@ pub fn timer_skip(timer: State<'_, TimerController>) {
     timer.skip();
 }
 
+/// Restart the current round from zero without advancing the sequence.
+/// Round type and round number are preserved; only elapsed time is reset.
+#[tauri::command]
+pub fn timer_restart_round(timer: State<'_, TimerController>) {
+    timer.restart_round();
+}
+
 /// Return a full snapshot of the current timer state.
 /// Called once on frontend mount to hydrate stores.
 #[tauri::command]

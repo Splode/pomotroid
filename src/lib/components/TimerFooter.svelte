@@ -1,7 +1,7 @@
 <script lang="ts">
   // Round counter, reset/skip buttons, and volume slider.
   import type { TimerState } from '$lib/types';
-  import { timerReset, timerSkip, setSetting } from '$lib/ipc';
+  import { timerReset, setSetting } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
 
   interface Props {
@@ -49,14 +49,6 @@
   <!-- Reset -->
   <button class="btn-text" onclick={timerReset} aria-label="Reset timer">
     Reset
-  </button>
-
-  <!-- Skip -->
-  <button class="btn-icon" onclick={timerSkip} aria-label="Skip round">
-    <svg width="16" height="16" viewBox="0 0 16 16">
-      <polygon points="1,1 10,8 1,15" fill="currentColor"/>
-      <rect x="12" y="1" width="3" height="14" rx="1" fill="currentColor"/>
-    </svg>
   </button>
 
   <!-- Volume -->
