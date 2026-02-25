@@ -25,6 +25,7 @@ const defaults: Settings = {
   websocket_enabled: false,
   websocket_port: 1314,
   theme: 'Pomotroid',
+  dial_countdown: false,
 };
 
 export const settings = writable<Settings>(defaults);

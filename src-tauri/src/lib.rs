@@ -55,6 +55,9 @@ pub fn run() {
                 settings::load(&conn).expect("failed to load settings")
             };
 
+            // Sync tray countdown mode from saved settings.
+            *tray_state.countdown_mode.lock().unwrap() = initial_settings.dial_countdown;
+
             // --- Audio engine (optional — graceful if no audio device) ---
             if let Some(audio) = audio::AudioManager::new(&initial_settings) {
                 app.manage(audio);

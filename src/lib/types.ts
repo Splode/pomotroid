@@ -38,6 +38,7 @@ export interface Settings {
   websocket_enabled: boolean;
   websocket_port: number;
   theme: string;
+  dial_countdown: boolean;
 }
 
 /** Mirrors Rust `Theme` struct. Color keys include the `--` CSS var prefix. */

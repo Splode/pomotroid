@@ -12,6 +12,7 @@
     onTimerReset,
   } from '$lib/ipc';
   import { timerState } from '$lib/stores/timer';
+  import { settings } from '$lib/stores/settings';
   import { fade } from 'svelte/transition';
   import TimerDial from './TimerDial.svelte';
   import TimerDisplay from './TimerDisplay.svelte';
@@ -84,7 +85,7 @@
 <div class="timer" style="zoom: {uiScale}">
   <!-- Dial + display stacked (display centered over dial) -->
   <div class="dial-stack">
-    <TimerDial snap={state} />
+    <TimerDial snap={state} countdown={$settings.dial_countdown} />
     <TimerDisplay {state} />
   </div>
 

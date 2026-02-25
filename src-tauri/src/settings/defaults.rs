@@ -13,6 +13,7 @@ pub const DEFAULTS: &[(&str, &str)] = &[
     ("min_to_tray_on_close", "false"),
     ("notifications", "true"),
     ("work_rounds", "4"),
+    ("dial_countdown", "false"),
     ("theme", "Pomotroid"),
     ("tick_sounds_work", "false"),
     ("tick_sounds_break", "true"),

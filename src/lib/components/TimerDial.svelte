@@ -8,9 +8,10 @@
 
   interface Props {
     snap: TimerState;
+    countdown?: boolean;
   }
 
-  let { snap }: Props = $props();
+  let { snap, countdown = false }: Props = $props();
 
   // SVG constants (matching original Pomotroid geometry)
   const CIRCUMFERENCE = 691.15;  // 2π × 110 ≈ 691.15
@@ -34,11 +35,17 @@
     const progress = snap.total_secs > 0
       ? snap.elapsed_secs / snap.total_secs
       : 0;
-    const target = CIRCUMFERENCE * (1 - progress);
 
-    // On round change: snap to 0% fill immediately (new round starts from empty).
+    // Elapsed mode: arc grows from empty → full (offset counts down to 0).
+    // Countdown mode: arc shrinks from full → empty (offset counts up to CIRCUMFERENCE).
+    const target = countdown
+      ? CIRCUMFERENCE * progress
+      : CIRCUMFERENCE * (1 - progress);
+    const startOffset = countdown ? 0 : CIRCUMFERENCE;
+
+    // On round change: snap to start position immediately.
     if (rt !== prevRound) {
-      dashOffset.set(CIRCUMFERENCE, { duration: 0 });
+      dashOffset.set(startOffset, { duration: 0 });
       prevRound = rt;
     } else {
       dashOffset.set(target);

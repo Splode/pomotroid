@@ -74,6 +74,7 @@ pub fn parse_hex_color(hex: &str) -> Option<[u8; 4]> {
 pub struct TrayState {
     pub icon: Mutex<Option<TrayIcon<tauri::Wry>>>,
     pub colors: Mutex<TrayColors>,
+    pub countdown_mode: Mutex<bool>,
 }
 
 impl TrayState {
@@ -81,6 +82,7 @@ impl TrayState {
         Arc::new(Self {
             icon: Mutex::new(None),
             colors: Mutex::new(TrayColors::default()),
+            countdown_mode: Mutex::new(false),
         })
     }
 }
@@ -88,12 +90,6 @@ impl TrayState {
 // ---------------------------------------------------------------------------
 // Tray lifecycle
 // ---------------------------------------------------------------------------
-
-/// Build the initial idle tray icon image.
-fn initial_icon_image() -> Image<'static> {
-    let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.0, "work");
-    Image::new_owned(bytes, SIZE, SIZE)
-}
 
 /// Create the system tray with a "Show" / "Exit" context menu.
 /// Safe to call multiple times — replaces any existing tray handle.
@@ -111,7 +107,14 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
         Err(e) => { eprintln!("[tray] menu error: {e}"); return; }
     };
 
-    let image = initial_icon_image();
+    // Render the initial idle icon using the current state (respects countdown mode
+    // and theme colors already set before create_tray is called).
+    let image = {
+        let colors = state.colors.lock().unwrap().clone();
+        let countdown = *state.countdown_mode.lock().unwrap();
+        let bytes = render_tray_icon_rgba(&colors, false, 0.0, "work", countdown);
+        Image::new_owned(bytes, SIZE, SIZE)
+    };
 
     let tray = TrayIconBuilder::new()
         .icon(image)
@@ -176,7 +179,8 @@ pub fn update_icon(state: &Arc<TrayState>, round_type: &str, paused: bool, progr
     let Some(tray) = guard.as_ref() else { return };
 
     let colors = state.colors.lock().unwrap().clone();
-    let bytes = render_tray_icon_rgba(&colors, paused, progress, round_type);
+    let countdown = *state.countdown_mode.lock().unwrap();
+    let bytes = render_tray_icon_rgba(&colors, paused, progress, round_type, countdown);
 
     let image = Image::new_owned(bytes, SIZE, SIZE);
     let _ = tray.set_icon(Some(image));
@@ -211,6 +215,7 @@ pub fn render_tray_icon_rgba(
     paused: bool,
     progress: f32,
     round_type: &str,
+    countdown: bool,
 ) -> Vec<u8> {
     let mut pixmap = Pixmap::new(SIZE, SIZE).expect("pixmap alloc");
 
@@ -259,7 +264,9 @@ pub fn render_tray_icon_rgba(
         };
         paint.set_color(arc_color);
 
-        let sweep = progress.clamp(0.0, 1.0) * TAU;
+        // In elapsed mode the arc grows as time passes; in countdown mode it shrinks.
+        let effective = if countdown { 1.0 - progress } else { progress };
+        let sweep = effective.clamp(0.0, 1.0) * TAU;
         if sweep > 0.001 {
             let start = -FRAC_PI_2;
             let end   = start + sweep;
@@ -312,19 +319,19 @@ mod tests {
 
     #[test]
     fn render_returns_correct_byte_count() {
-        let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.5, "work");
+        let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.5, "work", false);
         assert_eq!(bytes.len(), (SIZE * SIZE * 4) as usize);
     }
 
     #[test]
     fn render_paused_returns_correct_byte_count() {
-        let bytes = render_tray_icon_rgba(&TrayColors::default(), true, 0.0, "work");
+        let bytes = render_tray_icon_rgba(&TrayColors::default(), true, 0.0, "work", false);
         assert_eq!(bytes.len(), (SIZE * SIZE * 4) as usize);
     }
 
     #[test]
     fn render_zero_progress_returns_correct_byte_count() {
-        let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.0, "work");
+        let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.0, "work", false);
         assert_eq!(bytes.len(), (SIZE * SIZE * 4) as usize);
     }
 

@@ -101,6 +101,19 @@ pub fn settings_set(
         }
     }
 
+    // Sync tray countdown mode when the dial setting changes, then immediately
+    // re-render the icon so it matches the dial without waiting for a timer event.
+    if key == "dial_countdown" {
+        *tray_state.countdown_mode.lock().unwrap() = new_settings.dial_countdown;
+        let snap = timer.get_snapshot();
+        let progress = if snap.total_secs > 0 {
+            snap.elapsed_secs as f32 / snap.total_secs as f32
+        } else {
+            0.0
+        };
+        tray::update_icon(&tray_state, &snap.round_type, snap.is_paused, progress);
+    }
+
     // Create or destroy the tray based on the min_to_tray setting.
     if key == "min_to_tray" {
         if value == "true" {
@@ -153,6 +166,7 @@ pub fn shortcuts_reload(db: State<'_, DbState>, app: AppHandle) -> Result<(), St
 pub fn settings_reset_defaults(
     db: State<'_, DbState>,
     timer: State<'_, TimerController>,
+    tray_state: State<'_, Arc<TrayState>>,
     app: AppHandle,
 ) -> Result<Settings, String> {
     let new_settings = {
@@ -165,6 +179,7 @@ pub fn settings_reset_defaults(
     };
 
     timer.apply_settings(new_settings.clone());
+    *tray_state.countdown_mode.lock().unwrap() = new_settings.dial_countdown;
     app.emit("settings:changed", &new_settings).ok();
     Ok(new_settings)
 }

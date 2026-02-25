@@ -3,7 +3,8 @@
   import type { Theme } from '$lib/types';
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
-  import { getThemes, applyThemeByName, onThemesChanged } from '$lib/ipc';
+  import { getThemes, applyThemeByName, onThemesChanged, setSetting } from '$lib/ipc';
+  import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import type { UnlistenFn } from '@tauri-apps/api/event';
 
   let themes = $state<Theme[]>([]);
@@ -27,6 +28,19 @@
 </script>
 
 <div class="section">
+  <SettingsToggle
+    label="Countdown dial"
+    description="Arc starts full and subtracts as time passes"
+    checked={$settings.dial_countdown}
+    onclick={async () => {
+      const updated = await setSetting('dial_countdown', String(!$settings.dial_countdown));
+      settings.set(updated);
+    }}
+  />
+
+  <div class="themes-label">Theme</div>
+
+  <div class="theme-list">
   {#each themes as theme (theme.name)}
     {@const bg = theme.colors['--color-background'] ?? '#2f384b'}
     {@const fg = theme.colors['--color-foreground'] ?? '#d7e1f4'}
@@ -61,14 +75,30 @@
       </span>
     </button>
   {/each}
+  </div>
 </div>
 
 <style>
   .section {
     display: flex;
     flex-direction: column;
+  }
+
+  .themes-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-foreground-darker, var(--color-foreground));
+    opacity: 0.5;
+    padding: 12px 20px 6px;
+  }
+
+  .theme-list {
+    display: flex;
+    flex-direction: column;
     gap: 6px;
-    padding: 12px 20px;
+    padding: 0 20px 12px;
   }
 
   .card {
