@@ -79,8 +79,9 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    /* Auto-contrast thumb: dark on light backgrounds, light on dark backgrounds. */
-    background: oklch(from var(--color-background) clamp(0, (0.6 - l) * 9999, 1) 0 0);
+    /* OFF state: use a muted foreground tone so the thumb is visible against
+       the subtle foreground-tinted track without being overly bright. */
+    background: var(--color-foreground-darker, var(--color-foreground));
     top: 3px;
     left: 3px;
     transition: transform 0.2s, background 0.2s;
@@ -92,9 +93,9 @@
 
   .toggle.on::after {
     transform: translateX(16px);
-    /* Auto-contrast thumb against the accent: dark thumb on bright accents
-       (e.g. Gruvbox yellow #FABD2F, neon green), white on dark accents.
-       oklch L≈0 is black, L≈1 is white; threshold 0.6 is the equal-contrast point. */
-    background: oklch(from var(--color-accent) clamp(0, (0.6 - l) * 9999, 1) 0 0);
+    /* ON state: the background color is always chosen by the theme designer to
+       contrast with the accent, so it reads cleanly and stays within the palette.
+       e.g. dark navy on teal (Pomotroid), dark charcoal on yellow (Gruvbox). */
+    background: var(--color-background);
   }
 </style>
