@@ -180,6 +180,10 @@ pub fn settings_reset_defaults(
 
     timer.apply_settings(new_settings.clone());
     *tray_state.countdown_mode.lock().unwrap() = new_settings.dial_countdown;
+    let data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    if let Some(theme) = themes::find(&data_dir, &new_settings.theme) {
+        *tray_state.colors.lock().unwrap() = tray::TrayColors::from_colors_map(&theme.colors);
+    }
     app.emit("settings:changed", &new_settings).ok();
     Ok(new_settings)
 }
@@ -205,6 +209,8 @@ pub fn theme_apply(
     name: String,
     app: AppHandle,
     db: State<'_, DbState>,
+    tray_state: State<'_, Arc<TrayState>>,
+    timer: State<'_, TimerController>,
 ) -> Result<Theme, String> {
     let data_dir = app
         .path()
@@ -220,6 +226,16 @@ pub fn theme_apply(
         settings::save_setting(&conn, "theme", &theme.name).map_err(|e| e.to_string())?;
         settings::load(&conn).map_err(|e| e.to_string())?
     };
+
+    // Update tray colors and immediately re-render the icon for the new theme.
+    *tray_state.colors.lock().unwrap() = tray::TrayColors::from_colors_map(&theme.colors);
+    let snap = timer.get_snapshot();
+    let progress = if snap.total_secs > 0 {
+        snap.elapsed_secs as f32 / snap.total_secs as f32
+    } else {
+        0.0
+    };
+    tray::update_icon(&tray_state, &snap.round_type, snap.is_paused, progress);
 
     // Notify all windows so they can re-apply the new theme CSS.
     app.emit("settings:changed", &updated_settings).ok();

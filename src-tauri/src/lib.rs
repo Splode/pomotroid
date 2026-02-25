@@ -55,8 +55,11 @@ pub fn run() {
                 settings::load(&conn).expect("failed to load settings")
             };
 
-            // Sync tray countdown mode from saved settings.
+            // Sync tray state from saved settings.
             *tray_state.countdown_mode.lock().unwrap() = initial_settings.dial_countdown;
+            if let Some(theme) = themes::find(&app_data_dir, &initial_settings.theme) {
+                *tray_state.colors.lock().unwrap() = tray::TrayColors::from_colors_map(&theme.colors);
+            }
 
             // --- Audio engine (optional — graceful if no audio device) ---
             if let Some(audio) = audio::AudioManager::new(&initial_settings) {

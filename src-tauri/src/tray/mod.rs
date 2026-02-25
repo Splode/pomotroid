@@ -45,6 +45,27 @@ impl Default for TrayColors {
     }
 }
 
+impl TrayColors {
+    /// Build a `TrayColors` from a theme's CSS-variable color map.
+    /// Falls back to `TrayColors::default()` values for any key that is
+    /// missing or unparseable.
+    pub fn from_colors_map(colors: &std::collections::HashMap<String, String>) -> Self {
+        let d = Self::default();
+        let get = |key: &str, fallback: [u8; 4]| {
+            colors.get(key)
+                .and_then(|hex| parse_hex_color(hex))
+                .unwrap_or(fallback)
+        };
+        Self {
+            background: get("--color-background", d.background),
+            focus_round: get("--color-focus-round", d.focus_round),
+            short_round: get("--color-short-round", d.short_round),
+            long_round:  get("--color-long-round",  d.long_round),
+            foreground:  get("--color-foreground",   d.foreground),
+        }
+    }
+}
+
 /// Parse a CSS hex color (#RRGGBB or #RRGGBBAA) into [r, g, b, a].
 pub fn parse_hex_color(hex: &str) -> Option<[u8; 4]> {
     let h = hex.strip_prefix('#')?;
