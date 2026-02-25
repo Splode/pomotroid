@@ -51,7 +51,7 @@
   .note {
     font-size: 0.75rem;
     color: var(--color-foreground-darker, var(--color-foreground));
-    opacity: 0.7;
+    opacity: 0.65;
     padding: 8px 20px 16px;
     line-height: 1.5;
   }

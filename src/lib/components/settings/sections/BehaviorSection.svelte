@@ -10,7 +10,7 @@
 </script>
 
 <div class="section">
-  <p class="group-heading">Timer</p>
+  <div class="group-heading">Timer</div>
 
   <SettingsToggle
     label="Auto-start Work"
@@ -25,7 +25,7 @@
     onclick={() => toggle('auto_start_break', $settings.auto_start_break)}
   />
 
-  <p class="group-heading">Window</p>
+  <div class="group-heading">Window</div>
 
   <SettingsToggle
     label="Always on Top"
@@ -42,7 +42,7 @@
     />
   {/if}
 
-  <p class="group-heading">System Tray</p>
+  <div class="group-heading">System Tray</div>
 
   <SettingsToggle
     label="Minimize to Tray"
@@ -57,7 +57,7 @@
     onclick={() => toggle('min_to_tray_on_close', $settings.min_to_tray_on_close)}
   />
 
-  <p class="group-heading">Notifications</p>
+  <div class="group-heading">Notifications</div>
 
   <SettingsToggle
     label="Desktop Notifications"
@@ -75,11 +75,12 @@
 
   .group-heading {
     font-size: 0.68rem;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-foreground-darker, var(--color-foreground));
     opacity: 0.6;
+    margin: 0;
     padding: 16px 20px 6px;
   }
 </style>

@@ -219,12 +219,14 @@
 
   /* Section label divider */
   .section-label {
-    padding: 10px 20px 4px;
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-foreground-darker, rgba(255, 255, 255, 0.4));
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    color: var(--color-foreground-darker, var(--color-foreground));
+    opacity: 0.6;
+    margin: 0;
+    padding: 16px 20px 6px;
   }
 
   /* Alert sound rows */

@@ -85,13 +85,14 @@
   }
 
   .themes-label {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--color-foreground-darker, var(--color-foreground));
-    opacity: 0.5;
-    padding: 12px 20px 6px;
+    opacity: 0.6;
+    margin: 0;
+    padding: 16px 20px 6px;
   }
 
   .theme-list {
