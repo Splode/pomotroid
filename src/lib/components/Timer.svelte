@@ -18,6 +18,13 @@
   import TimerFooter from './TimerFooter.svelte';
   import type { UnlistenFn } from '@tauri-apps/api/event';
 
+  interface Props {
+    isCompact?: boolean;
+    uiScale?: number;
+  }
+
+  let { isCompact = false, uiScale = 1 }: Props = $props();
+
   let state = $derived($timerState);
 
   function roundColor(rt: string): string {
@@ -74,42 +81,44 @@
   });
 </script>
 
-<div class="timer">
+<div class="timer" style="zoom: {uiScale}">
   <!-- Dial + display stacked (display centered over dial) -->
   <div class="dial-stack">
     <TimerDial snap={state} />
     <TimerDisplay {state} />
   </div>
 
-  <!-- Round type label sits below the dial as a normal flex child so it
-       does not affect the dial-stack height used to centre TimerDisplay. -->
-  <div class="round-label" style="color: {roundColor(state.round_type)}">
-    {roundLabel(state.round_type)}
-  </div>
+  {#if !isCompact}
+    <!-- Round type label sits below the dial as a normal flex child so it
+         does not affect the dial-stack height used to centre TimerDisplay. -->
+    <div class="round-label" style="color: {roundColor(state.round_type)}">
+      {roundLabel(state.round_type)}
+    </div>
 
-  <!-- Play / Pause button — icon fades when state changes -->
-  <button
-    class="play-pause"
-    onclick={timerToggle}
-    aria-label={state.is_running ? 'Pause' : 'Play'}
-  >
-    {#key state.is_running}
-      <span class="icon" in:fade={{ duration: 120 }}>
-        {#if state.is_running}
-          <svg width="24" height="24" viewBox="0 0 24 24">
-            <rect x="4" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
-            <rect x="15" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
-          </svg>
-        {:else}
-          <svg width="24" height="24" viewBox="0 0 24 24">
-            <polygon points="5,3 21,12 5,21" fill="currentColor"/>
-          </svg>
-        {/if}
-      </span>
-    {/key}
-  </button>
+    <!-- Play / Pause button — icon fades when state changes -->
+    <button
+      class="play-pause"
+      onclick={timerToggle}
+      aria-label={state.is_running ? 'Pause' : 'Play'}
+    >
+      {#key state.is_running}
+        <span class="icon" in:fade={{ duration: 120 }}>
+          {#if state.is_running}
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <rect x="4" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
+              <rect x="15" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
+            </svg>
+          {:else}
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <polygon points="5,3 21,12 5,21" fill="currentColor"/>
+            </svg>
+          {/if}
+        </span>
+      {/key}
+    </button>
 
-  <TimerFooter snap={state} />
+    <TimerFooter snap={state} />
+  {/if}
 </div>
 
 <style>

@@ -15,7 +15,9 @@
         "title": "Pomotroid",
         "width": 360,
         "height": 478,
-        "resizable": false,
+        "minWidth": 240,
+        "minHeight": 240,
+        "resizable": true,
         "decorations": false,
         "backgroundColor": "#2F384B"
       }

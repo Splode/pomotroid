@@ -79,6 +79,16 @@ pub fn settings_set(
     // Keep the timer engine in sync when time-related settings change.
     timer.apply_settings(new_settings.clone());
 
+    // If the timer is idle, broadcast a reset snapshot immediately so the
+    // frontend's dial and display reflect the new duration without requiring
+    // the user to manually start/reset the timer.
+    {
+        let snap = timer.get_snapshot();
+        if !snap.is_running && !snap.is_paused {
+            app.emit("timer:reset", &snap).ok();
+        }
+    }
+
     // Propagate volume and tick-sound changes to the audio engine (optional state).
     if let Some(audio) = app.try_state::<Arc<AudioManager>>() {
         audio.apply_settings(&new_settings);
@@ -189,9 +199,15 @@ pub fn theme_apply(
     let theme = themes::find(&data_dir, &name)
         .ok_or_else(|| format!("theme '{name}' not found"))?;
 
-    // Persist the selection.
-    let conn = db.lock().map_err(|e| e.to_string())?;
-    settings::save_setting(&conn, "theme", &theme.name).map_err(|e| e.to_string())?;
+    // Persist the selection and load updated settings to broadcast.
+    let updated_settings = {
+        let conn = db.lock().map_err(|e| e.to_string())?;
+        settings::save_setting(&conn, "theme", &theme.name).map_err(|e| e.to_string())?;
+        settings::load(&conn).map_err(|e| e.to_string())?
+    };
+
+    // Notify all windows so they can re-apply the new theme CSS.
+    app.emit("settings:changed", &updated_settings).ok();
 
     Ok(theme)
 }

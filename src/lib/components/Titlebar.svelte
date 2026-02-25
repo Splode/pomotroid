@@ -1,14 +1,36 @@
 <script lang="ts">
-  import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+  import { onMount } from 'svelte';
+  import { getCurrentWebviewWindow, WebviewWindow } from '@tauri-apps/api/webviewWindow';
   import { setWindowVisibility } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
 
-  interface Props {
-    drawerOpen?: boolean;
-    ontoggle?: () => void;
-  }
+  let maximized = $state(false);
 
-  let { drawerOpen = false, ontoggle }: Props = $props();
+  onMount(() => {
+    const win = getCurrentWebviewWindow();
+    win.isMaximized().then((v) => { maximized = v; });
+    const unlisten = win.onResized(async () => {
+      maximized = await win.isMaximized();
+    });
+    return () => { unlisten.then((fn) => fn()); };
+  });
+
+  async function openSettings() {
+    const existing = await WebviewWindow.getByLabel('settings');
+    if (existing) {
+      await existing.show();
+      await existing.setFocus();
+      return;
+    }
+    new WebviewWindow('settings', {
+      url: '/settings',
+      title: 'Pomotroid — Settings',
+      width: 720,
+      height: 520,
+      decorations: false,
+      resizable: false,
+    });
+  }
 
   async function minimize() {
     if ($settings.min_to_tray) {
@@ -18,16 +40,27 @@
     }
   }
 
+  function toggleMaximize() {
+    getCurrentWebviewWindow().toggleMaximize();
+  }
+
   function close() {
     getCurrentWebviewWindow().close();
   }
 </script>
 
 <nav class="titlebar" data-tauri-drag-region>
-  <!-- Hamburger / close drawer toggle -->
-  <button class="btn-icon hamburger" class:open={drawerOpen} onclick={ontoggle} aria-label="Menu">
-    <span class="bar bar-top"></span>
-    <span class="bar bar-bottom"></span>
+  <!-- Settings button -->
+  <button class="btn-icon" onclick={openSettings} aria-label="Settings">
+    <!-- Sliders / settings icon -->
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <line x1="2" y1="4"  x2="14" y2="4"  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <circle cx="5"  cy="4"  r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="2" y1="8"  x2="14" y2="8"  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <circle cx="11" cy="8"  r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
+      <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+      <circle cx="7"  cy="12" r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
+    </svg>
   </button>
 
   <!-- Title -->
@@ -39,6 +72,18 @@
       <svg width="12" height="12" viewBox="0 0 12 12">
         <line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
       </svg>
+    </button>
+    <button class="btn-icon" onclick={toggleMaximize} aria-label={maximized ? 'Restore' : 'Maximize'}>
+      {#if maximized}
+        <svg width="12" height="12" viewBox="0 0 12 12">
+          <rect x="3" y="1" width="8" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M1 4 L1 11 L8 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      {:else}
+        <svg width="12" height="12" viewBox="0 0 12 12">
+          <rect x="1" y="1" width="10" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      {/if}
     </button>
     <button class="btn-icon close" onclick={close} aria-label="Close">
       <svg width="12" height="12" viewBox="0 0 12 12">
@@ -73,6 +118,10 @@
     pointer-events: none;
   }
 
+  @media (max-width: 299px) {
+    .title { display: none; }
+  }
+
   .controls {
     display: flex;
     gap: 4px;
@@ -101,30 +150,5 @@
   .btn-icon.close:hover {
     color: #fff;
     background: #e74c3c;
-  }
-
-  /* Hamburger bars */
-  .hamburger {
-    flex-direction: column;
-    gap: 5px;
-    width: 32px;
-    height: 32px;
-  }
-
-  .bar {
-    display: block;
-    width: 18px;
-    height: 2px;
-    background: currentColor;
-    border-radius: 1px;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-  }
-
-  .hamburger.open .bar-top {
-    transform: translateY(3.5px) rotate(45deg);
-  }
-
-  .hamburger.open .bar-bottom {
-    transform: translateY(-3.5px) rotate(-45deg);
   }
 </style>

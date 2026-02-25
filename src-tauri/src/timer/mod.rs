@@ -201,6 +201,9 @@ impl TimerController {
     /// round or after a manual reset.  Sending Reconfigure to a running
     /// engine transitions it to Idle, which would freeze the timer.
     pub fn apply_settings(&self, new: Settings) {
+        // Sync work_rounds_total so the round counter and advance() logic both
+        // reflect the new long_break_interval immediately.
+        self.sequence.lock().unwrap().work_rounds_total = new.long_break_interval;
         *self.settings.lock().unwrap() = new;
         let s = self.shared.lock().unwrap();
         let is_idle = !s.is_running && s.elapsed_secs == 0;
