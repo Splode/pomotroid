@@ -8,7 +8,7 @@
 /// All shortcuts are unregistered before re-registering, so calling
 /// `register_all` is idempotent.
 use tauri::{AppHandle, Manager};
-use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut};
+use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut, ShortcutState};
 
 use crate::settings::Settings;
 use crate::timer::TimerController;
@@ -83,7 +83,7 @@ fn parse_code(key: &str) -> Option<Code> {
 // Registration
 // ---------------------------------------------------------------------------
 
-/// Unregister all current shortcuts and register the three actions defined
+/// Unregister all current shortcuts and register the four actions defined
 /// in `settings`. Silent on individual parse/register failures.
 pub fn register_all(app: &AppHandle, settings: &Settings) {
     let gsm = app.global_shortcut();
@@ -92,9 +92,10 @@ pub fn register_all(app: &AppHandle, settings: &Settings) {
     let _ = gsm.unregister_all();
 
     let shortcuts = [
-        (settings.shortcut_toggle.as_str(), ShortcutAction::Toggle),
-        (settings.shortcut_reset.as_str(),  ShortcutAction::Reset),
-        (settings.shortcut_skip.as_str(),   ShortcutAction::Skip),
+        (settings.shortcut_toggle.as_str(),  ShortcutAction::Toggle),
+        (settings.shortcut_reset.as_str(),   ShortcutAction::Reset),
+        (settings.shortcut_skip.as_str(),    ShortcutAction::Skip),
+        (settings.shortcut_restart.as_str(), ShortcutAction::RestartRound),
     ];
 
     for (key_str, action) in shortcuts {
@@ -104,8 +105,12 @@ pub fn register_all(app: &AppHandle, settings: &Settings) {
         };
 
         let app_clone = app.clone();
-        if let Err(e) = gsm.on_shortcut(shortcut, move |_app, _shortcut, _event| {
-            fire_action(&app_clone, action);
+        if let Err(e) = gsm.on_shortcut(shortcut, move |_app, _shortcut, event| {
+            // Fire only on key-press. Without this filter the callback fires on
+            // both press and release, causing Toggle to cancel itself immediately.
+            if event.state == ShortcutState::Pressed {
+                fire_action(&app_clone, action);
+            }
         }) {
             eprintln!("[shortcuts] failed to register '{key_str}': {e}");
         }
@@ -126,14 +131,16 @@ enum ShortcutAction {
     Toggle,
     Reset,
     Skip,
+    RestartRound,
 }
 
 fn fire_action(app: &AppHandle, action: ShortcutAction) {
     let Some(timer) = app.try_state::<TimerController>() else { return };
     match action {
-        ShortcutAction::Toggle => timer.toggle(),
-        ShortcutAction::Reset  => timer.reset(),
-        ShortcutAction::Skip   => timer.skip(),
+        ShortcutAction::Toggle       => timer.toggle(),
+        ShortcutAction::Reset        => timer.reset(),
+        ShortcutAction::Skip         => timer.skip(),
+        ShortcutAction::RestartRound => timer.restart_round(),
     }
 }
 
@@ -169,6 +176,11 @@ mod tests {
     #[test]
     fn parse_ctrl_f3() {
         assert!(parse_shortcut("Control+F3").is_some());
+    }
+
+    #[test]
+    fn parse_ctrl_f4() {
+        assert!(parse_shortcut("Control+F4").is_some());
     }
 
     #[test]

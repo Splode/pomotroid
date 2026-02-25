@@ -37,6 +37,7 @@ pub struct Settings {
     pub shortcut_toggle: String,
     pub shortcut_reset: String,
     pub shortcut_skip: String,
+    pub shortcut_restart: String,
     pub websocket_enabled: bool,
     pub websocket_port: u16,
 }
@@ -63,6 +64,7 @@ impl Default for Settings {
             shortcut_toggle: "Control+F1".to_string(),
             shortcut_reset: "Control+F2".to_string(),
             shortcut_skip: "Control+F3".to_string(),
+            shortcut_restart: "Control+F4".to_string(),
             websocket_enabled: false,
             websocket_port: 1314,
         }
@@ -130,6 +132,10 @@ pub fn load(conn: &Connection) -> Result<Settings> {
             .get("shortcut_skip")
             .cloned()
             .unwrap_or(d.shortcut_skip),
+        shortcut_restart: map
+            .get("shortcut_restart")
+            .cloned()
+            .unwrap_or(d.shortcut_restart),
         websocket_enabled: parse_bool(&map, "websocket_enabled", d.websocket_enabled),
         websocket_port: parse_u32(&map, "websocket_port", d.websocket_port as u32) as u16,
     })
@@ -189,6 +195,7 @@ mod tests {
         assert_eq!(s.shortcut_toggle, "Control+F1");
         assert_eq!(s.shortcut_reset, "Control+F2");
         assert_eq!(s.shortcut_skip, "Control+F3");
+        assert_eq!(s.shortcut_restart, "Control+F4");
         assert!(!s.always_on_top);
         assert!(!s.websocket_enabled);
         assert_eq!(s.websocket_port, 1314);

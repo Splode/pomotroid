@@ -24,6 +24,7 @@ pub const DEFAULTS: &[(&str, &str)] = &[
     ("shortcut_toggle", "Control+F1"),
     ("shortcut_reset", "Control+F2"),
     ("shortcut_skip", "Control+F3"),
+    ("shortcut_restart", "Control+F4"),
     ("websocket_enabled", "false"),
     ("websocket_port", "1314"),
 ];

@@ -39,6 +39,14 @@
       onchange={(v) => setShortcut('shortcut_skip', v)}
     />
   </div>
+
+  <div class="row">
+    <span class="label">Restart Round</span>
+    <ShortcutInput
+      value={$settings.shortcut_restart}
+      onchange={(v) => setShortcut('shortcut_restart', v)}
+    />
+  </div>
 </div>
 
 <style>

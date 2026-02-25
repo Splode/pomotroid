@@ -35,6 +35,7 @@ export interface Settings {
   shortcut_toggle: string;
   shortcut_reset: string;
   shortcut_skip: string;
+  shortcut_restart: string;
   websocket_enabled: boolean;
   websocket_port: number;
   theme: string;
