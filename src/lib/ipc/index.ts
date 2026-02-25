@@ -3,7 +3,8 @@
 
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
-import type { TimerState, Settings, Theme } from '$lib/types';
+import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
+import type { TimerState, Settings, Theme, CustomAudioInfo } from '$lib/types';
 
 // --- Timer commands ---
 
@@ -32,6 +33,26 @@ export const setWindowVisibility = (visible: boolean) =>
   invoke<void>('window_set_visibility', { visible });
 export const setAlwaysOnTop = (onTop: boolean) =>
   invoke<void>('window_set_always_on_top', { onTop });
+
+// --- Audio commands ---
+
+export const getCustomAudioInfo = () =>
+  invoke<CustomAudioInfo>('audio_get_custom_info');
+
+/** Copy `srcPath` to the config dir for `cue`; returns the display name. */
+export const setCustomAudio = (cue: string, srcPath: string) =>
+  invoke<string>('audio_set_custom', { cue, srcPath });
+
+/** Delete the custom file for `cue` and revert to the built-in sound. */
+export const clearCustomAudio = (cue: string) =>
+  invoke<void>('audio_clear_custom', { cue });
+
+/** Open a native file picker filtered to audio formats. Returns a path or null. */
+export const openAudioFilePicker = (): Promise<string | null> =>
+  dialogOpen({
+    multiple: false,
+    filters: [{ name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'flac'] }],
+  }) as Promise<string | null>;
 
 // --- Event listeners ---
 

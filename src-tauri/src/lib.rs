@@ -14,6 +14,7 @@ use std::sync::Arc;
 use tauri::Manager;
 
 use commands::{
+    audio_clear_custom, audio_get_custom_info, audio_set_custom,
     settings_get, settings_reset_defaults, settings_set,
     shortcuts_reload,
     stats_get_all_time, stats_get_session,
@@ -27,6 +28,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             let app_data_dir = app
@@ -63,6 +65,12 @@ pub fn run() {
 
             // --- Audio engine (optional — graceful if no audio device) ---
             if let Some(audio) = audio::AudioManager::new(&initial_settings) {
+                // Restore any previously saved custom audio files.
+                let audio_dir = app_data_dir.join("audio");
+                if audio_dir.exists() {
+                    let custom = audio::find_custom_files(&audio_dir);
+                    *audio.custom_paths.lock().unwrap() = custom;
+                }
                 app.manage(audio);
             }
 
@@ -156,6 +164,10 @@ pub fn run() {
             window_set_always_on_top,
             // Shortcuts
             shortcuts_reload,
+            // Audio
+            audio_set_custom,
+            audio_clear_custom,
+            audio_get_custom_info,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

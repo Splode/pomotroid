@@ -6,7 +6,7 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 use std::sync::Arc;
 
-use crate::audio::AudioManager;
+use crate::audio::{self, AudioManager};
 use crate::db::{queries, DbState};
 use crate::settings::{self, Settings};
 use crate::shortcuts;
@@ -293,6 +293,115 @@ pub fn window_set_always_on_top(on_top: bool, app: AppHandle) -> Result<(), Stri
         .get_webview_window("main")
         .ok_or_else(|| "main window not found".to_string())?;
     window.set_always_on_top(on_top).map_err(|e| e.to_string())
+}
+
+// ---------------------------------------------------------------------------
+// CMD-07 — Audio commands
+// ---------------------------------------------------------------------------
+
+/// Copy a user-selected audio file into the app config dir for the given cue slot.
+///
+/// `cue` must be one of: `"work_alert"`, `"short_break_alert"`, `"long_break_alert"`.
+/// `src_path` is the full path to the file chosen by the user.
+///
+/// The file is stored with a fixed stem (e.g. `custom_work_alert.mp3`) so that
+/// selecting a new file for the same slot automatically replaces the old one —
+/// no orphan files accumulate.
+///
+/// Returns the original filename for display in the UI.
+#[tauri::command]
+pub fn audio_set_custom(
+    cue: String,
+    src_path: String,
+    app: AppHandle,
+) -> Result<String, String> {
+    let audio_state = app
+        .try_state::<Arc<AudioManager>>()
+        .ok_or_else(|| "audio engine is not available".to_string())?;
+
+    let stem = cue_to_stem(&cue)?;
+
+    let audio_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| e.to_string())?
+        .join("audio");
+    std::fs::create_dir_all(&audio_dir).map_err(|e| e.to_string())?;
+
+    let src = std::path::Path::new(&src_path);
+    let ext = src
+        .extension()
+        .and_then(|e| e.to_str())
+        .unwrap_or("mp3");
+
+    // Remove any existing custom file for this slot (preserves zero orphans).
+    if let Ok(entries) = std::fs::read_dir(&audio_dir) {
+        for entry in entries.filter_map(|e| e.ok()) {
+            let p = entry.path();
+            if p.file_stem().and_then(|s| s.to_str()) == Some(stem) {
+                let _ = std::fs::remove_file(&p);
+            }
+        }
+    }
+
+    let dest = audio_dir.join(format!("{stem}.{ext}"));
+    std::fs::copy(src, &dest).map_err(|e| e.to_string())?;
+
+    audio_state.set_custom_path(&cue, dest);
+
+    let display_name = src
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("custom")
+        .to_string();
+    Ok(display_name)
+}
+
+/// Restore the built-in sound for the given cue slot by deleting the custom file.
+#[tauri::command]
+pub fn audio_clear_custom(cue: String, app: AppHandle) -> Result<(), String> {
+    let audio_state = app
+        .try_state::<Arc<AudioManager>>()
+        .ok_or_else(|| "audio engine is not available".to_string())?;
+
+    let stem = cue_to_stem(&cue)?;
+
+    let audio_dir = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| e.to_string())?
+        .join("audio");
+
+    if let Ok(entries) = std::fs::read_dir(&audio_dir) {
+        for entry in entries.filter_map(|e| e.ok()) {
+            let p = entry.path();
+            if p.file_stem().and_then(|s| s.to_str()) == Some(stem) {
+                std::fs::remove_file(&p).map_err(|e| e.to_string())?;
+            }
+        }
+    }
+
+    audio_state.clear_custom_path(&cue);
+    Ok(())
+}
+
+/// Return the display names of any currently configured custom audio files.
+/// Fields are `null` when the built-in sound is in use for that slot.
+#[tauri::command]
+pub fn audio_get_custom_info(app: AppHandle) -> Result<audio::CustomAudioInfo, String> {
+    let audio_state = app
+        .try_state::<Arc<AudioManager>>()
+        .ok_or_else(|| "audio engine is not available".to_string())?;
+    Ok(audio_state.get_custom_info())
+}
+
+fn cue_to_stem(cue: &str) -> Result<&'static str, String> {
+    match cue {
+        "work_alert" => Ok(audio::STEM_WORK),
+        "short_break_alert" => Ok(audio::STEM_SHORT),
+        "long_break_alert" => Ok(audio::STEM_LONG),
+        _ => Err(format!("unknown audio cue: '{cue}'")),
+    }
 }
 
 // ---------------------------------------------------------------------------

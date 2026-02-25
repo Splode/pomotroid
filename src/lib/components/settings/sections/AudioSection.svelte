@@ -1,10 +1,48 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { settings } from '$lib/stores/settings';
-  import { setSetting } from '$lib/ipc';
+  import { setSetting, getCustomAudioInfo, setCustomAudio, clearCustomAudio, openAudioFilePicker } from '$lib/ipc';
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
+  import type { CustomAudioInfo } from '$lib/types';
+
+  type CueKey = keyof CustomAudioInfo;
+
+  const CUE_LIST: { id: CueKey; label: string }[] = [
+    { id: 'work_alert',       label: 'Work Alert' },
+    { id: 'short_break_alert', label: 'Short Break Alert' },
+    { id: 'long_break_alert',  label: 'Long Break Alert' },
+  ];
 
   let localVolume = $state($settings.volume);
   $effect(() => { localVolume = $settings.volume; });
+
+  // Custom audio file names (null = built-in default is active).
+  let workAlert       = $state<string | null>(null);
+  let shortBreakAlert = $state<string | null>(null);
+  let longBreakAlert  = $state<string | null>(null);
+
+  function getFileName(id: CueKey): string | null {
+    if (id === 'work_alert') return workAlert;
+    if (id === 'short_break_alert') return shortBreakAlert;
+    return longBreakAlert;
+  }
+
+  function setFileName(id: CueKey, val: string | null) {
+    if (id === 'work_alert') workAlert = val;
+    else if (id === 'short_break_alert') shortBreakAlert = val;
+    else longBreakAlert = val;
+  }
+
+  onMount(async () => {
+    try {
+      const info: CustomAudioInfo = await getCustomAudioInfo();
+      workAlert       = info.work_alert;
+      shortBreakAlert = info.short_break_alert;
+      longBreakAlert  = info.long_break_alert;
+    } catch (err) {
+      console.warn('[audio] getCustomAudioInfo failed (audio unavailable?):', err);
+    }
+  });
 
   async function toggle(dbKey: string, current: boolean) {
     const updated = await setSetting(dbKey, current ? 'false' : 'true');
@@ -16,6 +54,34 @@
     localVolume = val;
     const updated = await setSetting('volume', String(Math.round(val * 100)));
     settings.set(updated);
+  }
+
+  async function pickAudio(id: CueKey) {
+    let path: string | null = null;
+    try {
+      path = await openAudioFilePicker();
+    } catch (err) {
+      console.error('[audio] file picker error:', err);
+      return;
+    }
+
+    if (!path) return; // dialog was cancelled
+
+    try {
+      const displayName = await setCustomAudio(id, path);
+      setFileName(id, displayName);
+    } catch (err) {
+      console.error('[audio] setCustomAudio failed:', err);
+    }
+  }
+
+  async function restoreAudio(id: CueKey) {
+    try {
+      await clearCustomAudio(id);
+      setFileName(id, null);
+    } catch (err) {
+      console.error('[audio] clearCustomAudio failed:', err);
+    }
   }
 </script>
 
@@ -48,6 +114,25 @@
     checked={$settings.tick_sounds_during_break}
     onclick={() => toggle('tick_sounds_break', $settings.tick_sounds_during_break)}
   />
+
+  <div class="section-label">Alert Sounds</div>
+
+  {#each CUE_LIST as { id, label } (id)}
+    <div class="audio-row">
+      <div class="audio-meta">
+        <span class="label">{label}</span>
+        <span class="file-name" class:custom={getFileName(id) !== null}>
+          {getFileName(id) ?? 'Default'}
+        </span>
+      </div>
+      <div class="audio-actions">
+        {#if getFileName(id) !== null}
+          <button class="btn-restore" onclick={() => restoreAudio(id)}>Restore</button>
+        {/if}
+        <button class="btn-choose" onclick={() => pickAudio(id)}>Choose File</button>
+      </div>
+    </div>
+  {/each}
 </div>
 
 <style>
@@ -130,5 +215,78 @@
     z-index: 1;
     background: var(--color-accent);
     transition: width 0.05s;
+  }
+
+  /* Section label divider */
+  .section-label {
+    padding: 10px 20px 4px;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-foreground-darker, rgba(255, 255, 255, 0.4));
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  /* Alert sound rows */
+  .audio-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .audio-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .file-name {
+    font-size: 0.72rem;
+    font-family: monospace;
+    color: var(--color-foreground-darker, rgba(255, 255, 255, 0.35));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+
+  .file-name.custom {
+    color: var(--color-accent);
+  }
+
+  .audio-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .btn-choose,
+  .btn-restore {
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--color-foreground);
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn-choose:hover {
+    background: rgba(255, 255, 255, 0.13);
+  }
+
+  .btn-restore {
+    color: var(--color-foreground-darker, rgba(255, 255, 255, 0.5));
+  }
+
+  .btn-restore:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-foreground);
   }
 </style>

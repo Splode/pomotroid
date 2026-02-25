@@ -41,6 +41,13 @@ export interface Settings {
   dial_countdown: boolean;
 }
 
+/** Mirrors Rust `CustomAudioInfo` — null means the built-in sound is active. */
+export interface CustomAudioInfo {
+  work_alert: string | null;
+  short_break_alert: string | null;
+  long_break_alert: string | null;
+}
+
 /** Mirrors Rust `Theme` struct. Color keys include the `--` CSS var prefix. */
 export interface Theme {
   name: string;
