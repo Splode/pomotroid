@@ -43,8 +43,6 @@ pub struct TimerSnapshot {
 struct TimerShared {
     elapsed_secs: u32,
     is_running: bool,
-    /// Set by `skip()` so the Complete handler can record `completed=false`.
-    skip_pending: bool,
 }
 
 // ---------------------------------------------------------------------------
@@ -80,7 +78,6 @@ impl TimerController {
         let shared = Arc::new(Mutex::new(TimerShared {
             elapsed_secs: 0,
             is_running: false,
-            skip_pending: false,
         }));
 
         // Clone handles for the event-listener thread.
@@ -148,17 +145,6 @@ impl TimerController {
     }
 
     pub fn skip(&self) {
-        // Guard: Skip while Idle is a no-op.  The engine would silently drop
-        // the command, but skip_pending would remain set — poisoning the next
-        // natural completion by marking it as skipped in the DB.
-        {
-            let s = self.shared.lock().unwrap();
-            if !s.is_running && s.elapsed_secs == 0 {
-                return;
-            }
-        }
-        // Flag skip before sending so the Complete handler sees it.
-        self.shared.lock().unwrap().skip_pending = true;
         self.engine.send(TimerCommand::Skip);
     }
 
@@ -294,12 +280,7 @@ fn listen_events(
                 }
             }
 
-            TimerEvent::Complete => {
-                // Capture and clear skip flag atomically.
-                let was_skipped = {
-                    let mut s = shared.lock().unwrap();
-                    std::mem::replace(&mut s.skip_pending, false)
-                };
+            TimerEvent::Complete { skipped: was_skipped } => {
 
                 // --- Session recording: mark the completed round ---
                 if let Some(session_id) = current_session_id.take() {

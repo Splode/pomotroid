@@ -33,7 +33,7 @@ pub enum TimerCommand {
 #[derive(Debug, Clone)]
 pub enum TimerEvent {
     Tick { elapsed_secs: u32, total_secs: u32 },
-    Complete,
+    Complete { skipped: bool },
     Paused { elapsed_secs: u32 },
     Resumed { elapsed_secs: u32 },
     Reset,
@@ -130,6 +130,11 @@ fn run_loop(
                     let _ = event_tx.send(TimerEvent::Reset);
                     Transition::Stay
                 }
+                // Skip while Idle: advance to the next round without starting.
+                Ok(TimerCommand::Skip) => {
+                    let _ = event_tx.send(TimerEvent::Complete { skipped: true });
+                    Transition::Stay
+                }
                 Ok(TimerCommand::Shutdown) | Err(_) => Transition::Break,
                 _ => Transition::Stay,
             },
@@ -151,7 +156,7 @@ fn run_loop(
                 }
                 Ok(TimerCommand::Skip) => {
                     elapsed_secs = 0;
-                    let _ = event_tx.send(TimerEvent::Complete);
+                    let _ = event_tx.send(TimerEvent::Complete { skipped: true });
                     Transition::To(Phase::Idle)
                 }
                 Ok(TimerCommand::Reconfigure { duration_secs: d }) => {
@@ -178,7 +183,7 @@ fn run_loop(
                         let _ = event_tx.send(TimerEvent::Tick { elapsed_secs, total_secs });
 
                         if elapsed_secs >= total_secs {
-                            let _ = event_tx.send(TimerEvent::Complete);
+                            let _ = event_tx.send(TimerEvent::Complete { skipped: false });
                             elapsed_secs = 0;
                             Transition::To(Phase::Idle)
                         } else {
@@ -198,7 +203,7 @@ fn run_loop(
                     }
                     Ok(TimerCommand::Skip) => {
                         elapsed_secs = 0;
-                        let _ = event_tx.send(TimerEvent::Complete);
+                        let _ = event_tx.send(TimerEvent::Complete { skipped: true });
                         Transition::To(Phase::Idle)
                     }
                     Ok(TimerCommand::Reset) => {
@@ -255,7 +260,7 @@ mod tests {
             }
             match rx.recv_timeout(remaining) {
                 Ok(e) => {
-                    let done = matches!(e, TimerEvent::Complete);
+                    let done = matches!(e, TimerEvent::Complete { .. });
                     events.push(e);
                     if done {
                         break;
@@ -280,7 +285,7 @@ mod tests {
             .collect();
         assert_eq!(ticks.len(), 5, "expected 5 ticks, got {}", ticks.len());
         assert!(
-            matches!(events.last(), Some(TimerEvent::Complete)),
+            matches!(events.last(), Some(TimerEvent::Complete { .. })),
             "last event must be Complete"
         );
     }
@@ -337,7 +342,7 @@ mod tests {
         assert!(
             events_after
                 .iter()
-                .any(|e| matches!(e, TimerEvent::Complete)),
+                .any(|e| matches!(e, TimerEvent::Complete { .. })),
             "expected Complete after resume"
         );
     }
@@ -356,7 +361,7 @@ mod tests {
         );
         // No Complete should have fired.
         assert!(
-            !events.iter().any(|e| matches!(e, TimerEvent::Complete)),
+            !events.iter().any(|e| matches!(e, TimerEvent::Complete { .. })),
             "Complete must not fire on Reset"
         );
     }
@@ -370,7 +375,7 @@ mod tests {
 
         let events = collect_until_complete(&rx, Duration::from_millis(500));
         assert!(
-            events.iter().any(|e| matches!(e, TimerEvent::Complete)),
+            events.iter().any(|e| matches!(e, TimerEvent::Complete { .. })),
             "Skip must trigger Complete"
         );
         // Should have completed well before 30 ticks elapsed.
@@ -430,7 +435,7 @@ mod tests {
             "Resumed event must carry the same elapsed_secs as Suspended"
         );
         assert!(
-            after.iter().any(|e| matches!(e, TimerEvent::Complete)),
+            after.iter().any(|e| matches!(e, TimerEvent::Complete { .. })),
             "timer must complete after WakeResume"
         );
     }
@@ -476,7 +481,7 @@ mod tests {
             .count();
         assert_eq!(ticks, 3, "Reconfigure to 3s should yield 3 ticks, got {ticks}");
         assert!(
-            matches!(events.last(), Some(TimerEvent::Complete)),
+            matches!(events.last(), Some(TimerEvent::Complete { .. })),
             "last event must be Complete after reconfigured timer"
         );
     }
@@ -494,7 +499,7 @@ mod tests {
         let wall = t0.elapsed();
 
         assert!(
-            matches!(events.last(), Some(TimerEvent::Complete)),
+            matches!(events.last(), Some(TimerEvent::Complete { .. })),
             "timer must complete"
         );
         let nominal = TICK * 5; // 100 ms
