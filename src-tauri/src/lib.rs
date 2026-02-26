@@ -59,7 +59,11 @@ pub fn run() {
 
             // Sync tray state from saved settings.
             *tray_state.countdown_mode.lock().unwrap() = initial_settings.dial_countdown;
-            if let Some(theme) = themes::find(&app_data_dir, &initial_settings.theme) {
+            let tray_theme_name = match initial_settings.theme_mode.as_str() {
+                "dark" => &initial_settings.theme_dark,
+                _ => &initial_settings.theme_light,
+            };
+            if let Some(theme) = themes::find(&app_data_dir, tray_theme_name) {
                 *tray_state.colors.lock().unwrap() = tray::TrayColors::from_colors_map(&theme.colors);
             }
 

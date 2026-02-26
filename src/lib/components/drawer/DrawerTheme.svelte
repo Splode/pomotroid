@@ -4,23 +4,25 @@
   import type { Theme } from '$lib/types';
   import { settings } from '$lib/stores/settings';
   import { activeTheme, applyTheme } from '$lib/stores/theme';
-  import { getThemes, applyThemeByName, onThemesChanged } from '$lib/ipc';
+  import { getThemes, setSetting, onThemesChanged } from '$lib/ipc';
+  import { resolveThemeName } from '$lib/utils/theme';
   import type { UnlistenFn } from '@tauri-apps/api/event';
 
   let themes = $state<Theme[]>([]);
-  let activeName = $derived($settings.theme);
+  let osDark = $state(window.matchMedia('(prefers-color-scheme: dark)').matches);
+  let activeName = $derived(resolveThemeName($settings, osDark));
 
   onMount(() => {
     const cleanups: UnlistenFn[] = [];
 
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const mqListener = (e: MediaQueryListEvent) => { osDark = e.matches; };
+    mq.addEventListener('change', mqListener);
+    cleanups.push(() => mq.removeEventListener('change', mqListener));
+
     (async () => {
       themes = await getThemes();
-
-      cleanups.push(
-        await onThemesChanged((updated) => {
-          themes = updated;
-        }),
-      );
+      cleanups.push(await onThemesChanged((updated) => { themes = updated; }));
     })();
 
     return () => { for (const fn of cleanups) fn(); };
@@ -29,10 +31,9 @@
   async function select(theme: Theme) {
     // Apply immediately for instant preview.
     applyTheme(theme);
-    // Persist via backend (also updates settings store via settings:changed).
-    const applied = await applyThemeByName(theme.name);
-    applyTheme(applied);
-    settings.update((s) => ({ ...s, theme: theme.name }));
+    // Save to whichever picker is currently active.
+    const key = osDark || $settings.theme_mode === 'dark' ? 'theme_dark' : 'theme_light';
+    await setSetting(key, theme.name);
   }
 </script>
 

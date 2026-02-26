@@ -1,0 +1,58 @@
+schema: spec-driven
+
+context: |
+  ## Project: Pomotroid
+  A Pomodoro timer desktop application. Full rewrite from Electron + Vue 2 → Tauri 2.x + Rust + Svelte 5 + SQLite.
+
+  ## Tech Stack
+  - **Frontend**: SvelteKit (adapter-static, fallback: index.html), Svelte 5 runes ($state, $derived, $effect)
+  - **Backend**: Tauri 2, Rust, SQLite via rusqlite
+  - **Build**: `npm run tauri dev` (dev), `npm run tauri build` (release)
+  - **Type checking**: `npm run check` (svelte-check)
+  - **Rust tests**: `cargo test` in src-tauri/
+
+  ## Architecture
+
+  ### Windows
+  - `main` — the timer window (src/routes/+page.svelte)
+  - `settings` — opened programmatically via WebviewWindow from Titlebar.svelte (src/routes/settings/+page.svelte)
+  - Both windows share the same capabilities and CSS theme
+
+  ### IPC Layer
+  - All frontend↔backend calls go through src/lib/ipc/index.ts (typed wrappers around invoke/listen)
+  - Rust commands in src-tauri/src/commands.rs
+  - Events emitted by Rust: timer:tick, timer:reset, timer:paused, timer:resumed, timer:round-change, settings:changed, themes:changed
+
+  ### Settings
+  - Stored in SQLite as flat key/value strings (src-tauri/src/settings/)
+  - DB keys differ from struct field names (e.g. DB `work_rounds` → struct `long_break_interval`)
+  - DB migration system in src-tauri/src/db/migrations.rs — versioned, transactional
+  - Frontend store: src/lib/stores/settings.ts; types: src/lib/types.ts (must mirror Rust Settings struct)
+  - Single settings_set command saves one key at a time and emits settings:changed to all windows
+
+  ### Timer
+  - Engine runs in a background Rust thread; TimerController is the public API (src-tauri/src/timer/mod.rs)
+  - SequenceState (src-tauri/src/timer/sequence.rs) tracks round type and count
+  - TimerEvent::Complete { skipped: bool } — skipped=true for Skip commands, false for natural completion
+
+  ### Theme System
+  - 18 bundled themes as JSON files; CSS custom properties applied to :root via applyTheme() (src/lib/stores/theme.ts)
+  - Three-field model: theme_mode (auto/light/dark) + theme_light + theme_dark
+  - Active theme resolved at runtime via resolveThemeName() (src/lib/utils/theme.ts)
+  - OS color scheme detected via window.matchMedia('(prefers-color-scheme: dark)') — frontend only, no Rust involvement
+  - Tray icon colors updated by Rust when theme-related settings change (mode-aware: dark→theme_dark, else→theme_light)
+
+  ### UI Conventions
+  - Decoration-free window; custom titlebar in Titlebar.svelte
+  - Settings window: sidebar nav with 6 sections — Timer, Appearance, Notifications, Shortcuts, System, About
+  - Settings section components in src/lib/components/settings/sections/
+  - Compact mode: isCompact = w < 300 || h < 300 — hides footer/label/play-pause, shows only timer dial
+  - uiScale applied via CSS zoom on .timer div
+  - Hardcoded colors use CSS custom properties or color-mix(in oklch, ...) — never raw rgba() values
+
+  ## Conventions
+  - No auto-commit; always ask before committing or pushing
+  - Svelte 5 runes only — no legacy $: reactive statements or writable stores for component state
+  - CSS: semantic variables (--color-background, --color-foreground, --color-accent, etc.) for all theme-sensitive colors
+  - Overlays/borders: color-mix(in oklch, var(--color-foreground) N%, transparent) pattern
+  - Tauri capabilities in src-tauri/capabilities/default.json — both windows share this file

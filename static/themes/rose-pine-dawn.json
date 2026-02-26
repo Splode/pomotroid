@@ -1,0 +1,15 @@
+{
+  "name": "Rosé Pine Dawn",
+  "colors": {
+    "--color-focus-round": "#b4637a",
+    "--color-short-round": "#56949f",
+    "--color-long-round": "#907aa9",
+    "--color-background": "#faf4ed",
+    "--color-background-light": "#fffaf3",
+    "--color-background-lightest": "#f2e9e1",
+    "--color-foreground": "#575279",
+    "--color-foreground-darker": "#797593",
+    "--color-foreground-darkest": "#9893a5",
+    "--color-accent": "#ea9d34"
+  }
+}

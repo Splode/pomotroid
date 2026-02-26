@@ -38,7 +38,9 @@ export interface Settings {
   shortcut_restart: string;
   websocket_enabled: boolean;
   websocket_port: number;
-  theme: string;
+  theme_mode: string;   // 'auto' | 'light' | 'dark'
+  theme_light: string;
+  theme_dark: string;
   dial_countdown: boolean;
 }
 

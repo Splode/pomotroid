@@ -121,6 +121,25 @@ pub fn settings_set(
         tray::update_icon(&tray_state, &snap.round_type, snap.is_paused, progress);
     }
 
+    // Update tray icon colors when the active theme changes.
+    if matches!(key.as_str(), "theme_mode" | "theme_light" | "theme_dark") {
+        let data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+        let tray_theme_name = match new_settings.theme_mode.as_str() {
+            "dark" => &new_settings.theme_dark,
+            _ => &new_settings.theme_light,
+        };
+        if let Some(theme) = themes::find(&data_dir, tray_theme_name) {
+            *tray_state.colors.lock().unwrap() = tray::TrayColors::from_colors_map(&theme.colors);
+            let snap = timer.get_snapshot();
+            let progress = if snap.total_secs > 0 {
+                snap.elapsed_secs as f32 / snap.total_secs as f32
+            } else {
+                0.0
+            };
+            tray::update_icon(&tray_state, &snap.round_type, snap.is_paused, progress);
+        }
+    }
+
     // Create or destroy the tray based on the min_to_tray setting.
     if key == "min_to_tray" {
         if value == "true" {
@@ -188,7 +207,11 @@ pub fn settings_reset_defaults(
     timer.apply_settings(new_settings.clone());
     *tray_state.countdown_mode.lock().unwrap() = new_settings.dial_countdown;
     let data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
-    if let Some(theme) = themes::find(&data_dir, &new_settings.theme) {
+    let tray_theme_name = match new_settings.theme_mode.as_str() {
+        "dark" => &new_settings.theme_dark,
+        _ => &new_settings.theme_light,
+    };
+    if let Some(theme) = themes::find(&data_dir, tray_theme_name) {
         *tray_state.colors.lock().unwrap() = tray::TrayColors::from_colors_map(&theme.colors);
     }
     app.emit("settings:changed", &new_settings).ok();

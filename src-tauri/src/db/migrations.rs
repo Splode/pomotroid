@@ -33,6 +33,26 @@ const MIGRATION_1: &str = "
     INSERT INTO schema_version VALUES (1);
 ";
 
+/// Migrates the single `theme` key to the three-field model (`theme_mode`,
+/// `theme_light`, `theme_dark`). Safe to run on both existing installs
+/// (propagates the old theme value) and fresh installs (falls back to
+/// 'Pomotroid'). Uses INSERT OR IGNORE so a partially-applied run is harmless.
+const MIGRATION_2: &str = "
+    INSERT OR IGNORE INTO settings (key, value)
+        VALUES ('theme_light',
+                COALESCE((SELECT value FROM settings WHERE key = 'theme'), 'Pomotroid'));
+
+    INSERT OR IGNORE INTO settings (key, value)
+        VALUES ('theme_dark',
+                COALESCE((SELECT value FROM settings WHERE key = 'theme'), 'Pomotroid'));
+
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('theme_mode', 'auto');
+
+    DELETE FROM settings WHERE key = 'theme';
+
+    INSERT INTO schema_version VALUES (2);
+";
+
 /// Apply any pending migrations. Each migration is wrapped in a transaction
 /// so a partial failure leaves the database unchanged.
 pub fn run(conn: &Connection) -> Result<()> {
@@ -40,6 +60,10 @@ pub fn run(conn: &Connection) -> Result<()> {
 
     if version < 1 {
         conn.execute_batch(&format!("BEGIN; {MIGRATION_1} COMMIT;"))?;
+    }
+
+    if version < 2 {
+        conn.execute_batch(&format!("BEGIN; {MIGRATION_2} COMMIT;"))?;
     }
 
     Ok(())
@@ -75,9 +99,9 @@ mod tests {
         // Second run must not error (version check prevents re-application).
         run(&conn).unwrap();
         let v: i64 = conn
-            .query_row("SELECT version FROM schema_version", [], |r| r.get(0))
+            .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(v, 1);
+        assert_eq!(v, 2);
     }
 
     #[test]

@@ -23,7 +23,9 @@ pub struct Settings {
     pub long_break_interval: u32,
     /// When true the dial arc starts full and subtracts; when false it fills from empty.
     pub dial_countdown: bool,
-    pub theme: String,
+    pub theme_mode: String,
+    pub theme_light: String,
+    pub theme_dark: String,
     pub tick_sounds_during_work: bool,
     pub tick_sounds_during_break: bool,
     /// Work round duration in seconds.
@@ -51,12 +53,14 @@ impl Default for Settings {
             auto_start_break: true,
             min_to_tray: false,
             min_to_tray_on_close: false,
-            notifications_enabled: true,
+            notifications_enabled: false,
             long_break_interval: 4,
-            dial_countdown: false,
-            theme: "Pomotroid".to_string(),
+            dial_countdown: true,
+            theme_mode: "auto".to_string(),
+            theme_light: "Pomotroid".to_string(),
+            theme_dark: "Pomotroid".to_string(),
             tick_sounds_during_work: false,
-            tick_sounds_during_break: true,
+            tick_sounds_during_break: false,
             time_work_secs: 25 * 60,
             time_short_break_secs: 5 * 60,
             time_long_break_secs: 15 * 60,
@@ -103,10 +107,18 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         notifications_enabled: parse_bool(&map, "notifications", d.notifications_enabled),
         long_break_interval: parse_u32(&map, "work_rounds", d.long_break_interval),
         dial_countdown: parse_bool(&map, "dial_countdown", d.dial_countdown),
-        theme: map
-            .get("theme")
+        theme_mode: map
+            .get("theme_mode")
             .cloned()
-            .unwrap_or(d.theme),
+            .unwrap_or(d.theme_mode),
+        theme_light: map
+            .get("theme_light")
+            .cloned()
+            .unwrap_or(d.theme_light),
+        theme_dark: map
+            .get("theme_dark")
+            .cloned()
+            .unwrap_or(d.theme_dark),
         tick_sounds_during_work: parse_bool(&map, "tick_sounds_work", d.tick_sounds_during_work),
         tick_sounds_during_break: parse_bool(
             &map,
@@ -199,7 +211,9 @@ mod tests {
         assert!(!s.always_on_top);
         assert!(!s.websocket_enabled);
         assert_eq!(s.websocket_port, 1314);
-        assert_eq!(s.theme, "Pomotroid");
+        assert_eq!(s.theme_mode, "auto");
+        assert_eq!(s.theme_light, "Pomotroid");
+        assert_eq!(s.theme_dark, "Pomotroid");
     }
 
     #[test]

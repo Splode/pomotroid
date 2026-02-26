@@ -38,6 +38,7 @@ const BUNDLED_JSON: &[&str] = &[
     include_str!("../../../static/themes/one-dark.json"),
     include_str!("../../../static/themes/pomotroid.json"),
     include_str!("../../../static/themes/popping-and-locking.json"),
+    include_str!("../../../static/themes/rose-pine-dawn.json"),
     include_str!("../../../static/themes/solarized-light.json"),
     include_str!("../../../static/themes/spandex.json"),
     include_str!("../../../static/themes/synthwave.json"),
@@ -131,7 +132,7 @@ mod tests {
     #[test]
     fn all_bundled_themes_parse() {
         let themes = load_bundled();
-        assert_eq!(themes.len(), 17, "expected 17 bundled themes");
+        assert_eq!(themes.len(), 18, "expected 18 bundled themes");
     }
 
     #[test]

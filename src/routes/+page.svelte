@@ -6,6 +6,7 @@
   import { getSettings, getThemes, onSettingsChanged, onThemesChanged } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
+  import { resolveThemeName } from '$lib/utils/theme';
   import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
   import type { UnlistenFn } from '@tauri-apps/api/event';
 
@@ -60,25 +61,45 @@
       const s = await getSettings();
       settings.set(s);
 
-      // Load and apply the active theme.
+      // Load and apply the active theme using OS color scheme.
       const themes = await getThemes();
-      const active = themes.find((t) => t.name === s.theme) ?? themes[0];
+      const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const active = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
       if (active) applyTheme(active);
+
+      // Live OS color scheme changes — re-resolve only in auto mode.
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const mqListener = async (e: MediaQueryListEvent) => {
+        if ($settings.theme_mode !== 'auto') return;
+        const allThemes = await getThemes();
+        const t = allThemes.find((th) => th.name === resolveThemeName($settings, e.matches));
+        if (t) applyTheme(t);
+      };
+      mq.addEventListener('change', mqListener);
+      cleanups.push(() => mq.removeEventListener('change', mqListener));
 
       // Keep settings store in sync with backend changes.
       cleanups.push(
         await onSettingsChanged(async (updated) => {
-          const prevTheme = $settings.theme;
+          const prevMode = $settings.theme_mode;
+          const prevLight = $settings.theme_light;
+          const prevDark = $settings.theme_dark;
           settings.set(updated);
-          if (updated.theme !== prevTheme) {
+          if (
+            updated.theme_mode !== prevMode ||
+            updated.theme_light !== prevLight ||
+            updated.theme_dark !== prevDark
+          ) {
             const allThemes = await getThemes();
-            const t = allThemes.find((t) => t.name === updated.theme);
+            const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const t = allThemes.find((th) => th.name === resolveThemeName(updated, dark));
             if (t) applyTheme(t);
           }
         }),
         // Re-apply theme when custom themes are hot-reloaded.
         await onThemesChanged((updated) => {
-          const current = updated.find((t) => t.name === s.theme) ?? updated[0];
+          const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const current = updated.find((t) => t.name === resolveThemeName($settings, dark)) ?? updated[0];
           if (current) applyTheme(current);
         }),
       );
