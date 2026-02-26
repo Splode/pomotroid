@@ -144,11 +144,11 @@
 
   .btn-icon:hover {
     color: var(--color-foreground);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--color-hover);
   }
 
   .btn-icon.close:hover {
-    color: #fff;
-    background: #e74c3c;
+    color: var(--color-background);
+    background: var(--color-focus-round);
   }
 </style>

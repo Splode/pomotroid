@@ -180,7 +180,7 @@
 
   .btn-side:hover {
     color: var(--color-foreground);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--color-hover);
   }
 
   .play-pause {
@@ -203,7 +203,7 @@
   .play-pause:hover {
     color: var(--color-accent);
     border-color: var(--color-accent);
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--color-hover);
   }
 
   .icon {

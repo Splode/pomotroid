@@ -143,7 +143,7 @@
 
   .volume-row {
     padding: 14px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--color-separator);
   }
 
   .volume-meta {
@@ -163,7 +163,7 @@
     font-size: 0.8rem;
     font-family: monospace;
     color: var(--color-foreground-darker, var(--color-foreground));
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--color-hover);
     padding: 2px 8px;
     border-radius: 3px;
   }
@@ -182,7 +182,7 @@
     -webkit-appearance: none;
     appearance: none;
     height: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: color-mix(in oklch, var(--color-foreground) 14%, transparent);
     border-radius: 2px;
     outline: none;
     cursor: pointer;
@@ -236,7 +236,7 @@
     justify-content: space-between;
     gap: 12px;
     padding: 10px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--color-separator);
   }
 
   .audio-meta {
@@ -272,15 +272,15 @@
     padding: 4px 10px;
     border-radius: 4px;
     cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid color-mix(in oklch, var(--color-foreground) 20%, transparent);
+    background: var(--color-hover);
     color: var(--color-foreground);
     transition: background 0.15s;
     white-space: nowrap;
   }
 
   .btn-choose:hover {
-    background: rgba(255, 255, 255, 0.13);
+    background: color-mix(in oklch, var(--color-foreground) 17%, transparent);
   }
 
   .btn-restore {
@@ -288,7 +288,7 @@
   }
 
   .btn-restore:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: color-mix(in oklch, var(--color-foreground) 14%, transparent);
     color: var(--color-foreground);
   }
 </style>

@@ -25,7 +25,7 @@
     justify-content: center;
     position: relative;
     flex-shrink: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid var(--color-separator);
   }
 
   .title {
@@ -54,7 +54,7 @@
   }
 
   .btn-close:hover {
-    color: #fff;
-    background: #e74c3c;
+    color: var(--color-background);
+    background: var(--color-focus-round);
   }
 </style>

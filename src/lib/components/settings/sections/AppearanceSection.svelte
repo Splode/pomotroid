@@ -134,7 +134,7 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid color-mix(in oklch, var(--color-foreground) 14%, transparent);
   }
 
   .card-name {

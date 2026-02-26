@@ -29,7 +29,7 @@
     padding: 10px 20px;
     background: none;
     border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--color-separator);
     cursor: pointer;
     text-align: left;
     gap: 16px;
@@ -37,7 +37,7 @@
   }
 
   .row:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--color-hover);
   }
 
   .text {

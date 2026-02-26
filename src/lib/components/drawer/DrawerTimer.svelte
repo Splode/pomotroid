@@ -111,7 +111,7 @@
     color: var(--color-foreground-darker, var(--color-foreground));
     margin-bottom: 8px;
     padding-bottom: 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid var(--color-separator);
   }
 
   .row {

@@ -106,7 +106,7 @@
 
   .slider-row {
     padding: 14px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--color-separator);
   }
 
   .slider-meta {
@@ -126,7 +126,7 @@
     font-size: 0.8rem;
     font-family: monospace;
     color: var(--color-foreground-darker, var(--color-foreground));
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--color-hover);
     padding: 2px 8px;
     border-radius: 3px;
   }
@@ -145,7 +145,7 @@
     -webkit-appearance: none;
     appearance: none;
     height: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: color-mix(in oklch, var(--color-foreground) 14%, transparent);
     border-radius: 2px;
     outline: none;
     cursor: pointer;
@@ -192,7 +192,7 @@
 
   .reset-btn {
     background: none;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid color-mix(in oklch, var(--color-foreground) 18%, transparent);
     border-radius: 4px;
     color: var(--color-foreground-darker, var(--color-foreground));
     font-size: 0.8rem;

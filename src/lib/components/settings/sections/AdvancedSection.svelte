@@ -62,7 +62,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 10px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid var(--color-separator);
   }
 
   .label {
@@ -72,8 +72,8 @@
   }
 
   .port-input {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--color-hover);
+    border: 1px solid color-mix(in oklch, var(--color-foreground) 18%, transparent);
     border-radius: 4px;
     color: var(--color-foreground);
     font-size: 0.85rem;
@@ -100,7 +100,7 @@
   code {
     font-family: monospace;
     font-size: 0.75em;
-    background: rgba(255, 255, 255, 0.08);
+    background: color-mix(in oklch, var(--color-foreground) 12%, transparent);
     padding: 1px 5px;
     border-radius: 3px;
   }

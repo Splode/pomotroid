@@ -122,7 +122,7 @@
   .sidebar {
     width: 180px;
     flex-shrink: 0;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid var(--color-separator);
     background: var(--color-background-light);
     overflow-y: auto;
     padding: 8px 0;
@@ -145,13 +145,13 @@
 
   .nav-item:hover {
     color: var(--color-foreground);
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--color-hover);
   }
 
   .nav-item.active {
     color: var(--color-foreground);
     border-left-color: var(--color-accent);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--color-hover);
     font-weight: 500;
   }
 

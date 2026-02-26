@@ -108,7 +108,7 @@
     color: var(--color-foreground-darker, var(--color-foreground));
     margin-bottom: 8px;
     padding-bottom: 6px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid var(--color-separator);
   }
 
   .row {
@@ -127,7 +127,7 @@
   }
 
   .row:hover {
-    background: color-mix(in srgb, var(--color-background) 80%, white 20%);
+    background: color-mix(in oklch, var(--color-background) 88%, var(--color-foreground) 12%);
   }
 
   .row--shortcut {
@@ -149,7 +149,7 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.2);
+    border: 2px solid color-mix(in oklch, var(--color-foreground) 25%, transparent);
     background: var(--color-background);
     flex-shrink: 0;
     transition: background 0.15s, border-color 0.15s;

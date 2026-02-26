@@ -86,7 +86,7 @@
   .links {
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--color-separator);
     border-radius: 6px;
     overflow: hidden;
   }
@@ -98,7 +98,7 @@
     padding: 12px 16px;
     background: none;
     border: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid var(--color-separator);
     cursor: pointer;
     color: var(--color-foreground);
     font-size: 0.85rem;
@@ -112,7 +112,7 @@
   }
 
   .link-row:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--color-hover);
     color: var(--color-accent);
   }
 

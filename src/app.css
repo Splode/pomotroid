@@ -14,6 +14,13 @@
   --color-accent-extra: #f0c050;
   --color-gradient: #1e2430;
 
+  /* Derived chrome tokens — adapt automatically between dark and light themes.
+     color-mix with transparent produces the foreground color at N% opacity,
+     which creates subtle dark overlays on light themes and light overlays on
+     dark themes without any hardcoded rgba(255,255,255,...) values. */
+  --color-separator: color-mix(in oklch, var(--color-foreground) 8%, transparent);
+  --color-hover:     color-mix(in oklch, var(--color-foreground) 10%, transparent);
+
   /* Transition timing tokens — components reference these for consistency */
   --transition-default: 0.2s ease;
   --transition-snappy: 0.12s cubic-bezier(0.4, 0, 0.2, 1);
