@@ -12,6 +12,12 @@ const config = {
     adapter: adapter({
       fallback: "index.html",
     }),
+    paths: {
+      relative: false,
+    },
+    alias: {
+      $paraglide: './src/paraglide',
+    },
   },
 };
 

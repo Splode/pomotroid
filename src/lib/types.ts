@@ -41,6 +41,7 @@ export interface Settings {
   theme_light: string;
   theme_dark: string;
   dial_countdown: boolean;
+  language: string;     // 'auto' | 'en' | 'es' | 'fr' | 'de' | 'ja'
 }
 
 /** Mirrors Rust `CustomAudioInfo` — null means the built-in sound is active. */

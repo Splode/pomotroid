@@ -29,4 +29,5 @@ pub const DEFAULTS: &[(&str, &str)] = &[
     ("shortcut_restart", "Control+F4"),
     ("websocket_enabled", "false"),
     ("websocket_port", "1314"),
+    ("language", "auto"),
 ];

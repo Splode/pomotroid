@@ -53,6 +53,15 @@ const MIGRATION_2: &str = "
     INSERT INTO schema_version VALUES (2);
 ";
 
+/// Adds the `language` setting (default `'auto'`) for users upgrading from
+/// before localization support. Uses INSERT OR IGNORE so it is safe on fresh
+/// installs where seed_defaults already wrote the row.
+const MIGRATION_3: &str = "
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('language', 'auto');
+
+    INSERT INTO schema_version VALUES (3);
+";
+
 /// Apply any pending migrations. Each migration is wrapped in a transaction
 /// so a partial failure leaves the database unchanged.
 pub fn run(conn: &Connection) -> Result<()> {
@@ -64,6 +73,10 @@ pub fn run(conn: &Connection) -> Result<()> {
 
     if version < 2 {
         conn.execute_batch(&format!("BEGIN; {MIGRATION_2} COMMIT;"))?;
+    }
+
+    if version < 3 {
+        conn.execute_batch(&format!("BEGIN; {MIGRATION_3} COMMIT;"))?;
     }
 
     Ok(())
@@ -101,7 +114,7 @@ mod tests {
         let v: i64 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(v, 2);
+        assert_eq!(v, 3);
     }
 
     #[test]

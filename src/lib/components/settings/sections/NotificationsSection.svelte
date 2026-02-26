@@ -4,13 +4,14 @@
   import { setSetting, getCustomAudioInfo, setCustomAudio, clearCustomAudio, openAudioFilePicker } from '$lib/ipc';
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import type { CustomAudioInfo } from '$lib/types';
+  import * as m from '$paraglide/messages.js';
 
   type CueKey = keyof CustomAudioInfo;
 
-  const CUE_LIST: { id: CueKey; label: string }[] = [
-    { id: 'work_alert',        label: 'Work Alert' },
-    { id: 'short_break_alert', label: 'Short Break Alert' },
-    { id: 'long_break_alert',  label: 'Long Break Alert' },
+  const CUE_LIST: { id: CueKey; label: () => string }[] = [
+    { id: 'work_alert',        label: m.notif_alert_work },
+    { id: 'short_break_alert', label: m.notif_alert_short_break },
+    { id: 'long_break_alert',  label: m.notif_alert_long_break },
   ];
 
   let localVolume = $state($settings.volume);
@@ -83,20 +84,54 @@
 </script>
 
 <div class="section">
-  <div class="group-heading">Desktop</div>
+  <div class="group-heading">{m.notif_group_alert()}</div>
+
+  {#each CUE_LIST as { id, label } (id)}
+    <div class="audio-row">
+      <div class="audio-meta">
+        <span class="label">{label()}</span>
+        <span class="file-name" class:custom={getFileName(id) !== null}>
+          {getFileName(id) ?? m.notif_audio_default()}
+        </span>
+      </div>
+      <div class="audio-actions">
+        {#if getFileName(id) !== null}
+          <button class="btn-restore" onclick={() => restoreAudio(id)}>{m.notif_btn_restore()}</button>
+        {/if}
+        <button class="btn-choose" onclick={() => pickAudio(id)}>{m.notif_btn_choose()}</button>
+      </div>
+    </div>
+  {/each}
+
+  <div class="group-heading">{m.notif_group_desktop()}</div>
 
   <SettingsToggle
-    label="Desktop Notifications"
-    description="Show a system notification when each round ends."
+    label={m.notif_toggle_desktop()}
+    description={m.notif_toggle_desktop_desc()}
     checked={$settings.notifications_enabled}
     onclick={() => toggle('notifications', $settings.notifications_enabled)}
   />
 
-  <div class="group-heading">Volume</div>
+  <div class="group-heading">{m.notif_group_tick()}</div>
+
+  <SettingsToggle
+    label={m.notif_toggle_tick_work()}
+    description={m.notif_toggle_tick_work_desc()}
+    checked={$settings.tick_sounds_during_work}
+    onclick={() => toggle('tick_sounds_work', $settings.tick_sounds_during_work)}
+  />
+  <SettingsToggle
+    label={m.notif_toggle_tick_break()}
+    description={m.notif_toggle_tick_break_desc()}
+    checked={$settings.tick_sounds_during_break}
+    onclick={() => toggle('tick_sounds_break', $settings.tick_sounds_during_break)}
+  />
+
+  <div class="group-heading">{m.notif_group_volume()}</div>
 
   <div class="volume-row">
     <div class="volume-meta">
-      <span class="label">Volume</span>
+      <span class="label">{m.notif_label_volume()}</span>
       <span class="value">{Math.round(localVolume * 100)}%</span>
     </div>
     <div class="slider-wrap">
@@ -109,40 +144,6 @@
       <div class="bar" style="width: {localVolume * 100}%"></div>
     </div>
   </div>
-
-  <div class="group-heading">Tick Sounds</div>
-
-  <SettingsToggle
-    label="Work Sessions"
-    description="Play a ticking sound during work sessions."
-    checked={$settings.tick_sounds_during_work}
-    onclick={() => toggle('tick_sounds_work', $settings.tick_sounds_during_work)}
-  />
-  <SettingsToggle
-    label="Break Sessions"
-    description="Play a ticking sound during break sessions."
-    checked={$settings.tick_sounds_during_break}
-    onclick={() => toggle('tick_sounds_break', $settings.tick_sounds_during_break)}
-  />
-
-  <div class="group-heading">Alert Sounds</div>
-
-  {#each CUE_LIST as { id, label } (id)}
-    <div class="audio-row">
-      <div class="audio-meta">
-        <span class="label">{label}</span>
-        <span class="file-name" class:custom={getFileName(id) !== null}>
-          {getFileName(id) ?? 'Default'}
-        </span>
-      </div>
-      <div class="audio-actions">
-        {#if getFileName(id) !== null}
-          <button class="btn-restore" onclick={() => restoreAudio(id)}>Restore</button>
-        {/if}
-        <button class="btn-choose" onclick={() => pickAudio(id)}>Choose File</button>
-      </div>
-    </div>
-  {/each}
 </div>
 
 <style>

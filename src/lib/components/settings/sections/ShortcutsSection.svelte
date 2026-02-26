@@ -2,6 +2,7 @@
   import { settings } from '$lib/stores/settings';
   import { setSetting, reloadShortcuts } from '$lib/ipc';
   import ShortcutInput from '$lib/components/ShortcutInput.svelte';
+  import * as m from '$paraglide/messages.js';
 
   async function setShortcut(dbKey: string, value: string) {
     const updated = await setSetting(dbKey, value);
@@ -11,13 +12,10 @@
 </script>
 
 <div class="section">
-  <p class="note">
-    Global shortcuts work even when the window is not focused.
-    Click a field and press your desired key combination to record it.
-  </p>
+  <p class="note">{m.shortcuts_note()}</p>
 
   <div class="row">
-    <span class="label">Toggle Timer</span>
+    <span class="label">{m.shortcuts_toggle_timer()}</span>
     <ShortcutInput
       value={$settings.shortcut_toggle}
       onchange={(v) => setShortcut('shortcut_toggle', v)}
@@ -25,7 +23,7 @@
   </div>
 
   <div class="row">
-    <span class="label">Reset Timer</span>
+    <span class="label">{m.shortcuts_reset_timer()}</span>
     <ShortcutInput
       value={$settings.shortcut_reset}
       onchange={(v) => setShortcut('shortcut_reset', v)}
@@ -33,7 +31,7 @@
   </div>
 
   <div class="row">
-    <span class="label">Skip Round</span>
+    <span class="label">{m.shortcuts_skip_round()}</span>
     <ShortcutInput
       value={$settings.shortcut_skip}
       onchange={(v) => setShortcut('shortcut_skip', v)}
@@ -41,7 +39,7 @@
   </div>
 
   <div class="row">
-    <span class="label">Restart Round</span>
+    <span class="label">{m.shortcuts_restart_round()}</span>
     <ShortcutInput
       value={$settings.shortcut_restart}
       onchange={(v) => setShortcut('shortcut_restart', v)}

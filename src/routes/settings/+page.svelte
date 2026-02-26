@@ -5,6 +5,7 @@
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
   import { resolveThemeName } from '$lib/utils/theme';
+  import { setLocale } from '$lib/locale.svelte.js';
   import type { UnlistenFn } from '@tauri-apps/api/event';
 
   import SettingsTitlebar from '$lib/components/settings/SettingsTitlebar.svelte';
@@ -15,15 +16,17 @@
   import SystemSection from '$lib/components/settings/sections/SystemSection.svelte';
   import AboutSection from '$lib/components/settings/sections/AboutSection.svelte';
 
+  import * as m from '$paraglide/messages.js';
+
   type Section = 'timer' | 'appearance' | 'notifications' | 'shortcuts' | 'system' | 'about';
 
-  const SECTIONS: { id: Section; label: string }[] = [
-    { id: 'timer',         label: 'Timer' },
-    { id: 'appearance',    label: 'Appearance' },
-    { id: 'notifications', label: 'Notifications' },
-    { id: 'shortcuts',     label: 'Shortcuts' },
-    { id: 'system',        label: 'System' },
-    { id: 'about',         label: 'About' },
+  const SECTIONS: { id: Section; label: () => string }[] = [
+    { id: 'timer',         label: m.nav_timer },
+    { id: 'appearance',    label: m.nav_appearance },
+    { id: 'notifications', label: m.nav_notifications },
+    { id: 'shortcuts',     label: m.nav_shortcuts },
+    { id: 'system',        label: m.nav_system },
+    { id: 'about',         label: m.nav_about },
   ];
 
   let active = $state<Section>('timer');
@@ -34,6 +37,9 @@
     (async () => {
       const s = await getSettings();
       settings.set(s);
+
+      // Apply the stored locale on mount.
+      setLocale(s.language);
 
       const themes = await getThemes();
       const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -56,7 +62,11 @@
           const prevMode = $settings.theme_mode;
           const prevLight = $settings.theme_light;
           const prevDark = $settings.theme_dark;
+          const prevLanguage = $settings.language;
           settings.set(updated);
+          if (updated.language !== prevLanguage) {
+            setLocale(updated.language);
+          }
           if (
             updated.theme_mode !== prevMode ||
             updated.theme_light !== prevLight ||
@@ -93,7 +103,7 @@
             class:active={active === section.id}
             onclick={() => { active = section.id; }}
           >
-            {section.label}
+            {section.label()}
           </button>
         {/each}
       </nav>

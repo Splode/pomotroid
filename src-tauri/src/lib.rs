@@ -15,6 +15,7 @@ use tauri::Manager;
 
 use commands::{
     audio_clear_custom, audio_get_custom_info, audio_set_custom,
+    notification_show,
     settings_get, settings_reset_defaults, settings_set,
     shortcuts_reload,
     stats_get_all_time, stats_get_session,
@@ -171,6 +172,8 @@ pub fn run() {
             audio_set_custom,
             audio_clear_custom,
             audio_get_custom_info,
+            // Notifications
+            notification_show,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

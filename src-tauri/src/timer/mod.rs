@@ -9,7 +9,6 @@ use tauri::{AppHandle, Emitter, Manager};
 
 use crate::audio::{AudioCue, AudioManager};
 use crate::db::{queries, DbState};
-use crate::notifications;
 use crate::settings::Settings;
 use crate::tray::{self, TrayState};
 use crate::websocket::{self, WsState};
@@ -313,9 +312,9 @@ fn listen_events(
                 let snapshot = build_snapshot(&sequence, &settings, &shared);
                 let _ = app.emit("timer:round-change", snapshot);
 
-                // Desktop notification for the new round.
-                let notifs_enabled = settings.lock().unwrap().notifications_enabled;
-                notifications::notify_round_change(&app, next_round, notifs_enabled);
+                // Desktop notifications are dispatched by the frontend via the
+                // notification_show command after receiving the timer:round-change
+                // event, so translated strings can be used.
 
                 // Audio alert for the new round.
                 if let Some(audio) = app.try_state::<Arc<AudioManager>>() {

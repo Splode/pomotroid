@@ -6,6 +6,7 @@
   import { getThemes, setSetting, onThemesChanged } from '$lib/ipc';
   import { resolveThemeName } from '$lib/utils/theme';
   import type { UnlistenFn } from '@tauri-apps/api/event';
+  import * as m from '$paraglide/messages.js';
 
   let themes = $state<Theme[]>([]);
   let osDark = $state(window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -62,9 +63,9 @@
 <div class="section">
 
   <!-- Mode selector -->
-  <div class="group-label">Mode</div>
+  <div class="group-label">{m.appearance_group_mode()}</div>
   <div class="mode-selector">
-    {#each [['auto', 'Auto'], ['light', 'Light'], ['dark', 'Dark']] as [value, label] (value)}
+    {#each [['auto', m.appearance_mode_auto()], ['light', m.appearance_mode_light()], ['dark', m.appearance_mode_dark()]] as [value, label] (value)}
       <button
         class="mode-btn"
         class:active={$settings.theme_mode === value}
@@ -77,8 +78,8 @@
 
   <!-- Light theme picker -->
   <div class="group-label">
-    Light Theme
-    {#if lightIsActive}<span class="active-badge">active</span>{/if}
+    {m.appearance_group_light_theme()}
+    {#if lightIsActive}<span class="active-badge">{m.appearance_badge_active()}</span>{/if}
   </div>
   <div class="theme-list">
     {#each themes as theme (theme.name)}
@@ -104,7 +105,7 @@
         <span class="card-name" style="color:{fg}">{theme.name}</span>
         <span class="card-right">
           {#if theme.is_custom}
-            <span class="badge" style="color:{accent}">custom</span>
+            <span class="badge" style="color:{accent}">{m.appearance_badge_custom()}</span>
           {/if}
           {#if isSelected && lightIsActive}
             <svg width="16" height="16" viewBox="0 0 24 24" style="fill:{accent}; flex-shrink:0;">
@@ -118,8 +119,8 @@
 
   <!-- Dark theme picker -->
   <div class="group-label">
-    Dark Theme
-    {#if darkIsActive}<span class="active-badge">active</span>{/if}
+    {m.appearance_group_dark_theme()}
+    {#if darkIsActive}<span class="active-badge">{m.appearance_badge_active()}</span>{/if}
   </div>
   <div class="theme-list">
     {#each themes as theme (theme.name)}
@@ -145,7 +146,7 @@
         <span class="card-name" style="color:{fg}">{theme.name}</span>
         <span class="card-right">
           {#if theme.is_custom}
-            <span class="badge" style="color:{accent}">custom</span>
+            <span class="badge" style="color:{accent}">{m.appearance_badge_custom()}</span>
           {/if}
           {#if isSelected && darkIsActive}
             <svg width="16" height="16" viewBox="0 0 24 24" style="fill:{accent}; flex-shrink:0;">

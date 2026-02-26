@@ -20,6 +20,8 @@
   import TimerDisplay from './TimerDisplay.svelte';
   import TimerFooter from './TimerFooter.svelte';
   import type { UnlistenFn } from '@tauri-apps/api/event';
+  import * as m from '$paraglide/messages.js';
+  import { notificationShow } from '$lib/ipc';
 
   interface Props {
     isCompact?: boolean;
@@ -37,9 +39,9 @@
   }
 
   function roundLabel(rt: string): string {
-    if (rt === 'work') return 'Focus';
-    if (rt === 'short-break') return 'Short Break';
-    return 'Long Break';
+    if (rt === 'work') return m.round_label_work();
+    if (rt === 'short-break') return m.round_label_short_break();
+    return m.round_label_long_break();
   }
 
   onMount(() => {
@@ -70,6 +72,21 @@
         }),
         await onRoundChange((snap) => {
           timerState.set(snap);
+          if ($settings.notifications_enabled) {
+            let title: string;
+            let body: string;
+            if (snap.round_type === 'work') {
+              title = m.notification_work_title();
+              body  = m.notification_work_body();
+            } else if (snap.round_type === 'short-break') {
+              title = m.notification_short_break_title();
+              body  = m.notification_short_break_body();
+            } else {
+              title = m.notification_long_break_title();
+              body  = m.notification_long_break_body();
+            }
+            notificationShow(title, body).catch(() => {});
+          }
         }),
         await onTimerReset((snap) => {
           timerState.set(snap);
