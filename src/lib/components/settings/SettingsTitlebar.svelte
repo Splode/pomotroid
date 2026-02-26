@@ -1,5 +1,6 @@
 <script lang="ts">
   import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+  import * as m from '$paraglide/messages.js';
 
   function close() {
     getCurrentWebviewWindow().close();
@@ -7,7 +8,7 @@
 </script>
 
 <nav class="titlebar" data-tauri-drag-region>
-  <h1 class="title">Settings</h1>
+  <h1 class="title">{m.settings_title()}</h1>
   <button class="btn-close" onclick={close} aria-label="Close">
     <svg width="12" height="12" viewBox="0 0 12 12">
       <line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>

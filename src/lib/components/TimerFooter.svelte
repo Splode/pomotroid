@@ -3,6 +3,7 @@
   import type { TimerState } from '$lib/types';
   import { timerReset, setSetting } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
+  import * as m from '$paraglide/messages.js';
 
   interface Props {
     snap: TimerState;
@@ -47,8 +48,8 @@
   </span>
 
   <!-- Reset -->
-  <button class="btn-text" onclick={timerReset} aria-label="Reset timer">
-    Reset
+  <button class="btn-text" onclick={timerReset} aria-label={m.timer_reset()}>
+    {m.timer_reset()}
   </button>
 
   <!-- Volume -->

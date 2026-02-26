@@ -1,6 +1,8 @@
 <script lang="ts">
   import { openUrl } from '@tauri-apps/plugin-opener';
 
+  import * as m from '$paraglide/messages.js';
+
   const VERSION = '1.0.0';
   const REPO = 'https://github.com/Splode/pomotroid';
   const RELEASE_URL = `${REPO}/releases/tag/v${VERSION}`;
@@ -36,13 +38,13 @@
 
   <div class="links">
     <button class="link-row" onclick={() => openUrl(RELEASE_URL)}>
-      <span>Release Notes</span>
+      <span>{m.about_release_notes()}</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
         <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
     <button class="link-row" onclick={() => openUrl(REPO)}>
-      <span>Source Code &amp; License</span>
+      <span>{m.about_source_code()}</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
         <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>

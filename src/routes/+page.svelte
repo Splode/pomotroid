@@ -7,6 +7,7 @@
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
   import { resolveThemeName } from '$lib/utils/theme';
+  import { setLocale } from '$lib/locale.svelte.js';
   import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
   import type { UnlistenFn } from '@tauri-apps/api/event';
 
@@ -61,6 +62,9 @@
       const s = await getSettings();
       settings.set(s);
 
+      // Apply the stored locale on mount.
+      setLocale(s.language);
+
       // Load and apply the active theme using OS color scheme.
       const themes = await getThemes();
       const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -84,7 +88,11 @@
           const prevMode = $settings.theme_mode;
           const prevLight = $settings.theme_light;
           const prevDark = $settings.theme_dark;
+          const prevLanguage = $settings.language;
           settings.set(updated);
+          if (updated.language !== prevLanguage) {
+            setLocale(updated.language);
+          }
           if (
             updated.theme_mode !== prevMode ||
             updated.theme_light !== prevLight ||

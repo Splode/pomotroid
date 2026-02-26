@@ -27,6 +27,11 @@ export const reloadShortcuts = () => invoke<void>('shortcuts_reload');
 
 export const getThemes = () => invoke<Theme[]>('themes_list');
 
+// --- Notification commands ---
+
+export const notificationShow = (title: string, body: string) =>
+  invoke<void>('notification_show', { title, body });
+
 // --- Window commands ---
 
 export const setWindowVisibility = (visible: boolean) =>

@@ -164,6 +164,20 @@ npm run tauri build
 
 The packaged output is written to `src-tauri/target/release/bundle/`.
 
+### Localization
+
+UI strings live in `messages/<locale>.json` (en, es, fr, de, ja). The compiled output in `src/paraglide/` is generated at build time and is not committed to the repository.
+
+**During development**, the Paraglide Vite plugin compiles messages automatically whenever `npm run tauri dev` or `npm run tauri build` is run — no manual step required.
+
+**After adding or changing message keys**, regenerate the output explicitly so that `svelte-check` and your editor can pick up the new types:
+
+```bash
+npm run paraglide:compile
+```
+
+This is also run automatically as part of `npm run check`.
+
 ## License
 
 MIT &copy; [Christopher Murphy](https://github.com/Splode)

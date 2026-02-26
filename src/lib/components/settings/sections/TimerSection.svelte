@@ -2,6 +2,7 @@
   import { settings } from '$lib/stores/settings';
   import { setSetting, resetSettings } from '$lib/ipc';
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
+  import * as m from '$paraglide/messages.js';
 
   const MAX_MINS = 90;
   const MAX_ROUNDS = 12;
@@ -37,7 +38,7 @@
 <div class="section">
   <div class="slider-row">
     <div class="slider-meta">
-      <span class="slider-label">Focus</span>
+      <span class="slider-label">{m.timer_slider_focus()}</span>
       <span class="slider-value">{workMins}:00</span>
     </div>
     <div class="slider-wrap">
@@ -53,7 +54,7 @@
 
   <div class="slider-row">
     <div class="slider-meta">
-      <span class="slider-label">Short Break</span>
+      <span class="slider-label">{m.timer_slider_short_break()}</span>
       <span class="slider-value">{shortMins}:00</span>
     </div>
     <div class="slider-wrap">
@@ -69,7 +70,7 @@
 
   <div class="slider-row">
     <div class="slider-meta">
-      <span class="slider-label">Long Break</span>
+      <span class="slider-label">{m.timer_slider_long_break()}</span>
       <span class="slider-value">{longMins}:00</span>
     </div>
     <div class="slider-wrap">
@@ -85,7 +86,7 @@
 
   <div class="slider-row">
     <div class="slider-meta">
-      <span class="slider-label">Rounds until Long Break</span>
+      <span class="slider-label">{m.timer_slider_rounds()}</span>
       <span class="slider-value">{rounds}</span>
     </div>
     <div class="slider-wrap">
@@ -100,26 +101,26 @@
   </div>
 
   <SettingsToggle
-    label="Auto-start Work"
-    description="Automatically begin the next work session after a break ends."
+    label={m.timer_toggle_auto_start_work()}
+    description={m.timer_toggle_auto_start_work_desc()}
     checked={$settings.auto_start_work}
     onclick={() => toggle('auto_start_work', $settings.auto_start_work)}
   />
   <SettingsToggle
-    label="Auto-start Breaks"
-    description="Automatically begin a break when a work session ends."
+    label={m.timer_toggle_auto_start_break()}
+    description={m.timer_toggle_auto_start_break_desc()}
     checked={$settings.auto_start_break}
     onclick={() => toggle('auto_start_break', $settings.auto_start_break)}
   />
   <SettingsToggle
-    label="Countdown Dial"
-    description="Arc starts full and subtracts as time passes."
+    label={m.timer_toggle_countdown()}
+    description={m.timer_toggle_countdown_desc()}
     checked={$settings.dial_countdown}
     onclick={() => toggle('dial_countdown', $settings.dial_countdown)}
   />
 
   <div class="reset-row">
-    <button class="reset-btn" onclick={handleReset}>Reset to Defaults</button>
+    <button class="reset-btn" onclick={handleReset}>{m.timer_reset_defaults()}</button>
   </div>
 </div>
 

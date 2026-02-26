@@ -7,6 +7,7 @@ use tauri::{AppHandle, Emitter, Manager, State};
 use std::sync::Arc;
 
 use crate::audio::{self, AudioManager};
+use crate::notifications;
 use crate::db::{queries, DbState};
 use crate::settings::{self, Settings};
 use crate::shortcuts;
@@ -379,6 +380,19 @@ pub fn audio_get_custom_info(app: AppHandle) -> Result<audio::CustomAudioInfo, S
         .try_state::<Arc<AudioManager>>()
         .ok_or_else(|| "audio engine is not available".to_string())?;
     Ok(audio_state.get_custom_info())
+}
+
+// ---------------------------------------------------------------------------
+// CMD-08 — Notification command
+// ---------------------------------------------------------------------------
+
+/// Show a desktop notification with the given title and body.
+///
+/// String construction (including translation) is the caller's (frontend's)
+/// responsibility. This command is a thin platform-dispatch wrapper.
+#[tauri::command]
+pub fn notification_show(title: String, body: String, app: AppHandle) {
+    notifications::show(&app, &title, &body);
 }
 
 fn cue_to_stem(cue: &str) -> Result<&'static str, String> {

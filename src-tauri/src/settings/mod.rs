@@ -42,6 +42,7 @@ pub struct Settings {
     pub shortcut_restart: String,
     pub websocket_enabled: bool,
     pub websocket_port: u16,
+    pub language: String,
 }
 
 impl Default for Settings {
@@ -71,6 +72,7 @@ impl Default for Settings {
             shortcut_restart: "Control+F4".to_string(),
             websocket_enabled: false,
             websocket_port: 1314,
+            language: "auto".to_string(),
         }
     }
 }
@@ -150,6 +152,7 @@ pub fn load(conn: &Connection) -> Result<Settings> {
             .unwrap_or(d.shortcut_restart),
         websocket_enabled: parse_bool(&map, "websocket_enabled", d.websocket_enabled),
         websocket_port: parse_u32(&map, "websocket_port", d.websocket_port as u32) as u16,
+        language: map.get("language").cloned().unwrap_or(d.language),
     })
 }
 
@@ -214,6 +217,7 @@ mod tests {
         assert_eq!(s.theme_mode, "auto");
         assert_eq!(s.theme_light, "Pomotroid");
         assert_eq!(s.theme_dark, "Pomotroid");
+        assert_eq!(s.language, "auto");
     }
 
     #[test]
