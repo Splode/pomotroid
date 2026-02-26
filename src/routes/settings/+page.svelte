@@ -9,22 +9,20 @@
   import SettingsTitlebar from '$lib/components/settings/SettingsTitlebar.svelte';
   import TimerSection from '$lib/components/settings/sections/TimerSection.svelte';
   import AppearanceSection from '$lib/components/settings/sections/AppearanceSection.svelte';
-  import BehaviorSection from '$lib/components/settings/sections/BehaviorSection.svelte';
-  import AudioSection from '$lib/components/settings/sections/AudioSection.svelte';
+  import NotificationsSection from '$lib/components/settings/sections/NotificationsSection.svelte';
   import ShortcutsSection from '$lib/components/settings/sections/ShortcutsSection.svelte';
-  import AdvancedSection from '$lib/components/settings/sections/AdvancedSection.svelte';
+  import SystemSection from '$lib/components/settings/sections/SystemSection.svelte';
   import AboutSection from '$lib/components/settings/sections/AboutSection.svelte';
 
-  type Section = 'timer' | 'appearance' | 'behavior' | 'audio' | 'shortcuts' | 'advanced' | 'about';
+  type Section = 'timer' | 'appearance' | 'notifications' | 'shortcuts' | 'system' | 'about';
 
   const SECTIONS: { id: Section; label: string }[] = [
-    { id: 'timer',      label: 'Timer' },
-    { id: 'appearance', label: 'Appearance' },
-    { id: 'behavior',   label: 'Behavior' },
-    { id: 'audio',      label: 'Audio' },
-    { id: 'shortcuts',  label: 'Shortcuts' },
-    { id: 'advanced',   label: 'Advanced' },
-    { id: 'about',      label: 'About' },
+    { id: 'timer',         label: 'Timer' },
+    { id: 'appearance',    label: 'Appearance' },
+    { id: 'notifications', label: 'Notifications' },
+    { id: 'shortcuts',     label: 'Shortcuts' },
+    { id: 'system',        label: 'System' },
+    { id: 'about',         label: 'About' },
   ];
 
   let active = $state<Section>('timer');
@@ -86,14 +84,12 @@
         <TimerSection />
       {:else if active === 'appearance'}
         <AppearanceSection />
-      {:else if active === 'behavior'}
-        <BehaviorSection />
-      {:else if active === 'audio'}
-        <AudioSection />
+      {:else if active === 'notifications'}
+        <NotificationsSection />
       {:else if active === 'shortcuts'}
         <ShortcutsSection />
-      {:else if active === 'advanced'}
-        <AdvancedSection />
+      {:else if active === 'system'}
+        <SystemSection />
       {:else if active === 'about'}
         <AboutSection />
       {/if}

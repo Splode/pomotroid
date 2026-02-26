@@ -1,6 +1,7 @@
 <script lang="ts">
   import { settings } from '$lib/stores/settings';
   import { setSetting, resetSettings } from '$lib/ipc';
+  import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
 
   const MAX_MINS = 90;
   const MAX_ROUNDS = 12;
@@ -19,6 +20,11 @@
 
   async function handleChange(dbKey: string, rawValue: number) {
     const updated = await setSetting(dbKey, String(rawValue));
+    settings.set(updated);
+  }
+
+  async function toggle(dbKey: string, current: boolean) {
+    const updated = await setSetting(dbKey, current ? 'false' : 'true');
     settings.set(updated);
   }
 
@@ -92,6 +98,25 @@
       <div class="bar bar--rounds" style="width: {barWidth(rounds, 1, MAX_ROUNDS)}"></div>
     </div>
   </div>
+
+  <SettingsToggle
+    label="Auto-start Work"
+    description="Automatically begin the next work session after a break ends."
+    checked={$settings.auto_start_work}
+    onclick={() => toggle('auto_start_work', $settings.auto_start_work)}
+  />
+  <SettingsToggle
+    label="Auto-start Breaks"
+    description="Automatically begin a break when a work session ends."
+    checked={$settings.auto_start_break}
+    onclick={() => toggle('auto_start_break', $settings.auto_start_break)}
+  />
+  <SettingsToggle
+    label="Countdown Dial"
+    description="Arc starts full and subtracts as time passes."
+    checked={$settings.dial_countdown}
+    onclick={() => toggle('dial_countdown', $settings.dial_countdown)}
+  />
 
   <div class="reset-row">
     <button class="reset-btn" onclick={handleReset}>Reset to Defaults</button>

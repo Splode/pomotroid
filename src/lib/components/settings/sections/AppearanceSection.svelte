@@ -3,8 +3,7 @@
   import type { Theme } from '$lib/types';
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
-  import { getThemes, applyThemeByName, onThemesChanged, setSetting } from '$lib/ipc';
-  import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
+  import { getThemes, applyThemeByName, onThemesChanged } from '$lib/ipc';
   import type { UnlistenFn } from '@tauri-apps/api/event';
 
   let themes = $state<Theme[]>([]);
@@ -28,16 +27,6 @@
 </script>
 
 <div class="section">
-  <SettingsToggle
-    label="Countdown dial"
-    description="Arc starts full and subtracts as time passes"
-    checked={$settings.dial_countdown}
-    onclick={async () => {
-      const updated = await setSetting('dial_countdown', String(!$settings.dial_countdown));
-      settings.set(updated);
-    }}
-  />
-
   <div class="themes-label">Theme</div>
 
   <div class="theme-list">
