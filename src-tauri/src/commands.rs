@@ -101,10 +101,16 @@ pub fn settings_set(
         audio.apply_settings(&new_settings);
     }
 
-    // Apply always-on-top window flag immediately when the setting changes.
+    // Apply always-on-top window flag immediately when the setting changes,
+    // accounting for the current round type so break_always_on_top takes
+    // effect without waiting for the next round transition.
     if matches!(key.as_str(), "always_on_top" | "break_always_on_top") {
         if let Some(window) = app.get_webview_window("main") {
-            let _ = window.set_always_on_top(new_settings.always_on_top);
+            let snap = timer.get_snapshot();
+            let is_break = snap.round_type != "work";
+            let effective_aot = new_settings.always_on_top
+                && !(new_settings.break_always_on_top && is_break);
+            let _ = window.set_always_on_top(effective_aot);
         }
     }
 

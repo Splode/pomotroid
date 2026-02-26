@@ -327,12 +327,17 @@ fn listen_events(
                     audio.play_cue(cue);
                 }
 
-                // Break-always-on-top: raise window on break, lower on work resume.
-                let break_aot = settings.lock().unwrap().break_always_on_top;
-                if break_aot {
+                // Lower-priority-during-breaks: when always_on_top is on and
+                // break_always_on_top is enabled, disable always-on-top for
+                // breaks and restore it when work resumes.
+                let (always_on_top, break_always_on_top) = {
+                    let s = settings.lock().unwrap();
+                    (s.always_on_top, s.break_always_on_top)
+                };
+                if always_on_top {
                     if let Some(window) = app.get_webview_window("main") {
                         let is_break = next_round != RoundType::Work;
-                        let _ = window.set_always_on_top(is_break);
+                        let _ = window.set_always_on_top(!(break_always_on_top && is_break));
                     }
                 }
 
