@@ -2,7 +2,6 @@
 
 export type RoundType = 'work' | 'short-break' | 'long-break';
 
-export type DrawerPanel = 'timer' | 'settings' | 'themes' | 'about';
 
 /** Mirrors Rust `TimerSnapshot` — emitted via timer:tick / timer:round-change events
  *  and returned by the `timer_get_state` IPC command. */

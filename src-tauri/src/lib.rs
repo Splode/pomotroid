@@ -18,9 +18,9 @@ use commands::{
     settings_get, settings_reset_defaults, settings_set,
     shortcuts_reload,
     stats_get_all_time, stats_get_session,
-    theme_apply, themes_list,
+    themes_list,
     timer_get_state, timer_reset, timer_restart_round, timer_skip, timer_toggle,
-    window_set_always_on_top, window_set_visibility,
+    window_set_visibility,
 };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -160,13 +160,11 @@ pub fn run() {
             settings_reset_defaults,
             // Themes
             themes_list,
-            theme_apply,
             // Stats
             stats_get_all_time,
             stats_get_session,
             // Window
             window_set_visibility,
-            window_set_always_on_top,
             // Shortcuts
             shortcuts_reload,
             // Audio

@@ -26,14 +26,11 @@ export const reloadShortcuts = () => invoke<void>('shortcuts_reload');
 // --- Theme commands ---
 
 export const getThemes = () => invoke<Theme[]>('themes_list');
-export const applyThemeByName = (name: string) => invoke<Theme>('theme_apply', { name });
 
 // --- Window commands ---
 
 export const setWindowVisibility = (visible: boolean) =>
   invoke<void>('window_set_visibility', { visible });
-export const setAlwaysOnTop = (onTop: boolean) =>
-  invoke<void>('window_set_always_on_top', { onTop });
 
 // --- Audio commands ---
 

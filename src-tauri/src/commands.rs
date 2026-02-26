@@ -232,47 +232,6 @@ pub fn themes_list(app: AppHandle) -> Result<Vec<Theme>, String> {
     Ok(themes::list_all(&data_dir))
 }
 
-/// Apply a theme by name: persist the selection and return the Theme object
-/// so the frontend can immediately apply the CSS custom properties.
-#[tauri::command]
-pub fn theme_apply(
-    name: String,
-    app: AppHandle,
-    db: State<'_, DbState>,
-    tray_state: State<'_, Arc<TrayState>>,
-    timer: State<'_, TimerController>,
-) -> Result<Theme, String> {
-    let data_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| e.to_string())?;
-
-    let theme = themes::find(&data_dir, &name)
-        .ok_or_else(|| format!("theme '{name}' not found"))?;
-
-    // Persist the selection and load updated settings to broadcast.
-    let updated_settings = {
-        let conn = db.lock().map_err(|e| e.to_string())?;
-        settings::save_setting(&conn, "theme", &theme.name).map_err(|e| e.to_string())?;
-        settings::load(&conn).map_err(|e| e.to_string())?
-    };
-
-    // Update tray colors and immediately re-render the icon for the new theme.
-    *tray_state.colors.lock().unwrap() = tray::TrayColors::from_colors_map(&theme.colors);
-    let snap = timer.get_snapshot();
-    let progress = if snap.total_secs > 0 {
-        snap.elapsed_secs as f32 / snap.total_secs as f32
-    } else {
-        0.0
-    };
-    tray::update_icon(&tray_state, &snap.round_type, snap.is_paused, progress);
-
-    // Notify all windows so they can re-apply the new theme CSS.
-    app.emit("settings:changed", &updated_settings).ok();
-
-    Ok(theme)
-}
-
 // ---------------------------------------------------------------------------
 // CMD-04 — Stats commands
 // ---------------------------------------------------------------------------
@@ -314,15 +273,6 @@ pub fn window_set_visibility(visible: bool, app: AppHandle) -> Result<(), String
         window.hide().map_err(|e| e.to_string())?;
     }
     Ok(())
-}
-
-/// Set or clear the always-on-top flag for the main window.
-#[tauri::command]
-pub fn window_set_always_on_top(on_top: bool, app: AppHandle) -> Result<(), String> {
-    let window = app
-        .get_webview_window("main")
-        .ok_or_else(|| "main window not found".to_string())?;
-    window.set_always_on_top(on_top).map_err(|e| e.to_string())
 }
 
 // ---------------------------------------------------------------------------
