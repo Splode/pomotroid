@@ -441,6 +441,12 @@ pub fn open_log_dir(app: AppHandle) {
     }
 }
 
+/// Return the compile-time build version string.
+#[tauri::command]
+pub fn app_version() -> &'static str {
+    env!("APP_BUILD_VERSION")
+}
+
 /// Return the application log directory path as a string.
 #[tauri::command]
 pub fn get_log_dir(app: AppHandle) -> Result<String, String> {

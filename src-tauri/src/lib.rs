@@ -16,6 +16,7 @@ use tauri::Manager;
 use tauri_plugin_log::{Builder as LogBuilder, RotationStrategy, Target, TargetKind};
 
 use commands::{
+    app_version,
     audio_clear_custom, audio_get_custom_info, audio_set_custom,
     get_log_dir, open_log_dir,
     notification_show,
@@ -59,6 +60,11 @@ pub fn run() {
             // --- Database ---
             let db = match db::open(&app_data_dir) {
                 Ok(d) => {
+                    log::info!(
+                        "[app] version={} sha={}",
+                        env!("APP_BUILD_VERSION"),
+                        env!("APP_BUILD_SHA")
+                    );
                     log::info!(
                         "Pomotroid v{} — data dir: {}",
                         env!("CARGO_PKG_VERSION"),
@@ -215,6 +221,7 @@ pub fn run() {
             // Diagnostics
             open_log_dir,
             get_log_dir,
+            app_version,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

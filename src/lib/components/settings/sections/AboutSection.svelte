@@ -1,12 +1,29 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { openUrl } from '@tauri-apps/plugin-opener';
 
-  import { openLogDir } from '$lib/ipc';
+  import { openLogDir, appVersion } from '$lib/ipc';
   import * as m from '$paraglide/messages.js';
 
-  const VERSION = '1.0.0';
+  const BASE_VERSION = '1.0.0';
   const REPO = 'https://github.com/Splode/pomotroid';
-  const RELEASE_URL = `${REPO}/releases/tag/v${VERSION}`;
+
+  let version = $state('...');
+
+  // Strip pre-release and build metadata to get the bare X.Y.Z for the release tag URL.
+  function baseOnly(v: string): string {
+    return v.split('-')[0].split('+')[0];
+  }
+
+  let releaseUrl = $derived(`${REPO}/releases/tag/v${baseOnly(version === '...' ? BASE_VERSION : version)}`);
+
+  onMount(async () => {
+    try {
+      version = await appVersion();
+    } catch {
+      version = BASE_VERSION;
+    }
+  });
 </script>
 
 <div class="section">
@@ -33,12 +50,12 @@
     </svg>
     <div>
       <h2 class="name">Pomotroid</h2>
-      <p class="version">Version {VERSION}</p>
+      <p class="version">Version {version}</p>
     </div>
   </div>
 
   <div class="links">
-    <button class="link-row" onclick={() => openUrl(RELEASE_URL)}>
+    <button class="link-row" onclick={() => openUrl(releaseUrl)}>
       <span>{m.about_release_notes()}</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
         <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
