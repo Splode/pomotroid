@@ -217,7 +217,7 @@ fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
     let (_stream, handle) = match OutputStream::try_default() {
         Ok(pair) => pair,
         Err(e) => {
-            eprintln!("[audio] failed to open output stream: {e}");
+            log::warn!("[audio] failed to open output stream: {e}");
             return;
         }
     };
@@ -225,7 +225,7 @@ fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
     while let Ok(req) = rx.recv() {
         let sink = match Sink::try_new(&handle) {
             Ok(s) => s,
-            Err(e) => { eprintln!("[audio] sink error: {e}"); continue; }
+            Err(e) => { log::warn!("[audio] sink error: {e}"); continue; }
         };
         sink.set_volume(req.volume);
 
@@ -235,12 +235,12 @@ fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
                 Ok(reader) => match Decoder::new(reader) {
                     Ok(source) => { sink.append(source); true }
                     Err(e) => {
-                        eprintln!("[audio] decode error for {path:?}: {e}");
+                        log::warn!("[audio] decode error for {path:?}: {e}");
                         false
                     }
                 },
                 Err(e) => {
-                    eprintln!("[audio] cannot open {path:?}: {e}");
+                    log::warn!("[audio] cannot open {path:?}: {e}");
                     false
                 }
             }
@@ -257,7 +257,7 @@ fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
             };
             match Decoder::new(Cursor::new(bytes)) {
                 Ok(source) => sink.append(source),
-                Err(e) => eprintln!("[audio] embedded decode error: {e}"),
+                Err(e) => log::warn!("[audio] embedded decode error: {e}"),
             }
         }
 

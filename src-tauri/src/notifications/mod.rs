@@ -38,7 +38,7 @@ pub fn dispatch(_app: &AppHandle, title: &str, body: &str) {
 pub fn dispatch(app: &AppHandle, title: &str, body: &str) {
     use tauri_plugin_notification::NotificationExt;
     if let Err(e) = app.notification().builder().title(title).body(body).show() {
-        eprintln!("[notifications] failed to send notification: {e}");
+        log::warn!("[notifications] failed to send notification: {e}");
     }
 }
 

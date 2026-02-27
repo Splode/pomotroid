@@ -34,7 +34,7 @@ pub fn spawn_watcher(
 
     // Ensure the custom themes directory exists.
     if let Err(e) = std::fs::create_dir_all(&themes_dir) {
-        eprintln!("[themes/watcher] failed to create themes dir: {e}");
+        log::warn!("[themes/watcher] failed to create themes dir: {e}");
         return None;
     }
 
@@ -43,13 +43,13 @@ pub fn spawn_watcher(
     let mut watcher = match RecommendedWatcher::new(tx, notify::Config::default()) {
         Ok(w) => w,
         Err(e) => {
-            eprintln!("[themes/watcher] failed to create watcher: {e}");
+            log::warn!("[themes/watcher] failed to create watcher: {e}");
             return None;
         }
     };
 
     if let Err(e) = watcher.watch(&themes_dir, RecursiveMode::NonRecursive) {
-        eprintln!("[themes/watcher] failed to watch {}: {e}", themes_dir.display());
+        log::warn!("[themes/watcher] failed to watch {}: {e}", themes_dir.display());
         return None;
     }
 
@@ -76,7 +76,7 @@ fn debounce_loop(
     while let Ok(first) = rx.recv() {
         // Log and ignore watcher errors.
         if let Err(e) = first {
-            eprintln!("[themes/watcher] watch error: {e}");
+            log::warn!("[themes/watcher] watch error: {e}");
             continue;
         }
 
@@ -107,6 +107,6 @@ fn drain_within(rx: &mpsc::Receiver<notify::Result<Event>>, window: Duration) {
 fn reload_and_emit(app_data_dir: &Path, app: &AppHandle) {
     let themes: Vec<Theme> = list_all(app_data_dir);
     if let Err(e) = app.emit("themes:changed", &themes) {
-        eprintln!("[themes/watcher] emit error: {e}");
+        log::warn!("[themes/watcher] emit error: {e}");
     }
 }

@@ -57,6 +57,14 @@ export const openAudioFilePicker = (): Promise<string | null> =>
     filters: [{ name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'flac'] }],
   }) as Promise<string | null>;
 
+// --- Diagnostic log commands ---
+
+/** Open the application log directory in the OS file manager. */
+export const openLogDir = () => invoke<void>('open_log_dir');
+
+/** Return the resolved log directory path as a string. */
+export const getLogDir = () => invoke<string>('get_log_dir');
+
 // --- Event listeners ---
 
 export const onTimerTick = (

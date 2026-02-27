@@ -74,8 +74,13 @@
   "shortcuts_skip_round": "Passer le tour",
   "shortcuts_restart_round": "Redémarrer le tour",
 
+  "advanced_group_logging": "Journalisation",
+  "advanced_toggle_verbose_logging": "Journalisation détaillée",
+  "advanced_toggle_verbose_logging_desc": "Activer la journalisation de débogage détaillée pour aider à diagnostiquer les problèmes.",
+
   "about_release_notes": "Notes de version",
   "about_source_code": "Code source et licence",
+  "about_open_log_folder": "Ouvrir le dossier de journaux",
 
   "notification_work_title": "Pause terminée — au travail !",
   "notification_work_body": "Il est temps de se remettre au travail. Vous pouvez le faire !",

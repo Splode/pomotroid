@@ -119,15 +119,19 @@ impl TimerController {
     pub fn toggle(&self) {
         let s = self.shared.lock().unwrap();
         if s.is_running {
+            log::info!("[timer] pause");
             self.engine.send(TimerCommand::Pause);
         } else if s.elapsed_secs > 0 {
+            log::info!("[timer] resume");
             self.engine.send(TimerCommand::Resume);
         } else {
+            log::info!("[timer] start");
             self.engine.send(TimerCommand::Start);
         }
     }
 
     pub fn reset(&self) {
+        log::info!("[timer] reset");
         self.sequence.lock().unwrap().reset();
         // Send only Reset — the event listener's Reset handler will follow up
         // with Reconfigure once the engine is confirmed Idle.  Sending
@@ -140,10 +144,12 @@ impl TimerController {
     /// Round type, round number, and position in the work/break cycle are all
     /// preserved — only the elapsed time is zeroed.
     pub fn restart_round(&self) {
+        log::info!("[timer] restart round");
         self.engine.send(TimerCommand::Reset);
     }
 
     pub fn skip(&self) {
+        log::info!("[timer] skip");
         self.engine.send(TimerCommand::Skip);
     }
 
@@ -254,7 +260,7 @@ fn listen_events(
                     if let Ok(conn) = db.lock() {
                         match queries::insert_session(&conn, &rt, total) {
                             Ok(id) => current_session_id = Some(id),
-                            Err(e) => eprintln!("[timer] failed to record session: {e}"),
+                            Err(e) => log::error!("[timer] failed to record session: {e}"),
                         }
                     }
                 }
@@ -280,6 +286,10 @@ fn listen_events(
             }
 
             TimerEvent::Complete { skipped: was_skipped } => {
+                let completed_round = sequence.lock().unwrap().current_round.as_str().to_string();
+                log::info!(
+                    "[timer] round complete type={completed_round} skipped={was_skipped}"
+                );
 
                 // --- Session recording: mark the completed round ---
                 if let Some(session_id) = current_session_id.take() {
@@ -361,11 +371,13 @@ fn listen_events(
                     _ => auto_start_break,
                 };
                 if should_auto {
+                    log::debug!("[timer] auto-starting {}", next_round.as_str());
                     engine.send(TimerCommand::Start);
                 }
             }
 
             TimerEvent::Paused { elapsed_secs } => {
+                log::info!("[timer] paused elapsed={elapsed_secs}s");
                 shared.lock().unwrap().is_running = false;
                 let _ = app.emit("timer:paused", serde_json::json!({ "elapsed_secs": elapsed_secs }));
 
@@ -381,6 +393,7 @@ fn listen_events(
             }
 
             TimerEvent::Resumed { elapsed_secs } => {
+                log::info!("[timer] resumed elapsed={elapsed_secs}s");
                 shared.lock().unwrap().is_running = true;
                 let _ = app.emit("timer:resumed", serde_json::json!({ "elapsed_secs": elapsed_secs }));
 
@@ -397,6 +410,7 @@ fn listen_events(
             }
 
             TimerEvent::Reset => {
+                log::debug!("[timer] idle");
                 // Abandon the active session (leave DB row as-is).
                 current_session_id = None;
 
@@ -428,6 +442,7 @@ fn listen_events(
             }
 
             TimerEvent::Suspended { elapsed_secs } => {
+                log::info!("[timer] suspended by system elapsed={elapsed_secs}s");
                 shared.lock().unwrap().is_running = false;
                 let _ = app.emit(
                     "timer:suspended",

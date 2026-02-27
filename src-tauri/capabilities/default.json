@@ -5,6 +5,7 @@
   "windows": ["main", "settings"],
   "permissions": [
     "core:default",
+    "log:default",
     "core:window:allow-close",
     "core:window:allow-minimize",
     "core:webview:allow-create-webview-window",

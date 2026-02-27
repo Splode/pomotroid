@@ -10,6 +10,7 @@
   import { setLocale } from '$lib/locale.svelte.js';
   import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
   import type { UnlistenFn } from '@tauri-apps/api/event';
+  import { info, error as logError } from '@tauri-apps/plugin-log';
 
   // Base window dimensions (natural/default size).
   const BASE_W = 360;
@@ -58,18 +59,26 @@
     const cleanups: UnlistenFn[] = [];
 
     (async () => {
+      try {
       // Load settings from backend.
       const s = await getSettings();
       settings.set(s);
 
       // Apply the stored locale on mount.
       setLocale(s.language);
+      await info(`[main] settings loaded, locale=${s.language}`);
 
       // Load and apply the active theme using OS color scheme.
       const themes = await getThemes();
       const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const active = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
       if (active) applyTheme(active);
+      await getCurrentWebviewWindow().show();
+      await info(`[main] initialized, theme=${active?.name ?? 'none'}`);
+      } catch (e) {
+        await logError(`[main] initialization failed: ${e}`);
+        throw e;
+      }
 
       // Live OS color scheme changes — re-resolve only in auto mode.
       const mq = window.matchMedia('(prefers-color-scheme: dark)');

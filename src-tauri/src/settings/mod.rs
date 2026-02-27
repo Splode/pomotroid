@@ -43,6 +43,7 @@ pub struct Settings {
     pub websocket_enabled: bool,
     pub websocket_port: u16,
     pub language: String,
+    pub verbose_logging: bool,
 }
 
 impl Default for Settings {
@@ -73,6 +74,7 @@ impl Default for Settings {
             websocket_enabled: false,
             websocket_port: 1314,
             language: "auto".to_string(),
+            verbose_logging: false,
         }
     }
 }
@@ -153,6 +155,7 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         websocket_enabled: parse_bool(&map, "websocket_enabled", d.websocket_enabled),
         websocket_port: parse_u32(&map, "websocket_port", d.websocket_port as u32) as u16,
         language: map.get("language").cloned().unwrap_or(d.language),
+        verbose_logging: parse_bool(&map, "verbose_logging", d.verbose_logging),
     })
 }
 
@@ -218,6 +221,7 @@ mod tests {
         assert_eq!(s.theme_light, "Pomotroid");
         assert_eq!(s.theme_dark, "Pomotroid");
         assert_eq!(s.language, "auto");
+        assert!(!s.verbose_logging);
     }
 
     #[test]

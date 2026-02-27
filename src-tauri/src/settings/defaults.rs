@@ -30,4 +30,5 @@ pub const DEFAULTS: &[(&str, &str)] = &[
     ("websocket_enabled", "false"),
     ("websocket_port", "1314"),
     ("language", "auto"),
+    ("verbose_logging", "false"),
 ];
