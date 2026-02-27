@@ -7,6 +7,7 @@
   import { resolveThemeName } from '$lib/utils/theme';
   import { setLocale } from '$lib/locale.svelte.js';
   import type { UnlistenFn } from '@tauri-apps/api/event';
+  import { info, error as logError } from '@tauri-apps/plugin-log';
 
   import SettingsTitlebar from '$lib/components/settings/SettingsTitlebar.svelte';
   import TimerSection from '$lib/components/settings/sections/TimerSection.svelte';
@@ -35,16 +36,23 @@
     const cleanups: UnlistenFn[] = [];
 
     (async () => {
+      try {
       const s = await getSettings();
       settings.set(s);
 
       // Apply the stored locale on mount.
       setLocale(s.language);
+      await info(`[settings] settings loaded, locale=${s.language}`);
 
       const themes = await getThemes();
       const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const activeTheme = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
       if (activeTheme) applyTheme(activeTheme);
+      await info(`[settings] initialized, theme=${activeTheme?.name ?? 'none'}`);
+      } catch (e) {
+        await logError(`[settings] initialization failed: ${e}`);
+        throw e;
+      }
 
       // Live OS color scheme changes — re-resolve only in auto mode.
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -141,6 +149,7 @@
 
   .body {
     flex: 1;
+    min-height: 0;
     display: flex;
     overflow: hidden;
   }

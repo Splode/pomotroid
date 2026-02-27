@@ -74,8 +74,13 @@
   "shortcuts_skip_round": "Saltar ronda",
   "shortcuts_restart_round": "Reiniciar ronda",
 
+  "advanced_group_logging": "Registro",
+  "advanced_toggle_verbose_logging": "Registro detallado",
+  "advanced_toggle_verbose_logging_desc": "Habilitar el registro de depuración detallado para ayudar a diagnosticar problemas.",
+
   "about_release_notes": "Notas de la versión",
   "about_source_code": "Código fuente y licencia",
+  "about_open_log_folder": "Abrir carpeta de registros",
 
   "notification_work_title": "¡Descanso terminado — hora de enfocarse!",
   "notification_work_body": "Es hora de volver al trabajo. ¡Tú puedes!",

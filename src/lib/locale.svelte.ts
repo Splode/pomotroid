@@ -1,5 +1,6 @@
 import { overwriteGetLocale, baseLocale, locales } from '$paraglide/runtime.js';
 import { resolveLocale } from '$lib/utils/locale';
+import { info } from '@tauri-apps/plugin-log';
 
 type SupportedLocale = (typeof locales)[number];
 
@@ -19,5 +20,7 @@ overwriteGetLocale(() => currentLocale);
  * Accepts the raw DB value ('auto' | BCP-47 tag) and resolves it.
  */
 export function setLocale(language: string): void {
-	currentLocale = resolveLocale(language) as SupportedLocale;
+	const resolved = resolveLocale(language) as SupportedLocale;
+	currentLocale = resolved;
+	info(`[locale] locale set to ${resolved}`).catch(() => {});
 }

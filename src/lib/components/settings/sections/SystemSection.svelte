@@ -119,6 +119,15 @@
     </div>
   </div>
 
+  <div class="group-heading">{m.advanced_group_logging()}</div>
+
+  <SettingsToggle
+    label={m.advanced_toggle_verbose_logging()}
+    description={m.advanced_toggle_verbose_logging_desc()}
+    checked={$settings.verbose_logging}
+    onclick={() => toggle('verbose_logging', $settings.verbose_logging)}
+  />
+
   <div class="group-heading">{m.system_group_tray()}</div>
 
   <SettingsToggle

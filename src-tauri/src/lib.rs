@@ -11,10 +11,13 @@ pub mod websocket;
 
 use std::sync::Arc;
 
+use log::LevelFilter;
 use tauri::Manager;
+use tauri_plugin_log::{Builder as LogBuilder, RotationStrategy, Target, TargetKind};
 
 use commands::{
     audio_clear_custom, audio_get_custom_info, audio_set_custom,
+    get_log_dir, open_log_dir,
     notification_show,
     settings_get, settings_reset_defaults, settings_set,
     shortcuts_reload,
@@ -27,11 +30,24 @@ use commands::{
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(
+            LogBuilder::new()
+                .targets([Target::new(TargetKind::LogDir { file_name: None })])
+                .max_file_size(5 * 1024 * 1024)
+                .rotation_strategy(RotationStrategy::KeepOne)
+                .level(LevelFilter::Debug)
+                .build(),
+        )
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
         .setup(|app| {
+            // Capture Rust panics to the log file before the process terminates.
+            std::panic::set_hook(Box::new(|info| {
+                log::error!("PANIC: {info}");
+            }));
+
             let app_data_dir = app
                 .path()
                 .app_data_dir()
@@ -41,7 +57,21 @@ pub fn run() {
                 .expect("failed to create app data directory");
 
             // --- Database ---
-            let db = db::open(&app_data_dir).expect("failed to open database");
+            let db = match db::open(&app_data_dir) {
+                Ok(d) => {
+                    log::info!(
+                        "Pomotroid v{} — data dir: {}",
+                        env!("CARGO_PKG_VERSION"),
+                        app_data_dir.display()
+                    );
+                    log::info!("Database opened successfully");
+                    d
+                }
+                Err(e) => {
+                    log::error!("Failed to open database: {e}");
+                    panic!("failed to open database: {e}");
+                }
+            };
             {
                 let conn = db.lock().unwrap();
                 settings::seed_defaults(&conn).expect("failed to seed default settings");
@@ -57,6 +87,14 @@ pub fn run() {
                 let conn = db.lock().unwrap();
                 settings::load(&conn).expect("failed to load settings")
             };
+
+            // Apply the persisted log level before any further setup.
+            if initial_settings.verbose_logging {
+                log::set_max_level(LevelFilter::Debug);
+                log::info!("Verbose logging enabled — log level set to DEBUG");
+            } else {
+                log::set_max_level(LevelFilter::Info);
+            }
 
             // Sync tray state from saved settings.
             *tray_state.countdown_mode.lock().unwrap() = initial_settings.dial_countdown;
@@ -174,6 +212,9 @@ pub fn run() {
             audio_get_custom_info,
             // Notifications
             notification_show,
+            // Diagnostics
+            open_log_dir,
+            get_log_dir,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

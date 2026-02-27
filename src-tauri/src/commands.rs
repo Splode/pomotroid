@@ -2,6 +2,7 @@
 ///
 /// Commands are grouped by domain: Timer, Settings, Themes, Stats.
 /// Each command returns `Result<T, String>` so errors surface cleanly in JS.
+use log::LevelFilter;
 use tauri::{AppHandle, Emitter, Manager, State};
 
 use std::sync::Arc;
@@ -61,7 +62,10 @@ pub fn timer_get_state(timer: State<'_, TimerController>) -> TimerSnapshot {
 #[tauri::command]
 pub fn settings_get(db: State<'_, DbState>) -> Result<Settings, String> {
     let conn = db.lock().map_err(|e| e.to_string())?;
-    settings::load(&conn).map_err(|e| e.to_string())
+    settings::load(&conn).map_err(|e| {
+        log::error!("[settings] failed to load settings: {e}");
+        e.to_string()
+    })
 }
 
 /// Persist a single setting and emit `settings:changed` with the updated set.
@@ -78,11 +82,29 @@ pub fn settings_set(
     ws_state: State<'_, Arc<WsState>>,
     app: AppHandle,
 ) -> Result<Settings, String> {
+    log::debug!("[settings] set {key}={value}");
     let new_settings = {
         let conn = db.lock().map_err(|e| e.to_string())?;
-        settings::save_setting(&conn, &key, &value).map_err(|e| e.to_string())?;
-        settings::load(&conn).map_err(|e| e.to_string())?
+        settings::save_setting(&conn, &key, &value).map_err(|e| {
+            log::error!("[settings] failed to save '{key}': {e}");
+            e.to_string()
+        })?;
+        settings::load(&conn).map_err(|e| {
+            log::error!("[settings] failed to reload after save: {e}");
+            e.to_string()
+        })?
     };
+
+    // Apply verbose_logging change immediately without a restart.
+    if key == "verbose_logging" {
+        if new_settings.verbose_logging {
+            log::set_max_level(LevelFilter::Debug);
+            log::info!("Verbose logging enabled — log level set to DEBUG");
+        } else {
+            log::set_max_level(LevelFilter::Info);
+            log::info!("Verbose logging disabled — log level set to INFO");
+        }
+    }
 
     // Keep the timer engine in sync when time-related settings change.
     timer.apply_settings(new_settings.clone());
@@ -202,6 +224,7 @@ pub fn settings_reset_defaults(
     tray_state: State<'_, Arc<TrayState>>,
     app: AppHandle,
 ) -> Result<Settings, String> {
+    log::info!("[settings] reset to defaults");
     let new_settings = {
         let conn = db.lock().map_err(|e| e.to_string())?;
         // Delete all rows so seed_defaults can insert fresh defaults.
@@ -247,7 +270,10 @@ pub fn themes_list(app: AppHandle) -> Result<Vec<Theme>, String> {
 #[tauri::command]
 pub fn stats_get_all_time(db: State<'_, DbState>) -> Result<AllTimeStats, String> {
     let conn = db.lock().map_err(|e| e.to_string())?;
-    let raw = queries::get_all_time_stats(&conn).map_err(|e| e.to_string())?;
+    let raw = queries::get_all_time_stats(&conn).map_err(|e| {
+        log::error!("[stats] failed to query all-time stats: {e}");
+        e.to_string()
+    })?;
     Ok(AllTimeStats {
         total_work_rounds: raw.completed_work_sessions as u32,
         total_work_minutes: (raw.total_work_secs / 60) as u32,
@@ -270,6 +296,7 @@ pub fn stats_get_session(timer: State<'_, TimerController>) -> SessionStats {
 /// Show or hide the main window.
 #[tauri::command]
 pub fn window_set_visibility(visible: bool, app: AppHandle) -> Result<(), String> {
+    log::debug!("[window] set visibility={visible}");
     let window = app
         .get_webview_window("main")
         .ok_or_else(|| "main window not found".to_string())?;
@@ -341,6 +368,7 @@ pub fn audio_set_custom(
         .and_then(|n| n.to_str())
         .unwrap_or("custom")
         .to_string();
+    log::info!("[audio] custom sound set cue={cue} file={display_name}");
     Ok(display_name)
 }
 
@@ -369,6 +397,7 @@ pub fn audio_clear_custom(cue: String, app: AppHandle) -> Result<(), String> {
     }
 
     audio_state.clear_custom_path(&cue);
+    log::info!("[audio] custom sound cleared cue={cue}");
     Ok(())
 }
 
@@ -393,6 +422,35 @@ pub fn audio_get_custom_info(app: AppHandle) -> Result<audio::CustomAudioInfo, S
 #[tauri::command]
 pub fn notification_show(title: String, body: String, app: AppHandle) {
     notifications::show(&app, &title, &body);
+}
+
+// ---------------------------------------------------------------------------
+// CMD-09 — Diagnostic log commands
+// ---------------------------------------------------------------------------
+
+/// Open the application log directory in the OS file manager.
+#[tauri::command]
+pub fn open_log_dir(app: AppHandle) {
+    match app.path().app_log_dir() {
+        Ok(log_dir) => {
+            if let Err(e) = tauri_plugin_opener::open_path(&log_dir, None::<&str>) {
+                log::warn!("[log] failed to open log dir {}: {e}", log_dir.display());
+            }
+        }
+        Err(e) => log::warn!("[log] failed to resolve log dir: {e}"),
+    }
+}
+
+/// Return the application log directory path as a string.
+#[tauri::command]
+pub fn get_log_dir(app: AppHandle) -> Result<String, String> {
+    app.path()
+        .app_log_dir()
+        .map(|p| p.to_string_lossy().into_owned())
+        .map_err(|e| {
+            log::warn!("[log] failed to resolve log dir: {e}");
+            e.to_string()
+        })
 }
 
 fn cue_to_stem(cue: &str) -> Result<&'static str, String> {

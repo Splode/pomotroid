@@ -1,6 +1,7 @@
 <script lang="ts">
   import { openUrl } from '@tauri-apps/plugin-opener';
 
+  import { openLogDir } from '$lib/ipc';
   import * as m from '$paraglide/messages.js';
 
   const VERSION = '1.0.0';
@@ -47,6 +48,12 @@
       <span>{m.about_source_code()}</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
         <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="link-row" onclick={openLogDir}>
+      <span>{m.about_open_log_folder()}</span>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M1 3.5C1 2.67 1.67 2 2.5 2H5l1 1.5H9.5C10.33 3.5 11 4.17 11 5v4.5C11 10.33 10.33 11 9.5 11h-7C1.67 11 1 10.33 1 9.5V3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
       </svg>
     </button>
   </div>
@@ -124,4 +131,5 @@
     opacity: 0.5;
     line-height: 1.6;
   }
+
 </style>

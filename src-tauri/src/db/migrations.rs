@@ -62,6 +62,14 @@ const MIGRATION_3: &str = "
     INSERT INTO schema_version VALUES (3);
 ";
 
+/// Adds the `verbose_logging` setting (default `'false'`) for users upgrading
+/// from before diagnostic logging support.
+const MIGRATION_4: &str = "
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('verbose_logging', 'false');
+
+    INSERT INTO schema_version VALUES (4);
+";
+
 /// Apply any pending migrations. Each migration is wrapped in a transaction
 /// so a partial failure leaves the database unchanged.
 pub fn run(conn: &Connection) -> Result<()> {
@@ -77,6 +85,10 @@ pub fn run(conn: &Connection) -> Result<()> {
 
     if version < 3 {
         conn.execute_batch(&format!("BEGIN; {MIGRATION_3} COMMIT;"))?;
+    }
+
+    if version < 4 {
+        conn.execute_batch(&format!("BEGIN; {MIGRATION_4} COMMIT;"))?;
     }
 
     Ok(())
@@ -114,7 +126,7 @@ mod tests {
         let v: i64 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(v, 3);
+        assert_eq!(v, 4);
     }
 
     #[test]

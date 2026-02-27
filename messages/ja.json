@@ -74,8 +74,13 @@
   "shortcuts_skip_round": "ラウンドをスキップ",
   "shortcuts_restart_round": "ラウンドを再開",
 
+  "advanced_group_logging": "ログ記録",
+  "advanced_toggle_verbose_logging": "詳細ログ",
+  "advanced_toggle_verbose_logging_desc": "問題の診断に役立つ詳細なデバッグログを有効にします。",
+
   "about_release_notes": "リリースノート",
   "about_source_code": "ソースコードとライセンス",
+  "about_open_log_folder": "ログフォルダを開く",
 
   "notification_work_title": "休憩終了 — 集中する時間です！",
   "notification_work_body": "仕事に戻る時間です。頑張って！",

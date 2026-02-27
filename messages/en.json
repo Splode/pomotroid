@@ -74,8 +74,13 @@
   "shortcuts_skip_round": "Skip Round",
   "shortcuts_restart_round": "Restart Round",
 
+  "advanced_group_logging": "Logging",
+  "advanced_toggle_verbose_logging": "Verbose Logging",
+  "advanced_toggle_verbose_logging_desc": "Enable detailed debug logging to help diagnose issues.",
+
   "about_release_notes": "Release Notes",
   "about_source_code": "Source Code & License",
+  "about_open_log_folder": "Open Log Folder",
 
   "notification_work_title": "Break over — focus time!",
   "notification_work_body": "Time to get back to work. You've got this!",

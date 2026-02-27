@@ -100,10 +100,11 @@ pub fn register_all(app: &AppHandle, settings: &Settings) {
 
     for (key_str, action) in shortcuts {
         let Some(shortcut) = parse_shortcut(key_str) else {
-            eprintln!("[shortcuts] could not parse shortcut '{key_str}'");
+            log::warn!("[shortcuts] could not parse shortcut '{key_str}'");
             continue;
         };
 
+        let action_name = action.as_str();
         let app_clone = app.clone();
         if let Err(e) = gsm.on_shortcut(shortcut, move |_app, _shortcut, event| {
             // Fire only on key-press. Without this filter the callback fires on
@@ -112,7 +113,9 @@ pub fn register_all(app: &AppHandle, settings: &Settings) {
                 fire_action(&app_clone, action);
             }
         }) {
-            eprintln!("[shortcuts] failed to register '{key_str}': {e}");
+            log::warn!("[shortcuts] failed to register '{key_str}': {e}");
+        } else {
+            log::debug!("[shortcuts] registered '{key_str}' → {action_name}");
         }
     }
 }
@@ -134,7 +137,19 @@ enum ShortcutAction {
     RestartRound,
 }
 
+impl ShortcutAction {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Toggle       => "toggle",
+            Self::Reset        => "reset",
+            Self::Skip         => "skip",
+            Self::RestartRound => "restart-round",
+        }
+    }
+}
+
 fn fire_action(app: &AppHandle, action: ShortcutAction) {
+    log::info!("[shortcut] fired: {}", action.as_str());
     let Some(timer) = app.try_state::<TimerController>() else { return };
     match action {
         ShortcutAction::Toggle       => timer.toggle(),

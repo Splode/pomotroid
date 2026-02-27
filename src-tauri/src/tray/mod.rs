@@ -117,15 +117,15 @@ impl TrayState {
 pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
     let show_item = match MenuItem::with_id(app, "show", "Show", true, None::<&str>) {
         Ok(i) => i,
-        Err(e) => { eprintln!("[tray] menu item error: {e}"); return; }
+        Err(e) => { log::warn!("[tray] menu item error: {e}"); return; }
     };
     let exit_item = match MenuItem::with_id(app, "exit", "Exit", true, None::<&str>) {
         Ok(i) => i,
-        Err(e) => { eprintln!("[tray] menu item error: {e}"); return; }
+        Err(e) => { log::warn!("[tray] menu item error: {e}"); return; }
     };
     let menu = match Menu::with_items(app, &[&show_item, &exit_item]) {
         Ok(m) => m,
-        Err(e) => { eprintln!("[tray] menu error: {e}"); return; }
+        Err(e) => { log::warn!("[tray] menu error: {e}"); return; }
     };
 
     // Render the initial idle icon using the current state (respects countdown mode
@@ -152,8 +152,12 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
                 let app = tray_icon.app_handle();
                 if let Some(window) = app.get_webview_window("main") {
                     match window.is_visible() {
-                        Ok(true) => { let _ = window.hide(); }
+                        Ok(true) => {
+                            log::debug!("[tray] left-click → hide");
+                            let _ = window.hide();
+                        }
                         _ => {
+                            log::debug!("[tray] left-click → show");
                             let _ = window.show();
                             let _ = window.set_focus();
                         }
@@ -164,26 +168,34 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
         .on_menu_event(|app, event| {
             match event.id().as_ref() {
                 "show" => {
+                    log::info!("[tray] show");
                     if let Some(window) = app.get_webview_window("main") {
                         let _ = window.show();
                         let _ = window.set_focus();
                     }
                 }
-                "exit" => app.exit(0),
+                "exit" => {
+                    log::info!("[tray] exit");
+                    app.exit(0);
+                }
                 _ => {}
             }
         })
         .build(app);
 
     match tray {
-        Ok(t) => { *state.icon.lock().unwrap() = Some(t); }
-        Err(e) => eprintln!("[tray] failed to build tray icon: {e}"),
+        Ok(t) => {
+            *state.icon.lock().unwrap() = Some(t);
+            log::info!("[tray] created");
+        }
+        Err(e) => log::warn!("[tray] failed to build tray icon: {e}"),
     }
 }
 
 /// Remove the system tray icon (called when `min_to_tray` is disabled).
 pub fn destroy_tray(state: &Arc<TrayState>) {
     *state.icon.lock().unwrap() = None;
+    log::info!("[tray] destroyed");
 }
 
 // ---------------------------------------------------------------------------

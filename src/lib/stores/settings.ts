@@ -30,6 +30,7 @@ const defaults: Settings = {
   theme_dark: 'Pomotroid',
   dial_countdown: true,
   language: 'auto',
+  verbose_logging: false,
 };
 
 export const settings = writable<Settings>(defaults);

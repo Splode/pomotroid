@@ -84,7 +84,7 @@ pub async fn start(port: u16, app: AppHandle, state: &Arc<WsState>) {
     let listener = match TcpListener::bind(addr).await {
         Ok(l) => l,
         Err(e) => {
-            eprintln!("[ws] failed to bind {addr}: {e}");
+            log::error!("[ws] failed to bind {addr}: {e}");
             let _ = app.emit(
                 "websocket:error",
                 serde_json::json!({ "message": e.to_string(), "port": port }),
@@ -104,12 +104,12 @@ pub async fn start(port: u16, app: AppHandle, state: &Arc<WsState>) {
 
     let handle = tokio::spawn(async move {
         if let Err(e) = axum::serve(listener, router).await {
-            eprintln!("[ws] server error: {e}");
+            log::error!("[ws] server error: {e}");
         }
     });
 
     *state.task.lock().await = Some(handle);
-    eprintln!("[ws] listening on ws://127.0.0.1:{port}/ws");
+    log::info!("[ws] listening on ws://127.0.0.1:{port}/ws");
 }
 
 /// Stop the WebSocket server (aborts the task).

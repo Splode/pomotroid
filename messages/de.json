@@ -74,8 +74,13 @@
   "shortcuts_skip_round": "Runde überspringen",
   "shortcuts_restart_round": "Runde neu starten",
 
+  "advanced_group_logging": "Protokollierung",
+  "advanced_toggle_verbose_logging": "Ausführliche Protokollierung",
+  "advanced_toggle_verbose_logging_desc": "Detaillierte Debug-Protokollierung aktivieren, um Probleme zu diagnostizieren.",
+
   "about_release_notes": "Versionshinweise",
   "about_source_code": "Quellcode & Lizenz",
+  "about_open_log_folder": "Protokollordner öffnen",
 
   "notification_work_title": "Pause vorbei — Zeit zum Fokussieren!",
   "notification_work_body": "Zeit, wieder an die Arbeit zu gehen. Du schaffst das!",
