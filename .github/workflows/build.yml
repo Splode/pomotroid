@@ -2,7 +2,7 @@ name: Build / Test
 
 on:
   push:
-    branches: [master, "rewrite/**", "claude/**"]
+    branches: [master, 'rewrite/**', 'claude/**', 'feat/**']
   pull_request:
     branches: [master]
 
@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -78,6 +80,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -120,6 +124,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Node.js
         uses: actions/setup-node@v4

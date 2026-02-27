@@ -1,6 +1,6 @@
 [package]
 name = "pomotroid"
-version = "0.1.0"
+version = "1.0.0"
 description = "A simple and visually-pleasing Pomodoro timer"
 authors = ["Christopher Murphy <flyweight@pm.me>"]
 edition = "2021"
