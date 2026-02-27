@@ -43,7 +43,7 @@ Pomotroid provides many themes. It's also theme-able, allowing you to customize 
 
 ![Screenshots of Pomotroid using various themes](./.github/images/pomotroid_themes-preview--914x219.png)
 
-Visit the [theme documentation](./docs/themes/themes.md) to view the full list of official themes and for instruction on creating your own.
+See [THEMES.md](./THEMES.md) for the full theme list and instructions on creating your own.
 
 ## Install
 
@@ -85,33 +85,7 @@ appget install pomotroid
 
 ## Custom Themes
 
-Pomotroid supports custom themes defined as JSON files placed in the app's configuration directory:
-
-- **Linux**: `~/.config/pomotroid/themes/`
-- **macOS**: `~/Library/Application Support/pomotroid/themes/`
-- **Windows**: `%APPDATA%\pomotroid\themes\`
-
-Custom themes are hot-reloaded automatically — no restart required.
-
-Each theme file must follow this format:
-
-```json
-{
-  "name": "My Theme",
-  "colors": {
-    "--color-long-round": "#c75000",
-    "--color-short-round": "#417505",
-    "--color-focus-round": "#b01c2e",
-    "--color-background": "#2f384b",
-    "--color-background-light": "#3e4a5d",
-    "--color-foreground": "#d7e1f4",
-    "--color-foreground-darker": "#a3aec4",
-    "--color-accent": "#ff6347",
-    "--color-accent-extra": "#f0c050",
-    "--color-gradient": "#1e2430"
-  }
-}
-```
+Pomotroid supports user-created themes with automatic hot-reload — no restart required. See [THEMES.md](./THEMES.md) for directory paths, the full color reference, and a step-by-step guide.
 
 ## WebSocket API
 
