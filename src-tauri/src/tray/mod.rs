@@ -112,9 +112,22 @@ impl TrayState {
 // Tray lifecycle
 // ---------------------------------------------------------------------------
 
-/// Create the system tray with a "Show" / "Exit" context menu.
-/// Safe to call multiple times — replaces any existing tray handle.
+/// Show the system tray icon.
+///
+/// If the icon has already been created (e.g. it was previously hidden), it is
+/// made visible again without allocating a second OS icon.  A new icon is only
+/// built on the very first call.
 pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
+    // Re-show existing icon if present — avoids duplicate OS tray entries.
+    {
+        let guard = state.icon.lock().unwrap();
+        if let Some(existing) = guard.as_ref() {
+            let _ = existing.set_visible(true);
+            log::info!("[tray] shown (reused existing icon)");
+            return;
+        }
+    }
+
     let show_item = match MenuItem::with_id(app, "show", "Show", true, None::<&str>) {
         Ok(i) => i,
         Err(e) => { log::warn!("[tray] menu item error: {e}"); return; }
@@ -192,10 +205,17 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
     }
 }
 
-/// Remove the system tray icon (called when `min_to_tray` is disabled).
+/// Hide the system tray icon.
+///
+/// The underlying `TrayIcon` is kept alive so it can be shown again without
+/// allocating a second OS icon.  Dropping the handle is not sufficient to
+/// remove the icon on all platforms; `set_visible(false)` is the reliable path.
 pub fn destroy_tray(state: &Arc<TrayState>) {
-    *state.icon.lock().unwrap() = None;
-    log::info!("[tray] destroyed");
+    let guard = state.icon.lock().unwrap();
+    if let Some(existing) = guard.as_ref() {
+        let _ = existing.set_visible(false);
+        log::info!("[tray] hidden");
+    }
 }
 
 // ---------------------------------------------------------------------------

@@ -132,8 +132,9 @@ pub fn run() {
             );
             app.manage(timer);
 
-            // Create initial tray icon if min_to_tray is already on.
-            if initial_settings.min_to_tray {
+            // Create initial tray icon if tray_icon_enabled is on, or if an
+            // existing user has min_to_tray enabled (backwards compatibility).
+            if initial_settings.tray_icon_enabled || initial_settings.min_to_tray {
                 tray::create_tray(app.handle(), &tray_state);
             }
 

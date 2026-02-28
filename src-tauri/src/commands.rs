@@ -89,6 +89,13 @@ pub fn settings_set(
             log::error!("[settings] failed to save '{key}': {e}");
             e.to_string()
         })?;
+        // When SIT is turned off, cascade-reset the dependent tray settings so
+        // the close-to-tray handler cannot hide the window with no icon to
+        // restore from.
+        if key == "tray_icon_enabled" && value == "false" {
+            settings::save_setting(&conn, "min_to_tray", "false").map_err(|e| e.to_string())?;
+            settings::save_setting(&conn, "min_to_tray_on_close", "false").map_err(|e| e.to_string())?;
+        }
         settings::load(&conn).map_err(|e| {
             log::error!("[settings] failed to reload after save: {e}");
             e.to_string()
@@ -169,9 +176,10 @@ pub fn settings_set(
         }
     }
 
-    // Create or destroy the tray based on the min_to_tray setting.
-    if key == "min_to_tray" {
-        if value == "true" {
+    // Create or destroy the tray when tray_icon_enabled or min_to_tray changes.
+    // The tray exists when either flag is true.
+    if matches!(key.as_str(), "tray_icon_enabled" | "min_to_tray") {
+        if new_settings.tray_icon_enabled || new_settings.min_to_tray {
             tray::create_tray(&app, &tray_state);
         } else {
             tray::destroy_tray(&tray_state);
@@ -236,6 +244,11 @@ pub fn settings_reset_defaults(
 
     timer.apply_settings(new_settings.clone());
     *tray_state.countdown_mode.lock().unwrap() = new_settings.dial_countdown;
+
+    // After reset, defaults have tray_icon_enabled=false and min_to_tray=false,
+    // so destroy any active tray icon.
+    tray::destroy_tray(&tray_state);
+
     let data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
 
     // Clear custom alert sounds: delete files from disk and reset in-memory paths.

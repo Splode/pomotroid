@@ -129,24 +129,34 @@
     onclick={() => toggle('verbose_logging', $settings.verbose_logging)}
   />
 
-  {#if !isMac}
-    <!-- The tray section is hidden on macOS: the native yellow minimize button
-         goes to the Dock and cannot be intercepted, and hiding on close without
-         an active tray icon would leave the app unreachable. -->
-    <div class="group-heading">{m.system_group_tray()}</div>
+  <div class="group-heading">{m.system_group_tray()}</div>
 
-    <SettingsToggle
-      label={m.system_toggle_min_tray()}
-      description={m.system_toggle_min_tray_desc()}
-      checked={$settings.min_to_tray}
-      onclick={() => toggle('min_to_tray', $settings.min_to_tray)}
-    />
-    <SettingsToggle
-      label={m.system_toggle_close_tray()}
-      description={m.system_toggle_close_tray_desc()}
-      checked={$settings.min_to_tray_on_close}
-      onclick={() => toggle('min_to_tray_on_close', $settings.min_to_tray_on_close)}
-    />
+  <!-- Show in System Tray: available on all platforms. -->
+  <SettingsToggle
+    label={m.system_toggle_show_tray()}
+    description={m.system_toggle_show_tray_desc()}
+    checked={$settings.tray_icon_enabled}
+    onclick={() => toggle('tray_icon_enabled', $settings.tray_icon_enabled)}
+  />
+
+  {#if !isMac}
+    <!-- Minimize to Tray and Close to Tray are Windows/Linux only: the macOS
+         yellow traffic-light button goes to the Dock and cannot be intercepted,
+         and hiding on close without a reachable restore path would strand the app. -->
+    {#if $settings.tray_icon_enabled}
+      <SettingsToggle
+        label={m.system_toggle_min_tray()}
+        description={m.system_toggle_min_tray_desc()}
+        checked={$settings.min_to_tray}
+        onclick={() => toggle('min_to_tray', $settings.min_to_tray)}
+      />
+      <SettingsToggle
+        label={m.system_toggle_close_tray()}
+        description={m.system_toggle_close_tray_desc()}
+        checked={$settings.min_to_tray_on_close}
+        onclick={() => toggle('min_to_tray_on_close', $settings.min_to_tray_on_close)}
+      />
+    {/if}
   {/if}
 
   <div class="group-heading">{m.system_group_window()}</div>
