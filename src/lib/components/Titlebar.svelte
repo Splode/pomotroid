@@ -55,10 +55,8 @@
   }
 </script>
 
-<nav class="titlebar" class:macos={isMac} data-tauri-drag-region>
-  <!-- Settings button -->
+{#snippet settingsBtn()}
   <button class="btn-icon" onclick={openSettings} aria-label="Settings">
-    <!-- Sliders / settings icon -->
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
       <line x1="2" y1="4"  x2="14" y2="4"  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
       <circle cx="5"  cy="4"  r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
@@ -68,13 +66,22 @@
       <circle cx="7"  cy="12" r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
     </svg>
   </button>
+{/snippet}
 
-  <!-- Title -->
+<nav class="titlebar" data-tauri-drag-region>
+  <!-- Left: settings button on Linux/Windows. On macOS the traffic lights live
+       here; the settings button moves to the right side instead. -->
+  {#if !isMac}
+    {@render settingsBtn()}
+  {/if}
+
   <h1 class="title">Pomotroid</h1>
 
-  <!-- Window controls — hidden on macOS; native traffic lights handle these. -->
-  {#if !isMac}
-    <div class="controls">
+  <!-- Right: settings button on macOS, window controls on Linux/Windows. -->
+  <div class="controls">
+    {#if isMac}
+      {@render settingsBtn()}
+    {:else}
       <button class="btn-icon" onclick={minimize} aria-label="Minimize">
         <svg width="12" height="12" viewBox="0 0 12 12">
           <line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -98,8 +105,8 @@
           <line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
       </button>
-    </div>
-  {/if}
+    {/if}
+  </div>
 </nav>
 
 <style>
@@ -112,12 +119,6 @@
     padding: 0 8px;
     position: relative;
     flex-shrink: 0;
-  }
-
-  /* On macOS, offset content past the traffic light buttons (~12px offset + 3×12px
-     buttons + 2×6px gaps = ~60px; use 72px for comfortable clearance). */
-  .macos {
-    padding-left: 72px;
   }
 
   .title {

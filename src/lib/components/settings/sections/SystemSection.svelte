@@ -4,6 +4,7 @@
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import * as m from '$paraglide/messages.js';
   import { setLocale } from '$lib/locale.svelte.js';
+  import { isMac } from '$lib/utils/platform';
 
   // Language options: value stored in DB, label shown in native language.
   const LANGUAGES = [
@@ -128,20 +129,25 @@
     onclick={() => toggle('verbose_logging', $settings.verbose_logging)}
   />
 
-  <div class="group-heading">{m.system_group_tray()}</div>
+  {#if !isMac}
+    <!-- The tray section is hidden on macOS: the native yellow minimize button
+         goes to the Dock and cannot be intercepted, and hiding on close without
+         an active tray icon would leave the app unreachable. -->
+    <div class="group-heading">{m.system_group_tray()}</div>
 
-  <SettingsToggle
-    label={m.system_toggle_min_tray()}
-    description={m.system_toggle_min_tray_desc()}
-    checked={$settings.min_to_tray}
-    onclick={() => toggle('min_to_tray', $settings.min_to_tray)}
-  />
-  <SettingsToggle
-    label={m.system_toggle_close_tray()}
-    description={m.system_toggle_close_tray_desc()}
-    checked={$settings.min_to_tray_on_close}
-    onclick={() => toggle('min_to_tray_on_close', $settings.min_to_tray_on_close)}
-  />
+    <SettingsToggle
+      label={m.system_toggle_min_tray()}
+      description={m.system_toggle_min_tray_desc()}
+      checked={$settings.min_to_tray}
+      onclick={() => toggle('min_to_tray', $settings.min_to_tray)}
+    />
+    <SettingsToggle
+      label={m.system_toggle_close_tray()}
+      description={m.system_toggle_close_tray_desc()}
+      checked={$settings.min_to_tray_on_close}
+      onclick={() => toggle('min_to_tray_on_close', $settings.min_to_tray_on_close)}
+    />
+  {/if}
 
   <div class="group-heading">{m.system_group_window()}</div>
 
