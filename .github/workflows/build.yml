@@ -153,7 +153,7 @@ jobs:
           CI: true
 
       - name: Build portable
-        run: npm run tauri build -- --bundles nsis --config '{\"bundle\":{\"windows\":{\"nsis\":{\"installMode\":\"portable\"}}}}'
+        run: npm run tauri build -- --bundles nsis --config src-tauri/tauri.portable.conf.json
         env:
           CI: true
 
