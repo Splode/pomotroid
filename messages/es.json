@@ -70,6 +70,8 @@
   "system_label_port": "Puerto",
   "system_group_language": "Idioma",
 
+  "shortcuts_accessibility_notice": "Los atajos globales requieren acceso de Accesibilidad en macOS. Habilita Pomotroid en Configuración del Sistema → Privacidad y Seguridad → Accesibilidad.",
+  "shortcuts_accessibility_open": "Abrir Configuración del Sistema",
   "shortcuts_note": "Los atajos globales funcionan incluso cuando la ventana no está enfocada. Haz clic en un campo y presiona la combinación de teclas deseada para registrarla.",
   "shortcuts_toggle_timer": "Activar/Pausar temporizador",
   "shortcuts_reset_timer": "Reiniciar temporizador",

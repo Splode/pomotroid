@@ -70,6 +70,8 @@
   "system_label_port": "Port",
   "system_group_language": "Langue",
 
+  "shortcuts_accessibility_notice": "Les raccourcis globaux nécessitent l'accès à l'Accessibilité sur macOS. Activez Pomotroid dans Réglages Système → Confidentialité et sécurité → Accessibilité.",
+  "shortcuts_accessibility_open": "Ouvrir les Réglages Système",
   "shortcuts_note": "Les raccourcis globaux fonctionnent même lorsque la fenêtre n'est pas active. Cliquez sur un champ et appuyez sur la combinaison de touches souhaitée pour l'enregistrer.",
   "shortcuts_toggle_timer": "Basculer le minuteur",
   "shortcuts_reset_timer": "Réinitialiser le minuteur",

@@ -70,6 +70,8 @@
   "system_label_port": "Porta",
   "system_group_language": "Idioma",
 
+  "shortcuts_accessibility_notice": "Os atalhos globais requerem acesso de Acessibilidade no macOS. Ative o Pomotroid em Configurações do Sistema → Privacidade e Segurança → Acessibilidade.",
+  "shortcuts_accessibility_open": "Abrir Configurações do Sistema",
   "shortcuts_note": "Os atalhos globais funcionam mesmo quando a janela não está em foco. Clique em um campo e pressione a combinação de teclas desejada para gravá-la.",
   "shortcuts_toggle_timer": "Alternar Temporizador",
   "shortcuts_reset_timer": "Redefinir Temporizador",

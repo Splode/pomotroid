@@ -489,6 +489,29 @@ pub fn app_version() -> &'static str {
     env!("APP_BUILD_VERSION")
 }
 
+// ---------------------------------------------------------------------------
+// CMD-10 — Platform commands
+// ---------------------------------------------------------------------------
+
+/// Returns whether the app has macOS Accessibility permission.
+/// On macOS, calls AXIsProcessTrusted() from the ApplicationServices framework.
+/// On all other platforms, always returns true.
+#[tauri::command]
+pub fn accessibility_trusted() -> bool {
+    #[cfg(target_os = "macos")]
+    {
+        #[link(name = "ApplicationServices", kind = "framework")]
+        extern "C" {
+            fn AXIsProcessTrusted() -> bool;
+        }
+        unsafe { AXIsProcessTrusted() }
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        true
+    }
+}
+
 /// Return the application log directory path as a string.
 #[tauri::command]
 pub fn get_log_dir(app: AppHandle) -> Result<String, String> {

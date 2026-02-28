@@ -68,6 +68,10 @@ export const getLogDir = () => invoke<string>('get_log_dir');
 /** Return the compile-time build version string (e.g. `1.0.0-dev.80+20b2d87`). */
 export const appVersion = () => invoke<string>('app_version');
 
+// --- Platform commands ---
+
+export const accessibilityTrusted = () => invoke<boolean>('accessibility_trusted');
+
 // --- Event listeners ---
 
 export const onTimerTick = (

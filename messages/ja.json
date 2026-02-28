@@ -70,6 +70,8 @@
   "system_label_port": "ポート",
   "system_group_language": "言語",
 
+  "shortcuts_accessibility_notice": "macOSでグローバルショートカットを使用するには、アクセシビリティのアクセス許可が必要です。システム設定 → プライバシーとセキュリティ → アクセシビリティでPomotroidを有効にしてください。",
+  "shortcuts_accessibility_open": "システム設定を開く",
   "shortcuts_note": "グローバルショートカットはウィンドウにフォーカスがない場合でも機能します。フィールドをクリックして、記録したいキーの組み合わせを押してください。",
   "shortcuts_toggle_timer": "タイマーの切り替え",
   "shortcuts_reset_timer": "タイマーのリセット",

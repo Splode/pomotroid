@@ -16,6 +16,7 @@ use tauri::Manager;
 use tauri_plugin_log::{Builder as LogBuilder, RotationStrategy, Target, TargetKind};
 
 use commands::{
+    accessibility_trusted,
     app_version,
     audio_clear_custom, audio_get_custom_info, audio_set_custom,
     get_log_dir, open_log_dir,
@@ -229,6 +230,7 @@ pub fn run() {
             // Diagnostics
             open_log_dir,
             get_log_dir,
+            accessibility_trusted,
             app_version,
         ])
         .run(tauri::generate_context!())

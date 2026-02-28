@@ -70,6 +70,8 @@
   "system_label_port": "Port",
   "system_group_language": "Sprache",
 
+  "shortcuts_accessibility_notice": "Globale Tastenkürzel erfordern unter macOS Zugriff auf die Bedienungshilfen. Aktiviere Pomotroid unter Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen.",
+  "shortcuts_accessibility_open": "Systemeinstellungen öffnen",
   "shortcuts_note": "Globale Tastenkürzel funktionieren auch, wenn das Fenster nicht fokussiert ist. Klicke auf ein Feld und drücke die gewünschte Tastenkombination, um sie aufzuzeichnen.",
   "shortcuts_toggle_timer": "Timer umschalten",
   "shortcuts_reset_timer": "Timer zurücksetzen",

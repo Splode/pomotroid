@@ -70,6 +70,8 @@
   "system_label_port": "端口",
   "system_group_language": "语言",
 
+  "shortcuts_accessibility_notice": "在 macOS 上使用全局快捷键需要辅助功能权限。请在系统设置 → 隐私与安全性 → 辅助功能中启用 Pomotroid。",
+  "shortcuts_accessibility_open": "打开系统设置",
   "shortcuts_note": "全局快捷键即使窗口未聚焦也能使用。点击字段并按下所需的按键组合进行录制。",
   "shortcuts_toggle_timer": "切换计时器",
   "shortcuts_reset_timer": "重置计时器",

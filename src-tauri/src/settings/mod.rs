@@ -69,9 +69,21 @@ impl Default for Settings {
             time_short_break_secs: 5 * 60,
             time_long_break_secs: 15 * 60,
             volume: 1.0,
+            #[cfg(target_os = "macos")]
+            shortcut_toggle: "Super+Shift+1".to_string(),
+            #[cfg(not(target_os = "macos"))]
             shortcut_toggle: "Control+F1".to_string(),
+            #[cfg(target_os = "macos")]
+            shortcut_reset: "Super+Shift+2".to_string(),
+            #[cfg(not(target_os = "macos"))]
             shortcut_reset: "Control+F2".to_string(),
+            #[cfg(target_os = "macos")]
+            shortcut_skip: "Super+Shift+3".to_string(),
+            #[cfg(not(target_os = "macos"))]
             shortcut_skip: "Control+F3".to_string(),
+            #[cfg(target_os = "macos")]
+            shortcut_restart: "Super+Shift+4".to_string(),
+            #[cfg(not(target_os = "macos"))]
             shortcut_restart: "Control+F4".to_string(),
             websocket_enabled: false,
             websocket_port: 1314,
@@ -83,7 +95,33 @@ impl Default for Settings {
 
 /// Seed the `settings` table with default values for any missing keys.
 /// Uses `INSERT OR IGNORE` so existing customizations are preserved.
+///
+/// Shortcut defaults are platform-specific and seeded before the common
+/// defaults so that INSERT OR IGNORE lets them win on first launch.
 pub fn seed_defaults(conn: &Connection) -> Result<()> {
+    // Platform-specific shortcut defaults (seeded first so they win).
+    #[cfg(target_os = "macos")]
+    let shortcut_defaults: &[(&str, &str)] = &[
+        ("shortcut_toggle",  "Super+Shift+1"),
+        ("shortcut_reset",   "Super+Shift+2"),
+        ("shortcut_skip",    "Super+Shift+3"),
+        ("shortcut_restart", "Super+Shift+4"),
+    ];
+    #[cfg(not(target_os = "macos"))]
+    let shortcut_defaults: &[(&str, &str)] = &[
+        ("shortcut_toggle",  "Control+F1"),
+        ("shortcut_reset",   "Control+F2"),
+        ("shortcut_skip",    "Control+F3"),
+        ("shortcut_restart", "Control+F4"),
+    ];
+
+    for (key, value) in shortcut_defaults {
+        conn.execute(
+            "INSERT OR IGNORE INTO settings (key, value) VALUES (?1, ?2)",
+            params![key, value],
+        )?;
+    }
+
     for (key, value) in defaults::DEFAULTS {
         conn.execute(
             "INSERT OR IGNORE INTO settings (key, value) VALUES (?1, ?2)",
@@ -213,10 +251,20 @@ mod tests {
         assert_eq!(s.time_long_break_secs, 15 * 60);
         assert_eq!(s.long_break_interval, 4);
         assert!((s.volume - 1.0).abs() < f32::EPSILON);
-        assert_eq!(s.shortcut_toggle, "Control+F1");
-        assert_eq!(s.shortcut_reset, "Control+F2");
-        assert_eq!(s.shortcut_skip, "Control+F3");
-        assert_eq!(s.shortcut_restart, "Control+F4");
+        #[cfg(target_os = "macos")]
+        {
+            assert_eq!(s.shortcut_toggle, "Super+Shift+1");
+            assert_eq!(s.shortcut_reset, "Super+Shift+2");
+            assert_eq!(s.shortcut_skip, "Super+Shift+3");
+            assert_eq!(s.shortcut_restart, "Super+Shift+4");
+        }
+        #[cfg(not(target_os = "macos"))]
+        {
+            assert_eq!(s.shortcut_toggle, "Control+F1");
+            assert_eq!(s.shortcut_reset, "Control+F2");
+            assert_eq!(s.shortcut_skip, "Control+F3");
+            assert_eq!(s.shortcut_restart, "Control+F4");
+        }
         assert!(!s.always_on_top);
         assert!(!s.websocket_enabled);
         assert_eq!(s.websocket_port, 1314);
