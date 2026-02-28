@@ -18,7 +18,9 @@
         "minWidth": 240,
         "minHeight": 240,
         "resizable": true,
-        "decorations": false,
+        "decorations": true,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
         "backgroundColor": "#2F384B",
         "visible": false
       }

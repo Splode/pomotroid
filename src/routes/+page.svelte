@@ -7,6 +7,7 @@
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
   import { resolveThemeName } from '$lib/utils/theme';
+  import { isMac } from '$lib/utils/platform';
   import { setLocale } from '$lib/locale.svelte.js';
   import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
   import type { UnlistenFn } from '@tauri-apps/api/event';
@@ -128,23 +129,26 @@
   });
 </script>
 
-<!-- Resize handles — invisible edge/corner strips for decorations-free windows. -->
-<!-- N -->
-<div class="rh rh-n" onmousedown={() => startResize('North')} role="none"></div>
-<!-- S -->
-<div class="rh rh-s" onmousedown={() => startResize('South')} role="none"></div>
-<!-- E -->
-<div class="rh rh-e" onmousedown={() => startResize('East')} role="none"></div>
-<!-- W -->
-<div class="rh rh-w" onmousedown={() => startResize('West')} role="none"></div>
-<!-- NE -->
-<div class="rh rh-ne" onmousedown={() => startResize('NorthEast')} role="none"></div>
-<!-- NW -->
-<div class="rh rh-nw" onmousedown={() => startResize('NorthWest')} role="none"></div>
-<!-- SE -->
-<div class="rh rh-se" onmousedown={() => startResize('SouthEast')} role="none"></div>
-<!-- SW -->
-<div class="rh rh-sw" onmousedown={() => startResize('SouthWest')} role="none"></div>
+<!-- Resize handles — invisible edge/corner strips for decorations-free windows.
+     Not needed on macOS where native resizing is provided by decorations:true. -->
+{#if !isMac}
+  <!-- N -->
+  <div class="rh rh-n" onmousedown={() => startResize('North')} role="none"></div>
+  <!-- S -->
+  <div class="rh rh-s" onmousedown={() => startResize('South')} role="none"></div>
+  <!-- E -->
+  <div class="rh rh-e" onmousedown={() => startResize('East')} role="none"></div>
+  <!-- W -->
+  <div class="rh rh-w" onmousedown={() => startResize('West')} role="none"></div>
+  <!-- NE -->
+  <div class="rh rh-ne" onmousedown={() => startResize('NorthEast')} role="none"></div>
+  <!-- NW -->
+  <div class="rh rh-nw" onmousedown={() => startResize('NorthWest')} role="none"></div>
+  <!-- SE -->
+  <div class="rh rh-se" onmousedown={() => startResize('SouthEast')} role="none"></div>
+  <!-- SW -->
+  <div class="rh rh-sw" onmousedown={() => startResize('SouthWest')} role="none"></div>
+{/if}
 
 <div class="app">
   <Titlebar />

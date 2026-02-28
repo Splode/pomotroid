@@ -3,6 +3,7 @@
   import { getCurrentWebviewWindow, WebviewWindow } from '@tauri-apps/api/webviewWindow';
   import { setWindowVisibility } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
+  import { isMac } from '$lib/utils/platform';
 
   let maximized = $state(false);
 
@@ -27,7 +28,12 @@
       title: 'Pomotroid — Settings',
       width: 720,
       height: 520,
-      decorations: false,
+      // On macOS: native decorations + overlay titlebar for rounded corners and
+      // traffic light buttons. On other platforms: custom decorations-free window.
+      decorations: isMac,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      titleBarStyle: isMac ? ('Overlay' as any) : undefined,
+      hiddenTitle: isMac ? true : undefined,
       resizable: false,
     });
   }
@@ -49,7 +55,7 @@
   }
 </script>
 
-<nav class="titlebar" data-tauri-drag-region>
+<nav class="titlebar" class:macos={isMac} data-tauri-drag-region>
   <!-- Settings button -->
   <button class="btn-icon" onclick={openSettings} aria-label="Settings">
     <!-- Sliders / settings icon -->
@@ -66,32 +72,34 @@
   <!-- Title -->
   <h1 class="title">Pomotroid</h1>
 
-  <!-- Window controls -->
-  <div class="controls">
-    <button class="btn-icon" onclick={minimize} aria-label="Minimize">
-      <svg width="12" height="12" viewBox="0 0 12 12">
-        <line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    </button>
-    <button class="btn-icon" onclick={toggleMaximize} aria-label={maximized ? 'Restore' : 'Maximize'}>
-      {#if maximized}
+  <!-- Window controls — hidden on macOS; native traffic lights handle these. -->
+  {#if !isMac}
+    <div class="controls">
+      <button class="btn-icon" onclick={minimize} aria-label="Minimize">
         <svg width="12" height="12" viewBox="0 0 12 12">
-          <rect x="3" y="1" width="8" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
-          <path d="M1 4 L1 11 L8 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-      {:else}
+      </button>
+      <button class="btn-icon" onclick={toggleMaximize} aria-label={maximized ? 'Restore' : 'Maximize'}>
+        {#if maximized}
+          <svg width="12" height="12" viewBox="0 0 12 12">
+            <rect x="3" y="1" width="8" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M1 4 L1 11 L8 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        {:else}
+          <svg width="12" height="12" viewBox="0 0 12 12">
+            <rect x="1" y="1" width="10" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        {/if}
+      </button>
+      <button class="btn-icon close" onclick={close} aria-label="Close">
         <svg width="12" height="12" viewBox="0 0 12 12">
-          <rect x="1" y="1" width="10" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-      {/if}
-    </button>
-    <button class="btn-icon close" onclick={close} aria-label="Close">
-      <svg width="12" height="12" viewBox="0 0 12 12">
-        <line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    </button>
-  </div>
+      </button>
+    </div>
+  {/if}
 </nav>
 
 <style>
@@ -104,6 +112,12 @@
     padding: 0 8px;
     position: relative;
     flex-shrink: 0;
+  }
+
+  /* On macOS, offset content past the traffic light buttons (~12px offset + 3×12px
+     buttons + 2×6px gaps = ~60px; use 72px for comfortable clearance). */
+  .macos {
+    padding-left: 72px;
   }
 
   .title {

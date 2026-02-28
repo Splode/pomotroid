@@ -167,6 +167,13 @@ pub fn run() {
                 .get_webview_window("main")
                 .expect("main window not found");
 
+            // The config sets decorations:true so macOS renders the window correctly
+            // (decorations:false prevents event processing on macOS). On every other
+            // platform, restore the decorations-free window immediately; the window is
+            // still hidden at this point so there is no visible flash.
+            #[cfg(not(target_os = "macos"))]
+            let _ = main_window.set_decorations(false);
+
             // Apply always-on-top from saved settings on startup.
             if initial_settings.always_on_top {
                 let _ = main_window.set_always_on_top(true);
