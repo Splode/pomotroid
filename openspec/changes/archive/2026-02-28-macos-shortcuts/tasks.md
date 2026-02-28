@@ -24,7 +24,7 @@
 
 - [x] 4.1 Run `npm run check` — 0 errors
 - [x] 4.2 Run `cargo test` in `src-tauri/` — all tests pass
-- [ ] 4.3 (macOS) Fresh install: confirm shortcuts default to `⌘⇧1–4`
-- [ ] 4.4 (macOS, no Accessibility) Open Settings → Shortcuts: notice is visible with working "Open Settings" link
-- [ ] 4.5 (macOS) Grant Accessibility access, return to settings window: notice dismisses automatically
-- [ ] 4.6 (macOS, Accessibility granted) Confirm `⌘⇧1` toggles the timer globally
+- [x] 4.3 (macOS) Fresh install: confirm shortcuts default to `⌘⇧1–4`
+- [x] 4.4 (macOS, no Accessibility) Open Settings → Shortcuts: notice is visible with working "Open Settings" link
+- [x] 4.5 (macOS) Grant Accessibility access, return to settings window: notice dismisses automatically
+- [x] 4.6 (macOS, Accessibility granted) Confirm `⌘⇧1` toggles the timer globally
