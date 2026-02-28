@@ -11,6 +11,7 @@ const defaults: Settings = {
   long_break_interval: 4,
   auto_start_work: false,
   auto_start_break: false,
+  tray_icon_enabled: false,
   min_to_tray: false,
   min_to_tray_on_close: false,
   notifications_enabled: false,

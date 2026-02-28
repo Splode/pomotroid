@@ -23,6 +23,7 @@ export interface Settings {
   long_break_interval: number;
   auto_start_work: boolean;
   auto_start_break: boolean;
+  tray_icon_enabled: boolean;
   min_to_tray: boolean;
   min_to_tray_on_close: boolean;
   notifications_enabled: boolean;
