@@ -1,6 +1,6 @@
 <script lang="ts">
   import { settings } from '$lib/stores/settings';
-  import { setSetting, resetSettings } from '$lib/ipc';
+  import { setSetting } from '$lib/ipc';
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import * as m from '$paraglide/messages.js';
 
@@ -29,10 +29,6 @@
     settings.set(updated);
   }
 
-  async function handleReset() {
-    const updated = await resetSettings();
-    settings.set(updated);
-  }
 </script>
 
 <div class="section">
@@ -119,9 +115,6 @@
     onclick={() => toggle('dial_countdown', $settings.dial_countdown)}
   />
 
-  <div class="reset-row">
-    <button class="reset-btn" onclick={handleReset}>{m.timer_reset_defaults()}</button>
-  </div>
 </div>
 
 <style>
@@ -209,26 +202,4 @@
   .bar--short  { background: var(--color-short-round); }
   .bar--long   { background: var(--color-long-round); }
   .bar--rounds { background: var(--color-foreground-darker, var(--color-foreground)); }
-
-  .reset-row {
-    padding: 16px 20px;
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .reset-btn {
-    background: none;
-    border: 1px solid color-mix(in oklch, var(--color-foreground) 18%, transparent);
-    border-radius: 4px;
-    color: var(--color-foreground-darker, var(--color-foreground));
-    font-size: 0.8rem;
-    padding: 6px 14px;
-    cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
-  }
-
-  .reset-btn:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-  }
 </style>

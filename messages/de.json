@@ -81,6 +81,8 @@
   "about_release_notes": "Versionshinweise",
   "about_source_code": "Quellcode & Lizenz",
   "about_open_log_folder": "Protokollordner öffnen",
+  "about_reset_all": "Alle Einstellungen zurücksetzen",
+  "about_reset_confirm": "Dadurch werden alle Einstellungen auf die Standardwerte zurückgesetzt.",
 
   "notification_work_title": "Pause vorbei — Zeit zum Fokussieren!",
   "notification_work_body": "Zeit, wieder an die Arbeit zu gehen. Du schaffst das!",

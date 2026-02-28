@@ -81,6 +81,8 @@
   "about_release_notes": "Notes de version",
   "about_source_code": "Code source et licence",
   "about_open_log_folder": "Ouvrir le dossier de journaux",
+  "about_reset_all": "Réinitialiser tous les paramètres",
+  "about_reset_confirm": "Cela réinitialisera tous les paramètres aux valeurs par défaut.",
 
   "notification_work_title": "Pause terminée — au travail !",
   "notification_work_body": "Il est temps de se remettre au travail. Vous pouvez le faire !",

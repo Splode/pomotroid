@@ -2,13 +2,15 @@
   import { onMount } from 'svelte';
   import { openUrl } from '@tauri-apps/plugin-opener';
 
-  import { openLogDir, appVersion } from '$lib/ipc';
+  import { openLogDir, appVersion, resetSettings } from '$lib/ipc';
+  import { settings } from '$lib/stores/settings';
   import * as m from '$paraglide/messages.js';
 
   const BASE_VERSION = '1.0.0';
   const REPO = 'https://github.com/Splode/pomotroid';
 
   let version = $state('...');
+  let confirming = $state(false);
 
   // Strip pre-release and build metadata to get the bare X.Y.Z for the release tag URL.
   function baseOnly(v: string): string {
@@ -24,6 +26,12 @@
       version = BASE_VERSION;
     }
   });
+
+  async function handleReset() {
+    const updated = await resetSettings();
+    settings.set(updated);
+    confirming = false;
+  }
 </script>
 
 <div class="section">
@@ -73,6 +81,22 @@
         <path d="M1 3.5C1 2.67 1.67 2 2.5 2H5l1 1.5H9.5C10.33 3.5 11 4.17 11 5v4.5C11 10.33 10.33 11 9.5 11h-7C1.67 11 1 10.33 1 9.5V3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
       </svg>
     </button>
+  </div>
+
+  <div class="reset-group">
+    {#if !confirming}
+      <button class="reset-row" onclick={() => (confirming = true)}>
+        <span>{m.about_reset_all()}</span>
+      </button>
+    {:else}
+      <div class="confirm-row">
+        <span class="confirm-label">{m.about_reset_confirm()}</span>
+        <div class="confirm-actions">
+          <button class="confirm-cancel" onclick={() => (confirming = false)}>Cancel</button>
+          <button class="confirm-reset" onclick={handleReset}>Reset</button>
+        </div>
+      </div>
+    {/if}
   </div>
 
   <p class="credit">
@@ -140,6 +164,81 @@
   .link-row:hover {
     background: var(--color-hover);
     color: var(--color-accent);
+  }
+
+  .reset-group {
+    border: 1px solid var(--color-separator);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .reset-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-foreground-darker, var(--color-foreground));
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    text-align: left;
+    transition: background 0.12s, color 0.12s;
+  }
+
+  .reset-row:hover {
+    background: var(--color-hover);
+    color: color-mix(in oklch, var(--color-focus-round) 80%, var(--color-foreground));
+  }
+
+  .confirm-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+
+  .confirm-label {
+    font-size: 0.8rem;
+    color: var(--color-foreground-darker, var(--color-foreground));
+    opacity: 0.8;
+  }
+
+  .confirm-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .confirm-cancel,
+  .confirm-reset {
+    background: none;
+    border: 1px solid color-mix(in oklch, var(--color-foreground) 18%, transparent);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .confirm-cancel {
+    color: var(--color-foreground-darker, var(--color-foreground));
+  }
+
+  .confirm-cancel:hover {
+    border-color: color-mix(in oklch, var(--color-foreground) 40%, transparent);
+    color: var(--color-foreground);
+  }
+
+  .confirm-reset {
+    color: var(--color-accent);
+    border-color: color-mix(in oklch, var(--color-accent) 40%, transparent);
+  }
+
+  .confirm-reset:hover {
+    background: color-mix(in oklch, var(--color-accent) 10%, transparent);
+    border-color: var(--color-accent);
   }
 
   .credit {

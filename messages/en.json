@@ -81,6 +81,8 @@
   "about_release_notes": "Release Notes",
   "about_source_code": "Source Code & License",
   "about_open_log_folder": "Open Log Folder",
+  "about_reset_all": "Reset All Settings",
+  "about_reset_confirm": "This will reset all settings to defaults.",
 
   "notification_work_title": "Break over — focus time!",
   "notification_work_body": "Time to get back to work. You've got this!",

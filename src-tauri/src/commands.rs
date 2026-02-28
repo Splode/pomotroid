@@ -237,6 +237,26 @@ pub fn settings_reset_defaults(
     timer.apply_settings(new_settings.clone());
     *tray_state.countdown_mode.lock().unwrap() = new_settings.dial_countdown;
     let data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+
+    // Clear custom alert sounds: delete files from disk and reset in-memory paths.
+    if let Some(audio_state) = app.try_state::<Arc<AudioManager>>() {
+        let audio_dir = data_dir.join("audio");
+        for stem in [audio::STEM_WORK, audio::STEM_SHORT, audio::STEM_LONG] {
+            if let Ok(entries) = std::fs::read_dir(&audio_dir) {
+                for entry in entries.filter_map(|e| e.ok()) {
+                    let p = entry.path();
+                    if p.file_stem().and_then(|s| s.to_str()) == Some(stem) {
+                        let _ = std::fs::remove_file(&p);
+                    }
+                }
+            }
+        }
+        audio_state.clear_custom_path("work_alert");
+        audio_state.clear_custom_path("short_break_alert");
+        audio_state.clear_custom_path("long_break_alert");
+        log::info!("[audio] custom sounds cleared on settings reset");
+    }
+
     let tray_theme_name = match new_settings.theme_mode.as_str() {
         "dark" => &new_settings.theme_dark,
         _ => &new_settings.theme_light,

@@ -81,6 +81,8 @@
   "about_release_notes": "リリースノート",
   "about_source_code": "ソースコードとライセンス",
   "about_open_log_folder": "ログフォルダを開く",
+  "about_reset_all": "すべての設定をリセット",
+  "about_reset_confirm": "すべての設定がデフォルト値にリセットされます。",
 
   "notification_work_title": "休憩終了 — 集中する時間です！",
   "notification_work_body": "仕事に戻る時間です。頑張って！",

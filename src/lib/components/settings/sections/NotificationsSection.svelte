@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { settings } from '$lib/stores/settings';
-  import { setSetting, getCustomAudioInfo, setCustomAudio, clearCustomAudio, openAudioFilePicker } from '$lib/ipc';
+  import { setSetting, getCustomAudioInfo, setCustomAudio, clearCustomAudio, openAudioFilePicker, onSettingsChanged } from '$lib/ipc';
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import type { CustomAudioInfo } from '$lib/types';
   import * as m from '$paraglide/messages.js';
@@ -33,7 +33,7 @@
     else longBreakAlert = val;
   }
 
-  onMount(async () => {
+  async function refreshAudioInfo() {
     try {
       const info: CustomAudioInfo = await getCustomAudioInfo();
       workAlert       = info.work_alert;
@@ -42,6 +42,15 @@
     } catch (err) {
       console.warn('[audio] getCustomAudioInfo failed (audio unavailable?):', err);
     }
+  }
+
+  onMount(() => {
+    let unlisten: (() => void) | undefined;
+    (async () => {
+      await refreshAudioInfo();
+      unlisten = await onSettingsChanged(refreshAudioInfo);
+    })();
+    return () => unlisten?.();
   });
 
   async function toggle(dbKey: string, current: boolean) {

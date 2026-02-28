@@ -81,6 +81,8 @@
   "about_release_notes": "Notas de la versión",
   "about_source_code": "Código fuente y licencia",
   "about_open_log_folder": "Abrir carpeta de registros",
+  "about_reset_all": "Restablecer toda la configuración",
+  "about_reset_confirm": "Esto restablecerá toda la configuración a los valores predeterminados.",
 
   "notification_work_title": "¡Descanso terminado — hora de enfocarse!",
   "notification_work_body": "Es hora de volver al trabajo. ¡Tú puedes!",
