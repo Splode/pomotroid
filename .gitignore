@@ -8,3 +8,4 @@ thumbs.db
 *.key
 *.cert
 .svelte-kit/
+build/
