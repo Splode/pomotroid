@@ -11,8 +11,6 @@
   --color-foreground: #d7e1f4;
   --color-foreground-darker: #a3aec4;
   --color-accent: #ff6347;
-  --color-accent-extra: #f0c050;
-  --color-gradient: #1e2430;
 
   /* Derived chrome tokens — adapt automatically between dark and light themes.
      color-mix with transparent produces the foreground color at N% opacity,
