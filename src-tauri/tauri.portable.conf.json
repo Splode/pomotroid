@@ -1,9 +1,0 @@
-{
-  "bundle": {
-    "windows": {
-      "nsis": {
-        "installMode": "portable"
-      }
-    }
-  }
-}

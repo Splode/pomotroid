@@ -147,13 +147,8 @@ jobs:
       - name: Sync SvelteKit types
         run: npx svelte-kit sync
 
-      - name: Build installer
-        run: npm run tauri build -- --bundles nsis --config src-tauri/tauri.installer.conf.json
-        env:
-          CI: true
-
-      - name: Build portable
-        run: npm run tauri build -- --bundles nsis --config src-tauri/tauri.portable.conf.json
+      - name: Build (release)
+        run: npm run tauri build -- --bundles nsis
         env:
           CI: true
 
@@ -163,5 +158,5 @@ jobs:
           name: pomotroid-windows-x64
           path: |
             src-tauri/target/release/bundle/nsis/*-setup.exe
-            src-tauri/target/release/bundle/nsis/*_portable.exe
+            src-tauri/target/release/pomotroid.exe
           if-no-files-found: error

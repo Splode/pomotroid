@@ -78,7 +78,12 @@
       "minimumSystemVersion": "10.13"
     },
     "windows": {
-      "nsis": {},
+      "nsis": {
+        "displayLanguageSelector": false,
+        "installerIcon": "icons/icon.ico",
+        "headerImage": "icons/128x128.png",
+        "installMode": "perMachine"
+      },
       "wix": {
         "language": "en-US"
       }
