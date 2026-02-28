@@ -245,6 +245,15 @@ pub fn settings_reset_defaults(
     timer.apply_settings(new_settings.clone());
     *tray_state.countdown_mode.lock().unwrap() = new_settings.dial_countdown;
 
+    // Broadcast a reset snapshot so the frontend dial and display reflect the
+    // restored default durations without requiring the user to manually reset.
+    {
+        let snap = timer.get_snapshot();
+        if !snap.is_running && !snap.is_paused {
+            app.emit("timer:reset", &snap).ok();
+        }
+    }
+
     // After reset, defaults have tray_icon_enabled=false and min_to_tray=false,
     // so destroy any active tray icon.
     tray::destroy_tray(&tray_state);
