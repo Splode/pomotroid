@@ -5,7 +5,7 @@
     "--color-short-round": "#50fa7b",
     "--color-focus-round": "#ff5555",
     "--color-background": "#282a36",
-    "--color-background-light": "#363846",
+    "--color-background-light": "#44475a",
     "--color-background-lightest": "#6272a4",
     "--color-foreground": "#f8f8f2",
     "--color-foreground-darker": "#ffb86c",
