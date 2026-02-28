@@ -19,6 +19,7 @@
   import TimerDial from './TimerDial.svelte';
   import TimerDisplay from './TimerDisplay.svelte';
   import TimerFooter from './TimerFooter.svelte';
+  import MiniControls from './MiniControls.svelte';
   import type { UnlistenFn } from '@tauri-apps/api/event';
   import * as m from '$paraglide/messages.js';
   import { notificationShow } from '$lib/ipc';
@@ -101,66 +102,79 @@
   });
 </script>
 
-<div class="timer" style="zoom: {uiScale}">
-  <!-- Dial + display stacked (display centered over dial) -->
-  <div class="dial-stack">
-    <TimerDial snap={state} countdown={$settings.dial_countdown} />
-    <TimerDisplay {state} />
+<div class="timer-outer" class:compact={isCompact}>
+  <div class="timer" style="zoom: {uiScale}">
+    <!-- Dial + display stacked (display centered over dial) -->
+    <div class="dial-stack">
+      <TimerDial snap={state} countdown={$settings.dial_countdown} />
+      <TimerDisplay {state} />
+    </div>
+
+    {#if !isCompact}
+      <!-- Round type label sits below the dial as a normal flex child so it
+           does not affect the dial-stack height used to centre TimerDisplay. -->
+      <div class="round-label" style="color: {roundColor(state.round_type)}">
+        {roundLabel(state.round_type)}
+      </div>
+
+      <!-- Controls row: back | play/pause | skip -->
+      <div class="controls">
+        <!-- Back: restart current round -->
+        <button class="btn-side" onclick={timerRestartRound} aria-label="Restart round">
+          <svg width="18" height="18" viewBox="0 0 16 16">
+            <polygon points="15,1 6,8 15,15" fill="currentColor"/>
+            <rect x="1" y="1" width="3" height="14" rx="1" fill="currentColor"/>
+          </svg>
+        </button>
+
+        <!-- Play / Pause — icon fades when state changes -->
+        <button
+          class="play-pause"
+          onclick={timerToggle}
+          aria-label={state.is_running ? 'Pause' : 'Play'}
+        >
+          {#key state.is_running}
+            <span class="icon" in:fade={{ duration: 120 }}>
+              {#if state.is_running}
+                <svg width="24" height="24" viewBox="0 0 24 24">
+                  <rect x="4" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
+                  <rect x="15" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
+                </svg>
+              {:else}
+                <svg width="24" height="24" viewBox="0 0 24 24">
+                  <polygon points="5,3 21,12 5,21" fill="currentColor"/>
+                </svg>
+              {/if}
+            </span>
+          {/key}
+        </button>
+
+        <!-- Skip: advance to next round -->
+        <button class="btn-side" onclick={timerSkip} aria-label="Skip round">
+          <svg width="18" height="18" viewBox="0 0 16 16">
+            <polygon points="1,1 10,8 1,15" fill="currentColor"/>
+            <rect x="12" y="1" width="3" height="14" rx="1" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <TimerFooter snap={state} />
+    {/if}
   </div>
 
-  {#if !isCompact}
-    <!-- Round type label sits below the dial as a normal flex child so it
-         does not affect the dial-stack height used to centre TimerDisplay. -->
-    <div class="round-label" style="color: {roundColor(state.round_type)}">
-      {roundLabel(state.round_type)}
-    </div>
-
-    <!-- Controls row: back | play/pause | skip -->
-    <div class="controls">
-      <!-- Back: restart current round -->
-      <button class="btn-side" onclick={timerRestartRound} aria-label="Restart round">
-        <svg width="18" height="18" viewBox="0 0 16 16">
-          <polygon points="15,1 6,8 15,15" fill="currentColor"/>
-          <rect x="1" y="1" width="3" height="14" rx="1" fill="currentColor"/>
-        </svg>
-      </button>
-
-      <!-- Play / Pause — icon fades when state changes -->
-      <button
-        class="play-pause"
-        onclick={timerToggle}
-        aria-label={state.is_running ? 'Pause' : 'Play'}
-      >
-        {#key state.is_running}
-          <span class="icon" in:fade={{ duration: 120 }}>
-            {#if state.is_running}
-              <svg width="24" height="24" viewBox="0 0 24 24">
-                <rect x="4" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
-                <rect x="15" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
-              </svg>
-            {:else}
-              <svg width="24" height="24" viewBox="0 0 24 24">
-                <polygon points="5,3 21,12 5,21" fill="currentColor"/>
-              </svg>
-            {/if}
-          </span>
-        {/key}
-      </button>
-
-      <!-- Skip: advance to next round -->
-      <button class="btn-side" onclick={timerSkip} aria-label="Skip round">
-        <svg width="18" height="18" viewBox="0 0 16 16">
-          <polygon points="1,1 10,8 1,15" fill="currentColor"/>
-          <rect x="12" y="1" width="3" height="14" rx="1" fill="currentColor"/>
-        </svg>
-      </button>
-    </div>
-
-    <TimerFooter snap={state} />
+  {#if isCompact}
+    <MiniControls />
   {/if}
 </div>
 
 <style>
+  .timer-outer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
   .timer {
     display: flex;
     flex-direction: column;

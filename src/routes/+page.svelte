@@ -28,7 +28,7 @@
   // Extra bottom padding added to <main> in compact mode.  Shifts the
   // dial upward so the whitespace sits at the bottom rather than being
   // split equally — compensates for the visual weight of the titlebar.
-  const COMPACT_BOTTOM_PAD = 20;
+  const COMPACT_BOTTOM_PAD = 48;
 
   $effect(() => {
     function update() {
@@ -172,9 +172,8 @@
   }
 
   main.compact {
-    /* Bottom padding shifts the dial upward, placing the whitespace
-       at the bottom and balancing the visual weight of the titlebar. */
-    padding-bottom: 20px;
+    /* Bottom padding provides breathing room below the mini controls. */
+    padding-bottom: 8px;
   }
 
   /* ---------------------------------------------------------------------------
