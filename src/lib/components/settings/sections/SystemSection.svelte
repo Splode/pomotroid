@@ -139,24 +139,25 @@
     onclick={() => toggle('tray_icon_enabled', $settings.tray_icon_enabled)}
   />
 
-  {#if !isMac}
-    <!-- Minimize to Tray and Close to Tray are Windows/Linux only: the macOS
-         yellow traffic-light button goes to the Dock and cannot be intercepted,
-         and hiding on close without a reachable restore path would strand the app. -->
-    {#if $settings.tray_icon_enabled}
+  {#if $settings.tray_icon_enabled}
+    <!-- Minimize to Tray is Windows/Linux only: the macOS yellow traffic-light
+         button routes to the Dock and cannot be intercepted by the app. -->
+    {#if !isMac}
       <SettingsToggle
         label={m.system_toggle_min_tray()}
         description={m.system_toggle_min_tray_desc()}
         checked={$settings.min_to_tray}
         onclick={() => toggle('min_to_tray', $settings.min_to_tray)}
       />
-      <SettingsToggle
-        label={m.system_toggle_close_tray()}
-        description={m.system_toggle_close_tray_desc()}
-        checked={$settings.min_to_tray_on_close}
-        onclick={() => toggle('min_to_tray_on_close', $settings.min_to_tray_on_close)}
-      />
     {/if}
+    <!-- Close to Tray is available on all platforms: the CloseRequested event
+         fires on macOS (red button / Cmd+W) and can be intercepted. -->
+    <SettingsToggle
+      label={m.system_toggle_close_tray()}
+      description={m.system_toggle_close_tray_desc()}
+      checked={$settings.min_to_tray_on_close}
+      onclick={() => toggle('min_to_tray_on_close', $settings.min_to_tray_on_close)}
+    />
   {/if}
 
   <div class="group-heading">{m.system_group_window()}</div>
