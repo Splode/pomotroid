@@ -148,7 +148,7 @@ jobs:
         run: npx svelte-kit sync
 
       - name: Build installer
-        run: npm run tauri build -- --bundles nsis
+        run: npm run tauri build -- --bundles nsis --config src-tauri/tauri.installer.conf.json
         env:
           CI: true
 

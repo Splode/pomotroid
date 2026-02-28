@@ -1,0 +1,12 @@
+{
+  "bundle": {
+    "windows": {
+      "nsis": {
+        "displayLanguageSelector": false,
+        "installerIcon": "icons/icon.ico",
+        "headerImage": "icons/128x128.png",
+        "installMode": "perMachine"
+      }
+    }
+  }
+}
