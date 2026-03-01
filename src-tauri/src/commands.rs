@@ -335,9 +335,18 @@ pub fn stats_get_session(timer: State<'_, TimerController>) -> SessionStats {
 #[tauri::command]
 pub fn stats_get_detailed(db: State<'_, DbState>) -> Result<DetailedStats, String> {
     let conn = db.lock().map_err(|e| e.to_string())?;
-    let today = queries::get_daily_stats(&conn).map_err(|e| e.to_string())?;
-    let week = queries::get_weekly_stats(&conn).map_err(|e| e.to_string())?;
-    let streak = queries::get_streak(&conn).map_err(|e| e.to_string())?;
+    let today = queries::get_daily_stats(&conn).map_err(|e| {
+        log::error!("[stats] failed to query daily stats: {e}");
+        e.to_string()
+    })?;
+    let week = queries::get_weekly_stats(&conn).map_err(|e| {
+        log::error!("[stats] failed to query weekly stats: {e}");
+        e.to_string()
+    })?;
+    let streak = queries::get_streak(&conn).map_err(|e| {
+        log::error!("[stats] failed to query streak: {e}");
+        e.to_string()
+    })?;
     Ok(DetailedStats { today, week, streak })
 }
 
@@ -345,9 +354,18 @@ pub fn stats_get_detailed(db: State<'_, DbState>) -> Result<DetailedStats, Strin
 #[tauri::command]
 pub fn stats_get_heatmap(db: State<'_, DbState>) -> Result<HeatmapStats, String> {
     let conn = db.lock().map_err(|e| e.to_string())?;
-    let entries = queries::get_heatmap_data(&conn).map_err(|e| e.to_string())?;
-    let raw = queries::get_all_time_stats(&conn).map_err(|e| e.to_string())?;
-    let streak = queries::get_streak(&conn).map_err(|e| e.to_string())?;
+    let entries = queries::get_heatmap_data(&conn).map_err(|e| {
+        log::error!("[stats] failed to query heatmap data: {e}");
+        e.to_string()
+    })?;
+    let raw = queries::get_all_time_stats(&conn).map_err(|e| {
+        log::error!("[stats] failed to query all-time stats: {e}");
+        e.to_string()
+    })?;
+    let streak = queries::get_streak(&conn).map_err(|e| {
+        log::error!("[stats] failed to query streak for heatmap: {e}");
+        e.to_string()
+    })?;
     Ok(HeatmapStats {
         entries,
         total_rounds: raw.completed_work_sessions as u32,

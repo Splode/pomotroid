@@ -15,6 +15,7 @@
   import type { UnlistenFn } from '@tauri-apps/api/event';
   import type { DetailedStats, HeatmapStats } from '$lib/types';
   import * as m from '$paraglide/messages.js';
+  import { info, error as logError } from '@tauri-apps/plugin-log';
 
   import DailyView from '$lib/components/stats/DailyView.svelte';
   import WeeklyView from '$lib/components/stats/WeeklyView.svelte';
@@ -30,8 +31,12 @@
   async function switchTab(tab: Tab) {
     activeTab = tab;
     if (tab === 'alltime' && !heatmapLoaded) {
-      heatmap = await statsGetHeatmap();
-      heatmapLoaded = true;
+      try {
+        heatmap = await statsGetHeatmap();
+        heatmapLoaded = true;
+      } catch (e) {
+        await logError(`[stats] failed to load heatmap: ${e}`);
+      }
     }
   }
 
@@ -43,21 +48,32 @@
     const cleanups: UnlistenFn[] = [];
 
     (async () => {
-      const s = await getSettings();
-      settings.set(s);
-      setLocale(s.language);
+      try {
+        const s = await getSettings();
+        settings.set(s);
+        setLocale(s.language);
+        await info(`[stats] settings loaded, locale=${s.language}`);
 
-      const themes = await getThemes();
-      const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const activeTheme = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
-      if (activeTheme) applyTheme(activeTheme);
+        const themes = await getThemes();
+        const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const activeTheme = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
+        if (activeTheme) applyTheme(activeTheme);
 
-      detailed = await statsGetDetailed();
+        detailed = await statsGetDetailed();
+        await info(`[stats] initialized, theme=${activeTheme?.name ?? 'none'}`);
+      } catch (e) {
+        await logError(`[stats] initialization failed: ${e}`);
+        throw e;
+      }
 
       cleanups.push(
         await onRoundChange(async () => {
-          detailed = await statsGetDetailed();
-          if (heatmapLoaded) heatmap = await statsGetHeatmap();
+          try {
+            detailed = await statsGetDetailed();
+            if (heatmapLoaded) heatmap = await statsGetHeatmap();
+          } catch (e) {
+            await logError(`[stats] failed to refresh stats after round change: ${e}`);
+          }
         }),
         await onSettingsChanged(async (updated) => {
           const prev = {
