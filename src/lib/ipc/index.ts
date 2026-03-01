@@ -4,7 +4,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
-import type { TimerState, Settings, Theme, CustomAudioInfo } from '$lib/types';
+import type { TimerState, Settings, Theme, CustomAudioInfo, DetailedStats, HeatmapStats } from '$lib/types';
 
 // --- Timer commands ---
 
@@ -67,6 +67,14 @@ export const getLogDir = () => invoke<string>('get_log_dir');
 
 /** Return the compile-time build version string (e.g. `1.0.0-dev.80+20b2d87`). */
 export const appVersion = () => invoke<string>('app_version');
+
+// --- Stats commands ---
+
+/** Daily + weekly data + streak in one call (Today and This Week tabs). */
+export const statsGetDetailed = () => invoke<DetailedStats>('stats_get_detailed');
+
+/** Heatmap entries + lifetime totals (All Time tab). */
+export const statsGetHeatmap = () => invoke<HeatmapStats>('stats_get_heatmap');
 
 // --- Platform commands ---
 

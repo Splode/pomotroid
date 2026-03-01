@@ -331,6 +331,31 @@ pub fn stats_get_session(timer: State<'_, TimerController>) -> SessionStats {
     }
 }
 
+/// Batched stats for Today + This Week tabs (minimises IPC round-trips).
+#[tauri::command]
+pub fn stats_get_detailed(db: State<'_, DbState>) -> Result<DetailedStats, String> {
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    let today = queries::get_daily_stats(&conn).map_err(|e| e.to_string())?;
+    let week = queries::get_weekly_stats(&conn).map_err(|e| e.to_string())?;
+    let streak = queries::get_streak(&conn).map_err(|e| e.to_string())?;
+    Ok(DetailedStats { today, week, streak })
+}
+
+/// Heatmap data + lifetime totals for the All Time tab.
+#[tauri::command]
+pub fn stats_get_heatmap(db: State<'_, DbState>) -> Result<HeatmapStats, String> {
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    let entries = queries::get_heatmap_data(&conn).map_err(|e| e.to_string())?;
+    let raw = queries::get_all_time_stats(&conn).map_err(|e| e.to_string())?;
+    let streak = queries::get_streak(&conn).map_err(|e| e.to_string())?;
+    Ok(HeatmapStats {
+        entries,
+        total_rounds: raw.completed_work_sessions as u32,
+        total_hours: (raw.total_work_secs / 3600) as u32,
+        longest_streak: streak.longest,
+    })
+}
+
 // ---------------------------------------------------------------------------
 // CMD-05 — Window commands
 // ---------------------------------------------------------------------------
@@ -547,4 +572,21 @@ pub struct AllTimeStats {
 pub struct SessionStats {
     /// Work rounds completed in this session (current round_number).
     pub session_work_rounds: u32,
+}
+
+/// Batched payload for Today + This Week tabs.
+#[derive(serde::Serialize)]
+pub struct DetailedStats {
+    pub today: queries::DailyStats,
+    pub week: Vec<queries::DayStat>,
+    pub streak: queries::StreakInfo,
+}
+
+/// Payload for the All Time tab.
+#[derive(serde::Serialize)]
+pub struct HeatmapStats {
+    pub entries: Vec<queries::HeatmapEntry>,
+    pub total_rounds: u32,
+    pub total_hours: u32,
+    pub longest_streak: u32,
 }

@@ -59,3 +59,44 @@ export interface Theme {
   colors: Record<string, string>;  // keys like "--color-background", "--color-focus-round"
   is_custom: boolean;
 }
+
+// ---------------------------------------------------------------------------
+// Stats types — mirror Rust structs in commands.rs / queries.rs
+// ---------------------------------------------------------------------------
+
+export interface DailyStats {
+  rounds: number;
+  focus_mins: number;
+  completion_rate: number | null;  // null when no sessions started today
+  by_hour: number[];               // 24 entries, index = hour of day
+}
+
+export interface DayStat {
+  date: string;   // "YYYY-MM-DD"
+  rounds: number;
+}
+
+export interface HeatmapEntry {
+  date: string;   // "YYYY-MM-DD"
+  count: number;
+}
+
+export interface StreakInfo {
+  current: number;
+  longest: number;
+}
+
+/** Returned by stats_get_detailed — Today + This Week + streak in one call. */
+export interface DetailedStats {
+  today: DailyStats;
+  week: DayStat[];
+  streak: StreakInfo;
+}
+
+/** Returned by stats_get_heatmap — heatmap entries + lifetime totals. */
+export interface HeatmapStats {
+  entries: HeatmapEntry[];
+  total_rounds: number;
+  total_hours: number;
+  longest_streak: number;
+}

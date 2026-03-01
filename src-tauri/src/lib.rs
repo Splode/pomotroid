@@ -23,7 +23,7 @@ use commands::{
     notification_show,
     settings_get, settings_reset_defaults, settings_set,
     shortcuts_reload,
-    stats_get_all_time, stats_get_session,
+    stats_get_all_time, stats_get_session, stats_get_detailed, stats_get_heatmap,
     themes_list,
     timer_get_state, timer_reset, timer_restart_round, timer_skip, timer_toggle,
     window_set_visibility,
@@ -217,6 +217,8 @@ pub fn run() {
             // Stats
             stats_get_all_time,
             stats_get_session,
+            stats_get_detailed,
+            stats_get_heatmap,
             // Window
             window_set_visibility,
             // Shortcuts
