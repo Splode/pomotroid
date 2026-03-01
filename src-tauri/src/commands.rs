@@ -308,29 +308,6 @@ pub fn themes_list(app: AppHandle) -> Result<Vec<Theme>, String> {
 // CMD-04 — Stats commands
 // ---------------------------------------------------------------------------
 
-/// All-time statistics aggregated from the sessions table.
-#[tauri::command]
-pub fn stats_get_all_time(db: State<'_, DbState>) -> Result<AllTimeStats, String> {
-    let conn = db.lock().map_err(|e| e.to_string())?;
-    let raw = queries::get_all_time_stats(&conn).map_err(|e| {
-        log::error!("[stats] failed to query all-time stats: {e}");
-        e.to_string()
-    })?;
-    Ok(AllTimeStats {
-        total_work_rounds: raw.completed_work_sessions as u32,
-        total_work_minutes: (raw.total_work_secs / 60) as u32,
-    })
-}
-
-/// Current-session statistics from the timer controller.
-#[tauri::command]
-pub fn stats_get_session(timer: State<'_, TimerController>) -> SessionStats {
-    let snap = timer.get_snapshot();
-    SessionStats {
-        session_work_rounds: snap.work_round_number,
-    }
-}
-
 /// Batched stats for Today + This Week tabs (minimises IPC round-trips).
 #[tauri::command]
 pub fn stats_get_detailed(db: State<'_, DbState>) -> Result<DetailedStats, String> {
@@ -579,18 +556,6 @@ fn cue_to_stem(cue: &str) -> Result<&'static str, String> {
 // ---------------------------------------------------------------------------
 // Stats payload types
 // ---------------------------------------------------------------------------
-
-#[derive(serde::Serialize)]
-pub struct AllTimeStats {
-    pub total_work_rounds: u32,
-    pub total_work_minutes: u32,
-}
-
-#[derive(serde::Serialize)]
-pub struct SessionStats {
-    /// Work rounds completed in this session (current round_number).
-    pub session_work_rounds: u32,
-}
 
 /// Batched payload for Today + This Week tabs.
 #[derive(serde::Serialize)]

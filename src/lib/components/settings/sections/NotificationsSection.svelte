@@ -5,6 +5,7 @@
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import type { CustomAudioInfo } from '$lib/types';
   import * as m from '$paraglide/messages.js';
+  import { warn, error as logError } from '@tauri-apps/plugin-log';
 
   type CueKey = keyof CustomAudioInfo;
 
@@ -40,7 +41,7 @@
       shortBreakAlert = info.short_break_alert;
       longBreakAlert  = info.long_break_alert;
     } catch (err) {
-      console.warn('[audio] getCustomAudioInfo failed (audio unavailable?):', err);
+      await warn(`[audio] getCustomAudioInfo failed (audio unavailable?): ${err}`);
     }
   }
 
@@ -70,7 +71,7 @@
     try {
       path = await openAudioFilePicker();
     } catch (err) {
-      console.error('[audio] file picker error:', err);
+      await logError(`[audio] file picker error: ${err}`);
       return;
     }
     if (!path) return;
@@ -78,7 +79,7 @@
       const displayName = await setCustomAudio(id, path);
       setFileName(id, displayName);
     } catch (err) {
-      console.error('[audio] setCustomAudio failed:', err);
+      await logError(`[audio] setCustomAudio failed: ${err}`);
     }
   }
 
@@ -87,7 +88,7 @@
       await clearCustomAudio(id);
       setFileName(id, null);
     } catch (err) {
-      console.error('[audio] clearCustomAudio failed:', err);
+      await logError(`[audio] clearCustomAudio failed: ${err}`);
     }
   }
 </script>
