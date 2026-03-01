@@ -1,0 +1,15 @@
+{
+  "name": "Everforest",
+  "colors": {
+    "--color-long-round": "#7fbbb3",
+    "--color-short-round": "#a7c080",
+    "--color-focus-round": "#e67e80",
+    "--color-background": "#2d353b",
+    "--color-background-light": "#3d484d",
+    "--color-background-lightest": "#596a6d",
+    "--color-foreground": "#d3c6aa",
+    "--color-foreground-darker": "#9da9a0",
+    "--color-foreground-darkest": "#859289",
+    "--color-accent": "#a7c080"
+  }
+}

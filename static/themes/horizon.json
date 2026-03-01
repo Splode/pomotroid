@@ -1,0 +1,15 @@
+{
+  "name": "Horizon",
+  "colors": {
+    "--color-long-round": "#25b0bc",
+    "--color-short-round": "#09f7a0",
+    "--color-focus-round": "#e95678",
+    "--color-background": "#1c1e26",
+    "--color-background-light": "#232530",
+    "--color-background-lightest": "#2e303e",
+    "--color-foreground": "#cbced3",
+    "--color-foreground-darker": "#6c6f93",
+    "--color-foreground-darkest": "#4f5275",
+    "--color-accent": "#e95678"
+  }
+}

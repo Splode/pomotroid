@@ -1,0 +1,15 @@
+{
+  "name": "Catppuccin Frappé",
+  "colors": {
+    "--color-long-round": "#8caaee",
+    "--color-short-round": "#a6d189",
+    "--color-focus-round": "#e78284",
+    "--color-background": "#303446",
+    "--color-background-light": "#414559",
+    "--color-background-lightest": "#626880",
+    "--color-foreground": "#c6d0f5",
+    "--color-foreground-darker": "#b5bfe2",
+    "--color-foreground-darkest": "#949cbb",
+    "--color-accent": "#ca9ee6"
+  }
+}

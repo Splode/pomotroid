@@ -1,0 +1,15 @@
+{
+  "name": "Rosé Pine",
+  "colors": {
+    "--color-long-round": "#c4a7e7",
+    "--color-short-round": "#9ccfd8",
+    "--color-focus-round": "#eb6f92",
+    "--color-background": "#191724",
+    "--color-background-light": "#1f1d2e",
+    "--color-background-lightest": "#524f67",
+    "--color-foreground": "#e0def4",
+    "--color-foreground-darker": "#908caa",
+    "--color-foreground-darkest": "#6e6a86",
+    "--color-accent": "#c4a7e7"
+  }
+}

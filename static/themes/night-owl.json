@@ -1,0 +1,15 @@
+{
+  "name": "Night Owl",
+  "colors": {
+    "--color-long-round": "#82aaff",
+    "--color-short-round": "#addb67",
+    "--color-focus-round": "#ef5350",
+    "--color-background": "#011627",
+    "--color-background-light": "#0d2231",
+    "--color-background-lightest": "#1d3b53",
+    "--color-foreground": "#d6deeb",
+    "--color-foreground-darker": "#7fa3b3",
+    "--color-foreground-darkest": "#637777",
+    "--color-accent": "#c792ea"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Solarized Dark",
+  "colors": {
+    "--color-long-round": "#2aa198",
+    "--color-short-round": "#859900",
+    "--color-focus-round": "#dc322f",
+    "--color-background": "#002b36",
+    "--color-background-light": "#073642",
+    "--color-background-lightest": "#586e75",
+    "--color-foreground": "#839496",
+    "--color-foreground-darker": "#657b83",
+    "--color-foreground-darkest": "#586e75",
+    "--color-accent": "#268bd2"
+  }
+}

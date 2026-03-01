@@ -1,0 +1,15 @@
+{
+  "name": "Panda",
+  "colors": {
+    "--color-long-round": "#6fc1ff",
+    "--color-short-round": "#19f9d8",
+    "--color-focus-round": "#ff2c6d",
+    "--color-background": "#292a2b",
+    "--color-background-light": "#333434",
+    "--color-background-lightest": "#676b79",
+    "--color-foreground": "#e6e6e6",
+    "--color-foreground-darker": "#b3b3b3",
+    "--color-foreground-darkest": "#676b79",
+    "--color-accent": "#19f9d8"
+  }
+}
