@@ -70,6 +70,16 @@ const MIGRATION_4: &str = "
     INSERT INTO schema_version VALUES (4);
 ";
 
+/// Switches the default light theme from 'Pomotroid' to 'Pomotroid Light'.
+/// Only updates users who still have the old default — custom selections are
+/// left untouched.
+const MIGRATION_5: &str = "
+    UPDATE settings SET value = 'Pomotroid Light'
+        WHERE key = 'theme_light' AND value = 'Pomotroid';
+
+    INSERT INTO schema_version VALUES (5);
+";
+
 /// Apply any pending migrations. Each migration is wrapped in a transaction
 /// so a partial failure leaves the database unchanged.
 pub fn run(conn: &Connection) -> Result<()> {
@@ -89,6 +99,10 @@ pub fn run(conn: &Connection) -> Result<()> {
 
     if version < 4 {
         conn.execute_batch(&format!("BEGIN; {MIGRATION_4} COMMIT;"))?;
+    }
+
+    if version < 5 {
+        conn.execute_batch(&format!("BEGIN; {MIGRATION_5} COMMIT;"))?;
     }
 
     Ok(())
@@ -126,7 +140,7 @@ mod tests {
         let v: i64 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(v, 4);
+        assert_eq!(v, 5);
     }
 
     #[test]
