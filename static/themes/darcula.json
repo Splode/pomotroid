@@ -1,0 +1,15 @@
+{
+  "name": "Darcula",
+  "colors": {
+    "--color-long-round": "#6897bb",
+    "--color-short-round": "#6a8759",
+    "--color-focus-round": "#c75450",
+    "--color-background": "#2b2b2b",
+    "--color-background-light": "#313335",
+    "--color-background-lightest": "#4e5254",
+    "--color-foreground": "#a9b7c6",
+    "--color-foreground-darker": "#808080",
+    "--color-foreground-darkest": "#5c5f61",
+    "--color-accent": "#ffc66d"
+  }
+}

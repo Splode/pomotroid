@@ -1,0 +1,15 @@
+{
+  "name": "Material Palenight",
+  "colors": {
+    "--color-long-round": "#82aaff",
+    "--color-short-round": "#c3e88d",
+    "--color-focus-round": "#f07178",
+    "--color-background": "#292d3e",
+    "--color-background-light": "#33374e",
+    "--color-background-lightest": "#4e5579",
+    "--color-foreground": "#a6accd",
+    "--color-foreground-darker": "#676e95",
+    "--color-foreground-darkest": "#4e5579",
+    "--color-accent": "#c792ea"
+  }
+}

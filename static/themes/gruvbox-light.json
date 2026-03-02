@@ -1,0 +1,15 @@
+{
+  "name": "Gruvbox Light",
+  "colors": {
+    "--color-long-round": "#076678",
+    "--color-short-round": "#79740e",
+    "--color-focus-round": "#9d0006",
+    "--color-background": "#fbf1c7",
+    "--color-background-light": "#ebdbb2",
+    "--color-background-lightest": "#bdae93",
+    "--color-foreground": "#3c3836",
+    "--color-foreground-darker": "#665c54",
+    "--color-foreground-darkest": "#928374",
+    "--color-accent": "#b57614"
+  }
+}

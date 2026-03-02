@@ -1,0 +1,15 @@
+{
+  "name": "Pomotroid Light",
+  "colors": {
+    "--color-long-round": "#6aaec4",
+    "--color-short-round": "#3a7d58",
+    "--color-focus-round": "#c84840",
+    "--color-background": "#f5f0e8",
+    "--color-background-light": "#ede6db",
+    "--color-background-lightest": "#c4bdb5",
+    "--color-foreground": "#2f384b",
+    "--color-foreground-darker": "#55647a",
+    "--color-foreground-darkest": "#8899b0",
+    "--color-accent": "#3a7d58"
+  }
+}

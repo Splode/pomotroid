@@ -1,0 +1,15 @@
+{
+  "name": "Kanagawa",
+  "colors": {
+    "--color-long-round": "#7e9cd8",
+    "--color-short-round": "#76946a",
+    "--color-focus-round": "#c34043",
+    "--color-background": "#1f1f28",
+    "--color-background-light": "#2a2a37",
+    "--color-background-lightest": "#54546d",
+    "--color-foreground": "#dcd7ba",
+    "--color-foreground-darker": "#c8c093",
+    "--color-foreground-darkest": "#727169",
+    "--color-accent": "#957fb8"
+  }
+}

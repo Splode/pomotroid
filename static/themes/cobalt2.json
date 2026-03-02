@@ -1,0 +1,15 @@
+{
+  "name": "Cobalt2",
+  "colors": {
+    "--color-long-round": "#80fcff",
+    "--color-short-round": "#3ad900",
+    "--color-focus-round": "#ff3600",
+    "--color-background": "#193549",
+    "--color-background-light": "#1f4662",
+    "--color-background-lightest": "#2a5f8f",
+    "--color-foreground": "#b0d9fb",
+    "--color-foreground-darker": "#7ab3d9",
+    "--color-foreground-darkest": "#4e8ab5",
+    "--color-accent": "#ff9d00"
+  }
+}

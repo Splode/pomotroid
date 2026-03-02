@@ -1,0 +1,15 @@
+{
+  "name": "Monokai Pro",
+  "colors": {
+    "--color-long-round": "#78dce8",
+    "--color-short-round": "#a9dc76",
+    "--color-focus-round": "#ff6188",
+    "--color-background": "#2d2a2e",
+    "--color-background-light": "#403e41",
+    "--color-background-lightest": "#5b595c",
+    "--color-foreground": "#fcfcfa",
+    "--color-foreground-darker": "#939293",
+    "--color-foreground-darkest": "#727072",
+    "--color-accent": "#ffd866"
+  }
+}
