@@ -1,33 +1,103 @@
 
-<a name="v1.0.0"></a>
-## [v1.0.0](https://github.com/Splode/pomotroid/releases/tag/v1.0.0)
-
-> 2026-02-21
+[Unreleased]
+-----------
 
 ### Complete Rewrite — Electron → Tauri 2 + Rust + Svelte 5
 
-This release replaces the previous Electron + Vue.js stack with a fully native Tauri 2 application.
+Pomotroid has been rebuilt from the ground up. The Electron + Vue.js stack has been replaced with a fully native Tauri 2 application backed by Rust and a Svelte 5 frontend, resulting in a drastically smaller footprint, faster startup, and no Chromium dependency.
 
-### Highlights
+### Timer
 
-* **Tauri 2 + Rust backend** — drastically reduced bundle size and memory footprint compared to Electron
-* **Svelte 5 frontend** — modern reactive UI using Svelte 5 runes
-* **SQLite settings and session storage** — persistent settings and all-time session statistics via embedded SQLite (WAL mode)
-* **Drift-correcting timer engine** — pure Rust timer thread with `Instant`-based scheduling; eliminates cumulative drift
-* **Rust audio engine** (`rodio`) — guaranteed sound playback even when the window is hidden to the system tray
-* **Dynamic tray icon** (`tiny-skia`) — arc rendering reflects timer progress and round type in real time
-* **Custom theme hot-reload** (`notify` crate) — drop a JSON theme into the custom themes folder; applied instantly without restart
-* **WebSocket server** (opt-in, default off) — external integrations and stream overlays via `ws://127.0.0.1:<port>`
-* **Global shortcuts** — Ctrl+F1 / F2 / F3 defaults; fully configurable; work even when the window is hidden
-* **Desktop notifications** — native OS notifications on round transitions via `tauri-plugin-notification`
-* **Sleep / wake handling** — timer pauses on OS sleep and resumes from the correct position on wake
-* **All 17 built-in themes** preserved from the previous release
-* **Custom theme format unchanged** — existing theme files are fully compatible
+* **Drift-correcting engine** — Rust timer thread uses `std::time::Instant` with a fixed tick schedule; eliminates the cumulative drift that plagued the web-worker approach
+* **Sleep / wake handling** — timer pauses automatically on OS sleep and resumes from the correct position on wake; no missed rounds
+* **Round sequencing** — configurable work / short-break / long-break cycle with independent auto-start per round type
+* **Skip and round reset** — skip to the next round or restart only the current round at any time, regardless of timer state
+* **Session recording** — every completed round is written to SQLite with type, duration, and completion status
+
+### Statistics
+
+* **Dedicated stats window** with three tabs:
+  * **Today** — work and break round counts, total focus time, hourly breakdown chart
+  * **This Week** — daily bar chart for the past seven days, current consecutive-day streak
+  * **All Time** — 52-week heatmap (GitHub-style contribution calendar), lifetime session totals
+* Charts use pure SVG; no external charting library
+* Chart and heatmap colours are derived from the active theme
+* Stats update live when a round completes — no manual refresh needed
+
+### Themes & Appearance
+
+* **37 bundled themes** including Pomotroid (dark), Pomotroid Light, Dracula, Nord, Tokyo Night, Gruvbox, Solarized, GitHub, One Dark, Rose Piné (3 variants), Catppuccin (4 variants), Synthwave, Ayu, Everforest, Kanagawa, Monokai, Night Owl, and more
+* **Auto light / dark mode** — follows the OS `prefers-color-scheme` preference automatically; separate theme pickers for light and dark
+* **Custom theme hot-reload** — drop a JSON theme file into the user themes folder and it appears instantly without a restart
+* Theme colours propagate throughout the full UI and into the tray icon arc
+
+### Localization
+
+* **7 languages** — English, Spanish, French, German, Japanese, Chinese (Simplified), and Portuguese
+* Auto-detects OS language on first launch; can be overridden manually in Settings
+* All UI strings, settings labels, and notification messages are translated
+* Locale-aware date and time formatting throughout (Intl.DateTimeFormat, reactive to language changes)
+* Built with Paraglide JS v2 — compile-time, type-safe, tree-shakable message functions
+
+### Audio
+
+* **Configurable alert cues** for work rounds, short breaks, and long breaks
+* **Custom audio** — replace any of the three alert cues with your own file via a file picker
+* **Tick sounds** — independently toggleable for work and break rounds
+* **Volume control** — global volume slider (0–100)
+* All audio runs on a dedicated thread via `rodio`; playback is guaranteed even when the window is hidden to the tray
+
+### System Tray
+
+* **Dynamic tray icon** — a progress arc rendered with `tiny-skia` sweeps clockwise from 12 o'clock, coloured by round type (work / short break / long break)
+* **Countdown mode** — optional inverted arc that fills from full to empty instead of empty to full
+* **Pause indicator** — two vertical bars drawn over the icon when the timer is paused
+* **Tray menu** — Show and Exit actions; left-clicking the icon toggles window visibility
+* **Minimise to tray** and **close to tray** are independently configurable
+
+### Global Shortcuts
+
+* **Four actions** — toggle (start / pause / resume), reset, skip, restart round
+* **Platform defaults** — `Control+F1–F4` on Windows and Linux; `Command+Shift+1–4` on macOS
+* Fully rebindable in Settings; supports modifier combinations and function keys
+* Shortcuts work when the window is hidden to the tray
+
+### macOS
+
+* **Global shortcuts via Accessibility** — shortcuts use the macOS Accessibility API; a contextual notice in Settings guides through granting permission with a direct link to System Settings
+* **Native window style** — overlay titlebar with macOS-native traffic-light controls
+* **Platform-aware defaults** — tray settings hidden on macOS where they are not applicable; shortcut defaults use Command instead of Control
+
+### Desktop Notifications
+
+* Native OS notifications on round completion via `tauri-plugin-notification`
+* Linux uses `notify-send` (libnotify) to avoid D-Bus session bus conflicts
+* Notifications include round type and duration
+
+### WebSocket Integration
+
+* **Opt-in local WebSocket server** (default off) for stream overlays and external integrations
+* Listens on `ws://127.0.0.1:<port>` (localhost only); default port 1314
+* Broadcasts `roundChange` events with full timer state; clients can query current state with `getState`
+* Port is configurable; enable / disable at runtime from Settings → Advanced
+
+### Diagnostics & Logging
+
+* **Rotating log file** written to the OS log directory (5 MB max, keeps one backup)
+* Structured log entries for all major events — timer state changes, settings loads, audio playback, shortcut registration, round completions
+* Panics are captured to the log before the process terminates
+* **Verbose logging** toggle in Settings → Advanced switches between INFO and DEBUG level
+* **Open Log Folder** button in Settings → About for quick access
+
+### Settings
+
+26 configurable values across seven sections — Timer, Appearance, Notifications, Audio, Shortcuts, Advanced, and About. All settings are persisted to SQLite and take effect immediately without a restart (except WebSocket port).
 
 ### Breaking Changes
 
-* Settings are no longer stored in `user-preferences.json`. Preferences are reset to defaults on first launch. _(OQ-7: deliberate decision to start fresh; see PROPOSAL.md)_
-* The minimum OS requirement follows Tauri 2 system minimums (Windows 10+, macOS 10.13+, major Linux distributions with GTK 3.24+).
+* Settings are no longer stored in `user-preferences.json`. All preferences reset to defaults on first launch after upgrading from v0.x.
+* The minimum OS requirement follows Tauri 2 system minimums: Windows 10+, macOS 10.13+, Linux with GTK 3.24+.
+* Custom theme JSON files from v0.x are fully compatible — no changes needed.
 
 ---
 
