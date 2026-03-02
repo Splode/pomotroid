@@ -1,5 +1,5 @@
 
-[Unreleased]
+[v1.0.0] - 2026-03-02
 -----------
 
 ### Complete Rewrite — Electron → Tauri 2 + Rust + Svelte 5
