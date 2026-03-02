@@ -42,7 +42,8 @@ jobs:
             libayatana-appindicator3-dev \
             librsvg2-dev \
             patchelf \
-            libasound2-dev
+            libasound2-dev \
+            rpm
 
       - name: Install npm dependencies
         run: npm ci
@@ -60,7 +61,7 @@ jobs:
         run: cargo test --manifest-path src-tauri/Cargo.toml
 
       - name: Build (release)
-        run: npm run tauri build -- --bundles deb,appimage
+        run: npm run tauri build -- --bundles deb,appimage,rpm
         env:
           CI: true
 
@@ -71,6 +72,7 @@ jobs:
           path: |
             src-tauri/target/release/bundle/deb/*.deb
             src-tauri/target/release/bundle/appimage/*.AppImage
+            src-tauri/target/release/bundle/rpm/*.rpm
           if-no-files-found: error
 
   build-macos:
