@@ -72,6 +72,23 @@ cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
 
 All three must pass before submitting a pull request. The CI pipeline runs them automatically.
 
+### Seeding test data
+
+To populate the statistics views with realistic historical data, use the seed script (requires Python 3, no extra dependencies):
+
+```bash
+# Preview what would be inserted — no database changes
+python3 scripts/seed-db.py --dry-run
+
+# Seed ~2 years of session history (default)
+python3 scripts/seed-db.py
+
+# Seed 1 year and wipe any existing sessions first
+python3 scripts/seed-db.py --days 365 --clear
+```
+
+The database must exist before seeding — launch Pomotroid at least once to create it. The script resolves the platform-specific app-data path automatically; pass `--db PATH` to override.
+
 ---
 
 ## Project Structure
