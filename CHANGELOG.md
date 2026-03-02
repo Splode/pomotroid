@@ -1,4 +1,7 @@
 
+[Unreleased]
+-----------
+
 [v1.0.0] - 2026-03-02
 -----------
 
@@ -503,4 +506,3 @@ Pomotroid has been rebuilt from the ground up. The Electron + Vue.js stack has b
 ## v0.1.0
 
 > 2018-01-30
-
