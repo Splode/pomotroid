@@ -11,6 +11,7 @@
 
 - [Overview](#overview)
 - [Features](#features)
+- [Statistics](#statistics)
 - [Themes](#themes)
 - [Install](#install)
 - [WebSocket API](#websocket-api)
@@ -40,6 +41,14 @@ Built with [Tauri 2](https://tauri.app), [Rust](https://www.rust-lang.org), and 
 - **Always on top** — optionally keep the timer above other windows
 - **WebSocket server** — opt-in local server for stream overlays and external integrations
 - **Diagnostic logging** — rotating log file with a one-click shortcut to the log folder
+
+## Statistics
+
+Pomotroid tracks every completed session and surfaces the data across three views: a daily summary with an hourly breakdown, a weekly bar chart with streak tracking, and an all-time 52-week heatmap.
+
+<div align="center">
+  <img alt="Pomotroid statistics window" src=".github/images/pomotroid-stats.png" width="800px">
+</div>
 
 ## Themes
 
