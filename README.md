@@ -45,7 +45,7 @@ Built with [Tauri 2](https://tauri.app), [Rust](https://www.rust-lang.org), and 
 
 Pomotroid ships with 37 themes and supports fully custom themes with live hot-reload.
 
-![Screenshots of Pomotroid using various themes](./.github/images/pomotroid_themes-preview--914x219.png)
+![Screenshots of Pomotroid using various themes](.github/images/pomotroid-themes-preview.png)
 
 See [THEMES.md](./THEMES.md) for the full theme list and instructions on creating your own.
 
