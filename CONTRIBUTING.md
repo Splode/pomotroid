@@ -140,7 +140,7 @@ Custom user themes (placed in the app data `themes/` folder) are discovered at r
 
 The app uses [Inlang + Paraglide](https://inlang.com) for translations. Adding a language requires two files to be touched, then a rebuild.
 
-1. **Create the message file** at `messages/{locale}.json`. Copy `messages/en.json` as a starting point and translate all values — do not change any keys.
+1. **Create the message file** at `src/messages/{locale}.json`. Copy `src/messages/en.json` as a starting point and translate all values — do not change any keys.
 
 2. **Register the locale** by adding it to the `locales` array in `project.inlang/settings.json`:
    ```json
