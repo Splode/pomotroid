@@ -35,7 +35,7 @@ tokio = { version = "1", features = ["full"] }
 axum = { version = "0.8", features = ["ws"] }
 futures-util = "0.3"
 
-rodio = { version = "0.17", default-features = false, features = ["wav", "mp3", "vorbis"] }
+rodio = { version = "0.22", default-features = false, features = ["wav", "mp3", "vorbis"] }
 tiny-skia = "0.12"
 notify = "8"
 
