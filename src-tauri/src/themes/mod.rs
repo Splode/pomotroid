@@ -67,14 +67,16 @@ const BUNDLED_JSON: &[&str] = &[
 /// Parse all bundled theme JSON strings. Panics at startup if any are malformed
 /// (a compile-time-like assertion that the shipped assets are valid).
 pub fn load_bundled() -> Vec<Theme> {
-    BUNDLED_JSON
+    let themes: Vec<Theme> = BUNDLED_JSON
         .iter()
         .filter_map(|raw| {
             serde_json::from_str::<serde_json::Value>(raw)
                 .ok()
                 .and_then(|v| parse_theme_value(v, false))
         })
-        .collect()
+        .collect();
+    log::debug!("[themes] loaded {} bundled themes", themes.len());
+    themes
 }
 
 // ---------------------------------------------------------------------------
@@ -88,17 +90,29 @@ pub fn load_custom(themes_dir: &Path) -> Vec<Theme> {
         return Vec::new();
     };
 
-    entries
-        .filter_map(|entry| {
-            let path = entry.ok()?.path();
-            if path.extension()?.to_str()? != "json" {
-                return None;
+    let mut themes = Vec::new();
+    for entry in entries.filter_map(|e| e.ok()) {
+        let path = entry.path();
+        if path.extension().and_then(|e| e.to_str()) != Some("json") {
+            continue;
+        }
+        let raw = match std::fs::read_to_string(&path) {
+            Ok(r) => r,
+            Err(e) => { log::warn!("[themes] cannot read {path:?}: {e}"); continue; }
+        };
+        let value = match serde_json::from_str::<serde_json::Value>(&raw) {
+            Ok(v) => v,
+            Err(e) => { log::warn!("[themes] invalid JSON in {path:?}: {e}"); continue; }
+        };
+        match parse_theme_value(value, true) {
+            Some(t) => {
+                log::debug!("[themes] loaded custom theme: {}", t.name);
+                themes.push(t);
             }
-            let raw = std::fs::read_to_string(&path).ok()?;
-            let value = serde_json::from_str::<serde_json::Value>(&raw).ok()?;
-            parse_theme_value(value, true)
-        })
-        .collect()
+            None => log::warn!("[themes] missing required fields in {path:?}"),
+        }
+    }
+    themes
 }
 
 /// Return all themes: bundled first, then custom. Custom themes with the same
@@ -106,6 +120,7 @@ pub fn load_custom(themes_dir: &Path) -> Vec<Theme> {
 pub fn list_all(app_data_dir: &Path) -> Vec<Theme> {
     let mut themes = load_bundled();
     let custom = load_custom(&app_data_dir.join("themes"));
+    let custom_count = custom.len();
 
     for custom_theme in custom {
         // Replace built-in with same name, or append.
@@ -116,6 +131,7 @@ pub fn list_all(app_data_dir: &Path) -> Vec<Theme> {
         }
     }
 
+    log::info!("[themes] available: {} total ({} custom)", themes.len(), custom_count);
     themes
 }
 

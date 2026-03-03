@@ -131,6 +131,7 @@ async fn ws_handler(
 }
 
 async fn handle_socket(socket: WebSocket, state: ServerState) {
+    log::debug!("[ws] client connected");
     let (mut sender, mut receiver) = socket.split();
     let mut rx = state.broadcast_tx.subscribe();
 
@@ -167,6 +168,7 @@ async fn handle_socket(socket: WebSocket, state: ServerState) {
         _ = &mut send_task => recv_task.abort(),
         _ = &mut recv_task => send_task.abort(),
     }
+    log::debug!("[ws] client disconnected");
 }
 
 async fn handle_client_message(

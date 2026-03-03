@@ -128,6 +128,7 @@ pub fn seed_defaults(conn: &Connection) -> Result<()> {
             params![key, value],
         )?;
     }
+    log::debug!("[settings] defaults seeded");
     Ok(())
 }
 
@@ -140,6 +141,7 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         .filter_map(|r| r.ok())
         .collect();
 
+    log::debug!("[settings] loaded {} keys from db", map.len());
     let d = Settings::default();
     Ok(Settings {
         always_on_top: parse_bool(&map, "always_on_top", d.always_on_top),
@@ -170,10 +172,10 @@ pub fn load(conn: &Connection) -> Result<Settings> {
             "tick_sounds_break",
             d.tick_sounds_during_break,
         ),
-        // DB stores minutes; expose seconds to the frontend and timer engine.
-        time_work_secs: parse_u32(&map, "time_work_mins", d.time_work_secs / 60) * 60,
-        time_short_break_secs: parse_u32(&map, "time_short_break_mins", d.time_short_break_secs / 60) * 60,
-        time_long_break_secs: parse_u32(&map, "time_long_break_mins", d.time_long_break_secs / 60) * 60,
+        // DB stores seconds directly (since MIGRATION_2).
+        time_work_secs: parse_u32(&map, "time_work_secs", d.time_work_secs),
+        time_short_break_secs: parse_u32(&map, "time_short_break_secs", d.time_short_break_secs),
+        time_long_break_secs: parse_u32(&map, "time_long_break_secs", d.time_long_break_secs),
         // DB stores 0–100; convert to 0.0–1.0.
         volume: (parse_u32(&map, "volume", (d.volume * 100.0) as u32) as f32 / 100.0)
             .clamp(0.0, 1.0),
@@ -308,9 +310,18 @@ mod tests {
     fn save_and_reload_time() {
         let conn = setup();
         seed_defaults(&conn).unwrap();
-        save_setting(&conn, "time_work_mins", "30").unwrap();
+        save_setting(&conn, "time_work_secs", "1800").unwrap();
         let s = load(&conn).unwrap();
-        assert_eq!(s.time_work_secs, 30 * 60);
+        assert_eq!(s.time_work_secs, 1800);
+    }
+
+    #[test]
+    fn save_and_reload_sub_minute_time() {
+        let conn = setup();
+        seed_defaults(&conn).unwrap();
+        save_setting(&conn, "time_work_secs", "339").unwrap();
+        let s = load(&conn).unwrap();
+        assert_eq!(s.time_work_secs, 339);
     }
 
     #[test]
@@ -326,8 +337,8 @@ mod tests {
         // Mutate several settings (timer-related and others).
         let conn = setup();
         seed_defaults(&conn).unwrap();
-        save_setting(&conn, "time_work_mins", "45").unwrap();
-        save_setting(&conn, "time_short_break_mins", "10").unwrap();
+        save_setting(&conn, "time_work_secs", "2700").unwrap();
+        save_setting(&conn, "time_short_break_secs", "600").unwrap();
         save_setting(&conn, "work_rounds", "8").unwrap();
         save_setting(&conn, "always_on_top", "true").unwrap();
 
@@ -342,6 +353,35 @@ mod tests {
         assert_eq!(s.long_break_interval, 4, "work rounds must reset to 4");
         // Non-timer settings are also wiped and reseeded to their defaults.
         assert!(!s.always_on_top, "always_on_top must reset to default false");
+    }
+
+    #[test]
+    fn migration_2_converts_mins_to_secs_and_removes_old_keys() {
+        // Simulate a pre-migration DB: schema version 1, `*_mins` keys present.
+        let conn = Connection::open_in_memory().unwrap();
+        // Run only migration 1 manually to get v1 state.
+        conn.execute_batch("BEGIN; CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL); INSERT INTO schema_version VALUES (1); COMMIT;").unwrap();
+        conn.execute("INSERT INTO settings (key, value) VALUES ('time_work_mins', '30')", []).unwrap();
+        conn.execute("INSERT INTO settings (key, value) VALUES ('time_short_break_mins', '7')", []).unwrap();
+        conn.execute("INSERT INTO settings (key, value) VALUES ('time_long_break_mins', '20')", []).unwrap();
+
+        // Now run the full migration suite — only MIGRATION_2 should fire.
+        crate::db::migrations::run(&conn).unwrap();
+
+        // New keys must exist with correct second values.
+        let work: String = conn.query_row("SELECT value FROM settings WHERE key = 'time_work_secs'", [], |r| r.get(0)).unwrap();
+        assert_eq!(work, "1800");
+        let short: String = conn.query_row("SELECT value FROM settings WHERE key = 'time_short_break_secs'", [], |r| r.get(0)).unwrap();
+        assert_eq!(short, "420");
+        let long: String = conn.query_row("SELECT value FROM settings WHERE key = 'time_long_break_secs'", [], |r| r.get(0)).unwrap();
+        assert_eq!(long, "1200");
+
+        // Old keys must be gone.
+        let old_count: i64 = conn.query_row(
+            "SELECT COUNT(*) FROM settings WHERE key LIKE '%_mins'",
+            [], |r| r.get(0),
+        ).unwrap();
+        assert_eq!(old_count, 0, "old *_mins keys must be absent after MIGRATION_2");
     }
 
     #[test]

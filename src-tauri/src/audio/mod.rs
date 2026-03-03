@@ -103,6 +103,7 @@ impl AudioManager {
             .spawn(move || audio_thread(rx))
             .ok()?;
 
+        log::info!("[audio] initialized: volume={:.0}%", initial.volume * 100.0);
         Some(Arc::new(Self {
             tx,
             settings: Arc::new(Mutex::new(AudioSettings::from(initial))),
@@ -215,7 +216,10 @@ pub fn find_custom_files(audio_dir: &Path) -> CustomAudioPaths {
 fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
     // MixerDeviceSink must stay alive for the lifetime of this thread.
     let device_sink = match DeviceSinkBuilder::open_default_sink() {
-        Ok(s) => s,
+        Ok(s) => {
+            log::info!("[audio] output stream opened");
+            s
+        }
         Err(e) => {
             log::warn!("[audio] failed to open output stream: {e}");
             return;

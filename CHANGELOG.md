@@ -2,6 +2,18 @@
 [Unreleased]
 -----------
 
+### Settings
+
+* **Keyboard entry for timer durations** — the time badge next to each timer slider in Settings → Timer is now an editable field. Enter any duration in `MM:SS` format (e.g. `5:39`) or as a bare integer in minutes (e.g. `25`). Values are clamped to the supported range of `1:00`–`90:00`. Commit with Enter or blur; Escape reverts. The slider continues to work for whole-minute adjustments.
+
+### Timer
+
+* **Sub-minute timer durations** — timer durations are now stored in whole seconds, enabling any duration within the 1:00–90:00 range rather than whole minutes only. Existing settings are migrated automatically.
+
+### Statistics
+
+* **Focus time rounds to nearest minute** — daily focus time in the Statistics view is now rounded to the nearest minute rather than truncated (e.g. a 5:39 session counts as 6 m, not 5 m).
+
 ### Linux
 
 * **RPM package** — `.rpm` bundle now built and distributed alongside `.deb` and `.AppImage`, targeting Fedora, RHEL, openSUSE, and derivatives
