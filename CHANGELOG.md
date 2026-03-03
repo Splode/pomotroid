@@ -18,6 +18,10 @@
 
 * **Focus time rounds to nearest minute** — daily focus time in the Statistics view is now rounded to the nearest minute rather than truncated (e.g. a 5:39 session counts as 6 m, not 5 m).
 
+### Appearance
+
+* **Updated app icon** — refreshed application icon across all platforms and sizes; removed unused legacy icon variants
+
 ### Linux
 
 * **RPM package** — `.rpm` bundle now built and distributed alongside `.deb` and `.AppImage`, targeting Fedora, RHEL, openSUSE, and derivatives
