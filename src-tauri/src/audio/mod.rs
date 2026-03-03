@@ -18,7 +18,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc;
 
-use rodio::{Decoder, OutputStream, Sink};
+use rodio::{Decoder, DeviceSinkBuilder, Player};
 
 use crate::settings::Settings;
 
@@ -213,9 +213,9 @@ pub fn find_custom_files(audio_dir: &Path) -> CustomAudioPaths {
 // ---------------------------------------------------------------------------
 
 fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
-    // OutputStream must stay alive for the lifetime of this thread.
-    let (_stream, handle) = match OutputStream::try_default() {
-        Ok(pair) => pair,
+    // MixerDeviceSink must stay alive for the lifetime of this thread.
+    let device_sink = match DeviceSinkBuilder::open_default_sink() {
+        Ok(s) => s,
         Err(e) => {
             log::warn!("[audio] failed to open output stream: {e}");
             return;
@@ -223,17 +223,14 @@ fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
     };
 
     while let Ok(req) = rx.recv() {
-        let sink = match Sink::try_new(&handle) {
-            Ok(s) => s,
-            Err(e) => { log::warn!("[audio] sink error: {e}"); continue; }
-        };
-        sink.set_volume(req.volume);
+        let player = Player::connect_new(device_sink.mixer());
+        player.set_volume(req.volume);
 
         // Try the custom file first; fall back to the embedded asset on any error.
         let used_custom = if let Some(path) = req.custom_path {
             match std::fs::File::open(&path).map(std::io::BufReader::new) {
                 Ok(reader) => match Decoder::new(reader) {
-                    Ok(source) => { sink.append(source); true }
+                    Ok(source) => { player.append(source); true }
                     Err(e) => {
                         log::warn!("[audio] decode error for {path:?}: {e}");
                         false
@@ -256,12 +253,12 @@ fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
                 AudioCue::Tick => TICK,
             };
             match Decoder::new(Cursor::new(bytes)) {
-                Ok(source) => sink.append(source),
+                Ok(source) => player.append(source),
                 Err(e) => log::warn!("[audio] embedded decode error: {e}"),
             }
         }
 
-        sink.detach(); // let it finish without blocking
+        player.detach(); // let it finish without blocking
     }
 }
 
