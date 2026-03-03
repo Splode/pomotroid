@@ -2,6 +2,12 @@
 [Unreleased]
 -----------
 
+### Linux
+
+* **RPM package** — `.rpm` bundle now built and distributed alongside `.deb` and `.AppImage`, targeting Fedora, RHEL, openSUSE, and derivatives
+
+---
+
 [v1.0.0] - 2026-03-02
 -----------
 
