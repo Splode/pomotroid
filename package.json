@@ -21,7 +21,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@inlang/paraglide-js": "^2.13.0",
+    "@inlang/paraglide-js": "^2.13.1",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2.6.0",
     "@tauri-apps/plugin-log": "^2.8.0",
@@ -31,12 +31,12 @@
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.6",
     "@sveltejs/kit": "^2.9.0",
-    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@tauri-apps/cli": "^2",
     "@types/node": "^25.3.3",
     "svelte": "^5.53.6",
-    "svelte-check": "^4.0.0",
+    "svelte-check": "^4.4.4",
     "typescript": "~5.9.3",
-    "vite": "^6.0.3"
+    "vite": "^7.3.1"
   }
 }
