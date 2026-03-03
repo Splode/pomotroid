@@ -21,7 +21,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@inlang/paraglide-js": "^2.13.0",
+    "@inlang/paraglide-js": "^2.13.1",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-dialog": "^2.6.0",
     "@tauri-apps/plugin-log": "^2.8.0",
