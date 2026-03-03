@@ -158,7 +158,7 @@ pub fn get_daily_stats(conn: &Connection) -> Result<DailyStats> {
 
     Ok(DailyStats {
         rounds: completed as u32,
-        focus_mins: (focus_secs / 60) as u32,
+        focus_mins: ((focus_secs + 30) / 60) as u32,
         completion_rate: if total > 0 { Some(completed as f32 / total as f32) } else { None },
         by_hour,
     })
@@ -395,6 +395,31 @@ mod tests {
         let conn = setup();
         let entries = get_heatmap_data(&conn).unwrap();
         assert!(entries.is_empty());
+    }
+
+    #[test]
+    fn focus_mins_rounds_to_nearest_minute() {
+        let conn = setup();
+
+        // 339 s = 5:39 → rounds up to 6 min (remainder 39 ≥ 30).
+        let id1 = insert_session(&conn, "work", 339).unwrap();
+        complete_session(&conn, id1, true).unwrap();
+        let stats = get_daily_stats(&conn).unwrap();
+        assert_eq!(stats.focus_mins, 6, "339 s should round to 6 min");
+
+        // Reset and test round-down: 324 s = 5:24 → rounds down to 5 min (remainder 24 < 30).
+        let conn2 = setup();
+        let id2 = insert_session(&conn2, "work", 324).unwrap();
+        complete_session(&conn2, id2, true).unwrap();
+        let stats2 = get_daily_stats(&conn2).unwrap();
+        assert_eq!(stats2.focus_mins, 5, "324 s should round to 5 min");
+
+        // Exact minute boundary: 1500 s = 25:00 → stays 25 min.
+        let conn3 = setup();
+        let id3 = insert_session(&conn3, "work", 1500).unwrap();
+        complete_session(&conn3, id3, true).unwrap();
+        let stats3 = get_daily_stats(&conn3).unwrap();
+        assert_eq!(stats3.focus_mins, 25, "1500 s should be exactly 25 min");
     }
 
     #[test]

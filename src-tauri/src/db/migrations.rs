@@ -33,6 +33,24 @@ const MIGRATION_1: &str = "
     INSERT INTO schema_version VALUES (1);
 ";
 
+/// Migrates timer duration storage from minute-resolution keys to second-resolution keys.
+/// Reads existing `time_*_mins` rows, multiplies by 60, writes `time_*_secs`, then deletes
+/// the old keys so key names align with the Settings struct field names.
+const MIGRATION_2: &str = "
+    INSERT OR IGNORE INTO settings (key, value)
+        SELECT 'time_work_secs', CAST(CAST(value AS INTEGER) * 60 AS TEXT)
+          FROM settings WHERE key = 'time_work_mins';
+    INSERT OR IGNORE INTO settings (key, value)
+        SELECT 'time_short_break_secs', CAST(CAST(value AS INTEGER) * 60 AS TEXT)
+          FROM settings WHERE key = 'time_short_break_mins';
+    INSERT OR IGNORE INTO settings (key, value)
+        SELECT 'time_long_break_secs', CAST(CAST(value AS INTEGER) * 60 AS TEXT)
+          FROM settings WHERE key = 'time_long_break_mins';
+    DELETE FROM settings WHERE key IN
+        ('time_work_mins', 'time_short_break_mins', 'time_long_break_mins');
+    INSERT INTO schema_version VALUES (2);
+";
+
 /// Apply any pending migrations. Each migration is wrapped in a transaction
 /// so a partial failure leaves the database unchanged.
 pub fn run(conn: &Connection) -> Result<()> {
@@ -40,6 +58,10 @@ pub fn run(conn: &Connection) -> Result<()> {
 
     if version < 1 {
         conn.execute_batch(&format!("BEGIN; {MIGRATION_1} COMMIT;"))?;
+    }
+
+    if version < 2 {
+        conn.execute_batch(&format!("BEGIN; {MIGRATION_2} COMMIT;"))?;
     }
 
     Ok(())
@@ -77,7 +99,7 @@ mod tests {
         let v: i64 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(v, 1);
+        assert_eq!(v, 2);
     }
 
     #[test]
