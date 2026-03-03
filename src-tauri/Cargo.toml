@@ -26,7 +26,7 @@ tauri-plugin-notification = "2"
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-dialog = "2"
 
-rusqlite = { version = "0.31", features = ["bundled"] }
+rusqlite = { version = "0.38", features = ["bundled"] }
 
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
