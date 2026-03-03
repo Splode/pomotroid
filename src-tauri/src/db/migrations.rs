@@ -57,11 +57,15 @@ pub fn run(conn: &Connection) -> Result<()> {
     let version = current_version(conn)?;
 
     if version < 1 {
+        log::info!("[db/migrations] applying MIGRATION_1: initial schema");
         conn.execute_batch(&format!("BEGIN; {MIGRATION_1} COMMIT;"))?;
+        log::info!("[db/migrations] MIGRATION_1 complete");
     }
 
     if version < 2 {
+        log::info!("[db/migrations] applying MIGRATION_2: timer durations minutes → seconds");
         conn.execute_batch(&format!("BEGIN; {MIGRATION_2} COMMIT;"))?;
+        log::info!("[db/migrations] MIGRATION_2 complete");
     }
 
     Ok(())

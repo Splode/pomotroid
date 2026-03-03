@@ -128,6 +128,7 @@ pub fn seed_defaults(conn: &Connection) -> Result<()> {
             params![key, value],
         )?;
     }
+    log::debug!("[settings] defaults seeded");
     Ok(())
 }
 
@@ -140,6 +141,7 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         .filter_map(|r| r.ok())
         .collect();
 
+    log::debug!("[settings] loaded {} keys from db", map.len());
     let d = Settings::default();
     Ok(Settings {
         always_on_top: parse_bool(&map, "always_on_top", d.always_on_top),

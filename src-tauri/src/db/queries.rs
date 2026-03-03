@@ -18,7 +18,9 @@ pub fn insert_session(
          VALUES (?1, ?2, ?3, 0)",
         params![started_at, round_type, duration_secs],
     )?;
-    Ok(conn.last_insert_rowid())
+    let id = conn.last_insert_rowid();
+    log::debug!("[db] session started: id={id} type={round_type} duration={duration_secs}s");
+    Ok(id)
 }
 
 /// Updates a session when the round ends (by completion or skip).
@@ -31,6 +33,7 @@ pub fn complete_session(
         "UPDATE sessions SET ended_at = ?1, completed = ?2 WHERE id = ?3",
         params![unix_now(), completed as i64, session_id],
     )?;
+    log::debug!("[db] session ended: id={session_id} completed={completed}");
     Ok(())
 }
 
