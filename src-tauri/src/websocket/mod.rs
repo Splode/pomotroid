@@ -4,9 +4,13 @@
 ///
 /// Protocol:
 ///   Client → Server: `{ "type": "getState" }`
-///   Server → Client: `{ "type": "state",       "payload": TimerSnapshot }`
-///                    `{ "type": "roundChange",  "payload": TimerSnapshot }` (broadcast)
-///                    `{ "type": "error",        "message": "..." }`         (startup failure)
+///   Server → Client: `{ "type": "state",       "payload": TimerSnapshot }`              (getState response)
+///                    `{ "type": "started",      "payload": { "total_secs": u32 } }`     (broadcast)
+///                    `{ "type": "roundChange",  "payload": TimerSnapshot }`              (broadcast)
+///                    `{ "type": "paused",       "payload": { "elapsed_secs": u32 } }`   (broadcast)
+///                    `{ "type": "resumed",      "payload": { "elapsed_secs": u32 } }`   (broadcast)
+///                    `{ "type": "reset" }`                                               (broadcast)
+///                    `{ "type": "error",        "message": "..." }`                     (startup failure)
 ///
 /// Lifecycle:
 ///   - `start(port, app)` spawns a Tokio task; sets running handle in `WsState`.
@@ -35,11 +39,27 @@ use crate::timer::{TimerController, TimerSnapshot};
 // Broadcast channel payload
 // ---------------------------------------------------------------------------
 
+/// Shared payload for events that carry elapsed time.
+#[derive(Clone, serde::Serialize)]
+pub struct ElapsedPayload {
+    pub elapsed_secs: u32,
+}
+
+/// Payload for the `started` event.
+#[derive(Clone, serde::Serialize)]
+pub struct StartedPayload {
+    pub total_secs: u32,
+}
+
 /// Events broadcast to all connected WebSocket clients.
 #[derive(Clone, serde::Serialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 pub enum WsEvent {
+    Started { payload: StartedPayload },
     RoundChange { payload: TimerSnapshot },
+    Paused { payload: ElapsedPayload },
+    Resumed { payload: ElapsedPayload },
+    Reset,
 }
 
 // ---------------------------------------------------------------------------
@@ -199,10 +219,29 @@ async fn handle_client_message(
 // Public API for broadcasting from the timer event listener
 // ---------------------------------------------------------------------------
 
+/// Broadcast a `started` event to all connected WebSocket clients.
+pub fn broadcast_started(state: &Arc<WsState>, total_secs: u32) {
+    let _ = state.broadcast_tx.send(WsEvent::Started { payload: StartedPayload { total_secs } });
+}
+
 /// Broadcast a `roundChange` event to all connected WebSocket clients.
 pub fn broadcast_round_change(state: &Arc<WsState>, snapshot: TimerSnapshot) {
-    // Ignore send errors when there are no subscribers.
     let _ = state.broadcast_tx.send(WsEvent::RoundChange { payload: snapshot });
+}
+
+/// Broadcast a `paused` event to all connected WebSocket clients.
+pub fn broadcast_paused(state: &Arc<WsState>, elapsed_secs: u32) {
+    let _ = state.broadcast_tx.send(WsEvent::Paused { payload: ElapsedPayload { elapsed_secs } });
+}
+
+/// Broadcast a `resumed` event to all connected WebSocket clients.
+pub fn broadcast_resumed(state: &Arc<WsState>, elapsed_secs: u32) {
+    let _ = state.broadcast_tx.send(WsEvent::Resumed { payload: ElapsedPayload { elapsed_secs } });
+}
+
+/// Broadcast a `reset` event to all connected WebSocket clients.
+pub fn broadcast_reset(state: &Arc<WsState>) {
+    let _ = state.broadcast_tx.send(WsEvent::Reset);
 }
 
 // ---------------------------------------------------------------------------
@@ -236,5 +275,36 @@ mod tests {
         let json = serde_json::to_string(&event).unwrap();
         assert!(json.contains("\"type\":\"roundChange\""));
         assert!(json.contains("\"elapsed_secs\":60"));
+    }
+
+    #[test]
+    fn ws_event_started_serializes_correctly() {
+        let event = WsEvent::Started { payload: StartedPayload { total_secs: 1500 } };
+        let json = serde_json::to_string(&event).unwrap();
+        assert!(json.contains("\"type\":\"started\""));
+        assert!(json.contains("\"total_secs\":1500"));
+    }
+
+    #[test]
+    fn ws_event_paused_serializes_correctly() {
+        let event = WsEvent::Paused { payload: ElapsedPayload { elapsed_secs: 300 } };
+        let json = serde_json::to_string(&event).unwrap();
+        assert!(json.contains("\"type\":\"paused\""));
+        assert!(json.contains("\"elapsed_secs\":300"));
+    }
+
+    #[test]
+    fn ws_event_resumed_serializes_correctly() {
+        let event = WsEvent::Resumed { payload: ElapsedPayload { elapsed_secs: 180 } };
+        let json = serde_json::to_string(&event).unwrap();
+        assert!(json.contains("\"type\":\"resumed\""));
+        assert!(json.contains("\"elapsed_secs\":180"));
+    }
+
+    #[test]
+    fn ws_event_reset_serializes_correctly() {
+        let event = WsEvent::Reset;
+        let json = serde_json::to_string(&event).unwrap();
+        assert_eq!(json, r#"{"type":"reset"}"#);
     }
 }

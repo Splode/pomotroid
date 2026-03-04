@@ -238,9 +238,13 @@ fn listen_events(
 
     while let Ok(event) = event_rx.recv() {
         match event {
-            TimerEvent::Started { total_secs: _ } => {
+            TimerEvent::Started { total_secs } => {
+                log::info!("[timer] started total={total_secs}s");
                 shared.lock().unwrap().is_running = true;
-                let _ = app.emit("timer:started", ());
+                let _ = app.emit("timer:started", serde_json::json!({ "total_secs": total_secs }));
+                if let Some(ws) = app.try_state::<Arc<WsState>>() {
+                    websocket::broadcast_started(&ws, total_secs);
+                }
                 tray::update_menu_items(&tray, true, false);
             }
 
@@ -386,6 +390,9 @@ fn listen_events(
                 log::info!("[timer] paused elapsed={elapsed_secs}s");
                 shared.lock().unwrap().is_running = false;
                 let _ = app.emit("timer:paused", serde_json::json!({ "elapsed_secs": elapsed_secs }));
+                if let Some(ws) = app.try_state::<Arc<WsState>>() {
+                    websocket::broadcast_paused(&ws, elapsed_secs);
+                }
 
                 // Show pause bars in tray.
                 let rt = sequence.lock().unwrap().current_round.as_str().to_string();
@@ -403,6 +410,9 @@ fn listen_events(
                 log::info!("[timer] resumed elapsed={elapsed_secs}s");
                 shared.lock().unwrap().is_running = true;
                 let _ = app.emit("timer:resumed", serde_json::json!({ "elapsed_secs": elapsed_secs }));
+                if let Some(ws) = app.try_state::<Arc<WsState>>() {
+                    websocket::broadcast_resumed(&ws, elapsed_secs);
+                }
 
                 // Restore arc in tray.
                 let rt = sequence.lock().unwrap().current_round.as_str().to_string();
@@ -429,6 +439,9 @@ fn listen_events(
                 }
                 let snapshot = build_snapshot(&sequence, &settings, &shared);
                 let _ = app.emit("timer:reset", snapshot);
+                if let Some(ws) = app.try_state::<Arc<WsState>>() {
+                    websocket::broadcast_reset(&ws);
+                }
 
                 // Reconfigure the engine with the current round's duration so
                 // the next Start uses the correct (possibly settings-updated)
