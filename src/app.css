@@ -1,6 +1,27 @@
 /* Global CSS — CSS custom properties for theming.
    The active theme overrides these values at runtime via Tauri IPC. */
 
+/* ---------------------------------------------------------------------------
+   Embedded variable fonts
+   font-display: block — app is offline-first, no FOUT risk
+   --------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Mona Sans';
+  src: url('/fonts/MonaSansVF.woff2') format('woff2');
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Mona Sans Mono';
+  src: url('/fonts/MonaSansMonoVF.woff2') format('woff2');
+  font-weight: 200 900;
+  font-display: block;
+}
+
 :root {
   /* Theme colors (defaults; overridden by the active theme at runtime) */
   --color-long-round: #c75000;
@@ -23,6 +44,9 @@
   --transition-default: 0.2s ease;
   --transition-snappy: 0.12s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-slow: 0.35s ease;
+
+  /* Optical sizing — adapts letterforms to font-size automatically */
+  font-optical-sizing: auto;
 }
 
 *,
@@ -38,7 +62,7 @@ body {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Mona Sans', system-ui, sans-serif;
   background-color: var(--color-background);
   color: var(--color-foreground);
   user-select: none;

@@ -79,7 +79,7 @@
     color: var(--color-foreground);
     cursor: pointer;
     font-size: 0.75rem;
-    font-family: monospace;
+    font-family: 'Mona Sans Mono', monospace;
     padding: 4px 8px;
     text-align: center;
     outline: none;
