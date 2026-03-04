@@ -1,5 +1,16 @@
 ## ADDED Requirements
 
+### Requirement: Server broadcasts started event when timer starts
+When the timer transitions from idle to running, the server SHALL broadcast a `started` message to all connected WebSocket clients carrying the total duration of the round in seconds.
+
+#### Scenario: Client receives started message on first start
+- **WHEN** the user starts the timer from an idle state
+- **THEN** all connected WebSocket clients SHALL receive `{ "type": "started", "payload": { "total_secs": <n> } }` where `n` is the total duration of the current round
+
+#### Scenario: No clients connected on start
+- **WHEN** the timer starts and no WebSocket clients are connected
+- **THEN** the broadcast SHALL be silently discarded with no error
+
 ### Requirement: Server broadcasts paused event when timer pauses
 When the timer transitions to a paused state, the server SHALL broadcast a `paused` message to all connected WebSocket clients carrying the elapsed time in seconds.
 
