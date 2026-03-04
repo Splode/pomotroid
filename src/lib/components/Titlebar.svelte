@@ -106,8 +106,6 @@
     {@render statsBtn()}
   {/if}
 
-  <h1 class="title">Pomotroid</h1>
-
   <!-- Right: settings + stats buttons on macOS, window controls on Linux/Windows. -->
   <div class="controls">
     {#if isMac}
@@ -151,22 +149,6 @@
     padding: 0 8px;
     position: relative;
     flex-shrink: 0;
-  }
-
-  .title {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--color-short-round);
-    pointer-events: none;
-  }
-
-  @media (max-width: 299px) {
-    .title { display: none; }
   }
 
   .controls {
