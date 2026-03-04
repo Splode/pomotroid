@@ -2,6 +2,10 @@
 [Unreleased]
 -----------
 
+### Typography
+
+* **Mona Sans variable font** — the app now embeds [Mona Sans](https://github.com/github/mona-sans) as a variable font (weight 200–900, width 75–125%), replacing the platform system font. All UI text renders consistently across operating systems with no network dependency. Optical sizing (`font-optical-sizing: auto`) is enabled globally so letterform contrast and spacing adapt automatically to each element's rendered size. Shortcut keys in Settings → Shortcuts render in Mona Sans Mono.
+
 ### Settings
 
 * **Keyboard entry for timer durations** — the time badge next to each timer slider in Settings → Timer is now an editable field. Enter any duration in `MM:SS` format (e.g. `5:39`) or as a bare integer in minutes (e.g. `25`). Values are clamped to the supported range of `1:00`–`90:00`. Commit with Enter or blur; Escape reverts. The slider continues to work for whole-minute adjustments.
