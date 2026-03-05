@@ -2,6 +2,10 @@
 [Unreleased]
 -----------
 
+### Audio
+
+* **Sleep/wake audio recovery** — audio no longer produces a flood of "buffer underrun/overrun" errors after the system wakes from standby. The audio device is now opened fresh for each sound rather than held open indefinitely, so it reconnects to the OS audio subsystem automatically after a sleep/wake cycle without requiring an app restart.
+
 ### Typography
 
 * **Mona Sans variable font** — the app now embeds [Mona Sans](https://github.com/github/mona-sans) as a variable font (weight 200–900, width 75–125%), replacing the platform system font. All UI text renders consistently across operating systems with no network dependency. Optical sizing (`font-optical-sizing: auto`) is enabled globally so letterform contrast and spacing adapt automatically to each element's rendered size. Shortcut keys in Settings → Shortcuts render in Mona Sans Mono.

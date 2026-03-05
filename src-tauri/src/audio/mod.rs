@@ -214,19 +214,20 @@ pub fn find_custom_files(audio_dir: &Path) -> CustomAudioPaths {
 // ---------------------------------------------------------------------------
 
 fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
-    // MixerDeviceSink must stay alive for the lifetime of this thread.
-    let device_sink = match DeviceSinkBuilder::open_default_sink() {
-        Ok(s) => {
-            log::info!("[audio] output stream opened");
-            s
-        }
-        Err(e) => {
-            log::warn!("[audio] failed to open output stream: {e}");
-            return;
-        }
-    };
-
+    // Open the audio device fresh for each request rather than holding a
+    // single stream open indefinitely. This lets the audio thread recover
+    // automatically after a sleep/wake cycle that resets the OS audio
+    // subsystem, avoiding a flood of "buffer underrun/overrun" errors.
     while let Ok(req) = rx.recv() {
+        let mut device_sink = match DeviceSinkBuilder::open_default_sink() {
+            Ok(s) => s,
+            Err(e) => {
+                log::warn!("[audio] failed to open output stream: {e}");
+                continue;
+            }
+        };
+        device_sink.log_on_drop(false);
+
         let player = Player::connect_new(device_sink.mixer());
         player.set_volume(req.volume);
 
@@ -262,7 +263,9 @@ fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
             }
         }
 
-        player.detach(); // let it finish without blocking
+        // Block until playback completes so device_sink stays alive for the
+        // full duration and drops cleanly afterward.
+        player.sleep_until_end();
     }
 }
 
