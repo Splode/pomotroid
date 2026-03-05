@@ -116,7 +116,7 @@ jobs:
             src-tauri/target/release/bundle/rpm/*.rpm \
             src-tauri/target/release/bundle/appimage/*.AppImage; do
             echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 \
-              --detach-sign --armor "$f"
+              --pinentry-mode loopback --detach-sign --armor "$f"
           done
 
       - name: Upload Linux artifacts
