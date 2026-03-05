@@ -88,10 +88,27 @@ jobs:
       - name: Sync SvelteKit types
         run: npx svelte-kit sync
 
+      - name: Import GPG signing key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+
       - name: Build (release)
         run: npm run tauri build -- --bundles deb,appimage,rpm
         env:
           CI: true
+
+      - name: Sign Linux artifacts
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          for f in \
+            src-tauri/target/release/bundle/deb/*.deb \
+            src-tauri/target/release/bundle/rpm/*.rpm \
+            src-tauri/target/release/bundle/appimage/*.AppImage; do
+            echo "$GPG_PASSPHRASE" | gpg --batch --yes --passphrase-fd 0 \
+              --pinentry-mode loopback --detach-sign --armor "$f"
+          done
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v4
@@ -99,8 +116,11 @@ jobs:
           name: pomotroid-linux-x64
           path: |
             src-tauri/target/release/bundle/deb/*.deb
+            src-tauri/target/release/bundle/deb/*.deb.asc
             src-tauri/target/release/bundle/appimage/*.AppImage
+            src-tauri/target/release/bundle/appimage/*.AppImage.asc
             src-tauri/target/release/bundle/rpm/*.rpm
+            src-tauri/target/release/bundle/rpm/*.rpm.asc
           if-no-files-found: error
 
   # ── macOS build ────────────────────────────────────────────────────────────
@@ -228,8 +248,11 @@ jobs:
           body: ${{ needs.changelog.outputs.notes }}
           files: |
             dist/linux/**/*.deb
+            dist/linux/**/*.deb.asc
             dist/linux/**/*.AppImage
+            dist/linux/**/*.AppImage.asc
             dist/linux/**/*.rpm
+            dist/linux/**/*.rpm.asc
             dist/macos/**/*.dmg
             dist/windows/**/*-setup.exe
             dist/windows/**/pomotroid.exe

@@ -33,6 +33,7 @@
 ### Linux
 
 * **RPM package** — `.rpm` bundle now built and distributed alongside `.deb` and `.AppImage`, targeting Fedora, RHEL, openSUSE, and derivatives
+* **Release artifact signing** — `.deb`, `.rpm`, and `.AppImage` packages are now GPG-signed in CI. Each release includes a detached `.asc` signature file alongside every Linux package. Import `public.asc` from the repository root and run `gpg --verify <file>.asc <file>` to verify any download. See `SECURITY.md` for full instructions.
 
 ---
 
