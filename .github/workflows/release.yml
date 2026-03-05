@@ -174,6 +174,8 @@ jobs:
     name: Windows x64
     runs-on: windows-latest
     needs: changelog
+    outputs:
+      installer_hash: ${{ steps.hash.outputs.sha256 }}
 
     steps:
       - name: Checkout
@@ -205,6 +207,13 @@ jobs:
         run: npm run tauri build -- --bundles nsis
         env:
           CI: true
+
+      - name: Compute installer hash
+        id: hash
+        shell: bash
+        run: |
+          hash=$(sha256sum src-tauri/target/release/bundle/nsis/*-setup.exe | cut -d' ' -f1)
+          echo "sha256=$hash" >> "$GITHUB_OUTPUT"
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
@@ -239,6 +248,25 @@ jobs:
         with:
           name: pomotroid-windows-x64
           path: dist/windows
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Scoop manifest
+        run: |
+          VERSION="${{ needs.changelog.outputs.version }}"
+          HASH="${{ needs.build-windows.outputs.installer_hash }}"
+          jq --arg v "$VERSION" --arg h "$HASH" \
+            '.version = $v | .hash = $h | .url = "https://github.com/Splode/pomotroid/releases/download/v\($v)/Pomotroid_\($v)_x64-setup.exe#/dl.exe"' \
+            pomotroid.json > pomotroid.json.tmp && mv pomotroid.json.tmp pomotroid.json
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pomotroid.json
+          git commit -m "chore: update Scoop manifest to v${VERSION} [skip ci]"
+          git push origin HEAD:main
 
       - name: Create draft release
         uses: softprops/action-gh-release@v2
