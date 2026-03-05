@@ -1,10 +1,16 @@
 {
-  "version": "0.13.0",
-  "bin": [["pomotroid-0.13.0-portable.exe", "pomotroid"]],
-  "url": "https://github.com/Splode/pomotroid/releases/download/v0.13.0/pomotroid-0.13.0-portable.exe",
-  "hash": "3c8bdd88eed99c1a5bf3eb279acc0176e3ba409a8470186aefcdc1409eaf5e6a",
-  "description": "A simple and configurable Pomodoro timer. It provides a visually-pleasing and reliable way to track productivity using the Pomodoro Technique.",
-  "homepage": "https://github.com/splode/pomotroid",
+  "version": "1.0.0",
+  "description": "🍅 Simple and visually-pleasing Pomodoro timer. Pomotroid is a simple and configurable Pomodoro timer. It aims to provide a visually-pleasing and reliable way to track productivity using the Pomodoro Technique.",
+  "homepage": "https://github.com/Splode/pomotroid",
   "license": "MIT",
-  "shortcuts": [["pomotroid-0.13.0-portable.exe", "Pomotroid"]]
+  "url": "https://github.com/Splode/pomotroid/releases/download/v1.0.0/Pomotroid_1.0.0_x64-setup.exe#/dl.exe",
+  "hash": "10839b2fb000d07caabcdc280745246b9d1277b84621e6a49b41ab40c3b551dd",
+  "installer": {
+    "script": "Start-Process \"$dir\\dl.exe\" -ArgumentList '/S', \"/D=$dir\" -Wait"
+  },
+  "post_install": "Remove-Item \"$dir\\dl.exe\" -Force",
+  "shortcuts": [["Pomotroid.exe", "Pomotroid"]],
+  "autoupdate": {
+    "url": "https://github.com/Splode/pomotroid/releases/download/v$version/Pomotroid_$version_x64-setup.exe#/dl.exe"
+  }
 }
