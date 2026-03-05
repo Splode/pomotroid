@@ -35,6 +35,7 @@
       titleBarStyle: isMac ? ('Overlay' as any) : undefined,
       hiddenTitle: isMac ? true : undefined,
       resizable: false,
+      visible: false,
     });
   }
 
@@ -55,6 +56,7 @@
       titleBarStyle: isMac ? ('Overlay' as any) : undefined,
       hiddenTitle: isMac ? true : undefined,
       resizable: false,
+      visible: false,
     });
   }
 

@@ -58,6 +58,9 @@
         const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         const activeTheme = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
         if (activeTheme) applyTheme(activeTheme);
+        
+        // Show window immediately after theme is applied
+        await getCurrentWebviewWindow().show();
 
         detailed = await statsGetDetailed();
         await info(`[stats] initialized, theme=${activeTheme?.name ?? 'none'}`);
