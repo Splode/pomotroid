@@ -32,6 +32,7 @@ pub enum TimerCommand {
 
 #[derive(Debug, Clone)]
 pub enum TimerEvent {
+    Started { total_secs: u32 },
     Tick { elapsed_secs: u32, total_secs: u32 },
     Complete { skipped: bool },
     Paused { elapsed_secs: u32 },
@@ -111,6 +112,7 @@ fn run_loop(
             Phase::Idle => match cmd_rx.recv() {
                 Ok(TimerCommand::Start) => {
                     elapsed_secs = 0;
+                    let _ = event_tx.send(TimerEvent::Started { total_secs });
                     Transition::To(Phase::Running(RunningSegment {
                         start: Instant::now(),
                         elapsed_at_start: 0,

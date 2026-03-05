@@ -12,10 +12,12 @@ use std::sync::{Arc, Mutex};
 
 use tauri::{
     image::Image,
-    menu::{Menu, MenuItem},
+    menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager,
 };
+
+use crate::timer::TimerController;
 use tiny_skia::{Color, Paint, PathBuilder, Pixmap, Stroke, Transform};
 
 // ---------------------------------------------------------------------------
@@ -91,11 +93,20 @@ pub fn parse_hex_color(hex: &str) -> Option<[u8; 4]> {
 // Shared tray state
 // ---------------------------------------------------------------------------
 
+/// Handles to the dynamic timer-control menu items.
+/// Stored in `TrayState` so the timer event thread can update labels/enabled states.
+pub struct TrayMenuItems {
+    pub toggle: MenuItem<tauri::Wry>,
+    pub skip: MenuItem<tauri::Wry>,
+    pub reset_round: MenuItem<tauri::Wry>,
+}
+
 /// Tauri-managed state for the tray icon (uses the default Wry runtime).
 pub struct TrayState {
     pub icon: Mutex<Option<TrayIcon<tauri::Wry>>>,
     pub colors: Mutex<TrayColors>,
     pub countdown_mode: Mutex<bool>,
+    pub menu_items: Mutex<Option<TrayMenuItems>>,
 }
 
 impl TrayState {
@@ -104,6 +115,7 @@ impl TrayState {
             icon: Mutex::new(None),
             colors: Mutex::new(TrayColors::default()),
             countdown_mode: Mutex::new(false),
+            menu_items: Mutex::new(None),
         })
     }
 }
@@ -128,6 +140,22 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
         }
     }
 
+    let toggle_item = match MenuItem::with_id(app, "toggle", "Start", true, None::<&str>) {
+        Ok(i) => i,
+        Err(e) => { log::warn!("[tray] menu item error: {e}"); return; }
+    };
+    let skip_item = match MenuItem::with_id(app, "skip", "Skip", false, None::<&str>) {
+        Ok(i) => i,
+        Err(e) => { log::warn!("[tray] menu item error: {e}"); return; }
+    };
+    let reset_item = match MenuItem::with_id(app, "reset-round", "Reset Round", false, None::<&str>) {
+        Ok(i) => i,
+        Err(e) => { log::warn!("[tray] menu item error: {e}"); return; }
+    };
+    let sep = match PredefinedMenuItem::separator(app) {
+        Ok(i) => i,
+        Err(e) => { log::warn!("[tray] menu item error: {e}"); return; }
+    };
     let show_item = match MenuItem::with_id(app, "show", "Show", true, None::<&str>) {
         Ok(i) => i,
         Err(e) => { log::warn!("[tray] menu item error: {e}"); return; }
@@ -136,7 +164,7 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
         Ok(i) => i,
         Err(e) => { log::warn!("[tray] menu item error: {e}"); return; }
     };
-    let menu = match Menu::with_items(app, &[&show_item, &exit_item]) {
+    let menu = match Menu::with_items(app, &[&toggle_item, &skip_item, &reset_item, &sep, &show_item, &exit_item]) {
         Ok(m) => m,
         Err(e) => { log::warn!("[tray] menu error: {e}"); return; }
     };
@@ -180,6 +208,21 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
         })
         .on_menu_event(|app, event| {
             match event.id().as_ref() {
+                "toggle" => {
+                    if let Some(timer) = app.try_state::<TimerController>() {
+                        timer.toggle();
+                    }
+                }
+                "skip" => {
+                    if let Some(timer) = app.try_state::<TimerController>() {
+                        timer.skip();
+                    }
+                }
+                "reset-round" => {
+                    if let Some(timer) = app.try_state::<TimerController>() {
+                        timer.restart_round();
+                    }
+                }
                 "show" => {
                     log::info!("[tray] show");
                     if let Some(window) = app.get_webview_window("main") {
@@ -199,6 +242,11 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
     match tray {
         Ok(t) => {
             *state.icon.lock().unwrap() = Some(t);
+            *state.menu_items.lock().unwrap() = Some(TrayMenuItems {
+                toggle: toggle_item,
+                skip: skip_item,
+                reset_round: reset_item,
+            });
             log::info!("[tray] created");
         }
         Err(e) => log::warn!("[tray] failed to build tray icon: {e}"),
@@ -237,6 +285,28 @@ pub fn update_icon(state: &Arc<TrayState>, round_type: &str, paused: bool, progr
 
     let image = Image::new_owned(bytes, SIZE, SIZE);
     let _ = tray.set_icon(Some(image));
+}
+
+// ---------------------------------------------------------------------------
+// Menu item update (called from the timer event listener)
+// ---------------------------------------------------------------------------
+
+/// Update the tray menu items to reflect the current timer state.
+///
+/// - `is_running`: timer is actively counting down.
+/// - `is_paused`: timer has been started and then paused (elapsed > 0, not running).
+///
+/// No-op when the tray menu has not been created yet.
+pub fn update_menu_items(state: &Arc<TrayState>, is_running: bool, is_paused: bool) {
+    let guard = state.menu_items.lock().unwrap();
+    let Some(items) = guard.as_ref() else { return };
+
+    let toggle_label = if is_running { "Pause" } else if is_paused { "Resume" } else { "Start" };
+    let controls_enabled = is_running || is_paused;
+
+    let _ = items.toggle.set_text(toggle_label);
+    let _ = items.skip.set_enabled(controls_enabled);
+    let _ = items.reset_round.set_enabled(controls_enabled);
 }
 
 // ---------------------------------------------------------------------------
@@ -292,11 +362,19 @@ pub fn render_tray_icon_rgba(
     };
     pixmap.stroke_path(&ring, &paint, &stroke, Transform::identity(), None);
 
+    // Round-type color: used for both the progress arc and the pause bars.
+    let round_color = match round_type {
+        "short-break" => rgba_color(colors.short_round),
+        "long-break"  => rgba_color(colors.long_round),
+        _             => rgba_color(colors.focus_round),
+    };
+
     if paused {
-        // Two vertical bars centred in the ring.
-        paint.set_color(rgba_color(colors.foreground));
+        // Two vertical bars centred in the ring, in the round-type colour so
+        // they read clearly on any panel colour regardless of theme foreground.
+        paint.set_color(round_color);
         let bar_h = RADIUS * 0.75;
-        let bar_w = STROKE_WIDTH * 0.7;
+        let bar_w = STROKE_WIDTH * 1.2;
         let bar_gap = STROKE_WIDTH * 1.1;
         let bar_y = CENTER - bar_h / 2.0;
         for x in [CENTER - bar_gap / 2.0 - bar_w, CENTER + bar_gap / 2.0] {
@@ -310,12 +388,7 @@ pub fn render_tray_icon_rgba(
         }
     } else {
         // Progress arc from 12 o'clock, clockwise, in the round-type colour.
-        let arc_color = match round_type {
-            "short-break" => rgba_color(colors.short_round),
-            "long-break"  => rgba_color(colors.long_round),
-            _             => rgba_color(colors.focus_round),
-        };
-        paint.set_color(arc_color);
+        paint.set_color(round_color);
 
         // In elapsed mode the arc grows as time passes; in countdown mode it shrinks.
         let effective = if countdown { 1.0 - progress } else { progress };
