@@ -30,6 +30,11 @@
 
 * **Updated app icon** — refreshed application icon across all platforms and sizes; removed unused legacy icon variants
 
+### System Tray
+
+* **Timer controls in tray menu** — the system tray context menu now includes Start/Pause/Resume, Skip, and Reset Round actions. The toggle item label updates dynamically ("Start" → "Pause" → "Resume") as the timer state changes. Skip and Reset Round are disabled when the timer is idle. Reset Round restarts only the current round without advancing the work/break cycle.
+* **Pause icon contrast** — the tray pause icon (two vertical bars) now uses the active round's color (red for work, teal for short break, blue for long break) instead of the theme foreground color, ensuring visibility on dark panels regardless of theme.
+
 ### Linux
 
 * **RPM package** — `.rpm` bundle now built and distributed alongside `.deb` and `.AppImage`, targeting Fedora, RHEL, openSUSE, and derivatives

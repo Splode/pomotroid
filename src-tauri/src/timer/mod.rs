@@ -238,6 +238,12 @@ fn listen_events(
 
     while let Ok(event) = event_rx.recv() {
         match event {
+            TimerEvent::Started { total_secs: _ } => {
+                shared.lock().unwrap().is_running = true;
+                let _ = app.emit("timer:started", ());
+                tray::update_menu_items(&tray, true, false);
+            }
+
             TimerEvent::Tick { elapsed_secs, total_secs } => {
                 {
                     let mut s = shared.lock().unwrap();
@@ -390,6 +396,7 @@ fn listen_events(
                 };
                 let progress = if total > 0 { elapsed_secs as f32 / total as f32 } else { 0.0 };
                 tray::update_icon(&tray, &rt, true, progress);
+                tray::update_menu_items(&tray, false, true);
             }
 
             TimerEvent::Resumed { elapsed_secs } => {
@@ -407,6 +414,7 @@ fn listen_events(
                 let progress = if total > 0 { elapsed_secs as f32 / total as f32 } else { 0.0 };
                 tray::update_icon(&tray, &rt, false, progress);
                 last_tray_progress = progress;
+                tray::update_menu_items(&tray, true, false);
             }
 
             TimerEvent::Reset => {
@@ -439,6 +447,7 @@ fn listen_events(
                 let rt = sequence.lock().unwrap().current_round.as_str().to_string();
                 tray::update_icon(&tray, &rt, false, 0.0);
                 last_tray_progress = -1.0;
+                tray::update_menu_items(&tray, false, false);
             }
 
             TimerEvent::Suspended { elapsed_secs } => {
