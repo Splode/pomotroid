@@ -9,7 +9,7 @@
 
 ## 2. Commit public key and documentation
 
-- [ ] 2.1 Commit `public.asc` to the repository root
+- [x] 2.1 Commit `public.asc` to the repository root
 - [x] 2.2 Create `SECURITY.md` with:
   - Full GPG key fingerprint
   - How to import the public key: `gpg --import public.asc`
@@ -29,8 +29,8 @@
 
 ## 4. Verification
 
-- [ ] 4.1 Push a test tag and confirm the signing step completes without error
-- [ ] 4.2 Download a signed artifact and its `.asc` from the test run; verify locally:
+- [x] 4.1 Push a test tag and confirm the signing step completes without error
+- [x] 4.2 Download a signed artifact and its `.asc` from the test run; verify locally:
   - `gpg --import public.asc`
   - `gpg --verify pomotroid_*.deb.asc pomotroid_*.deb`
-- [ ] 4.3 Confirm no private key material appears in CI logs
+- [x] 4.3 Confirm no private key material appears in CI logs

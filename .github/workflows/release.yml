@@ -4,15 +4,6 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+-*'  # TEMPORARY: test tags e.g. v0.0.0-test
-  # TEMPORARY: allows manual trigger for testing signing workflow.
-  # Remove before merging.
-  workflow_dispatch:
-    inputs:
-      test_version:
-        description: 'Fake version string for the draft release (e.g. v0.0.0-signing-test)'
-        required: false
-        default: 'v0.0.0-signing-test'
 
 permissions:
   contents: write
@@ -253,7 +244,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: true
-          name: ${{ github.event_name == 'workflow_dispatch' && inputs.test_version || github.ref_name }}
+          name: ${{ github.ref_name }}
           body: ${{ needs.changelog.outputs.notes }}
           files: |
             dist/linux/**/*.deb
