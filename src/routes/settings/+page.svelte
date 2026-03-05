@@ -6,6 +6,7 @@
   import { applyTheme } from '$lib/stores/theme';
   import { resolveThemeName } from '$lib/utils/theme';
   import { setLocale } from '$lib/locale.svelte.js';
+  import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
   import type { UnlistenFn } from '@tauri-apps/api/event';
   import { info, error as logError } from '@tauri-apps/plugin-log';
 
@@ -49,6 +50,9 @@
       const activeTheme = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
       if (activeTheme) applyTheme(activeTheme);
       await info(`[settings] initialized, theme=${activeTheme?.name ?? 'none'}`);
+
+      // Show the window now that the theme is applied (avoids white flash)
+      await getCurrentWebviewWindow().show();
       } catch (e) {
         await logError(`[settings] initialization failed: ${e}`);
         throw e;
