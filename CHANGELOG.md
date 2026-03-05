@@ -2,6 +2,10 @@
 [Unreleased]
 -----------
 
+### Bug Fixes
+
+* **White screen flash on startup** — the Settings and Statistics windows no longer display a blank white frame before styles load. Windows are now created hidden and shown only after the theme has been applied.
+
 ### Audio
 
 * **Sleep/wake audio recovery** — audio no longer produces a flood of "buffer underrun/overrun" errors after the system wakes from standby. The audio device is now opened fresh for each sound rather than held open indefinitely, so it reconnects to the OS audio subsystem automatically after a sleep/wake cycle without requiring an app restart.
