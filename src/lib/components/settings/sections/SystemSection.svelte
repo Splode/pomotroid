@@ -16,6 +16,7 @@
     { value: 'ja',   label: '日本語' },
     { value: 'zh',   label: '中文' },
     { value: 'pt',   label: 'Português' },
+    { value: 'tr',   label: 'Türkçe' },
   ];
 
   let localPort = $state(String($settings.websocket_port));
