@@ -69,6 +69,9 @@
   "system_toggle_websocket_desc": "为外部集成公开本地 WebSocket 端点（端口 {port}）。",
   "system_label_port": "端口",
   "system_group_language": "语言",
+  "system_group_updates": "更新",
+  "system_toggle_check_updates": "自动检查更新",
+  "system_toggle_check_updates_desc": "打开设置时自动检查新版本。",
 
   "shortcuts_accessibility_notice": "在 macOS 上使用全局快捷键需要辅助功能权限。请在系统设置 → 隐私与安全性 → 辅助功能中启用 Pomotroid。",
   "shortcuts_accessibility_open": "打开系统设置",
@@ -87,6 +90,10 @@
   "about_open_log_folder": "打开日志文件夹",
   "about_reset_all": "重置所有设置",
   "about_reset_confirm": "这将把所有设置重置为默认值。",
+  "about_update_checking": "正在检查更新\u2026",
+  "about_update_up_to_date": "已是最新版本",
+  "about_update_install": "安装 v{version} \u2014 应用将重启",
+  "about_update_error": "无法检查更新",
 
   "stats_title": "统计",
   "stats_tab_today": "今天",

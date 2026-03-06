@@ -25,6 +25,7 @@ log = "0.4"
 tauri-plugin-notification = "2"
 tauri-plugin-global-shortcut = "2"
 tauri-plugin-dialog = "2"
+tauri-plugin-updater = "2"
 
 rusqlite = { version = "0.38", features = ["bundled"] }
 

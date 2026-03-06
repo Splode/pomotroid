@@ -69,6 +69,9 @@
   "system_toggle_websocket_desc": "外部連携用のローカルWebSocketエンドポイントを公開します（ポート {port}）。",
   "system_label_port": "ポート",
   "system_group_language": "言語",
+  "system_group_updates": "アップデート",
+  "system_toggle_check_updates": "自動的にアップデートを確認する",
+  "system_toggle_check_updates_desc": "設定を開いたときに自動的に新しいバージョンを確認します。",
 
   "shortcuts_accessibility_notice": "macOSでグローバルショートカットを使用するには、アクセシビリティのアクセス許可が必要です。システム設定 → プライバシーとセキュリティ → アクセシビリティでPomotroidを有効にしてください。",
   "shortcuts_accessibility_open": "システム設定を開く",
@@ -87,6 +90,10 @@
   "about_open_log_folder": "ログフォルダを開く",
   "about_reset_all": "すべての設定をリセット",
   "about_reset_confirm": "すべての設定がデフォルト値にリセットされます。",
+  "about_update_checking": "アップデートを確認中\u2026",
+  "about_update_up_to_date": "最新版です",
+  "about_update_install": "v{version} をインストール \u2014 アプリが再起動します",
+  "about_update_error": "アップデートを確認できませんでした",
 
   "stats_title": "統計",
   "stats_tab_today": "今日",

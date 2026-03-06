@@ -69,6 +69,9 @@
   "system_toggle_websocket_desc": "Harici entegrasyonlar için yerel bir WebSocket uç noktası sun (port {port}).",
   "system_label_port": "Port",
   "system_group_language": "Dil",
+  "system_group_updates": "Güncellemeler",
+  "system_toggle_check_updates": "Güncellemeleri Otomatik Kontrol Et",
+  "system_toggle_check_updates_desc": "Ayarlar açıldığında otomatik olarak yeni sürüm kontrol et.",
 
   "shortcuts_accessibility_notice": "Genel kısayollar macOS'ta Erişilebilirlik iznini gerektirir. Sistem Ayarları → Gizlilik ve Güvenlik → Erişilebilirlik bölümünde Pomotroid'i etkinleştirin.",
   "shortcuts_accessibility_open": "Sistem Ayarlarını Aç",
@@ -87,6 +90,10 @@
   "about_open_log_folder": "Kayıt Klasörünü Aç",
   "about_reset_all": "Tüm Ayarları Sıfırla",
   "about_reset_confirm": "Bu işlem tüm ayarları varsayılana sıfırlayacaktır.",
+  "about_update_checking": "Güncellemeler kontrol ediliyor\u2026",
+  "about_update_up_to_date": "Güncel",
+  "about_update_install": "v{version} kur \u2014 uygulama yeniden başlayacak",
+  "about_update_error": "Güncellemeler kontrol edilemedi",
 
   "stats_title": "İstatistikler",
   "stats_tab_today": "Bugün",

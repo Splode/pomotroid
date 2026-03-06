@@ -32,6 +32,7 @@ const defaults: Settings = {
   dial_countdown: true,
   language: 'auto',
   verbose_logging: false,
+  check_for_updates: true,
 };
 
 export const settings = writable<Settings>(defaults);

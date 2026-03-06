@@ -69,6 +69,9 @@
   "system_toggle_websocket_desc": "Expor um endpoint WebSocket local para integrações externas (porta {port}).",
   "system_label_port": "Porta",
   "system_group_language": "Idioma",
+  "system_group_updates": "Atualizações",
+  "system_toggle_check_updates": "Verificar atualizações automaticamente",
+  "system_toggle_check_updates_desc": "Verificar automaticamente novas versões ao abrir Configurações.",
 
   "shortcuts_accessibility_notice": "Os atalhos globais requerem acesso de Acessibilidade no macOS. Ative o Pomotroid em Configurações do Sistema → Privacidade e Segurança → Acessibilidade.",
   "shortcuts_accessibility_open": "Abrir Configurações do Sistema",
@@ -87,6 +90,10 @@
   "about_open_log_folder": "Abrir Pasta de Logs",
   "about_reset_all": "Redefinir Todas as Configurações",
   "about_reset_confirm": "Isso redefinirá todas as configurações para os valores padrão.",
+  "about_update_checking": "A verificar atualizações\u2026",
+  "about_update_up_to_date": "Atualizado",
+  "about_update_install": "Instalar v{version} \u2014 o app será reiniciado",
+  "about_update_error": "Não foi possível verificar atualizações",
 
   "stats_title": "Estat\u00edsticas",
   "stats_tab_today": "Hoje",

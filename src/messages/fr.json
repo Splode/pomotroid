@@ -69,6 +69,9 @@
   "system_toggle_websocket_desc": "Exposer un endpoint WebSocket local pour les intégrations externes (port {port}).",
   "system_label_port": "Port",
   "system_group_language": "Langue",
+  "system_group_updates": "Mises à jour",
+  "system_toggle_check_updates": "Vérifier les mises à jour automatiquement",
+  "system_toggle_check_updates_desc": "Rechercher automatiquement les nouvelles versions à l'ouverture des Réglages.",
 
   "shortcuts_accessibility_notice": "Les raccourcis globaux nécessitent l'accès à l'Accessibilité sur macOS. Activez Pomotroid dans Réglages Système → Confidentialité et sécurité → Accessibilité.",
   "shortcuts_accessibility_open": "Ouvrir les Réglages Système",
@@ -87,6 +90,10 @@
   "about_open_log_folder": "Ouvrir le dossier de journaux",
   "about_reset_all": "Réinitialiser tous les paramètres",
   "about_reset_confirm": "Cela réinitialisera tous les paramètres aux valeurs par défaut.",
+  "about_update_checking": "Vérification des mises à jour\u2026",
+  "about_update_up_to_date": "À jour",
+  "about_update_install": "Installer v{version} \u2014 l'app redémarrera",
+  "about_update_error": "Impossible de vérifier les mises à jour",
 
   "stats_title": "Statistiques",
   "stats_tab_today": "Aujourd'hui",

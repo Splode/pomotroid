@@ -541,6 +541,84 @@ pub fn get_log_dir(app: AppHandle) -> Result<String, String> {
         })
 }
 
+// ---------------------------------------------------------------------------
+// CMD-11 — Updater commands
+// ---------------------------------------------------------------------------
+
+/// Information about an available update returned to the frontend.
+#[derive(serde::Serialize)]
+pub struct UpdateInfo {
+    pub version: String,
+    pub body: Option<String>,
+    pub date: Option<String>,
+}
+
+/// Check whether a newer version is available.
+/// Returns `Some(UpdateInfo)` when an update is available, or `None` when
+/// the running version is already the latest.
+/// Errors (e.g. network failure) are surfaced as a string so the frontend
+/// can display a non-blocking message.
+#[tauri::command]
+pub async fn check_update(app: AppHandle) -> Result<Option<UpdateInfo>, String> {
+    use tauri_plugin_updater::UpdaterExt;
+    log::info!("[updater] checking for updates");
+    let updater = app.updater().map_err(|e| {
+        log::error!("[updater] failed to build updater: {e}");
+        e.to_string()
+    })?;
+    match updater.check().await {
+        Ok(Some(update)) => {
+            log::info!("[updater] update available: v{}", update.version);
+            Ok(Some(UpdateInfo {
+                version: update.version.clone(),
+                body: update.body.clone(),
+                date: update.date.map(|d| d.to_string()),
+            }))
+        }
+        Ok(None) => {
+            log::info!("[updater] already up to date");
+            Ok(None)
+        }
+        Err(e) => {
+            log::warn!("[updater] update check failed: {e}");
+            Err(e.to_string())
+        }
+    }
+}
+
+/// Download, verify, and install the pending update, then relaunch immediately.
+/// Should only be called after `check_update` has returned `Some(UpdateInfo)`.
+#[tauri::command]
+pub async fn install_update(app: AppHandle) -> Result<(), String> {
+    use tauri_plugin_updater::UpdaterExt;
+    log::info!("[updater] install requested — checking for update");
+    let updater = app.updater().map_err(|e| {
+        log::error!("[updater] failed to build updater: {e}");
+        e.to_string()
+    })?;
+    let update = updater
+        .check()
+        .await
+        .map_err(|e| {
+            log::error!("[updater] update check failed during install: {e}");
+            e.to_string()
+        })?
+        .ok_or_else(|| {
+            log::warn!("[updater] install_update called but no update is available");
+            "No update available".to_string()
+        })?;
+    log::info!("[updater] downloading and installing v{}", update.version);
+    update
+        .download_and_install(|_, _| {}, || {})
+        .await
+        .map_err(|e| {
+            log::error!("[updater] download/install failed: {e}");
+            e.to_string()
+        })?;
+    log::info!("[updater] install complete — relaunching");
+    app.restart();
+}
+
 fn cue_to_stem(cue: &str) -> Result<&'static str, String> {
     match cue {
         "work_alert" => Ok(audio::STEM_WORK),

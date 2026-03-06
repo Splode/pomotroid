@@ -69,6 +69,9 @@
   "system_toggle_websocket_desc": "Einen lokalen WebSocket-Endpunkt für externe Integrationen bereitstellen (Port {port}).",
   "system_label_port": "Port",
   "system_group_language": "Sprache",
+  "system_group_updates": "Updates",
+  "system_toggle_check_updates": "Automatisch nach Updates suchen",
+  "system_toggle_check_updates_desc": "Beim Öffnen der Einstellungen automatisch auf neue Versionen prüfen.",
 
   "shortcuts_accessibility_notice": "Globale Tastenkürzel erfordern unter macOS Zugriff auf die Bedienungshilfen. Aktiviere Pomotroid unter Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen.",
   "shortcuts_accessibility_open": "Systemeinstellungen öffnen",
@@ -87,6 +90,10 @@
   "about_open_log_folder": "Protokollordner öffnen",
   "about_reset_all": "Alle Einstellungen zurücksetzen",
   "about_reset_confirm": "Dadurch werden alle Einstellungen auf die Standardwerte zurückgesetzt.",
+  "about_update_checking": "Auf Updates wird geprüft\u2026",
+  "about_update_up_to_date": "Aktuell",
+  "about_update_install": "v{version} installieren \u2014 App wird neu gestartet",
+  "about_update_error": "Updates konnten nicht geprüft werden",
 
   "stats_title": "Statistiken",
   "stats_tab_today": "Heute",

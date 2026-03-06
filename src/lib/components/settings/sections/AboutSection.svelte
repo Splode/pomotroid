@@ -2,8 +2,10 @@
   import { onMount } from 'svelte';
   import { openUrl } from '@tauri-apps/plugin-opener';
 
-  import { openLogDir, appVersion, resetSettings } from '$lib/ipc';
+  import { info, warn, error as logError } from '@tauri-apps/plugin-log';
+  import { openLogDir, appVersion, resetSettings, checkUpdate, installUpdate } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
+  import type { UpdateInfo } from '$lib/types';
   import * as m from '$paraglide/messages.js';
 
   const BASE_VERSION = '1.0.0';
@@ -11,6 +13,11 @@
 
   let version = $state('...');
   let confirming = $state(false);
+
+  type UpdateState = 'idle' | 'checking' | 'up-to-date' | 'available' | 'installing' | 'error';
+  let updateState = $state<UpdateState>('idle');
+  let availableUpdate = $state<UpdateInfo | null>(null);
+  let updateError = $state('');
 
   // Strip pre-release and build metadata to get the bare X.Y.Z for the release tag URL.
   function baseOnly(v: string): string {
@@ -25,7 +32,39 @@
     } catch {
       version = BASE_VERSION;
     }
+
+    if ($settings.check_for_updates) {
+      updateState = 'checking';
+      await info('[about] checking for updates');
+      try {
+        const update = await checkUpdate();
+        if (update) {
+          availableUpdate = update;
+          updateState = 'available';
+          await info(`[about] update available: v${update.version}`);
+        } else {
+          updateState = 'up-to-date';
+          await info('[about] already up to date');
+        }
+      } catch (e) {
+        updateError = String(e);
+        updateState = 'error';
+        await warn(`[about] update check failed: ${e}`);
+      }
+    }
   });
+
+  async function handleInstall() {
+    updateState = 'installing';
+    await info(`[about] installing update v${availableUpdate?.version}`);
+    try {
+      await installUpdate();
+    } catch (e) {
+      updateError = String(e);
+      updateState = 'error';
+      await logError(`[about] update install failed: ${e}`);
+    }
+  }
 
   async function handleReset() {
     const updated = await resetSettings();
@@ -82,6 +121,32 @@
       </svg>
     </button>
   </div>
+
+  {#if $settings.check_for_updates || updateState !== 'idle'}
+    <div class="update-group">
+      {#if updateState === 'idle' || updateState === 'checking'}
+        <div class="update-row update-row--muted">
+          <span>{m.about_update_checking()}</span>
+        </div>
+      {:else if updateState === 'up-to-date'}
+        <div class="update-row update-row--muted">
+          <span>{m.about_update_up_to_date()}</span>
+        </div>
+      {:else if updateState === 'available' && availableUpdate}
+        <button class="update-row update-row--action" onclick={handleInstall}>
+          <span>{m.about_update_install({ version: availableUpdate.version })}</span>
+        </button>
+      {:else if updateState === 'installing'}
+        <div class="update-row update-row--muted">
+          <span>Installing…</span>
+        </div>
+      {:else if updateState === 'error'}
+        <div class="update-row update-row--muted">
+          <span>{m.about_update_error()}</span>
+        </div>
+      {/if}
+    </div>
+  {/if}
 
   <div class="reset-group">
     {#if !confirming}
@@ -164,6 +229,40 @@
   .link-row:hover {
     background: var(--color-hover);
     color: var(--color-accent);
+  }
+
+  .update-group {
+    border: 1px solid var(--color-separator);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .update-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+  }
+
+  .update-row--muted {
+    color: var(--color-foreground-darker, var(--color-foreground));
+    opacity: 0.65;
+  }
+
+  .update-row--action {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-accent);
+    text-align: left;
+    transition: background 0.12s;
+  }
+
+  .update-row--action:hover {
+    background: var(--color-hover);
   }
 
   .reset-group {

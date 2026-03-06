@@ -44,6 +44,14 @@ export interface Settings {
   dial_countdown: boolean;
   language: string;     // 'auto' | 'en' | 'es' | 'fr' | 'de' | 'ja'
   verbose_logging: boolean;
+  check_for_updates: boolean;
+}
+
+/** Returned by `check_update` — describes an available update. */
+export interface UpdateInfo {
+  version: string;
+  body: string | null;
+  date: string | null;
 }
 
 /** Mirrors Rust `CustomAudioInfo` — null means the built-in sound is active. */
