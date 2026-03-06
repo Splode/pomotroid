@@ -4,6 +4,7 @@
 
 ### Bug Fixes
 
+* **Theme watcher infinite reload loop** — the custom theme hot-reload watcher no longer floods the log file with continuous theme-scan messages on startup. notify v8's inotify backend monitors `IN_OPEN` events by default; every `read_dir()` call inside the watcher's own reload triggered a new open event, causing a cycle that fired ~2 full theme scans per second indefinitely. Read-only access events (`IN_OPEN`, `IN_CLOSE_NOWRITE`) and pure metadata changes (`IN_ATTRIB` / atime updates) are now filtered out in the debounce loop so only actual file writes, creates, deletes, and renames trigger a theme reload.
 * **White screen flash on startup** — the Settings and Statistics windows no longer display a blank white frame before styles load. Windows are now created hidden and shown only after the theme has been applied.
 
 ### Localization
