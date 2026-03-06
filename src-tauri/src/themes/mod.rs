@@ -131,7 +131,7 @@ pub fn list_all(app_data_dir: &Path) -> Vec<Theme> {
         }
     }
 
-    log::info!("[themes] available: {} total ({} custom)", themes.len(), custom_count);
+    log::debug!("[themes] available: {} total ({} custom)", themes.len(), custom_count);
     themes
 }
 

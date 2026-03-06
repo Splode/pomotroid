@@ -74,10 +74,26 @@ fn debounce_loop(
     app: &AppHandle,
 ) {
     while let Ok(first) = rx.recv() {
-        // Log and ignore watcher errors.
-        if let Err(e) = first {
-            log::warn!("[themes/watcher] watch error: {e}");
-            continue;
+        match first {
+            Err(e) => {
+                log::warn!("[themes/watcher] watch error: {e}");
+                continue;
+            }
+            // Skip read-only access events (IN_OPEN, IN_CLOSE_NOWRITE) and pure
+            // metadata changes (IN_ATTRIB / atime updates).  notify v8 includes
+            // WatchMask::OPEN in its default inotify mask, so every read_dir()
+            // call inside reload_and_emit emits an Access event — filtering these
+            // prevents an infinite reload loop.
+            Ok(event)
+                if matches!(
+                    event.kind,
+                    notify::EventKind::Access(_)
+                        | notify::EventKind::Modify(notify::event::ModifyKind::Metadata(_))
+                ) =>
+            {
+                continue;
+            }
+            Ok(_) => {}
         }
 
         // Drain additional events that arrive within the debounce window.
