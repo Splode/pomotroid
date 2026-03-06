@@ -86,6 +86,10 @@ Pomotroid has been rebuilt from the ground up. The Electron + Vue.js stack has b
 * Locale-aware date and time formatting throughout (Intl.DateTimeFormat, reactive to language changes)
 * Built with Paraglide JS v2 — compile-time, type-safe, tree-shakable message functions
 
+### Integrations
+
+* **WebSocket timer events** — the opt-in WebSocket server now broadcasts the full timer lifecycle to connected clients. New message types: `started` (timer begins from idle, carries `total_secs`), `paused` (carries `elapsed_secs`), `resumed` (carries `elapsed_secs`), and `reset`. The existing `roundChange` message is unchanged. A matching `timer:started` Tauri event is also emitted for internal listeners.
+
 ### Audio
 
 * **Configurable alert cues** for work rounds, short breaks, and long breaks
