@@ -231,6 +231,12 @@ jobs:
     needs: [changelog, build-linux, build-macos, build-windows]
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Download Linux artifacts
         uses: actions/download-artifact@v4
         with:
@@ -248,12 +254,6 @@ jobs:
         with:
           name: pomotroid-windows-x64
           path: dist/windows
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Scoop manifest
         run: |
