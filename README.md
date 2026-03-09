@@ -30,7 +30,7 @@ Built with [Tauri 2](https://tauri.app), [Rust](https://www.rust-lang.org), and 
 - **Statistics** — daily, weekly, and all-time session history with charts and a 52-week heatmap
 - **37 bundled themes** — including Dracula, Nord, Tokyo Night, Catppuccin, Gruvbox, Rose Piné, and more; auto-switches with your OS light/dark preference
 - **Custom themes** — drop a JSON file into the themes folder; applied instantly without a restart
-- **Localization** — 7 languages: English, Spanish, French, German, Japanese, Chinese (Simplified), and Portuguese; auto-detects OS language
+- **Localization** — 8 languages: English, Spanish, French, German, Japanese, Chinese (Simplified), Turkish, and Portuguese; auto-detects OS language
 - **Global shortcuts** — control the timer from anywhere, even when the window is hidden
 - **Custom audio** — replace the built-in alert sounds with your own files
 - **Tick sounds** — optional ticking during work and break rounds, independently toggleable
