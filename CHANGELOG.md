@@ -2,6 +2,10 @@
 [Unreleased]
 -----------
 
+### Bug Fixes
+
+* **Round count not updating while timer is active** — changing the number of work rounds in Settings while the timer is running or paused now immediately updates the round indicator in the main UI. Previously the frontend only received a state snapshot when the timer was idle, so the "X of Y" display required a manual Reset to reflect the new total. The snapshot is now always broadcast after a settings change; the active countdown is unaffected since the `timer:reset` event only updates the UI store, and any momentary `total_secs` discrepancy is corrected by the next `timer:tick` within one second.
+
 [v1.1.0] - 2026-03-09
 -----------
 
