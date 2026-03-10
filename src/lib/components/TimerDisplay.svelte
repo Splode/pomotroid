@@ -22,12 +22,14 @@
 
 <style>
   .display {
-    text-align: center;
-    /* Positioned over the center of the dial */
+    /* Fill the dial-stack and flex-center the time so positioning is never
+       derived from the element's own rendered width. The top/left+transform
+       approach caused sub-pixel jitter on macOS as glyph widths varied. */
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     pointer-events: none;
   }
 
