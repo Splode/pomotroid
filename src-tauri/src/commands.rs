@@ -116,15 +116,12 @@ pub fn settings_set(
     // Keep the timer engine in sync when time-related settings change.
     timer.apply_settings(new_settings.clone());
 
-    // If the timer is idle, broadcast a reset snapshot immediately so the
-    // frontend's dial and display reflect the new duration without requiring
-    // the user to manually start/reset the timer.
-    {
-        let snap = timer.get_snapshot();
-        if !snap.is_running && !snap.is_paused {
-            app.emit("timer:reset", &snap).ok();
-        }
-    }
+    // Broadcast an updated snapshot so the frontend immediately reflects any
+    // changed settings (round count, durations, etc.) regardless of timer
+    // state.  The timer:reset handler only calls timerState.set(), so emitting
+    // while running does not interrupt the countdown; the next timer:tick
+    // event will reconcile total_secs from the engine within one second.
+    app.emit("timer:reset", &timer.get_snapshot()).ok();
 
     // Propagate volume and tick-sound changes to the audio engine (optional state).
     if let Some(audio) = app.try_state::<Arc<AudioManager>>() {
