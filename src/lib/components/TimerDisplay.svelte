@@ -34,10 +34,11 @@
   }
 
   .time {
+    font-family: 'Mona Sans Mono', monospace;
     font-size: 2.8rem;
     font-weight: 300;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.02em;
+    font-stretch: 85%;
+    letter-spacing: -0.02em;
     color: var(--color-foreground);
   }
 </style>
