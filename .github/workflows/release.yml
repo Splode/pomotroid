@@ -102,6 +102,16 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: echo "$GPG_PRIVATE_KEY" | gpg --batch --import
 
+      - name: Verify signing key is set (debug)
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            echo "::error::TAURI_SIGNING_PRIVATE_KEY is empty or not set!"
+            exit 1
+          fi
+          echo "TAURI_SIGNING_PRIVATE_KEY is set (${#TAURI_SIGNING_PRIVATE_KEY} chars)"
+
       - name: Build (release)
         run: npm run tauri build -- --bundles deb,appimage,rpm
         env:
@@ -173,7 +183,7 @@ jobs:
         run: npx svelte-kit sync
 
       - name: Build (release, universal binary)
-        run: npm run tauri build -- --bundles dmg --target universal-apple-darwin
+        run: npm run tauri build -- --bundles app,dmg --target universal-apple-darwin
         env:
           CI: true
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
