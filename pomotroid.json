@@ -4,7 +4,7 @@
   "homepage": "https://github.com/Splode/pomotroid",
   "license": "MIT",
   "url": "https://github.com/Splode/pomotroid/releases/download/v1.1.1-test/Pomotroid_1.1.1-test_x64-setup.exe#/dl.exe",
-  "hash": "6d6c6e48be452dbb6cd0765398bd5fe92b1d15535d2911f60d8a22d9ffae3a9c",
+  "hash": "5b8c7fca0cc5c9ccf7508d8e0a46f83af5036bc8dc9a5c867850533cb64fd2d9",
   "installer": {
     "script": "Start-Process \"$dir\\dl.exe\" -ArgumentList '/S', \"/D=$dir\" -Wait"
   },
