@@ -64,7 +64,7 @@ jobs:
         run: cargo test --manifest-path src-tauri/Cargo.toml
 
       - name: Build (release)
-        run: npm run tauri build -- --bundles deb,appimage,rpm
+        run: npm run tauri build -- --config '{"bundle":{"createUpdaterArtifacts":true}}' --bundles deb,appimage,rpm
         env:
           CI: true
 
@@ -114,7 +114,7 @@ jobs:
         run: npx svelte-kit sync
 
       - name: Build (release, universal binary)
-        run: npm run tauri build -- --bundles dmg --target universal-apple-darwin
+        run: npm run tauri build -- --config '{"bundle":{"createUpdaterArtifacts":true}}' --bundles dmg --target universal-apple-darwin
         env:
           CI: true
 
@@ -159,7 +159,7 @@ jobs:
         run: npx svelte-kit sync
 
       - name: Build (release)
-        run: npm run tauri build -- --bundles nsis
+        run: npm run tauri build -- --config '{"bundle":{"createUpdaterArtifacts":true}}' --bundles nsis
         env:
           CI: true
 
