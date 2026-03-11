@@ -4,12 +4,6 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+-*'
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to release (e.g. v1.1.1-test)'
-        required: true
 
 permissions:
   contents: write
@@ -29,15 +23,12 @@ jobs:
 
       - name: Get version from tag
         id: version
-        run: |
-          REF="${{ github.event.inputs.tag || github.ref_name }}"
-          echo "version=${REF#v}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
 
       - name: Extract CHANGELOG section
         id: extract
         run: |
-          REF="${{ github.event.inputs.tag || github.ref_name }}"
-          VERSION="${REF#v}"
+          VERSION="${GITHUB_REF_NAME#v}"
           # Extract lines between the versioned header and the next header (or EOF)
           NOTES=$(awk "/^\[v${VERSION}\]/,/^\[v[0-9]/" CHANGELOG.md \
             | head -n -1 \
@@ -331,7 +322,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           draft: true
-          name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: ${{ github.ref_name }}
           body: ${{ needs.changelog.outputs.notes }}
           files: |
             dist/linux/**/*.deb
