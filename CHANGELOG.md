@@ -5,7 +5,7 @@
 ### Bug Fixes
 
 * **Round count not updating while timer is active** — changing the number of work rounds in Settings while the timer is running or paused now immediately updates the round indicator in the main UI. Previously the frontend only received a state snapshot when the timer was idle, so the "X of Y" display required a manual Reset to reflect the new total. The snapshot is now always broadcast after a settings change; the active countdown is unaffected since the `timer:reset` event only updates the UI store, and any momentary `total_secs` discrepancy is corrected by the next `timer:tick` within one second.
-* **Timer text jitter on macOS** — the countdown display no longer shifts horizontally as digits change while the timer is running. The previous `top/left + transform: translate(-50%, -50%)` centering recalculated position from the element's rendered width each frame; macOS subpixel text rendering caused that width to vary by a pixel or two per tick, making the text drift. Replaced with `inset: 0` + flexbox centering so position is fixed to the dial bounds and independent of glyph width.
+* **Timer text jitter on macOS** — the countdown display no longer shifts horizontally as digits change while the timer is running. The root cause was that Mona Sans does not include tabular (equal-width) numeral variants, so digits like `1` and `0` have different widths. macOS Core Text measures and positions glyphs with subpixel fractional precision, making the width difference between digits visible as a layout shift on each tick. Other platforms round glyph advances to whole pixels, hiding the effect. The timer now uses Mona Sans Mono, which is inherently fixed-width and eliminates the width variation entirely.
 
 [v1.1.0] - 2026-03-09
 -----------

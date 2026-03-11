@@ -22,9 +22,7 @@
 
 <style>
   .display {
-    /* Fill the dial-stack and flex-center the time so positioning is never
-       derived from the element's own rendered width. The top/left+transform
-       approach caused sub-pixel jitter on macOS as glyph widths varied. */
+    /* Fill the dial-stack and flex-center the time. */
     position: absolute;
     inset: 0;
     display: flex;
