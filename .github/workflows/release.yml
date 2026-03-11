@@ -110,9 +110,6 @@ jobs:
         env:
           CI: true
 
-      - name: List bundle output (debug)
-        run: find src-tauri/target/release/bundle -type f | sort
-
       - name: Sign Linux artifacts
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -181,9 +178,6 @@ jobs:
         env:
           CI: true
 
-      - name: List bundle output (debug)
-        run: find src-tauri/target/universal-apple-darwin/release/bundle -type f | sort
-
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -235,10 +229,6 @@ jobs:
         env:
           CI: true
 
-      - name: List bundle output (debug)
-        shell: bash
-        run: find src-tauri/target/release/bundle -type f | sort
-
       - name: Compute installer hash
         id: hash
         shell: bash
@@ -266,7 +256,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: feat/autoupdate
+          ref: main
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download Linux artifacts
@@ -286,15 +276,6 @@ jobs:
         with:
           name: pomotroid-windows-x64
           path: dist/windows
-
-      - name: List downloaded artifacts (debug)
-        run: |
-          echo "=== dist/linux ==="
-          find dist/linux -type f | sort
-          echo "=== dist/macos ==="
-          find dist/macos -type f | sort
-          echo "=== dist/windows ==="
-          find dist/windows -type f | sort
 
       - name: Generate latest.json updater manifest
         run: |
@@ -344,7 +325,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add pomotroid.json latest.json
           git commit -m "chore: update Scoop manifest and latest.json to v${VERSION} [skip ci]"
-          git push origin HEAD:feat/autoupdate
+          git push origin HEAD:main
 
       - name: Create draft release
         uses: softprops/action-gh-release@v2
