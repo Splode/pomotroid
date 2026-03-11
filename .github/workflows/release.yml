@@ -58,6 +58,9 @@ jobs:
     name: Linux x64
     runs-on: ubuntu-latest
     needs: changelog
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -102,22 +105,10 @@ jobs:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: echo "$GPG_PRIVATE_KEY" | gpg --batch --import
 
-      - name: Verify signing key is set (debug)
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-        run: |
-          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
-            echo "::error::TAURI_SIGNING_PRIVATE_KEY is empty or not set!"
-            exit 1
-          fi
-          echo "TAURI_SIGNING_PRIVATE_KEY is set (${#TAURI_SIGNING_PRIVATE_KEY} chars)"
-
       - name: Build (release)
         run: npm run tauri build -- --bundles deb,appimage,rpm
         env:
           CI: true
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       - name: List bundle output (debug)
         run: find src-tauri/target/release/bundle -type f | sort
@@ -153,6 +144,9 @@ jobs:
     name: macOS (universal)
     runs-on: macos-latest
     needs: changelog
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -186,8 +180,6 @@ jobs:
         run: npm run tauri build -- --bundles app,dmg --target universal-apple-darwin
         env:
           CI: true
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       - name: List bundle output (debug)
         run: find src-tauri/target/universal-apple-darwin/release/bundle -type f | sort
@@ -206,6 +198,9 @@ jobs:
     name: Windows x64
     runs-on: windows-latest
     needs: changelog
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
     outputs:
       installer_hash: ${{ steps.hash.outputs.sha256 }}
 
@@ -239,8 +234,6 @@ jobs:
         run: npm run tauri build -- --bundles nsis
         env:
           CI: true
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       - name: List bundle output (debug)
         shell: bash
