@@ -1,19 +1,19 @@
 {
-  "version": "1.1.1-test",
-  "notes": "See https://github.com/Splode/pomotroid/releases/tag/v1.1.1-test for release notes.",
-  "pub_date": "2026-03-10T23:24:27Z",
+  "version": "1.1.1-test2",
+  "notes": "See https://github.com/Splode/pomotroid/releases/tag/v1.1.1-test2 for release notes.",
+  "pub_date": "2026-03-11T01:24:50Z",
   "platforms": {
     "linux-x86_64": {
       "signature": "",
-      "url": "https://github.com/Splode/pomotroid/releases/download/v1.1.1-test/Pomotroid_1.1.1-test_amd64.AppImage"
+      "url": "https://github.com/Splode/pomotroid/releases/download/v1.1.1-test2/Pomotroid_1.1.1-test2_amd64.AppImage"
     },
     "darwin-universal": {
       "signature": "",
-      "url": "https://github.com/Splode/pomotroid/releases/download/v1.1.1-test/Pomotroid_1.1.1-test_universal.dmg"
+      "url": "https://github.com/Splode/pomotroid/releases/download/v1.1.1-test2/Pomotroid_1.1.1-test2_universal.dmg"
     },
     "windows-x86_64": {
       "signature": "",
-      "url": "https://github.com/Splode/pomotroid/releases/download/v1.1.1-test/Pomotroid_1.1.1-test_x64-setup.exe"
+      "url": "https://github.com/Splode/pomotroid/releases/download/v1.1.1-test2/Pomotroid_1.1.1-test2_x64-setup.exe"
     }
   }
 }
