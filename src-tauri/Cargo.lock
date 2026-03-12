@@ -3260,6 +3260,8 @@ dependencies = [
  "futures-util",
  "log",
  "notify",
+ "objc2",
+ "raw-window-handle",
  "rodio",
  "rusqlite",
  "serde",
