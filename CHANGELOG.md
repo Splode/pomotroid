@@ -2,6 +2,10 @@
 [Unreleased]
 -----------
 
+### macOS
+
+* **Native window management controls restored** — the macOS Window menu now includes the full set of standard window-management items (Fill, Center, Move & Resize with Halves/Quarters/Arrange submenus, Full Screen Tile, Bring All to Front) that were absent after the Electron → Tauri rewrite. The green traffic-light button also gains its tiling popup (arrange left/right/center). Both are enabled by setting `NSWindowCollectionBehaviorManaged` on the underlying `NSWindow` and registering the Window menu with `NSApplication.setWindowsMenu:` at startup.
+
 ### Bug Fixes
 
 * **Round count not updating while timer is active** — changing the number of work rounds in Settings while the timer is running or paused now immediately updates the round indicator in the main UI. Previously the frontend only received a state snapshot when the timer was idle, so the "X of Y" display required a manual Reset to reflect the new total. The snapshot is now always broadcast after a settings change; the active countdown is unaffected since the `timer:reset` event only updates the UI store, and any momentary `total_secs` discrepancy is corrected by the next `timer:tick` within one second.
