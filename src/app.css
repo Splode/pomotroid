@@ -19,6 +19,7 @@
   font-family: 'Mona Sans Mono';
   src: url('/fonts/MonaSansMonoVF.woff2') format('woff2');
   font-weight: 200 900;
+  font-stretch: 75% 125%;
   font-display: block;
 }
 

@@ -22,20 +22,21 @@
 
 <style>
   .display {
-    text-align: center;
-    /* Positioned over the center of the dial */
+    /* Fill the dial-stack and flex-center the time. */
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     pointer-events: none;
   }
 
   .time {
+    font-family: 'Mona Sans Mono', monospace;
     font-size: 2.8rem;
     font-weight: 300;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.02em;
+    font-stretch: 85%;
+    letter-spacing: -0.02em;
     color: var(--color-foreground);
   }
 </style>
