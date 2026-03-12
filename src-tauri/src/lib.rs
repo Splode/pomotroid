@@ -176,15 +176,24 @@ pub fn run() {
             #[cfg(not(target_os = "macos"))]
             let _ = main_window.set_decorations(false);
 
-            // Enable macOS window tiling/arrangement (the green traffic-light menu).
-            // Tauri's overlay titlebar does not set NSWindowCollectionBehaviorManaged,
-            // so the green button only toggles full-screen by default. Setting Managed
-            // additionally restores the "Arrange Left / Right / Center" tiling popup
-            // that users expect on macOS Ventura and later.
+            // Enable macOS window tiling/arrangement.
+            //
+            // Two things are required for the full native experience:
+            //
+            // 1. NSWindowCollectionBehaviorManaged on the NSWindow — enables the
+            //    tiling popup on the green traffic-light button AND tells macOS
+            //    this window participates in Spaces / tiling.
+            //
+            // 2. NSApplication.setWindowsMenu: — registers the "Window" menu from
+            //    the menu bar as the official windows menu. macOS then dynamically
+            //    injects the standard window-management items (Fill, Center,
+            //    Move & Resize with Halves/Quarters/Arrange, Full Screen Tile,
+            //    Bring All to Front, etc.) when the menu is opened. Tauri may or
+            //    may not wire this up, so we do it explicitly here.
             #[cfg(target_os = "macos")]
             {
                 use objc2::msg_send;
-                use objc2::runtime::AnyObject;
+                use objc2::runtime::{AnyClass, AnyObject};
                 use raw_window_handle::{HasWindowHandle, RawWindowHandle};
 
                 if let Ok(handle) = main_window.window_handle() {
@@ -193,10 +202,58 @@ pub fn run() {
                         // SAFETY: ns_view is a valid NSView* supplied by Tauri/WRY.
                         let ns_window: *mut AnyObject =
                             unsafe { msg_send![ns_view, window] };
-                        // NSWindowCollectionBehaviorManaged        = 1 << 2  (tiling menu)
+
+                        // NSWindowCollectionBehaviorManaged        = 1 << 2  (tiling)
                         // NSWindowCollectionBehaviorFullScreenPrimary = 1 << 10 (full-screen)
                         let behavior: u64 = (1 << 2) | (1 << 10);
-                        unsafe { let _: () = msg_send![ns_window, setCollectionBehavior: behavior]; }
+                        unsafe {
+                            let _: () = msg_send![ns_window, setCollectionBehavior: behavior];
+                        }
+
+                        // Walk the main menu bar looking for the "Window" menu and
+                        // register it with NSApplication. This causes macOS to
+                        // auto-populate it with all standard window-management items.
+                        unsafe {
+                            let ns_app_class = AnyClass::get(
+                                std::ffi::CStr::from_bytes_with_nul_unchecked(b"NSApplication\0"),
+                            );
+                            if let Some(cls) = ns_app_class {
+                                let ns_app: *mut AnyObject =
+                                    msg_send![cls, sharedApplication];
+                                let main_menu: *mut AnyObject =
+                                    msg_send![ns_app, mainMenu];
+                                if !main_menu.is_null() {
+                                    let count: isize =
+                                        msg_send![main_menu, numberOfItems];
+                                    for i in 0..count {
+                                        let item: *mut AnyObject =
+                                            msg_send![main_menu, itemAtIndex: i];
+                                        let submenu: *mut AnyObject =
+                                            msg_send![item, submenu];
+                                        if submenu.is_null() {
+                                            continue;
+                                        }
+                                        let title: *mut AnyObject =
+                                            msg_send![item, title];
+                                        let utf8: *const std::ffi::c_char =
+                                            msg_send![title, UTF8String];
+                                        if utf8.is_null() {
+                                            continue;
+                                        }
+                                        let s = std::ffi::CStr::from_ptr(utf8)
+                                            .to_str()
+                                            .unwrap_or("");
+                                        if s == "Window" {
+                                            let _: () = msg_send![
+                                                ns_app,
+                                                setWindowsMenu: submenu
+                                            ];
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
