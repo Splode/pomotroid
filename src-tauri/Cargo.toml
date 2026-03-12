@@ -38,3 +38,7 @@ futures-util = "0.3"
 rodio = { version = "0.22", default-features = false, features = ["playback", "wav", "mp3", "vorbis"] }
 tiny-skia = "0.12"
 notify = "8"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+raw-window-handle = "0.6"

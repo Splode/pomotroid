@@ -176,6 +176,31 @@ pub fn run() {
             #[cfg(not(target_os = "macos"))]
             let _ = main_window.set_decorations(false);
 
+            // Enable macOS window tiling/arrangement (the green traffic-light menu).
+            // Tauri's overlay titlebar does not set NSWindowCollectionBehaviorManaged,
+            // so the green button only toggles full-screen by default. Setting Managed
+            // additionally restores the "Arrange Left / Right / Center" tiling popup
+            // that users expect on macOS Ventura and later.
+            #[cfg(target_os = "macos")]
+            {
+                use objc2::msg_send;
+                use objc2::runtime::AnyObject;
+                use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+
+                if let Ok(handle) = main_window.window_handle() {
+                    if let RawWindowHandle::AppKit(h) = handle.as_raw() {
+                        let ns_view = h.ns_view.as_ptr() as *mut AnyObject;
+                        // SAFETY: ns_view is a valid NSView* supplied by Tauri/WRY.
+                        let ns_window: *mut AnyObject =
+                            unsafe { msg_send![ns_view, window] };
+                        // NSWindowCollectionBehaviorManaged        = 1 << 2  (tiling menu)
+                        // NSWindowCollectionBehaviorFullScreenPrimary = 1 << 10 (full-screen)
+                        let behavior: u64 = (1 << 2) | (1 << 10);
+                        unsafe { let _: () = msg_send![ns_window, setCollectionBehavior: behavior]; }
+                    }
+                }
+            }
+
             // Apply always-on-top from saved settings on startup.
             if initial_settings.always_on_top {
                 let _ = main_window.set_always_on_top(true);
