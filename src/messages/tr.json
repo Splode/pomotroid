@@ -1,17 +1,14 @@
 {
   "settings_title": "Ayarlar",
-
   "nav_timer": "Zamanlayıcı",
   "nav_appearance": "Görünüm",
   "nav_notifications": "Bildirimler",
   "nav_shortcuts": "Kısayollar",
   "nav_system": "Sistem",
   "nav_about": "Hakkında",
-
   "round_label_work": "Odaklanma",
   "round_label_short_break": "Kısa Mola",
   "round_label_long_break": "Uzun Mola",
-
   "timer_slider_focus": "Odaklanma",
   "timer_slider_short_break": "Kısa Mola",
   "timer_slider_long_break": "Uzun Mola",
@@ -24,7 +21,6 @@
   "timer_toggle_countdown_desc": "Yay dolu başlar ve zaman geçtikçe azalır.",
   "timer_reset": "Sıfırla",
   "timer_reset_defaults": "Varsayılanlara Sıfırla",
-
   "appearance_group_mode": "Mod",
   "appearance_mode_auto": "Otomatik",
   "appearance_mode_light": "Açık",
@@ -33,7 +29,6 @@
   "appearance_group_dark_theme": "Koyu Tema",
   "appearance_badge_active": "etkin",
   "appearance_badge_custom": "özel",
-
   "notif_group_desktop": "Masaüstü",
   "notif_toggle_desktop": "Masaüstü Bildirimleri",
   "notif_toggle_desktop_desc": "Her tur bittiğinde sistem bildirimi göster.",
@@ -51,8 +46,8 @@
   "notif_audio_default": "Varsayılan",
   "notif_btn_restore": "Geri Yükle",
   "notif_btn_choose": "Dosya Seç",
-
   "system_group_window": "Pencere",
+  "system_group_data": "Veri",
   "system_toggle_aot": "Her Zaman Üstte",
   "system_toggle_aot_desc": "Zamanlayıcı penceresini diğer tüm pencerelerin üzerinde tut.",
   "system_toggle_break_aot": "Molalarda Önceliği Düşür",
@@ -71,20 +66,16 @@
   "system_group_language": "Dil",
   "system_group_updates": "Güncellemeler",
   "system_toggle_check_updates": "Güncellemeleri Otomatik Kontrol Et",
-  "system_toggle_check_updates_desc": "Ayarlar açıldığında otomatik olarak yeni sürüm kontrol et.",
-
-  "shortcuts_accessibility_notice": "Genel kısayollar macOS'ta Erişilebilirlik iznini gerektirir. Sistem Ayarları → Gizlilik ve Güvenlik → Erişilebilirlik bölümünde Pomotroid'i etkinleştirin.",
+  "system_toggle_check_updates_desc": "Ayarlar açıldığında otomatik olarak yeni sürüm kontrol et.",  "shortcuts_accessibility_notice": "Genel kısayollar macOS'ta Erişilebilirlik iznini gerektirir. Sistem Ayarları → Gizlilik ve Güvenlik → Erişilebilirlik bölümünde Pomotroid'i etkinleştirin.",
   "shortcuts_accessibility_open": "Sistem Ayarlarını Aç",
   "shortcuts_note": "Genel kısayollar, pencere odaklanmamış olsa bile çalışır. Bir alana tıklayın ve kaydetmek için istediğiniz tuş kombinasyonuna basın.",
   "shortcuts_toggle_timer": "Zamanlayıcıyı Aç/Kapat",
   "shortcuts_reset_timer": "Zamanlayıcıyı Sıfırla",
   "shortcuts_skip_round": "Turu Atla",
   "shortcuts_restart_round": "Turu Yeniden Başlat",
-
   "advanced_group_logging": "Kayıt",
   "advanced_toggle_verbose_logging": "Ayrıntılı Kayıt",
   "advanced_toggle_verbose_logging_desc": "Sorunların teşhisine yardımcı olmak için ayrıntılı hata ayıklama kaydını etkinleştir.",
-
   "about_release_notes": "Sürüm Notları",
   "about_source_code": "Kaynak Kodu ve Lisans",
   "about_open_log_folder": "Kayıt Klasörünü Aç",
@@ -93,9 +84,7 @@
   "about_update_checking": "Güncellemeler kontrol ediliyor\u2026",
   "about_update_up_to_date": "Güncel",
   "about_update_install": "v{version} kur \u2014 uygulama yeniden başlayacak",
-  "about_update_error": "Güncellemeler kontrol edilemedi",
-
-  "stats_title": "İstatistikler",
+  "about_update_error": "Güncellemeler kontrol edilemedi",  "stats_title": "İstatistikler",
   "stats_tab_today": "Bugün",
   "stats_tab_week": "Bu Hafta",
   "stats_tab_alltime": "Tüm Zamanlar",
@@ -119,7 +108,6 @@
   "stats_empty_history": "Geçmişinizi görmek için ilk oturumunuzu tamamlayın",
   "stats_prev_year": "Önceki yıl",
   "stats_next_year": "Sonraki yıl",
-
   "notification_work_title": "Mola bitti — odaklanma zamanı!",
   "notification_work_body": "Çalışmaya geri dönme zamanı. Başarabilirsin!",
   "notification_short_break_title": "Çalışma turu tamamlandı!",

@@ -1,17 +1,14 @@
 {
   "settings_title": "設定",
-
   "nav_timer": "タイマー",
   "nav_appearance": "外観",
   "nav_notifications": "通知",
   "nav_shortcuts": "ショートカット",
   "nav_system": "システム",
   "nav_about": "このアプリについて",
-
   "round_label_work": "集中",
   "round_label_short_break": "短い休憩",
   "round_label_long_break": "長い休憩",
-
   "timer_slider_focus": "集中",
   "timer_slider_short_break": "短い休憩",
   "timer_slider_long_break": "長い休憩",
@@ -24,7 +21,6 @@
   "timer_toggle_countdown_desc": "アークが満タンから始まり、時間の経過とともに減少します。",
   "timer_reset": "リセット",
   "timer_reset_defaults": "デフォルトにリセット",
-
   "appearance_group_mode": "モード",
   "appearance_mode_auto": "自動",
   "appearance_mode_light": "ライト",
@@ -33,7 +29,6 @@
   "appearance_group_dark_theme": "ダークテーマ",
   "appearance_badge_active": "アクティブ",
   "appearance_badge_custom": "カスタム",
-
   "notif_group_desktop": "デスクトップ",
   "notif_toggle_desktop": "デスクトップ通知",
   "notif_toggle_desktop_desc": "各ラウンドが終了したときにシステム通知を表示します。",
@@ -51,8 +46,8 @@
   "notif_audio_default": "デフォルト",
   "notif_btn_restore": "復元",
   "notif_btn_choose": "ファイルを選択",
-
   "system_group_window": "ウィンドウ",
+  "system_group_data": "データ",
   "system_toggle_aot": "常に前面に表示",
   "system_toggle_aot_desc": "タイマーウィンドウを他のすべてのウィンドウの上に保持します。",
   "system_toggle_break_aot": "休憩中は優先度を下げる",
@@ -71,20 +66,16 @@
   "system_group_language": "言語",
   "system_group_updates": "アップデート",
   "system_toggle_check_updates": "自動的にアップデートを確認する",
-  "system_toggle_check_updates_desc": "設定を開いたときに自動的に新しいバージョンを確認します。",
-
-  "shortcuts_accessibility_notice": "macOSでグローバルショートカットを使用するには、アクセシビリティのアクセス許可が必要です。システム設定 → プライバシーとセキュリティ → アクセシビリティでPomotroidを有効にしてください。",
+  "system_toggle_check_updates_desc": "設定を開いたときに自動的に新しいバージョンを確認します。",  "shortcuts_accessibility_notice": "macOSでグローバルショートカットを使用するには、アクセシビリティのアクセス許可が必要です。システム設定 → プライバシーとセキュリティ → アクセシビリティでPomotroidを有効にしてください。",
   "shortcuts_accessibility_open": "システム設定を開く",
   "shortcuts_note": "グローバルショートカットはウィンドウにフォーカスがない場合でも機能します。フィールドをクリックして、記録したいキーの組み合わせを押してください。",
   "shortcuts_toggle_timer": "タイマーの切り替え",
   "shortcuts_reset_timer": "タイマーのリセット",
   "shortcuts_skip_round": "ラウンドをスキップ",
   "shortcuts_restart_round": "ラウンドを再開",
-
   "advanced_group_logging": "ログ記録",
   "advanced_toggle_verbose_logging": "詳細ログ",
   "advanced_toggle_verbose_logging_desc": "問題の診断に役立つ詳細なデバッグログを有効にします。",
-
   "about_release_notes": "リリースノート",
   "about_source_code": "ソースコードとライセンス",
   "about_open_log_folder": "ログフォルダを開く",
@@ -93,9 +84,7 @@
   "about_update_checking": "アップデートを確認中\u2026",
   "about_update_up_to_date": "最新版です",
   "about_update_install": "v{version} をインストール \u2014 アプリが再起動します",
-  "about_update_error": "アップデートを確認できませんでした",
-
-  "stats_title": "統計",
+  "about_update_error": "アップデートを確認できませんでした",  "stats_title": "統計",
   "stats_tab_today": "今日",
   "stats_tab_week": "今週",
   "stats_tab_alltime": "通算",
@@ -119,7 +108,6 @@
   "stats_empty_history": "最初のセッションを完了すると履歴が表示されます",
   "stats_prev_year": "前の年",
   "stats_next_year": "次の年",
-
   "notification_work_title": "休憩終了 — 集中する時間です！",
   "notification_work_body": "仕事に戻る時間です。頑張って！",
   "notification_short_break_title": "作業ラウンド完了！",
