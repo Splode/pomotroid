@@ -123,6 +123,15 @@
     </div>
   </div>
 
+  <div class="group-heading">{m.system_group_updates()}</div>
+
+  <SettingsToggle
+    label={m.system_toggle_check_updates()}
+    description={m.system_toggle_check_updates_desc()}
+    checked={$settings.check_for_updates}
+    onclick={() => toggle('check_for_updates', $settings.check_for_updates)}
+  />
+
   <div class="group-heading">{m.advanced_group_logging()}</div>
 
   <SettingsToggle

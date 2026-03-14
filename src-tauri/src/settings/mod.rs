@@ -45,6 +45,7 @@ pub struct Settings {
     pub websocket_port: u16,
     pub language: String,
     pub verbose_logging: bool,
+    pub check_for_updates: bool,
 }
 
 impl Default for Settings {
@@ -89,6 +90,7 @@ impl Default for Settings {
             websocket_port: 1314,
             language: "auto".to_string(),
             verbose_logging: false,
+            check_for_updates: true,
         }
     }
 }
@@ -199,6 +201,7 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         websocket_port: parse_u32(&map, "websocket_port", d.websocket_port as u32) as u16,
         language: map.get("language").cloned().unwrap_or(d.language),
         verbose_logging: parse_bool(&map, "verbose_logging", d.verbose_logging),
+        check_for_updates: parse_bool(&map, "check_for_updates", d.check_for_updates),
     })
 }
 

@@ -29,6 +29,14 @@
       "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; media-src 'self'"
     }
   },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDdDMTE5MDhGMEMyMDNDNjYKUldSbVBDQU1qNUFSZkc4SXhsOGx6Q1d6UkNPbHlBTUU3Qzhlb0cwa2pZZjk0S1RxNVUweS9YNlQK",
+      "endpoints": [
+        "https://raw.githubusercontent.com/Splode/pomotroid/main/latest.json"
+      ]
+    }
+  },
   "bundle": {
     "active": true,
     "targets": "all",

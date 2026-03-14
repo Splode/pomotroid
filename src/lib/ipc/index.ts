@@ -4,7 +4,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
-import type { TimerState, Settings, Theme, CustomAudioInfo, DetailedStats, HeatmapStats } from '$lib/types';
+import type { TimerState, Settings, Theme, CustomAudioInfo, DetailedStats, HeatmapStats, UpdateInfo } from '$lib/types';
 
 // --- Timer commands ---
 
@@ -79,6 +79,14 @@ export const statsGetHeatmap = () => invoke<HeatmapStats>('stats_get_heatmap');
 // --- Platform commands ---
 
 export const accessibilityTrusted = () => invoke<boolean>('accessibility_trusted');
+
+// --- Updater commands ---
+
+/** Check for an available update. Returns update info or null if already up to date. */
+export const checkUpdate = () => invoke<UpdateInfo | null>('check_update');
+
+/** Download, install, and immediately relaunch with the pending update. */
+export const installUpdate = () => invoke<void>('install_update');
 
 // --- Event listeners ---
 

@@ -49,6 +49,9 @@ jobs:
     name: Linux x64
     runs-on: ubuntu-latest
     needs: changelog
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -94,7 +97,7 @@ jobs:
         run: echo "$GPG_PRIVATE_KEY" | gpg --batch --import
 
       - name: Build (release)
-        run: npm run tauri build -- --bundles deb,appimage,rpm
+        run: npm run tauri build -- --config '{"bundle":{"createUpdaterArtifacts":true}}' --bundles deb,appimage,rpm
         env:
           CI: true
 
@@ -119,6 +122,7 @@ jobs:
             src-tauri/target/release/bundle/deb/*.deb.asc
             src-tauri/target/release/bundle/appimage/*.AppImage
             src-tauri/target/release/bundle/appimage/*.AppImage.asc
+            src-tauri/target/release/bundle/appimage/*.AppImage.sig
             src-tauri/target/release/bundle/rpm/*.rpm
             src-tauri/target/release/bundle/rpm/*.rpm.asc
           if-no-files-found: error
@@ -128,6 +132,9 @@ jobs:
     name: macOS (universal)
     runs-on: macos-latest
     needs: changelog
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -158,7 +165,7 @@ jobs:
         run: npx svelte-kit sync
 
       - name: Build (release, universal binary)
-        run: npm run tauri build -- --bundles dmg --target universal-apple-darwin
+        run: npm run tauri build -- --config '{"bundle":{"createUpdaterArtifacts":true}}' --bundles app,dmg --target universal-apple-darwin
         env:
           CI: true
 
@@ -166,7 +173,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pomotroid-macos-universal
-          path: src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+          path: |
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg.sig
           if-no-files-found: error
 
   # ── Windows build ──────────────────────────────────────────────────────────
@@ -174,6 +183,9 @@ jobs:
     name: Windows x64
     runs-on: windows-latest
     needs: changelog
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
     outputs:
       installer_hash: ${{ steps.hash.outputs.sha256 }}
 
@@ -204,7 +216,7 @@ jobs:
         run: npx svelte-kit sync
 
       - name: Build (release)
-        run: npm run tauri build -- --bundles nsis
+        run: npm run tauri build -- --config '{"bundle":{"createUpdaterArtifacts":true}}' --bundles nsis
         env:
           CI: true
 
@@ -221,6 +233,7 @@ jobs:
           name: pomotroid-windows-x64
           path: |
             src-tauri/target/release/bundle/nsis/*-setup.exe
+            src-tauri/target/release/bundle/nsis/*-setup.exe.sig
             src-tauri/target/release/pomotroid.exe
           if-no-files-found: error
 
@@ -255,7 +268,44 @@ jobs:
           name: pomotroid-windows-x64
           path: dist/windows
 
-      - name: Update Scoop manifest
+      - name: Generate latest.json updater manifest
+        run: |
+          VERSION="${{ needs.changelog.outputs.version }}"
+          REPO="https://github.com/Splode/pomotroid"
+          PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          # Derive actual filenames from the downloaded artifacts rather than
+          # constructing them from the tag version — the tag version may differ
+          # from the binary version in tauri.conf.json.
+          APPIMAGE_FILE=$(find dist/linux -name "*.AppImage" ! -name "*.sig" | head -1)
+          APPIMAGE_SIG=$(cat "${APPIMAGE_FILE}.sig" 2>/dev/null || echo "")
+          DMG_FILE=$(find dist/macos -name "*.dmg" ! -name "*.sig" | head -1)
+          DMG_SIG=$(cat "${DMG_FILE}.sig" 2>/dev/null || echo "")
+          NSIS_FILE=$(find dist/windows -name "*-setup.exe" ! -name "*.sig" | head -1)
+          NSIS_SIG=$(cat "${NSIS_FILE}.sig" 2>/dev/null || echo "")
+
+          jq -n \
+            --arg version "$VERSION" \
+            --arg pub_date "$PUB_DATE" \
+            --arg notes "See $REPO/releases/tag/v$VERSION for release notes." \
+            --arg linux_url "$REPO/releases/download/v$VERSION/$(basename "$APPIMAGE_FILE")" \
+            --arg linux_sig "$APPIMAGE_SIG" \
+            --arg darwin_url "$REPO/releases/download/v$VERSION/$(basename "$DMG_FILE")" \
+            --arg darwin_sig "$DMG_SIG" \
+            --arg windows_url "$REPO/releases/download/v$VERSION/$(basename "$NSIS_FILE")" \
+            --arg windows_sig "$NSIS_SIG" \
+            '{
+              version: $version,
+              notes: $notes,
+              pub_date: $pub_date,
+              platforms: {
+                "linux-x86_64": { signature: $linux_sig, url: $linux_url },
+                "darwin-universal": { signature: $darwin_sig, url: $darwin_url },
+                "windows-x86_64": { signature: $windows_sig, url: $windows_url }
+              }
+            }' > latest.json
+
+      - name: Update Scoop manifest and commit latest.json
         run: |
           VERSION="${{ needs.changelog.outputs.version }}"
           HASH="${{ needs.build-windows.outputs.installer_hash }}"
@@ -264,8 +314,8 @@ jobs:
             pomotroid.json > pomotroid.json.tmp && mv pomotroid.json.tmp pomotroid.json
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pomotroid.json
-          git commit -m "chore: update Scoop manifest to v${VERSION} [skip ci]"
+          git add pomotroid.json latest.json
+          git commit -m "chore: update Scoop manifest and latest.json to v${VERSION} [skip ci]"
           git push origin HEAD:main
 
       - name: Create draft release

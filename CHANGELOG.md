@@ -2,7 +2,11 @@
 [Unreleased]
 -----------
 
-### macOS
+### Features
+
+* **In-app auto-update** — Pomotroid now checks for new releases automatically when the Settings window opens. If an update is available, an "Install vX.Y.Z" button appears in Settings → About; clicking it downloads, verifies, and installs the update then relaunches immediately. Bundles are Ed25519-signed in CI and verified by the updater before installation. Automatic checking can be disabled via the new "Check for Updates Automatically" toggle in Settings → System. Linux users who installed via `.deb` or `.rpm` are not affected — in-app updates apply to AppImage only; package-manager installations should update through their respective package manager.
+
+#### macOS
 
 * **Native window management controls restored** — the macOS Window menu now includes the full set of standard window-management items (Fill, Center, Move & Resize with Halves/Quarters/Arrange submenus, Full Screen Tile, Bring All to Front) that were absent after the Electron → Tauri rewrite. The green traffic-light button also gains its tiling popup (arrange left/right/center). Both are enabled by setting `NSWindowCollectionBehaviorManaged` on the underlying `NSWindow` and registering the Window menu with `NSApplication.setWindowsMenu:` at startup.
 

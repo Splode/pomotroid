@@ -18,6 +18,8 @@ use tauri_plugin_log::{Builder as LogBuilder, RotationStrategy, Target, TargetKi
 use commands::{
     accessibility_trusted,
     app_version,
+    check_update,
+    install_update,
     audio_clear_custom, audio_get_custom_info, audio_set_custom,
     get_log_dir, open_log_dir,
     notification_show,
@@ -44,6 +46,7 @@ pub fn run() {
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_notification::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             // Capture Rust panics to the log file before the process terminates.
             std::panic::set_hook(Box::new(|info| {
@@ -314,6 +317,9 @@ pub fn run() {
             get_log_dir,
             accessibility_trusted,
             app_version,
+            // Updater
+            check_update,
+            install_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
