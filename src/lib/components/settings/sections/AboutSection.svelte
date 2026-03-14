@@ -3,7 +3,7 @@
   import { openUrl } from '@tauri-apps/plugin-opener';
 
   import { info, warn, error as logError } from '@tauri-apps/plugin-log';
-  import { openLogDir, appVersion, resetSettings, checkUpdate, installUpdate } from '$lib/ipc';
+  import { openLogDir, appVersion, checkUpdate, installUpdate } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import type { UpdateInfo } from '$lib/types';
   import * as m from '$paraglide/messages.js';
@@ -12,7 +12,6 @@
   const REPO = 'https://github.com/Splode/pomotroid';
 
   let version = $state('...');
-  let confirming = $state(false);
 
   type UpdateState = 'idle' | 'checking' | 'up-to-date' | 'available' | 'installing' | 'error';
   let updateState = $state<UpdateState>('idle');
@@ -64,12 +63,6 @@
       updateState = 'error';
       await logError(`[about] update install failed: ${e}`);
     }
-  }
-
-  async function handleReset() {
-    const updated = await resetSettings();
-    settings.set(updated);
-    confirming = false;
   }
 </script>
 
@@ -147,22 +140,6 @@
       {/if}
     </div>
   {/if}
-
-  <div class="reset-group">
-    {#if !confirming}
-      <button class="reset-row" onclick={() => (confirming = true)}>
-        <span>{m.about_reset_all()}</span>
-      </button>
-    {:else}
-      <div class="confirm-row">
-        <span class="confirm-label">{m.about_reset_confirm()}</span>
-        <div class="confirm-actions">
-          <button class="confirm-cancel" onclick={() => (confirming = false)}>Cancel</button>
-          <button class="confirm-reset" onclick={handleReset}>Reset</button>
-        </div>
-      </div>
-    {/if}
-  </div>
 
   <p class="credit">
     Built with Tauri, Svelte, and Rust.<br/>
@@ -263,81 +240,6 @@
 
   .update-row--action:hover {
     background: var(--color-hover);
-  }
-
-  .reset-group {
-    border: 1px solid var(--color-separator);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-
-  .reset-row {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding: 12px 16px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--color-foreground-darker, var(--color-foreground));
-    font-size: 0.85rem;
-    letter-spacing: 0.02em;
-    text-align: left;
-    transition: background 0.12s, color 0.12s;
-  }
-
-  .reset-row:hover {
-    background: var(--color-hover);
-    color: color-mix(in oklch, var(--color-focus-round) 80%, var(--color-foreground));
-  }
-
-  .confirm-row {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 12px 16px;
-  }
-
-  .confirm-label {
-    font-size: 0.8rem;
-    color: var(--color-foreground-darker, var(--color-foreground));
-    opacity: 0.8;
-  }
-
-  .confirm-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-  }
-
-  .confirm-cancel,
-  .confirm-reset {
-    background: none;
-    border: 1px solid color-mix(in oklch, var(--color-foreground) 18%, transparent);
-    border-radius: 4px;
-    font-size: 0.8rem;
-    padding: 5px 14px;
-    cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
-  }
-
-  .confirm-cancel {
-    color: var(--color-foreground-darker, var(--color-foreground));
-  }
-
-  .confirm-cancel:hover {
-    border-color: color-mix(in oklch, var(--color-foreground) 40%, transparent);
-    color: var(--color-foreground);
-  }
-
-  .confirm-reset {
-    color: var(--color-accent);
-    border-color: color-mix(in oklch, var(--color-accent) 40%, transparent);
-  }
-
-  .confirm-reset:hover {
-    background: color-mix(in oklch, var(--color-accent) 10%, transparent);
-    border-color: var(--color-accent);
   }
 
   .credit {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { settings } from '$lib/stores/settings';
-  import { setSetting } from '$lib/ipc';
+  import { setSetting, resetSettings, clearSessionHistory } from '$lib/ipc';
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import * as m from '$paraglide/messages.js';
   import { setLocale } from '$lib/locale.svelte.js';
@@ -44,6 +44,20 @@
     window.addEventListener('mousedown', onOutside);
     return () => window.removeEventListener('mousedown', onOutside);
   });
+
+  let confirmingReset = $state(false);
+  let confirmingClear = $state(false);
+
+  async function handleReset() {
+    const updated = await resetSettings();
+    settings.set(updated);
+    confirmingReset = false;
+  }
+
+  async function handleClear() {
+    await clearSessionHistory();
+    confirmingClear = false;
+  }
 
   async function toggle(dbKey: string, current: boolean) {
     const updated = await setSetting(dbKey, current ? 'false' : 'true');
@@ -188,12 +202,44 @@
       onclick={() => toggle('break_always_on_top', $settings.break_always_on_top)}
     />
   {/if}
+
+  <div class="group-heading">{m.system_group_data()}</div>
+
+  <div class="data-group">
+    {#if !confirmingClear}
+      <button class="data-row" onclick={() => (confirmingClear = true)}>
+        <span>Clear Session History</span>
+      </button>
+    {:else}
+      <div class="confirm-row">
+        <span class="confirm-label">This will permanently delete all session history. This cannot be undone.</span>
+        <div class="confirm-actions">
+          <button class="confirm-cancel" onclick={() => (confirmingClear = false)}>Cancel</button>
+          <button class="confirm-destructive" onclick={handleClear}>Clear</button>
+        </div>
+      </div>
+    {/if}
+    {#if !confirmingReset}
+      <button class="data-row" onclick={() => (confirmingReset = true)}>
+        <span>{m.about_reset_all()}</span>
+      </button>
+    {:else}
+      <div class="confirm-row">
+        <span class="confirm-label">{m.about_reset_confirm()}</span>
+        <div class="confirm-actions">
+          <button class="confirm-cancel" onclick={() => (confirmingReset = false)}>Cancel</button>
+          <button class="confirm-destructive" onclick={handleReset}>Reset</button>
+        </div>
+      </div>
+    {/if}
+  </div>
 </div>
 
 <style>
   .section {
     display: flex;
     flex-direction: column;
+    padding-bottom: 20px;
   }
 
   .group-heading {
@@ -329,5 +375,91 @@
   .lang-option.selected {
     color: var(--color-accent);
     font-weight: 500;
+  }
+
+  .data-group {
+    border: 1px solid var(--color-separator);
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 6px 20px 0;
+  }
+
+  .data-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--color-separator);
+    cursor: pointer;
+    color: var(--color-foreground-darker, var(--color-foreground));
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    text-align: left;
+    transition: background 0.12s, color 0.12s;
+  }
+
+  .data-row:last-child {
+    border-bottom: none;
+  }
+
+  .data-row:hover {
+    background: var(--color-hover);
+    color: color-mix(in oklch, var(--color-focus-round) 80%, var(--color-foreground));
+  }
+
+  .confirm-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-separator);
+  }
+
+  .confirm-row:last-child {
+    border-bottom: none;
+  }
+
+  .confirm-label {
+    font-size: 0.8rem;
+    color: var(--color-foreground-darker, var(--color-foreground));
+    opacity: 0.8;
+  }
+
+  .confirm-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+
+  .confirm-cancel,
+  .confirm-destructive {
+    background: none;
+    border: 1px solid color-mix(in oklch, var(--color-foreground) 18%, transparent);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .confirm-cancel {
+    color: var(--color-foreground-darker, var(--color-foreground));
+  }
+
+  .confirm-cancel:hover {
+    border-color: color-mix(in oklch, var(--color-foreground) 40%, transparent);
+    color: var(--color-foreground);
+  }
+
+  .confirm-destructive {
+    color: var(--color-accent);
+    border-color: color-mix(in oklch, var(--color-accent) 40%, transparent);
+  }
+
+  .confirm-destructive:hover {
+    background: color-mix(in oklch, var(--color-accent) 10%, transparent);
+    border-color: var(--color-accent);
   }
 </style>

@@ -3,7 +3,7 @@
   import { onMount } from 'svelte';
   import {
     getSettings, getThemes,
-    onSettingsChanged, onThemesChanged, onRoundChange,
+    onSettingsChanged, onThemesChanged, onRoundChange, onSessionsCleared,
     statsGetDetailed, statsGetHeatmap,
   } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
@@ -76,6 +76,14 @@
             if (heatmapLoaded) heatmap = await statsGetHeatmap();
           } catch (e) {
             await logError(`[stats] failed to refresh stats after round change: ${e}`);
+          }
+        }),
+        await onSessionsCleared(async () => {
+          try {
+            detailed = await statsGetDetailed();
+            if (heatmapLoaded) heatmap = await statsGetHeatmap();
+          } catch (e) {
+            await logError(`[stats] failed to refresh stats after session clear: ${e}`);
           }
         }),
         await onSettingsChanged(async (updated) => {

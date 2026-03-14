@@ -1,17 +1,14 @@
 {
   "settings_title": "设置",
-
   "nav_timer": "计时器",
   "nav_appearance": "外观",
   "nav_notifications": "通知",
   "nav_shortcuts": "快捷键",
   "nav_system": "系统",
   "nav_about": "关于",
-
   "round_label_work": "专注",
   "round_label_short_break": "短休息",
   "round_label_long_break": "长休息",
-
   "timer_slider_focus": "专注",
   "timer_slider_short_break": "短休息",
   "timer_slider_long_break": "长休息",
@@ -24,7 +21,6 @@
   "timer_toggle_countdown_desc": "表盘从满格开始，随时间推移减少。",
   "timer_reset": "重置",
   "timer_reset_defaults": "恢复默认设置",
-
   "appearance_group_mode": "模式",
   "appearance_mode_auto": "自动",
   "appearance_mode_light": "浅色",
@@ -33,7 +29,6 @@
   "appearance_group_dark_theme": "深色主题",
   "appearance_badge_active": "活跃",
   "appearance_badge_custom": "自定义",
-
   "notif_group_desktop": "桌面",
   "notif_toggle_desktop": "桌面通知",
   "notif_toggle_desktop_desc": "每个轮次结束时显示系统通知。",
@@ -51,8 +46,8 @@
   "notif_audio_default": "默认",
   "notif_btn_restore": "恢复",
   "notif_btn_choose": "选择文件",
-
   "system_group_window": "窗口",
+  "system_group_data": "数据",
   "system_toggle_aot": "始终置顶",
   "system_toggle_aot_desc": "将计时器窗口保持在所有其他窗口之上。",
   "system_toggle_break_aot": "休息期间降低优先级",
@@ -71,20 +66,16 @@
   "system_group_language": "语言",
   "system_group_updates": "更新",
   "system_toggle_check_updates": "自动检查更新",
-  "system_toggle_check_updates_desc": "打开设置时自动检查新版本。",
-
-  "shortcuts_accessibility_notice": "在 macOS 上使用全局快捷键需要辅助功能权限。请在系统设置 → 隐私与安全性 → 辅助功能中启用 Pomotroid。",
+  "system_toggle_check_updates_desc": "打开设置时自动检查新版本。",  "shortcuts_accessibility_notice": "在 macOS 上使用全局快捷键需要辅助功能权限。请在系统设置 → 隐私与安全性 → 辅助功能中启用 Pomotroid。",
   "shortcuts_accessibility_open": "打开系统设置",
   "shortcuts_note": "全局快捷键即使窗口未聚焦也能使用。点击字段并按下所需的按键组合进行录制。",
   "shortcuts_toggle_timer": "切换计时器",
   "shortcuts_reset_timer": "重置计时器",
   "shortcuts_skip_round": "跳过轮次",
   "shortcuts_restart_round": "重新开始轮次",
-
   "advanced_group_logging": "日志记录",
   "advanced_toggle_verbose_logging": "详细日志",
   "advanced_toggle_verbose_logging_desc": "启用详细调试日志以帮助诊断问题。",
-
   "about_release_notes": "发行说明",
   "about_source_code": "源代码与许可证",
   "about_open_log_folder": "打开日志文件夹",
@@ -93,9 +84,7 @@
   "about_update_checking": "正在检查更新\u2026",
   "about_update_up_to_date": "已是最新版本",
   "about_update_install": "安装 v{version} \u2014 应用将重启",
-  "about_update_error": "无法检查更新",
-
-  "stats_title": "统计",
+  "about_update_error": "无法检查更新",  "stats_title": "统计",
   "stats_tab_today": "今天",
   "stats_tab_week": "本周",
   "stats_tab_alltime": "总计",
@@ -119,7 +108,6 @@
   "stats_empty_history": "完成第一个会话后即可查看历史记录",
   "stats_prev_year": "上一年",
   "stats_next_year": "下一年",
-
   "notification_work_title": "休息结束 — 专注时间到！",
   "notification_work_body": "是时候回到工作了。你能做到！",
   "notification_short_break_title": "工作轮次完成！",

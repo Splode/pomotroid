@@ -1,17 +1,14 @@
 {
   "settings_title": "Settings",
-
   "nav_timer": "Timer",
   "nav_appearance": "Appearance",
   "nav_notifications": "Notifications",
   "nav_shortcuts": "Shortcuts",
   "nav_system": "System",
   "nav_about": "About",
-
   "round_label_work": "Focus",
   "round_label_short_break": "Short Break",
   "round_label_long_break": "Long Break",
-
   "timer_slider_focus": "Focus",
   "timer_slider_short_break": "Short Break",
   "timer_slider_long_break": "Long Break",
@@ -24,7 +21,6 @@
   "timer_toggle_countdown_desc": "Arc starts full and subtracts as time passes.",
   "timer_reset": "Reset",
   "timer_reset_defaults": "Reset to Defaults",
-
   "appearance_group_mode": "Mode",
   "appearance_mode_auto": "Auto",
   "appearance_mode_light": "Light",
@@ -33,7 +29,6 @@
   "appearance_group_dark_theme": "Dark Theme",
   "appearance_badge_active": "active",
   "appearance_badge_custom": "custom",
-
   "notif_group_desktop": "Desktop",
   "notif_toggle_desktop": "Desktop Notifications",
   "notif_toggle_desktop_desc": "Show a system notification when each round ends.",
@@ -51,8 +46,8 @@
   "notif_audio_default": "Default",
   "notif_btn_restore": "Restore",
   "notif_btn_choose": "Choose File",
-
   "system_group_window": "Window",
+  "system_group_data": "Data",
   "system_toggle_aot": "Always on Top",
   "system_toggle_aot_desc": "Keep the timer window above all other windows.",
   "system_toggle_break_aot": "Lower Priority During Breaks",
@@ -71,20 +66,16 @@
   "system_group_language": "Language",
   "system_group_updates": "Updates",
   "system_toggle_check_updates": "Check for Updates Automatically",
-  "system_toggle_check_updates_desc": "Automatically check for new versions when Settings is opened.",
-
-  "shortcuts_accessibility_notice": "Global shortcuts require Accessibility access on macOS. Enable Pomotroid in System Settings → Privacy & Security → Accessibility.",
+  "system_toggle_check_updates_desc": "Automatically check for new versions when Settings is opened.",  "shortcuts_accessibility_notice": "Global shortcuts require Accessibility access on macOS. Enable Pomotroid in System Settings → Privacy & Security → Accessibility.",
   "shortcuts_accessibility_open": "Open System Settings",
   "shortcuts_note": "Global shortcuts work even when the window is not focused. Click a field and press your desired key combination to record it.",
   "shortcuts_toggle_timer": "Toggle Timer",
   "shortcuts_reset_timer": "Reset Timer",
   "shortcuts_skip_round": "Skip Round",
   "shortcuts_restart_round": "Restart Round",
-
   "advanced_group_logging": "Logging",
   "advanced_toggle_verbose_logging": "Verbose Logging",
   "advanced_toggle_verbose_logging_desc": "Enable detailed debug logging to help diagnose issues.",
-
   "about_release_notes": "Release Notes",
   "about_source_code": "Source Code & License",
   "about_open_log_folder": "Open Log Folder",
@@ -93,9 +84,7 @@
   "about_update_checking": "Checking for updates\u2026",
   "about_update_up_to_date": "Up to date",
   "about_update_install": "Install v{version} \u2014 app will restart",
-  "about_update_error": "Could not check for updates",
-
-  "stats_title": "Statistics",
+  "about_update_error": "Could not check for updates",  "stats_title": "Statistics",
   "stats_tab_today": "Today",
   "stats_tab_week": "This Week",
   "stats_tab_alltime": "All Time",
@@ -115,11 +104,10 @@
   "stats_best_streak": "Best Streak",
   "stats_legend_less": "Less",
   "stats_legend_more": "More",
-  "stats_loading": "Loading\u2026",
+  "stats_loading": "Loading…",
   "stats_empty_history": "Complete your first session to see your history",
   "stats_prev_year": "Previous year",
   "stats_next_year": "Next year",
-
   "notification_work_title": "Break over — focus time!",
   "notification_work_body": "Time to get back to work. You've got this!",
   "notification_short_break_title": "Work round complete!",

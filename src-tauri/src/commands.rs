@@ -302,7 +302,25 @@ pub fn themes_list(app: AppHandle) -> Result<Vec<Theme>, String> {
 }
 
 // ---------------------------------------------------------------------------
-// CMD-04 — Stats commands
+// CMD-04 — Sessions commands
+// ---------------------------------------------------------------------------
+
+/// Deletes all rows from the `sessions` table (irreversible bulk clear).
+/// Emits `sessions:cleared` so any open stats window can refresh immediately.
+#[tauri::command]
+pub fn sessions_clear(db: State<'_, DbState>, app: AppHandle) -> Result<(), String> {
+    log::info!("[sessions] clearing all session history");
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    let n = conn.execute("DELETE FROM sessions", []).map_err(|e| {
+        log::error!("[sessions] failed to clear history: {e}");
+        e.to_string()
+    })?;
+    log::info!("[sessions] cleared {n} rows");
+    app.emit("sessions:cleared", ()).ok();
+    Ok(())
+}
+
+// CMD-05 — Stats commands
 // ---------------------------------------------------------------------------
 
 /// Batched stats for Today + This Week tabs (minimises IPC round-trips).
@@ -648,3 +666,45 @@ pub struct HeatmapStats {
     pub total_hours: u32,
     pub longest_streak: u32,
 }
+
+#[cfg(test)]
+mod tests {
+    use rusqlite::Connection;
+    use crate::db::migrations;
+
+    fn setup() -> Connection {
+        let conn = Connection::open_in_memory().unwrap();
+        migrations::run(&conn).unwrap();
+        conn
+    }
+
+    fn seed_sessions(conn: &Connection) {
+        conn.execute_batch("
+            INSERT INTO sessions (started_at, ended_at, round_type, duration_secs, completed)
+            VALUES (1000, 1060, 'work', 60, 1),
+                   (2000, 2300, 'short-break', 300, 1);
+        ").unwrap();
+    }
+
+    #[test]
+    fn sessions_clear_removes_all_rows() {
+        let conn = setup();
+        seed_sessions(&conn);
+        let before: i64 = conn.query_row("SELECT COUNT(*) FROM sessions", [], |r| r.get(0)).unwrap();
+        assert_eq!(before, 2);
+
+        let n = conn.execute("DELETE FROM sessions", []).unwrap();
+        assert_eq!(n, 2);
+
+        let after: i64 = conn.query_row("SELECT COUNT(*) FROM sessions", [], |r| r.get(0)).unwrap();
+        assert_eq!(after, 0);
+    }
+
+    #[test]
+    fn sessions_clear_on_empty_table_returns_zero() {
+        let conn = setup();
+        let n = conn.execute("DELETE FROM sessions", []).unwrap();
+        assert_eq!(n, 0);
+    }
+}
+

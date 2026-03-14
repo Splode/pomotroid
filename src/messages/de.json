@@ -1,17 +1,14 @@
 {
   "settings_title": "Einstellungen",
-
   "nav_timer": "Timer",
   "nav_appearance": "Erscheinungsbild",
   "nav_notifications": "Benachrichtigungen",
   "nav_shortcuts": "Tastenkürzel",
   "nav_system": "System",
   "nav_about": "Über",
-
   "round_label_work": "Fokus",
   "round_label_short_break": "Kurze Pause",
   "round_label_long_break": "Lange Pause",
-
   "timer_slider_focus": "Fokus",
   "timer_slider_short_break": "Kurze Pause",
   "timer_slider_long_break": "Lange Pause",
@@ -24,7 +21,6 @@
   "timer_toggle_countdown_desc": "Der Bogen beginnt voll und nimmt im Laufe der Zeit ab.",
   "timer_reset": "Zurücksetzen",
   "timer_reset_defaults": "Auf Standardwerte zurücksetzen",
-
   "appearance_group_mode": "Modus",
   "appearance_mode_auto": "Auto",
   "appearance_mode_light": "Hell",
@@ -33,7 +29,6 @@
   "appearance_group_dark_theme": "Dunkles Design",
   "appearance_badge_active": "aktiv",
   "appearance_badge_custom": "benutzerdefiniert",
-
   "notif_group_desktop": "Desktop",
   "notif_toggle_desktop": "Desktop-Benachrichtigungen",
   "notif_toggle_desktop_desc": "Eine Systembenachrichtigung anzeigen, wenn jede Runde endet.",
@@ -51,8 +46,8 @@
   "notif_audio_default": "Standard",
   "notif_btn_restore": "Wiederherstellen",
   "notif_btn_choose": "Datei auswählen",
-
   "system_group_window": "Fenster",
+  "system_group_data": "Daten",
   "system_toggle_aot": "Immer im Vordergrund",
   "system_toggle_aot_desc": "Das Timer-Fenster über allen anderen Fenstern halten.",
   "system_toggle_break_aot": "Niedrigere Priorität während Pausen",
@@ -71,20 +66,16 @@
   "system_group_language": "Sprache",
   "system_group_updates": "Updates",
   "system_toggle_check_updates": "Automatisch nach Updates suchen",
-  "system_toggle_check_updates_desc": "Beim Öffnen der Einstellungen automatisch auf neue Versionen prüfen.",
-
-  "shortcuts_accessibility_notice": "Globale Tastenkürzel erfordern unter macOS Zugriff auf die Bedienungshilfen. Aktiviere Pomotroid unter Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen.",
+  "system_toggle_check_updates_desc": "Beim Öffnen der Einstellungen automatisch auf neue Versionen prüfen.",  "shortcuts_accessibility_notice": "Globale Tastenkürzel erfordern unter macOS Zugriff auf die Bedienungshilfen. Aktiviere Pomotroid unter Systemeinstellungen → Datenschutz & Sicherheit → Bedienungshilfen.",
   "shortcuts_accessibility_open": "Systemeinstellungen öffnen",
   "shortcuts_note": "Globale Tastenkürzel funktionieren auch, wenn das Fenster nicht fokussiert ist. Klicke auf ein Feld und drücke die gewünschte Tastenkombination, um sie aufzuzeichnen.",
   "shortcuts_toggle_timer": "Timer umschalten",
   "shortcuts_reset_timer": "Timer zurücksetzen",
   "shortcuts_skip_round": "Runde überspringen",
   "shortcuts_restart_round": "Runde neu starten",
-
   "advanced_group_logging": "Protokollierung",
   "advanced_toggle_verbose_logging": "Ausführliche Protokollierung",
   "advanced_toggle_verbose_logging_desc": "Detaillierte Debug-Protokollierung aktivieren, um Probleme zu diagnostizieren.",
-
   "about_release_notes": "Versionshinweise",
   "about_source_code": "Quellcode & Lizenz",
   "about_open_log_folder": "Protokollordner öffnen",
@@ -93,9 +84,7 @@
   "about_update_checking": "Auf Updates wird geprüft\u2026",
   "about_update_up_to_date": "Aktuell",
   "about_update_install": "v{version} installieren \u2014 App wird neu gestartet",
-  "about_update_error": "Updates konnten nicht geprüft werden",
-
-  "stats_title": "Statistiken",
+  "about_update_error": "Updates konnten nicht geprüft werden",  "stats_title": "Statistiken",
   "stats_tab_today": "Heute",
   "stats_tab_week": "Diese Woche",
   "stats_tab_alltime": "Gesamt",
@@ -115,11 +104,10 @@
   "stats_best_streak": "Beste Serie",
   "stats_legend_less": "Weniger",
   "stats_legend_more": "Mehr",
-  "stats_loading": "Lade\u2026",
-  "stats_empty_history": "Schlie\u00dfe deine erste Sitzung ab, um deine Historie zu sehen",
+  "stats_loading": "Lade…",
+  "stats_empty_history": "Schließe deine erste Sitzung ab, um deine Historie zu sehen",
   "stats_prev_year": "Vorheriges Jahr",
-  "stats_next_year": "N\u00e4chstes Jahr",
-
+  "stats_next_year": "Nächstes Jahr",
   "notification_work_title": "Pause vorbei — Zeit zum Fokussieren!",
   "notification_work_body": "Zeit, wieder an die Arbeit zu gehen. Du schaffst das!",
   "notification_short_break_title": "Arbeitsrunde abgeschlossen!",
