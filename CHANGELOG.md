@@ -13,6 +13,7 @@
 ### Settings
 
 * **Data management in Settings → System** — a new Data section in Settings → System provides two actions: _Clear Session History_ permanently deletes all recorded session data, and _Reset All Settings_ restores every setting to its default value. Both actions require inline confirmation before executing. The Reset All Settings action has been moved here from Settings → About, and the Statistics window refreshes immediately when session history is cleared.
+* **Global shortcuts are now opt-in** ⚠️ **BREAKING** — global keyboard shortcuts are disabled by default on all platforms. A new _Enable Global Shortcuts_ toggle in Settings → Shortcuts controls them as a unit; individual shortcut bindings are preserved and editable only while shortcuts are enabled. Existing users will find shortcuts disabled after upgrading and must re-enable them once in Settings → Shortcuts. This matches the behaviour of the WebSocket server, which is also off by default.
 
 ### Bug Fixes
 

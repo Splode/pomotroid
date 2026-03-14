@@ -45,6 +45,7 @@ export interface Settings {
   language: string;     // 'auto' | 'en' | 'es' | 'fr' | 'de' | 'ja'
   verbose_logging: boolean;
   check_for_updates: boolean;
+  global_shortcuts_enabled: boolean;
 }
 
 /** Returned by `check_update` — describes an available update. */

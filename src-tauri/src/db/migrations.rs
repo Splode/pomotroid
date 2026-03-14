@@ -58,6 +58,15 @@ const MIGRATION_3: &str = "
     INSERT INTO schema_version VALUES (3);
 ";
 
+/// Seeds the `global_shortcuts_enabled` setting for all installs. Defaults to
+/// 'false' — global shortcuts are now opt-in. This is a breaking change for
+/// existing users who relied on shortcuts being active by default; they must
+/// re-enable them in Settings → Shortcuts.
+const MIGRATION_4: &str = "
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('global_shortcuts_enabled', 'false');
+    INSERT INTO schema_version VALUES (4);
+";
+
 /// Apply any pending migrations. Each migration is wrapped in a transaction
 /// so a partial failure leaves the database unchanged.
 pub fn run(conn: &Connection) -> Result<()> {
@@ -79,6 +88,12 @@ pub fn run(conn: &Connection) -> Result<()> {
         log::info!("[db/migrations] applying MIGRATION_3: seed check_for_updates setting");
         conn.execute_batch(&format!("BEGIN; {MIGRATION_3} COMMIT;"))?;
         log::info!("[db/migrations] MIGRATION_3 complete");
+    }
+
+    if version < 4 {
+        log::info!("[db/migrations] applying MIGRATION_4: seed global_shortcuts_enabled setting");
+        conn.execute_batch(&format!("BEGIN; {MIGRATION_4} COMMIT;"))?;
+        log::info!("[db/migrations] MIGRATION_4 complete");
     }
 
     Ok(())
@@ -116,7 +131,7 @@ mod tests {
         let v: i64 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(v, 3);
+        assert_eq!(v, 4);
     }
 
     #[test]
