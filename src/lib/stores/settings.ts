@@ -33,6 +33,7 @@ const defaults: Settings = {
   language: 'auto',
   verbose_logging: false,
   check_for_updates: true,
+  global_shortcuts_enabled: false,
 };
 
 export const settings = writable<Settings>(defaults);

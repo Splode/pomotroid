@@ -29,4 +29,5 @@ pub const DEFAULTS: &[(&str, &str)] = &[
     ("language", "auto"),
     ("verbose_logging", "false"),
     ("check_for_updates", "true"),
+    ("global_shortcuts_enabled", "false"),
 ];

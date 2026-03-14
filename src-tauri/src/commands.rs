@@ -183,8 +183,8 @@ pub fn settings_set(
         }
     }
 
-    // Re-register global shortcuts when any shortcut key changes.
-    if matches!(key.as_str(), "shortcut_toggle" | "shortcut_reset" | "shortcut_skip" | "shortcut_restart") {
+    // Re-register global shortcuts when any shortcut key changes or the enabled flag toggles.
+    if matches!(key.as_str(), "shortcut_toggle" | "shortcut_reset" | "shortcut_skip" | "shortcut_restart" | "global_shortcuts_enabled") {
         shortcuts::register_all(&app, &new_settings);
     }
 
@@ -283,6 +283,7 @@ pub fn settings_reset_defaults(
     if let Some(theme) = themes::find(&data_dir, tray_theme_name) {
         *tray_state.colors.lock().unwrap() = tray::TrayColors::from_colors_map(&theme.colors);
     }
+    shortcuts::register_all(&app, &new_settings);
     app.emit("settings:changed", &new_settings).ok();
     Ok(new_settings)
 }

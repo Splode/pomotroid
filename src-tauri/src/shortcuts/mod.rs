@@ -85,11 +85,18 @@ fn parse_code(key: &str) -> Option<Code> {
 
 /// Unregister all current shortcuts and register the four actions defined
 /// in `settings`. Silent on individual parse/register failures.
+/// If `settings.global_shortcuts_enabled` is false, unregisters all shortcuts
+/// and returns without registering any new ones.
 pub fn register_all(app: &AppHandle, settings: &Settings) {
     let gsm = app.global_shortcut();
 
     // Unregister everything first to avoid stale bindings.
     let _ = gsm.unregister_all();
+
+    if !settings.global_shortcuts_enabled {
+        log::info!("[shortcuts] global shortcuts disabled — skipping registration");
+        return;
+    }
 
     let shortcuts = [
         (settings.shortcut_toggle.as_str(),  ShortcutAction::Toggle),

@@ -46,6 +46,7 @@ pub struct Settings {
     pub language: String,
     pub verbose_logging: bool,
     pub check_for_updates: bool,
+    pub global_shortcuts_enabled: bool,
 }
 
 impl Default for Settings {
@@ -91,6 +92,7 @@ impl Default for Settings {
             language: "auto".to_string(),
             verbose_logging: false,
             check_for_updates: true,
+            global_shortcuts_enabled: false,
         }
     }
 }
@@ -202,6 +204,7 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         language: map.get("language").cloned().unwrap_or(d.language),
         verbose_logging: parse_bool(&map, "verbose_logging", d.verbose_logging),
         check_for_updates: parse_bool(&map, "check_for_updates", d.check_for_updates),
+        global_shortcuts_enabled: parse_bool(&map, "global_shortcuts_enabled", d.global_shortcuts_enabled),
     })
 }
 

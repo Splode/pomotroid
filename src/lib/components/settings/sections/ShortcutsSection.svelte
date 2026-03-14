@@ -3,6 +3,7 @@
   import { settings } from '$lib/stores/settings';
   import { setSetting, reloadShortcuts, accessibilityTrusted } from '$lib/ipc';
   import ShortcutInput from '$lib/components/ShortcutInput.svelte';
+  import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import * as m from '$paraglide/messages.js';
   import { isMac } from '$lib/utils/platform';
   import { openUrl } from '@tauri-apps/plugin-opener';
@@ -28,6 +29,11 @@
     return () => window.removeEventListener('focus', onFocus);
   });
 
+  async function toggle(dbKey: string, current: boolean) {
+    const updated = await setSetting(dbKey, current ? 'false' : 'true');
+    settings.set(updated);
+  }
+
   async function setShortcut(dbKey: string, value: string) {
     const updated = await setSetting(dbKey, value);
     settings.set(updated);
@@ -36,6 +42,13 @@
 </script>
 
 <div class="section">
+  <SettingsToggle
+    label={m.shortcuts_toggle_enabled()}
+    description={m.shortcuts_toggle_enabled_desc()}
+    checked={$settings.global_shortcuts_enabled}
+    onclick={() => toggle('global_shortcuts_enabled', $settings.global_shortcuts_enabled)}
+  />
+
   {#if isMac && !trusted}
     <div class="accessibility-notice">
       <p class="notice-text">{m.shortcuts_accessibility_notice()}</p>
@@ -45,38 +58,40 @@
     </div>
   {/if}
 
-  <p class="note">{m.shortcuts_note()}</p>
+  <div class="shortcuts-body" class:disabled={!$settings.global_shortcuts_enabled}>
+    <p class="note">{m.shortcuts_note()}</p>
 
-  <div class="row">
-    <span class="label">{m.shortcuts_toggle_timer()}</span>
-    <ShortcutInput
-      value={$settings.shortcut_toggle}
-      onchange={(v) => setShortcut('shortcut_toggle', v)}
-    />
-  </div>
+    <div class="row">
+      <span class="label">{m.shortcuts_toggle_timer()}</span>
+      <ShortcutInput
+        value={$settings.shortcut_toggle}
+        onchange={(v) => setShortcut('shortcut_toggle', v)}
+      />
+    </div>
 
-  <div class="row">
-    <span class="label">{m.shortcuts_reset_timer()}</span>
-    <ShortcutInput
-      value={$settings.shortcut_reset}
-      onchange={(v) => setShortcut('shortcut_reset', v)}
-    />
-  </div>
+    <div class="row">
+      <span class="label">{m.shortcuts_reset_timer()}</span>
+      <ShortcutInput
+        value={$settings.shortcut_reset}
+        onchange={(v) => setShortcut('shortcut_reset', v)}
+      />
+    </div>
 
-  <div class="row">
-    <span class="label">{m.shortcuts_skip_round()}</span>
-    <ShortcutInput
-      value={$settings.shortcut_skip}
-      onchange={(v) => setShortcut('shortcut_skip', v)}
-    />
-  </div>
+    <div class="row">
+      <span class="label">{m.shortcuts_skip_round()}</span>
+      <ShortcutInput
+        value={$settings.shortcut_skip}
+        onchange={(v) => setShortcut('shortcut_skip', v)}
+      />
+    </div>
 
-  <div class="row">
-    <span class="label">{m.shortcuts_restart_round()}</span>
-    <ShortcutInput
-      value={$settings.shortcut_restart}
-      onchange={(v) => setShortcut('shortcut_restart', v)}
-    />
+    <div class="row">
+      <span class="label">{m.shortcuts_restart_round()}</span>
+      <ShortcutInput
+        value={$settings.shortcut_restart}
+        onchange={(v) => setShortcut('shortcut_restart', v)}
+      />
+    </div>
   </div>
 </div>
 
@@ -85,6 +100,15 @@
     display: flex;
     flex-direction: column;
     padding: 8px 0;
+  }
+
+  .shortcuts-body {
+    transition: opacity 0.15s;
+  }
+
+  .shortcuts-body.disabled {
+    opacity: 0.4;
+    pointer-events: none;
   }
 
   .accessibility-notice {
