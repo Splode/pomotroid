@@ -113,96 +113,112 @@
     </div>
   </div>
 
-  <!-- Short Break -->
-  <div class="slider-row">
-    <div class="slider-meta">
-      <span class="slider-label">{m.timer_slider_short_break()}</span>
-      <input
-        class="slider-value"
-        type="text"
-        value={shortEdit ?? formatMMSS($settings.time_short_break_secs)}
-        onfocus={(e) => { shortEdit = (e.target as HTMLInputElement).value; (e.target as HTMLInputElement).select(); }}
-        oninput={(e) => { shortEdit = (e.target as HTMLInputElement).value; }}
-        onblur={async (e) => {
-          await commitBadge(shortEdit, $settings.time_short_break_secs, 'time_short_break_secs', e.target as HTMLInputElement);
-          shortEdit = null;
-        }}
-        onkeydown={async (e) => {
-          if (e.key === 'Enter') {
+  <!-- Short Break toggle + slider -->
+  <SettingsToggle
+    label={m.timer_toggle_short_breaks()}
+    description={m.timer_toggle_short_breaks_desc()}
+    checked={!$settings.short_breaks_enabled}
+    onclick={() => toggle('short_breaks_enabled', $settings.short_breaks_enabled)}
+  />
+  <div class="break-body" class:disabled={!$settings.short_breaks_enabled}>
+    <div class="slider-row">
+      <div class="slider-meta">
+        <span class="slider-label">{m.timer_slider_short_break()}</span>
+        <input
+          class="slider-value"
+          type="text"
+          value={shortEdit ?? formatMMSS($settings.time_short_break_secs)}
+          onfocus={(e) => { shortEdit = (e.target as HTMLInputElement).value; (e.target as HTMLInputElement).select(); }}
+          oninput={(e) => { shortEdit = (e.target as HTMLInputElement).value; }}
+          onblur={async (e) => {
             await commitBadge(shortEdit, $settings.time_short_break_secs, 'time_short_break_secs', e.target as HTMLInputElement);
             shortEdit = null;
-            (e.target as HTMLInputElement).blur();
-          } else if (e.key === 'Escape') {
-            shortEdit = null;
-            (e.target as HTMLInputElement).value = formatMMSS($settings.time_short_break_secs);
-            (e.target as HTMLInputElement).blur();
-          }
-        }}
-      />
-    </div>
-    <div class="slider-wrap">
-      <input
-        type="range" min="1" max="90" step="1"
-        value={shortMins}
-        class="slider"
-        oninput={(e) => handleChange('time_short_break_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
-      />
-      <div class="bar bar--short" style="width: {barWidth(shortMins, 1, 90)}"></div>
+          }}
+          onkeydown={async (e) => {
+            if (e.key === 'Enter') {
+              await commitBadge(shortEdit, $settings.time_short_break_secs, 'time_short_break_secs', e.target as HTMLInputElement);
+              shortEdit = null;
+              (e.target as HTMLInputElement).blur();
+            } else if (e.key === 'Escape') {
+              shortEdit = null;
+              (e.target as HTMLInputElement).value = formatMMSS($settings.time_short_break_secs);
+              (e.target as HTMLInputElement).blur();
+            }
+          }}
+        />
+      </div>
+      <div class="slider-wrap">
+        <input
+          type="range" min="1" max="90" step="1"
+          value={shortMins}
+          class="slider"
+          oninput={(e) => handleChange('time_short_break_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
+        />
+        <div class="bar bar--short" style="width: {barWidth(shortMins, 1, 90)}"></div>
+      </div>
     </div>
   </div>
 
-  <!-- Long Break -->
-  <div class="slider-row">
-    <div class="slider-meta">
-      <span class="slider-label">{m.timer_slider_long_break()}</span>
-      <input
-        class="slider-value"
-        type="text"
-        value={longEdit ?? formatMMSS($settings.time_long_break_secs)}
-        onfocus={(e) => { longEdit = (e.target as HTMLInputElement).value; (e.target as HTMLInputElement).select(); }}
-        oninput={(e) => { longEdit = (e.target as HTMLInputElement).value; }}
-        onblur={async (e) => {
-          await commitBadge(longEdit, $settings.time_long_break_secs, 'time_long_break_secs', e.target as HTMLInputElement);
-          longEdit = null;
-        }}
-        onkeydown={async (e) => {
-          if (e.key === 'Enter') {
+  <!-- Long Break toggle + slider + rounds -->
+  <SettingsToggle
+    label={m.timer_toggle_long_breaks()}
+    description={m.timer_toggle_long_breaks_desc()}
+    checked={!$settings.long_breaks_enabled}
+    onclick={() => toggle('long_breaks_enabled', $settings.long_breaks_enabled)}
+  />
+  <div class="break-body" class:disabled={!$settings.long_breaks_enabled}>
+    <div class="slider-row">
+      <div class="slider-meta">
+        <span class="slider-label">{m.timer_slider_long_break()}</span>
+        <input
+          class="slider-value"
+          type="text"
+          value={longEdit ?? formatMMSS($settings.time_long_break_secs)}
+          onfocus={(e) => { longEdit = (e.target as HTMLInputElement).value; (e.target as HTMLInputElement).select(); }}
+          oninput={(e) => { longEdit = (e.target as HTMLInputElement).value; }}
+          onblur={async (e) => {
             await commitBadge(longEdit, $settings.time_long_break_secs, 'time_long_break_secs', e.target as HTMLInputElement);
             longEdit = null;
-            (e.target as HTMLInputElement).blur();
-          } else if (e.key === 'Escape') {
-            longEdit = null;
-            (e.target as HTMLInputElement).value = formatMMSS($settings.time_long_break_secs);
-            (e.target as HTMLInputElement).blur();
-          }
-        }}
-      />
+          }}
+          onkeydown={async (e) => {
+            if (e.key === 'Enter') {
+              await commitBadge(longEdit, $settings.time_long_break_secs, 'time_long_break_secs', e.target as HTMLInputElement);
+              longEdit = null;
+              (e.target as HTMLInputElement).blur();
+            } else if (e.key === 'Escape') {
+              longEdit = null;
+              (e.target as HTMLInputElement).value = formatMMSS($settings.time_long_break_secs);
+              (e.target as HTMLInputElement).blur();
+            }
+          }}
+        />
+      </div>
+      <div class="slider-wrap">
+        <input
+          type="range" min="1" max="90" step="1"
+          value={longMins}
+          class="slider"
+          oninput={(e) => handleChange('time_long_break_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
+        />
+        <div class="bar bar--long" style="width: {barWidth(longMins, 1, 90)}"></div>
+      </div>
     </div>
-    <div class="slider-wrap">
-      <input
-        type="range" min="1" max="90" step="1"
-        value={longMins}
-        class="slider"
-        oninput={(e) => handleChange('time_long_break_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
-      />
-      <div class="bar bar--long" style="width: {barWidth(longMins, 1, 90)}"></div>
-    </div>
-  </div>
 
-  <!-- Rounds -->
-  <div class="slider-row">
-    <div class="slider-meta">
-      <span class="slider-label">{m.timer_slider_rounds()}</span>
-      <span class="slider-value slider-value--static">{rounds}</span>
-    </div>
-    <div class="slider-wrap">
-      <input
-        type="range" min="1" max={MAX_ROUNDS} step="1"
-        value={rounds}
-        class="slider"
-        oninput={(e) => handleChange('work_rounds', (e.target as HTMLInputElement).valueAsNumber)}
-      />
-      <div class="bar bar--rounds" style="width: {barWidth(rounds, 1, MAX_ROUNDS)}"></div>
+    <!-- Rounds -->
+    <div class="slider-row">
+      <div class="slider-meta">
+        <span class="slider-label">{m.timer_slider_rounds()}</span>
+        <span class="slider-value slider-value--static">{rounds}</span>
+      </div>
+      <div class="slider-wrap">
+        <input
+          type="range" min="1" max={MAX_ROUNDS} step="1"
+          value={rounds}
+          class="slider"
+          oninput={(e) => handleChange('work_rounds', (e.target as HTMLInputElement).valueAsNumber)}
+        />
+        <div class="bar bar--rounds" style="width: {barWidth(rounds, 1, MAX_ROUNDS)}"></div>
+      </div>
     </div>
   </div>
 
@@ -333,4 +349,7 @@
   .bar--short  { background: var(--color-short-round); }
   .bar--long   { background: var(--color-long-round); }
   .bar--rounds { background: var(--color-foreground-darker, var(--color-foreground)); }
+
+  .break-body { transition: opacity 0.15s; }
+  .break-body.disabled { opacity: 0.4; pointer-events: none; }
 </style>
