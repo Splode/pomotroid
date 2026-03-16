@@ -22,6 +22,8 @@ pub struct Settings {
     pub notifications_enabled: bool,
     /// Number of work rounds before a long break.
     pub long_break_interval: u32,
+    pub short_breaks_enabled: bool,
+    pub long_breaks_enabled: bool,
     /// When true the dial arc starts full and subtracts; when false it fills from empty.
     pub dial_countdown: bool,
     pub theme_mode: String,
@@ -61,6 +63,8 @@ impl Default for Settings {
             min_to_tray_on_close: false,
             notifications_enabled: false,
             long_break_interval: 4,
+            short_breaks_enabled: true,
+            long_breaks_enabled: true,
             dial_countdown: true,
             theme_mode: "auto".to_string(),
             theme_light: "Pomotroid Light".to_string(),
@@ -157,6 +161,8 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         min_to_tray_on_close: parse_bool(&map, "min_to_tray_on_close", d.min_to_tray_on_close),
         notifications_enabled: parse_bool(&map, "notifications", d.notifications_enabled),
         long_break_interval: parse_u32(&map, "work_rounds", d.long_break_interval),
+        short_breaks_enabled: parse_bool(&map, "short_breaks_enabled", d.short_breaks_enabled),
+        long_breaks_enabled: parse_bool(&map, "long_breaks_enabled", d.long_breaks_enabled),
         dial_countdown: parse_bool(&map, "dial_countdown", d.dial_countdown),
         theme_mode: map
             .get("theme_mode")

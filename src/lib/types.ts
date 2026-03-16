@@ -21,6 +21,8 @@ export interface Settings {
   time_short_break_secs: number;
   time_long_break_secs: number;
   long_break_interval: number;
+  short_breaks_enabled: boolean;
+  long_breaks_enabled: boolean;
   auto_start_work: boolean;
   auto_start_break: boolean;
   tray_icon_enabled: boolean;
