@@ -42,13 +42,9 @@
 </script>
 
 <div class="footer">
-  <!-- Round counter: X/Y when long breaks are active; labelled session count otherwise -->
+  <!-- Round counter -->
   <span class="rounds">
-    {#if $settings.long_breaks_enabled}
-      {snap.work_round_number} / {snap.work_rounds_total}
-    {:else}
-      {m.timer_session_round({ n: snap.session_work_count })}
-    {/if}
+    {snap.work_round_number} / {snap.work_rounds_total}
   </span>
 
   <!-- Reset -->

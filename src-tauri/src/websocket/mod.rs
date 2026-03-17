@@ -270,7 +270,6 @@ mod tests {
             is_paused: false,
             work_round_number: 1,
             work_rounds_total: 4,
-            session_work_count: 1,
         };
         let event = WsEvent::RoundChange { payload: snap };
         let json = serde_json::to_string(&event).unwrap();
