@@ -17,6 +17,7 @@
   "timer_toggle_auto_start_work_desc": "Automatically begin the next work session after a break ends.",
   "timer_toggle_auto_start_break": "Auto-start Breaks",
   "timer_toggle_auto_start_break_desc": "Automatically begin a break when a work session ends.",
+  "timer_session_round": "round {n}",
   "timer_toggle_short_breaks": "Disable Short Breaks",
   "timer_toggle_short_breaks_desc": "Skip the short break between work rounds.",
   "timer_toggle_long_breaks": "Disable Long Breaks",

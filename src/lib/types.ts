@@ -13,6 +13,7 @@ export interface TimerState {
   is_paused: boolean;
   work_round_number: number;   // current work round (1-based)
   work_rounds_total: number;   // total work rounds before long break
+  session_work_count: number;  // monotonic focus round count since last reset
 }
 
 /** Mirrors Rust `Settings` struct returned by `settings_get`. */
