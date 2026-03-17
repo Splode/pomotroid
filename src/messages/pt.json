@@ -17,6 +17,7 @@
   "timer_toggle_auto_start_work_desc": "Iniciar automaticamente a próxima sessão de trabalho após o fim de uma pausa.",
   "timer_toggle_auto_start_break": "Iniciar Pausas Automaticamente",
   "timer_toggle_auto_start_break_desc": "Iniciar automaticamente uma pausa quando uma sessão de trabalho terminar.",
+  "timer_session_round": "rodada {n}",
   "timer_toggle_short_breaks": "Desativar Pausas Curtas",
   "timer_toggle_short_breaks_desc": "Pular a pausa curta entre rodadas de trabalho.",
   "timer_toggle_long_breaks": "Desativar Pausas Longas",
