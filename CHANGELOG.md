@@ -6,6 +6,10 @@
 
 * **Crimson White** — new light theme with a white background and deep crimson accents. Contributed by [@Hungerdream](https://github.com/Hungerdream).
 
+### Bug Fixes
+
+* **macOS auto-update failing with "platform not found"** — the updater manifest (`latest.json`) used `darwin-universal` as the macOS platform key, which Tauri 2's updater does not recognise; it checks only for `darwin-aarch64` (Apple Silicon) and `darwin-x86_64` (Intel). Additionally, the release workflow pointed the updater at the `.dmg` distribution file rather than the `.app.tar.gz` bundle that the Tauri updater downloads and applies in-place. Both are fixed: the manifest now lists `darwin-aarch64` and `darwin-x86_64` entries, and the workflow uploads and references the `.app.tar.gz` artifact.
+
 [v1.2.0] - 2026-03-16
 -----------
 
