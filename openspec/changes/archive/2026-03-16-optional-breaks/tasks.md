@@ -50,11 +50,11 @@
 
 ## 7. Verify
 
-- [ ] 7.1 Both breaks enabled (default) — cycle matches existing behaviour exactly
-- [ ] 7.2 Short breaks disabled — Work rounds chain directly; long break still fires at the right interval
-- [ ] 7.3 Long breaks disabled — short break substituted at long-break point; `work_round_number` resets to 1 after it
-- [ ] 7.4 Both breaks disabled — pure work loop; round counter increments and resets correctly
-- [ ] 7.5 Disabling a break type dims its duration slider (and for long breaks, the rounds slider); enabling restores interaction
-- [ ] 7.6 Reset All Settings restores both toggles to enabled
+- [x] 7.1 Both breaks enabled (default) — cycle matches existing behaviour exactly
+- [x] 7.2 Short breaks disabled — Work rounds chain directly; long break still fires at the right interval
+- [x] 7.3 Long breaks disabled — short break substituted at long-break point; `work_round_number` resets to 1 after it
+- [x] 7.4 Both breaks disabled — pure work loop; round counter increments and resets correctly
+- [x] 7.5 Disabling a break type dims its duration slider (and for long breaks, the rounds slider); enabling restores interaction
+- [x] 7.6 Reset All Settings restores both toggles to enabled
 - [x] 7.7 Run `npm run check` — no type errors
 - [x] 7.8 Run `cargo test` in `src-tauri/` — all tests pass
