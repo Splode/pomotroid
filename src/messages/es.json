@@ -17,7 +17,6 @@
   "timer_toggle_auto_start_work_desc": "Comenzar automáticamente la siguiente sesión de trabajo cuando termine un descanso.",
   "timer_toggle_auto_start_break": "Iniciar descansos automáticamente",
   "timer_toggle_auto_start_break_desc": "Comenzar automáticamente un descanso cuando termine una sesión de trabajo.",
-  "timer_session_round": "ronda {n}",
   "timer_toggle_short_breaks": "Desactivar descansos cortos",
   "timer_toggle_short_breaks_desc": "Omitir el descanso corto entre rondas de trabajo.",
   "timer_toggle_long_breaks": "Desactivar descansos largos",

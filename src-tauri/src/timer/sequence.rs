@@ -42,10 +42,6 @@ pub struct SequenceState {
     pub work_round_number: u32,
     /// Total work rounds before a long break (from settings).
     pub work_rounds_total: u32,
-    /// Monotonically-increasing count of work rounds since the last reset.
-    /// Unlike `work_round_number` this never resets at cycle boundaries,
-    /// so it can be used as a session counter when long breaks are disabled.
-    pub session_work_count: u32,
 }
 
 impl SequenceState {
@@ -54,7 +50,6 @@ impl SequenceState {
             current_round: RoundType::Work,
             work_round_number: 1,
             work_rounds_total,
-            session_work_count: 1,
         }
     }
 
@@ -105,11 +100,6 @@ impl SequenceState {
             }
         };
 
-        // Increment the session counter every time we enter a new Work round.
-        if self.current_round == RoundType::Work {
-            self.session_work_count += 1;
-        }
-
         let duration = self.current_duration_secs(settings);
         (self.current_round, duration)
     }
@@ -118,7 +108,6 @@ impl SequenceState {
     pub fn reset(&mut self) {
         self.current_round = RoundType::Work;
         self.work_round_number = 1;
-        self.session_work_count = 1;
     }
 }
 

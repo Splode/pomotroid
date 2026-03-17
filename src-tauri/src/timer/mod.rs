@@ -33,9 +33,6 @@ pub struct TimerSnapshot {
     pub is_paused: bool,
     pub work_round_number: u32,
     pub work_rounds_total: u32,
-    /// Monotonically-increasing focus round count since last reset. Used as a
-    /// session counter when long breaks are disabled.
-    pub session_work_count: u32,
 }
 
 // ---------------------------------------------------------------------------
@@ -190,7 +187,6 @@ impl TimerController {
             is_paused: !shared.is_running && shared.elapsed_secs > 0,
             work_round_number: seq.work_round_number,
             work_rounds_total: seq.work_rounds_total,
-            session_work_count: seq.session_work_count,
         }
     }
 
@@ -506,6 +502,5 @@ fn build_snapshot(
         is_paused: !sh.is_running && sh.elapsed_secs > 0,
         work_round_number: seq.work_round_number,
         work_rounds_total: seq.work_rounds_total,
-        session_work_count: seq.session_work_count,
     }
 }

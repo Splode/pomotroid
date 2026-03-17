@@ -48,11 +48,7 @@ Setting `work_round_number = 0` before a substituted ShortBreak is the key detai
 
 **Both settings default `true`.** Existing behaviour is fully preserved for all current users. No breaking change; no migration needed to maintain the existing sequence. (Migration 5 still seeds the rows via `INSERT OR IGNORE` for correctness, but the default value matches prior implicit behaviour.)
 
-**"Disable" toggle framing, not "Enable".** Since both break types are on by default, the toggles are labelled "Disable Short Breaks" / "Disable Long Breaks". The knob is OFF (unchecked) in the normal state and turns ON when the user opts out. This means the `checked` prop is bound to `!breaks_enabled` — the inverse of the stored setting — so the visual state matches the label.
-
 **Dim dependent controls, don't hide them.** Consistent with the global shortcuts pattern: controls are always in the DOM, just `opacity: 0.4; pointer-events: none` when their parent toggle is off. When long breaks are disabled, both the Long Break duration slider and the Rounds until Long Break slider are wrapped together in a single `disabled` container.
-
-**Session counter replaces cycle counter when long breaks are disabled.** The `X / Y` round counter (current work round / total before long break) has no meaning when long breaks are off — there is no natural cycle boundary for Y. Instead, `SequenceState` carries a `session_work_count` field: a monotonically-increasing count of Work rounds entered since the last reset, which never resets at cycle boundaries. `TimerFooter` switches between `X / Y` (long breaks enabled) and a localised `"round N"` label (long breaks disabled). The `timer_session_round` i18n key carries an `{n}` parameter so each locale can position the number naturally.
 
 ## Risks / Trade-offs
 

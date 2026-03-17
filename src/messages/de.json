@@ -17,7 +17,6 @@
   "timer_toggle_auto_start_work_desc": "Die nächste Arbeitssitzung automatisch starten, wenn eine Pause endet.",
   "timer_toggle_auto_start_break": "Pausen automatisch starten",
   "timer_toggle_auto_start_break_desc": "Automatisch eine Pause starten, wenn eine Arbeitssitzung endet.",
-  "timer_session_round": "Runde {n}",
   "timer_toggle_short_breaks": "Kurze Pausen deaktivieren",
   "timer_toggle_short_breaks_desc": "Kurze Pause zwischen den Arbeitsrunden überspringen.",
   "timer_toggle_long_breaks": "Lange Pausen deaktivieren",
