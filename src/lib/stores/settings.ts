@@ -9,8 +9,6 @@ const defaults: Settings = {
   time_short_break_secs: 300,
   time_long_break_secs: 900,
   long_break_interval: 4,
-  short_breaks_enabled: true,
-  long_breaks_enabled: true,
   auto_start_work: false,
   auto_start_break: false,
   tray_icon_enabled: false,

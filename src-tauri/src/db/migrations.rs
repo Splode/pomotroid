@@ -67,15 +67,6 @@ const MIGRATION_4: &str = "
     INSERT INTO schema_version VALUES (4);
 ";
 
-/// Seeds the `short_breaks_enabled` and `long_breaks_enabled` settings for
-/// users upgrading from a version that did not have these settings.
-/// Both default to 'true' — existing behaviour is preserved.
-const MIGRATION_5: &str = "
-    INSERT OR IGNORE INTO settings (key, value) VALUES ('short_breaks_enabled', 'true');
-    INSERT OR IGNORE INTO settings (key, value) VALUES ('long_breaks_enabled', 'true');
-    INSERT INTO schema_version VALUES (5);
-";
-
 /// Apply any pending migrations. Each migration is wrapped in a transaction
 /// so a partial failure leaves the database unchanged.
 pub fn run(conn: &Connection) -> Result<()> {
@@ -103,12 +94,6 @@ pub fn run(conn: &Connection) -> Result<()> {
         log::info!("[db/migrations] applying MIGRATION_4: seed global_shortcuts_enabled setting");
         conn.execute_batch(&format!("BEGIN; {MIGRATION_4} COMMIT;"))?;
         log::info!("[db/migrations] MIGRATION_4 complete");
-    }
-
-    if version < 5 {
-        log::info!("[db/migrations] applying MIGRATION_5: seed short_breaks_enabled and long_breaks_enabled");
-        conn.execute_batch(&format!("BEGIN; {MIGRATION_5} COMMIT;"))?;
-        log::info!("[db/migrations] MIGRATION_5 complete");
     }
 
     Ok(())
@@ -146,7 +131,7 @@ mod tests {
         let v: i64 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(v, 5);
+        assert_eq!(v, 4);
     }
 
     #[test]
