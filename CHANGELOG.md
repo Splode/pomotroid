@@ -12,6 +12,10 @@
 * **Settings and Statistics windows left orphaned when main window is closed** — closing the main window while Settings or Statistics was open left those windows running with no way to reopen the main window. Both child windows are now closed automatically whenever the main window is truly closed (not when hiding to tray).
 * **macOS auto-update failing with "platform not found"** — the updater manifest (`latest.json`) used `darwin-universal` as the macOS platform key, which Tauri 2's updater does not recognise; it checks only for `darwin-aarch64` (Apple Silicon) and `darwin-x86_64` (Intel). Additionally, the release workflow pointed the updater at the `.dmg` distribution file rather than the `.app.tar.gz` bundle that the Tauri updater downloads and applies in-place. Both are fixed: the manifest now lists `darwin-aarch64` and `darwin-x86_64` entries, and the workflow uploads and references the `.app.tar.gz` artifact.
 
+### Timer
+
+* **Optional breaks** — short breaks and long breaks can now be independently disabled in Settings → Timer. Disabling short breaks chains work rounds back-to-back; disabling long breaks substitutes a short break at the cycle boundary so the round counter resets cleanly. When both are disabled the timer runs in a pure work loop. Duration sliders for disabled break types are dimmed to indicate they have no effect. When long breaks are disabled the round indicator switches from the `X / Y` cycle counter to a rolling "round N" session counter that increments continuously and resets only when the timer is reset.
+
 [v1.2.0] - 2026-03-16
 -----------
 
