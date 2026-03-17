@@ -10,9 +10,6 @@ jobs:
   build-linux:
     name: Linux x64
     runs-on: ubuntu-latest
-    env:
-      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -64,7 +61,7 @@ jobs:
         run: cargo test --manifest-path src-tauri/Cargo.toml
 
       - name: Build (release)
-        run: npm run tauri build -- --config '{"bundle":{"createUpdaterArtifacts":true}}' --bundles deb,appimage,rpm
+        run: npm run tauri build -- --bundles deb,appimage,rpm
         env:
           CI: true
 
@@ -81,9 +78,6 @@ jobs:
   build-macos:
     name: macOS (universal)
     runs-on: macos-latest
-    env:
-      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -114,7 +108,7 @@ jobs:
         run: npx svelte-kit sync
 
       - name: Build (release, universal binary)
-        run: npm run tauri build -- --config '{"bundle":{"createUpdaterArtifacts":true}}' --bundles dmg --target universal-apple-darwin
+        run: npm run tauri build -- --bundles dmg --target universal-apple-darwin
         env:
           CI: true
 
@@ -128,9 +122,6 @@ jobs:
   build-windows:
     name: Windows x64
     runs-on: windows-latest
-    env:
-      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -159,7 +150,7 @@ jobs:
         run: npx svelte-kit sync
 
       - name: Build (release)
-        run: npm run tauri build -- --config '{"bundle":{"createUpdaterArtifacts":true}}' --bundles nsis
+        run: npm run tauri build -- --bundles nsis
         env:
           CI: true
 
