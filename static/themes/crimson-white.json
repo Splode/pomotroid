@@ -1,0 +1,15 @@
+{
+  "name": "Crimson White",
+  "colors": {
+    "--color-long-round": "#e05252",
+    "--color-short-round": "#f28b82",
+    "--color-focus-round": "#c0392b",
+    "--color-background": "#ffffff",
+    "--color-background-light": "#f5f5f5",
+    "--color-background-lightest": "#e8e8e8",
+    "--color-foreground": "#2c2c2c",
+    "--color-foreground-darker": "#555555",
+    "--color-foreground-darkest": "#888888",
+    "--color-accent": "#a31515"
+  }
+}
