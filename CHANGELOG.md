@@ -2,6 +2,10 @@
 [Unreleased]
 -----------
 
+### Themes
+
+* **Crimson White** — new light theme with a white background and deep crimson accents. Contributed by [@Hungerdream](https://github.com/Hungerdream).
+
 [v1.2.0] - 2026-03-16
 -----------
 

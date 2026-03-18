@@ -28,7 +28,7 @@ Built with [Tauri 2](https://tauri.app), [Rust](https://www.rust-lang.org), and 
 
 - **Configurable timer** — customise work duration, break durations, and the number of rounds per long break
 - **Statistics** — daily, weekly, and all-time session history with charts and a 52-week heatmap
-- **37 bundled themes** — including Dracula, Nord, Tokyo Night, Catppuccin, Gruvbox, Rose Piné, and more; auto-switches with your OS light/dark preference
+- **38 bundled themes** — including Dracula, Nord, Tokyo Night, Catppuccin, Gruvbox, Rose Piné, and more; auto-switches with your OS light/dark preference
 - **Custom themes** — drop a JSON file into the themes folder; applied instantly without a restart
 - **Localization** — 8 languages: English, Spanish, French, German, Japanese, Chinese (Simplified), Turkish, and Portuguese; auto-detects OS language
 - **Global shortcuts** — control the timer from anywhere, even when the window is hidden
@@ -52,7 +52,7 @@ Pomotroid tracks every completed session and surfaces the data across three view
 
 ## Themes
 
-Pomotroid ships with 37 themes and supports fully custom themes with live hot-reload.
+Pomotroid ships with 38 themes and supports fully custom themes with live hot-reload.
 
 ![Screenshots of Pomotroid using various themes](.github/images/pomotroid-themes-preview.png)
 

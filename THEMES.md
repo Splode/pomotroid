@@ -1,10 +1,10 @@
 # Pomotroid Themes
 
-Pomotroid ships with 37 built-in themes and supports an unlimited number of user-created custom themes. Custom themes are hot-reloaded — no restart required.
+Pomotroid ships with 38 built-in themes and supports an unlimited number of user-created custom themes. Custom themes are hot-reloaded — no restart required.
 
 ## Built-in themes
 
-Andromeda, Ayu (Mirage), Catppuccin Frappé, Catppuccin Latte, Catppuccin Macchiato, Catppuccin Mocha, City Lights, Cobalt2, Darcula, Dracula, D.Va, Everforest, GitHub, GitHub Dark, Graphite, Gruvbox, Gruvbox Light, Horizon, Kanagawa, Material Palenight, Monokai, Monokai Pro, Night Owl, Nord, One Dark Pro, Panda, Pomotroid (default dark), Pomotroid Light (default light), Popping and Locking, Rosé Pine, Rosé Pine Dawn, Rosé Pine Moon, Solarized Dark, Solarized Light, Spandex, Synthwave, Tokyo Night
+Andromeda, Ayu (Mirage), Catppuccin Frappé, Catppuccin Latte, Catppuccin Macchiato, Catppuccin Mocha, City Lights, Cobalt2, Crimson White, Darcula, Dracula, D.Va, Everforest, GitHub, GitHub Dark, Graphite, Gruvbox, Gruvbox Light, Horizon, Kanagawa, Material Palenight, Monokai, Monokai Pro, Night Owl, Nord, One Dark Pro, Panda, Pomotroid (default dark), Pomotroid Light (default light), Popping and Locking, Rosé Pine, Rosé Pine Dawn, Rosé Pine Moon, Solarized Dark, Solarized Light, Spandex, Synthwave, Tokyo Night
 
 ## Creating a custom theme
 
