@@ -33,6 +33,7 @@ const BUNDLED_JSON: &[&str] = &[
     include_str!("../../../static/themes/catppuccin-mocha.json"),
     include_str!("../../../static/themes/city-lights.json"),
     include_str!("../../../static/themes/cobalt2.json"),
+    include_str!("../../../static/themes/crimson-white.json"),
     include_str!("../../../static/themes/dracula.json"),
     include_str!("../../../static/themes/darcula.json"),
     include_str!("../../../static/themes/dva.json"),
@@ -167,7 +168,7 @@ mod tests {
     #[test]
     fn all_bundled_themes_parse() {
         let themes = load_bundled();
-        assert_eq!(themes.len(), 37, "expected 37 bundled themes");
+        assert_eq!(themes.len(), 38, "expected 38 bundled themes");
     }
 
     #[test]
@@ -198,6 +199,15 @@ mod tests {
         assert!(
             themes.iter().any(|t| t.name == "Pomotroid"),
             "Pomotroid theme must be bundled"
+        );
+    }
+
+    #[test]
+    fn crimson_white_theme_is_bundled() {
+        let themes = load_bundled();
+        assert!(
+            themes.iter().any(|t| t.name == "Crimson White"),
+            "Crimson White theme must be bundled"
         );
     }
 }
