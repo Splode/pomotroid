@@ -7,7 +7,11 @@
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSbVBDQU1qNUFSZkVrTGVSdFM4UThJZjY4Zkk5K2o2MHFSTFdkTTVWNG54Mk94cGFnOXNqeFZLNU10djlYL0Z4b0tZS0EyeUQxbFJnTmphM3NLRG1GdHdJMy90VGEyNndJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzczNjg4Mjk4CWZpbGU6UG9tb3Ryb2lkXzEuMi4wX2FtZDY0LkFwcEltYWdlCjhhcEZTTGV5U3czOHBON3lRd3BXOEREWlZTVXBHOU5NbXRqNWVucU0rVjFVRlR5LzJnZGlGWTJPZG1FSVNJcHZqNDlZTDJKdktkQXJkbzNNbU1KQUNBPT0K",
       "url": "https://github.com/Splode/pomotroid/releases/download/v1.2.0/Pomotroid_1.2.0_amd64.AppImage"
     },
-    "darwin-universal": {
+    "darwin-aarch64": {
+      "signature": "",
+      "url": "https://github.com/Splode/pomotroid/releases/download/v1.2.0/Pomotroid_1.2.0_universal.dmg"
+    },
+    "darwin-x86_64": {
       "signature": "",
       "url": "https://github.com/Splode/pomotroid/releases/download/v1.2.0/Pomotroid_1.2.0_universal.dmg"
     },

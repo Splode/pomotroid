@@ -175,7 +175,8 @@ jobs:
           name: pomotroid-macos-universal
           path: |
             src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
-            src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg.sig
+            src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app.tar.gz
+            src-tauri/target/universal-apple-darwin/release/bundle/macos/*.app.tar.gz.sig
           if-no-files-found: error
 
   # ── Windows build ──────────────────────────────────────────────────────────
@@ -279,8 +280,8 @@ jobs:
           # from the binary version in tauri.conf.json.
           APPIMAGE_FILE=$(find dist/linux -name "*.AppImage" ! -name "*.sig" | head -1)
           APPIMAGE_SIG=$(cat "${APPIMAGE_FILE}.sig" 2>/dev/null || echo "")
-          DMG_FILE=$(find dist/macos -name "*.dmg" ! -name "*.sig" | head -1)
-          DMG_SIG=$(cat "${DMG_FILE}.sig" 2>/dev/null || echo "")
+          APP_TAR_FILE=$(find dist/macos -name "*.app.tar.gz" ! -name "*.sig" | head -1)
+          APP_TAR_SIG=$(cat "${APP_TAR_FILE}.sig" 2>/dev/null || echo "")
           NSIS_FILE=$(find dist/windows -name "*-setup.exe" ! -name "*.sig" | head -1)
           NSIS_SIG=$(cat "${NSIS_FILE}.sig" 2>/dev/null || echo "")
 
@@ -290,8 +291,8 @@ jobs:
             --arg notes "See $REPO/releases/tag/v$VERSION for release notes." \
             --arg linux_url "$REPO/releases/download/v$VERSION/$(basename "$APPIMAGE_FILE")" \
             --arg linux_sig "$APPIMAGE_SIG" \
-            --arg darwin_url "$REPO/releases/download/v$VERSION/$(basename "$DMG_FILE")" \
-            --arg darwin_sig "$DMG_SIG" \
+            --arg darwin_url "$REPO/releases/download/v$VERSION/$(basename "$APP_TAR_FILE")" \
+            --arg darwin_sig "$APP_TAR_SIG" \
             --arg windows_url "$REPO/releases/download/v$VERSION/$(basename "$NSIS_FILE")" \
             --arg windows_sig "$NSIS_SIG" \
             '{
@@ -300,7 +301,8 @@ jobs:
               pub_date: $pub_date,
               platforms: {
                 "linux-x86_64": { signature: $linux_sig, url: $linux_url },
-                "darwin-universal": { signature: $darwin_sig, url: $darwin_url },
+                "darwin-aarch64": { signature: $darwin_sig, url: $darwin_url },
+                "darwin-x86_64": { signature: $darwin_sig, url: $darwin_url },
                 "windows-x86_64": { signature: $windows_sig, url: $windows_url }
               }
             }' > latest.json
@@ -332,5 +334,6 @@ jobs:
             dist/linux/**/*.rpm
             dist/linux/**/*.rpm.asc
             dist/macos/**/*.dmg
+            dist/macos/**/*.app.tar.gz
             dist/windows/**/*-setup.exe
             dist/windows/**/pomotroid.exe
