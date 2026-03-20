@@ -57,6 +57,14 @@ pub struct Settings {
     pub local_shortcut_volume_up: String,
     pub local_shortcut_mute: String,
     pub local_shortcut_fullscreen: String,
+    /// Last known window X coordinate (physical pixels). `None` = use OS default.
+    pub window_x: Option<i32>,
+    /// Last known window Y coordinate (physical pixels). `None` = use OS default.
+    pub window_y: Option<i32>,
+    /// Last known window width (physical pixels). `None` = use OS default.
+    pub window_width: Option<u32>,
+    /// Last known window height (physical pixels). `None` = use OS default.
+    pub window_height: Option<u32>,
 }
 
 impl Default for Settings {
@@ -112,6 +120,10 @@ impl Default for Settings {
             local_shortcut_volume_up: "ArrowUp".to_string(),
             local_shortcut_mute: "m".to_string(),
             local_shortcut_fullscreen: "F11".to_string(),
+            window_x: None,
+            window_y: None,
+            window_width: None,
+            window_height: None,
         }
     }
 }
@@ -233,6 +245,10 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         local_shortcut_volume_up: map.get("local_shortcut_volume_up").cloned().unwrap_or(d.local_shortcut_volume_up),
         local_shortcut_mute: map.get("local_shortcut_mute").cloned().unwrap_or(d.local_shortcut_mute),
         local_shortcut_fullscreen: map.get("local_shortcut_fullscreen").cloned().unwrap_or(d.local_shortcut_fullscreen),
+        window_x: parse_opt_i32(&map, "window_x"),
+        window_y: parse_opt_i32(&map, "window_y"),
+        window_width: parse_opt_u32(&map, "window_width"),
+        window_height: parse_opt_u32(&map, "window_height"),
     })
 }
 
@@ -268,6 +284,14 @@ fn parse_u32(map: &HashMap<String, String>, key: &str, default: u32) -> u32 {
     map.get(key)
         .and_then(|v| v.parse().ok())
         .unwrap_or(default)
+}
+
+fn parse_opt_i32(map: &HashMap<String, String>, key: &str) -> Option<i32> {
+    map.get(key)?.parse().ok()
+}
+
+fn parse_opt_u32(map: &HashMap<String, String>, key: &str) -> Option<u32> {
+    map.get(key)?.parse().ok()
 }
 
 // ---------------------------------------------------------------------------
