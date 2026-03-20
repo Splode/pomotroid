@@ -405,6 +405,7 @@ pub fn window_set_visibility(visible: bool, app: AppHandle) -> Result<(), String
 pub fn audio_set_custom(
     cue: String,
     src_path: String,
+    db: State<'_, DbState>,
     app: AppHandle,
 ) -> Result<String, String> {
     let audio_state = app
@@ -446,13 +447,23 @@ pub fn audio_set_custom(
         .and_then(|n| n.to_str())
         .unwrap_or("custom")
         .to_string();
+
+    // Persist the original filename so it survives restarts.
+    let name_key = cue_to_name_key(&cue)?;
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    settings::save_setting(&conn, name_key, &display_name).map_err(|e| e.to_string())?;
+
     log::info!("[audio] custom sound set cue={cue} file={display_name}");
     Ok(display_name)
 }
 
 /// Restore the built-in sound for the given cue slot by deleting the custom file.
 #[tauri::command]
-pub fn audio_clear_custom(cue: String, app: AppHandle) -> Result<(), String> {
+pub fn audio_clear_custom(
+    cue: String,
+    db: State<'_, DbState>,
+    app: AppHandle,
+) -> Result<(), String> {
     let audio_state = app
         .try_state::<Arc<AudioManager>>()
         .ok_or_else(|| "audio engine is not available".to_string())?;
@@ -475,6 +486,13 @@ pub fn audio_clear_custom(cue: String, app: AppHandle) -> Result<(), String> {
     }
 
     audio_state.clear_custom_path(&cue);
+
+    // Remove the persisted display name.
+    let name_key = cue_to_name_key(&cue)?;
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    conn.execute("DELETE FROM settings WHERE key = ?1", rusqlite::params![name_key])
+        .map_err(|e| e.to_string())?;
+
     log::info!("[audio] custom sound cleared cue={cue}");
     Ok(())
 }
@@ -482,11 +500,28 @@ pub fn audio_clear_custom(cue: String, app: AppHandle) -> Result<(), String> {
 /// Return the display names of any currently configured custom audio files.
 /// Fields are `null` when the built-in sound is in use for that slot.
 #[tauri::command]
-pub fn audio_get_custom_info(app: AppHandle) -> Result<audio::CustomAudioInfo, String> {
+pub fn audio_get_custom_info(
+    db: State<'_, DbState>,
+    app: AppHandle,
+) -> Result<audio::CustomAudioInfo, String> {
     let audio_state = app
         .try_state::<Arc<AudioManager>>()
         .ok_or_else(|| "audio engine is not available".to_string())?;
-    Ok(audio_state.get_custom_info())
+
+    // Start from the AudioManager's paths (determines which slots are active).
+    let mut info = audio_state.get_custom_info();
+
+    // Override each active slot's name with the persisted original filename.
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    let override_name = |stored: &Option<String>, key: &str| -> Option<String> {
+        stored.as_ref()?; // slot not active — leave as None
+        settings::get_setting(&conn, key).or_else(|| stored.clone())
+    };
+    info.work_alert = override_name(&info.work_alert, "custom_work_alert_name");
+    info.short_break_alert = override_name(&info.short_break_alert, "custom_short_break_alert_name");
+    info.long_break_alert = override_name(&info.long_break_alert, "custom_long_break_alert_name");
+
+    Ok(info)
 }
 
 // ---------------------------------------------------------------------------
@@ -643,6 +678,15 @@ fn cue_to_stem(cue: &str) -> Result<&'static str, String> {
         "work_alert" => Ok(audio::STEM_WORK),
         "short_break_alert" => Ok(audio::STEM_SHORT),
         "long_break_alert" => Ok(audio::STEM_LONG),
+        _ => Err(format!("unknown audio cue: '{cue}'")),
+    }
+}
+
+fn cue_to_name_key(cue: &str) -> Result<&'static str, String> {
+    match cue {
+        "work_alert" => Ok("custom_work_alert_name"),
+        "short_break_alert" => Ok("custom_short_break_alert_name"),
+        "long_break_alert" => Ok("custom_long_break_alert_name"),
         _ => Err(format!("unknown audio cue: '{cue}'")),
     }
 }
