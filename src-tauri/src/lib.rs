@@ -268,8 +268,11 @@ pub fn run() {
             }
 
             // CloseRequested: hide to tray instead of quitting if min_to_tray_on_close.
+            // When actually closing (not hiding), also close any child windows so they
+            // cannot be left orphaned with no way to reopen the main window.
             let db_for_close = db.clone();
             let win_for_close = main_window.clone();
+            let app_for_close = app.handle().clone();
             main_window.on_window_event(move |event| {
                 if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                     let hide = db_for_close
@@ -281,6 +284,13 @@ pub fn run() {
                     if hide {
                         api.prevent_close();
                         let _ = win_for_close.hide();
+                    } else {
+                        // Main window is truly closing — close child windows if open.
+                        for label in ["settings", "stats"] {
+                            if let Some(win) = app_for_close.get_webview_window(label) {
+                                let _ = win.close();
+                            }
+                        }
                     }
                 }
             });
