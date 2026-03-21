@@ -7,6 +7,7 @@ export type RoundType = 'work' | 'short-break' | 'long-break';
  *  and returned by the `timer_get_state` IPC command. */
 export interface TimerState {
   round_type: RoundType;
+  previous_round_type: string;  // round type before this one; "" on first round
   elapsed_secs: number;
   total_secs: number;
   is_running: boolean;

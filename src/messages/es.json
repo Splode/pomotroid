@@ -120,6 +120,8 @@
   "stats_next_year": "Año siguiente",
   "notification_work_title": "¡Descanso terminado — hora de enfocarse!",
   "notification_work_body": "Es hora de volver al trabajo. ¡Tú puedes!",
+  "notification_work_start_title": "¡Hora de enfocarse!",
+  "notification_work_start_body": "Es hora de concentrarse. ¡Tú puedes!",
   "notification_short_break_title": "¡Ronda de trabajo completada!",
   "notification_short_break_body": "Tómate un descanso corto. Estírate, respira, relájate.",
   "notification_long_break_title": "¡Sesión de trabajo terminada!",

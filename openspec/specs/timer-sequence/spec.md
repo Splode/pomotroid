@@ -57,6 +57,51 @@ The system SHALL support a `long_breaks_enabled` setting (default `true`). When 
 
 ---
 
+### Requirement: TimerSnapshot carries previous round type
+`TimerSnapshot` SHALL include a `previous_round_type: String` field containing the round type that was active immediately before the current round began. The value SHALL be one of `"work"`, `"short-break"`, or `"long-break"`.
+
+On the very first round of a session (or after a reset), `previous_round_type` SHALL be an empty string `""` to indicate there was no preceding round.
+
+This field allows the frontend to distinguish contextually different transitions — for example, a Work round that follows a break ("Break over — focus time!") versus a Work round that follows another Work round ("Focus time!") when short breaks are disabled.
+
+#### Scenario: previous_round_type reflects the preceding round
+- **WHEN** a ShortBreak round transitions to a Work round
+- **THEN** `previous_round_type` in the emitted `TimerSnapshot` SHALL be `"short-break"`
+
+#### Scenario: Work-to-Work transition when short breaks disabled
+- **WHEN** `short_breaks_enabled` is `false`
+- **AND** a Work round transitions directly to the next Work round
+- **THEN** `previous_round_type` in the emitted `TimerSnapshot` SHALL be `"work"`
+
+#### Scenario: previous_round_type is empty on first round
+- **WHEN** the timer has just started or been reset
+- **AND** the first round begins
+- **THEN** `previous_round_type` SHALL be `""`
+
+---
+
+### Requirement: Context-aware work notifications
+The frontend SHALL use `previous_round_type` from `TimerSnapshot` to select the appropriate notification text when a Work round begins:
+
+- If `previous_round_type` is `"short-break"` or `"long-break"`: use the break-over notification copy (e.g., "Break over — focus time!")
+- If `previous_round_type` is `"work"` or `""`: use a neutral work-start notification copy (e.g., "Focus time!")
+
+The two message variants SHALL be distinct localisation keys so they can be translated independently.
+
+#### Scenario: Notification after a break
+- **WHEN** a Work round begins after a ShortBreak or LongBreak
+- **THEN** the desktop notification SHALL use the break-over title and body
+
+#### Scenario: Notification on Work-to-Work transition
+- **WHEN** a Work round begins after another Work round (short breaks disabled)
+- **THEN** the desktop notification SHALL use the work-start title and body (not the break-over copy)
+
+#### Scenario: Notification on first work round
+- **WHEN** the very first Work round of a session begins (`previous_round_type` is `""`)
+- **THEN** the desktop notification SHALL use the work-start title and body
+
+---
+
 ### Requirement: Session work count
 `SequenceState` SHALL expose a `session_work_count: u32` field that starts at 1 and increments by 1 each time `advance()` enters a Work round. Unlike `work_round_number`, it SHALL never reset at cycle boundaries — only a call to `reset()` returns it to 1. It is included in `TimerSnapshot` and surfaced to the frontend as a session counter.
 

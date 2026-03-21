@@ -6,6 +6,7 @@ import type { TimerState } from '$lib/types';
 
 const initial: TimerState = {
   round_type: 'work',
+  previous_round_type: '',
   elapsed_secs: 0,
   total_secs: 25 * 60,
   is_running: false,

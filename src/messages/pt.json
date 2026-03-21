@@ -120,6 +120,8 @@
   "stats_next_year": "Próximo ano",
   "notification_work_title": "Pausa encerrada — hora de focar!",
   "notification_work_body": "Hora de voltar ao trabalho. Você consegue!",
+  "notification_work_start_title": "Hora de focar!",
+  "notification_work_start_body": "Hora de se concentrar. Você consegue!",
   "notification_short_break_title": "Rodada de trabalho concluída!",
   "notification_short_break_body": "Faça uma pausa curta. Alongue-se, respire, relaxe.",
   "notification_long_break_title": "Sessão de trabalho concluída!",

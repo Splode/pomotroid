@@ -26,6 +26,8 @@ use sequence::{RoundType, SequenceState};
 pub struct TimerSnapshot {
     /// "work" | "short-break" | "long-break"
     pub round_type: String,
+    /// Round type that was active before this one. Empty string on the first round of a session.
+    pub previous_round_type: String,
     pub elapsed_secs: u32,
     pub total_secs: u32,
     pub is_running: bool,
@@ -184,6 +186,7 @@ impl TimerController {
 
         TimerSnapshot {
             round_type: seq.current_round.as_str().to_string(),
+            previous_round_type: seq.previous_round.map(|r| r.as_str().to_string()).unwrap_or_default(),
             elapsed_secs: shared.elapsed_secs,
             total_secs: seq.current_duration_secs(&settings),
             is_running: shared.is_running,
@@ -500,6 +503,7 @@ fn build_snapshot(
 
     TimerSnapshot {
         round_type: seq.current_round.as_str().to_string(),
+        previous_round_type: seq.previous_round.map(|r| r.as_str().to_string()).unwrap_or_default(),
         elapsed_secs: sh.elapsed_secs,
         total_secs: seq.current_duration_secs(&s),
         is_running: sh.is_running,

@@ -38,6 +38,9 @@ impl RoundType {
 #[derive(Debug, Clone, Serialize)]
 pub struct SequenceState {
     pub current_round: RoundType,
+    /// The round type that was active before `advance()` was last called.
+    /// `None` on the very first round (no preceding round exists).
+    pub previous_round: Option<RoundType>,
     /// Which work round we're currently in (1-based). Displayed to the user.
     pub work_round_number: u32,
     /// Total work rounds before a long break (from settings).
@@ -52,6 +55,7 @@ impl SequenceState {
     pub fn new(work_rounds_total: u32) -> Self {
         Self {
             current_round: RoundType::Work,
+            previous_round: None,
             work_round_number: 1,
             work_rounds_total,
             session_work_count: 1,
@@ -71,6 +75,7 @@ impl SequenceState {
     ///
     /// Call this when the engine fires `TimerEvent::Complete`.
     pub fn advance(&mut self, settings: &Settings) -> (RoundType, u32) {
+        self.previous_round = Some(self.current_round);
         self.current_round = match self.current_round {
             RoundType::Work => {
                 if self.work_round_number >= self.work_rounds_total {
@@ -117,6 +122,7 @@ impl SequenceState {
     /// Reset the sequence to the initial state (used by the Reset command).
     pub fn reset(&mut self) {
         self.current_round = RoundType::Work;
+        self.previous_round = None;
         self.work_round_number = 1;
         self.session_work_count = 1;
     }

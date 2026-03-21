@@ -119,6 +119,8 @@
   "stats_next_year": "Next year",
   "notification_work_title": "Break over — focus time!",
   "notification_work_body": "Time to get back to work. You've got this!",
+  "notification_work_start_title": "Focus time!",
+  "notification_work_start_body": "Time to focus. You've got this!",
   "notification_short_break_title": "Work round complete!",
   "notification_short_break_body": "Take a short break. Stretch, breathe, relax.",
   "notification_long_break_title": "Work session done!",

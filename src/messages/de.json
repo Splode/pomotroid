@@ -119,6 +119,8 @@
   "stats_next_year": "Nächstes Jahr",
   "notification_work_title": "Pause vorbei — Zeit zum Fokussieren!",
   "notification_work_body": "Zeit, wieder an die Arbeit zu gehen. Du schaffst das!",
+  "notification_work_start_title": "Zeit zum Fokussieren!",
+  "notification_work_start_body": "Zeit, sich zu konzentrieren. Du schaffst das!",
   "notification_short_break_title": "Arbeitsrunde abgeschlossen!",
   "notification_short_break_body": "Mach eine kurze Pause. Strecken, atmen, entspannen.",
   "notification_long_break_title": "Arbeitssitzung beendet!",

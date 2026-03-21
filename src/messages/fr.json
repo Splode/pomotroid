@@ -119,6 +119,8 @@
   "stats_next_year": "Année suivante",
   "notification_work_title": "Pause terminée — au travail !",
   "notification_work_body": "Il est temps de se remettre au travail. Vous pouvez le faire !",
+  "notification_work_start_title": "Au travail !",
+  "notification_work_start_body": "Il est temps de se concentrer. Vous pouvez le faire !",
   "notification_short_break_title": "Tour de travail terminé !",
   "notification_short_break_body": "Prenez une courte pause. Étirez-vous, respirez, détendez-vous.",
   "notification_long_break_title": "Session de travail terminée !",

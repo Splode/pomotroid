@@ -119,6 +119,8 @@
   "stats_next_year": "次の年",
   "notification_work_title": "休憩終了 — 集中する時間です！",
   "notification_work_body": "仕事に戻る時間です。頑張って！",
+  "notification_work_start_title": "集中する時間です！",
+  "notification_work_start_body": "集中する時間です。頑張って！",
   "notification_short_break_title": "作業ラウンド完了！",
   "notification_short_break_body": "短い休憩を取ってください。ストレッチ、深呼吸、リラックス。",
   "notification_long_break_title": "作業セッション完了！",

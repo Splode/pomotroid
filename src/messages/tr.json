@@ -119,6 +119,8 @@
   "stats_next_year": "Sonraki yıl",
   "notification_work_title": "Mola bitti — odaklanma zamanı!",
   "notification_work_body": "Çalışmaya geri dönme zamanı. Başarabilirsin!",
+  "notification_work_start_title": "Odaklanma zamanı!",
+  "notification_work_start_body": "Konsantre olma zamanı. Başarabilirsin!",
   "notification_short_break_title": "Çalışma turu tamamlandı!",
   "notification_short_break_body": "Kısa bir mola ver. Ger, nefes al, dinlen.",
   "notification_long_break_title": "Çalışma oturumu bitti!",

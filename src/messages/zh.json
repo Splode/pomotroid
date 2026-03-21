@@ -119,6 +119,8 @@
   "stats_next_year": "下一年",
   "notification_work_title": "休息结束 — 专注时间到！",
   "notification_work_body": "是时候回到工作了。你能做到！",
+  "notification_work_start_title": "专注时间到！",
+  "notification_work_start_body": "是时候集中注意力了。你能做到！",
   "notification_short_break_title": "工作轮次完成！",
   "notification_short_break_body": "休息一下。伸伸腰、深呼吸、放松。",
   "notification_long_break_title": "工作时段完成！",

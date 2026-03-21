@@ -264,6 +264,7 @@ mod tests {
         use crate::timer::TimerSnapshot;
         let snap = TimerSnapshot {
             round_type: "work".into(),
+            previous_round_type: "short-break".into(),
             elapsed_secs: 60,
             total_secs: 1500,
             is_running: true,
