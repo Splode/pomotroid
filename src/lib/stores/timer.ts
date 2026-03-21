@@ -6,12 +6,14 @@ import type { TimerState } from '$lib/types';
 
 const initial: TimerState = {
   round_type: 'work',
+  previous_round_type: '',
   elapsed_secs: 0,
   total_secs: 25 * 60,
   is_running: false,
   is_paused: false,
   work_round_number: 1,
   work_rounds_total: 4,
+  session_work_count: 1,
 };
 
 export const timerState = writable<TimerState>(initial);

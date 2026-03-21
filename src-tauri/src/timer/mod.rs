@@ -26,6 +26,8 @@ use sequence::{RoundType, SequenceState};
 pub struct TimerSnapshot {
     /// "work" | "short-break" | "long-break"
     pub round_type: String,
+    /// Round type that was active before this one. Empty string on the first round of a session.
+    pub previous_round_type: String,
     pub elapsed_secs: u32,
     pub total_secs: u32,
     pub is_running: bool,
@@ -33,6 +35,9 @@ pub struct TimerSnapshot {
     pub is_paused: bool,
     pub work_round_number: u32,
     pub work_rounds_total: u32,
+    /// Monotonically-increasing focus round count since last reset. Used as a
+    /// session counter when long breaks are disabled.
+    pub session_work_count: u32,
 }
 
 // ---------------------------------------------------------------------------
@@ -181,12 +186,14 @@ impl TimerController {
 
         TimerSnapshot {
             round_type: seq.current_round.as_str().to_string(),
+            previous_round_type: seq.previous_round.map(|r| r.as_str().to_string()).unwrap_or_default(),
             elapsed_secs: shared.elapsed_secs,
             total_secs: seq.current_duration_secs(&settings),
             is_running: shared.is_running,
             is_paused: !shared.is_running && shared.elapsed_secs > 0,
             work_round_number: seq.work_round_number,
             work_rounds_total: seq.work_rounds_total,
+            session_work_count: seq.session_work_count,
         }
     }
 
@@ -496,11 +503,13 @@ fn build_snapshot(
 
     TimerSnapshot {
         round_type: seq.current_round.as_str().to_string(),
+        previous_round_type: seq.previous_round.map(|r| r.as_str().to_string()).unwrap_or_default(),
         elapsed_secs: sh.elapsed_secs,
         total_secs: seq.current_duration_secs(&s),
         is_running: sh.is_running,
         is_paused: !sh.is_running && sh.elapsed_secs > 0,
         work_round_number: seq.work_round_number,
         work_rounds_total: seq.work_rounds_total,
+        session_work_count: seq.session_work_count,
     }
 }

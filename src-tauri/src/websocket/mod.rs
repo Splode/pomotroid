@@ -264,12 +264,14 @@ mod tests {
         use crate::timer::TimerSnapshot;
         let snap = TimerSnapshot {
             round_type: "work".into(),
+            previous_round_type: "short-break".into(),
             elapsed_secs: 60,
             total_secs: 1500,
             is_running: true,
             is_paused: false,
             work_round_number: 1,
             work_rounds_total: 4,
+            session_work_count: 1,
         };
         let event = WsEvent::RoundChange { payload: snap };
         let json = serde_json::to_string(&event).unwrap();

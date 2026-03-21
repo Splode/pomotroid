@@ -77,8 +77,9 @@
             let title: string;
             let body: string;
             if (snap.round_type === 'work') {
-              title = m.notification_work_title();
-              body  = m.notification_work_body();
+              const afterBreak = snap.previous_round_type === 'short-break' || snap.previous_round_type === 'long-break';
+              title = afterBreak ? m.notification_work_title() : m.notification_work_start_title();
+              body  = afterBreak ? m.notification_work_body()  : m.notification_work_start_body();
             } else if (snap.round_type === 'short-break') {
               title = m.notification_short_break_title();
               body  = m.notification_short_break_body();

@@ -7,12 +7,14 @@ export type RoundType = 'work' | 'short-break' | 'long-break';
  *  and returned by the `timer_get_state` IPC command. */
 export interface TimerState {
   round_type: RoundType;
+  previous_round_type: string;  // round type before this one; "" on first round
   elapsed_secs: number;
   total_secs: number;
   is_running: boolean;
   is_paused: boolean;
   work_round_number: number;   // current work round (1-based)
   work_rounds_total: number;   // total work rounds before long break
+  session_work_count: number;  // monotonic focus round count since last reset
 }
 
 /** Mirrors Rust `Settings` struct returned by `settings_get`. */
@@ -21,6 +23,8 @@ export interface Settings {
   time_short_break_secs: number;
   time_long_break_secs: number;
   long_break_interval: number;
+  short_breaks_enabled: boolean;
+  long_breaks_enabled: boolean;
   auto_start_work: boolean;
   auto_start_break: boolean;
   tray_icon_enabled: boolean;

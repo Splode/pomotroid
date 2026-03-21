@@ -38,18 +38,27 @@ impl RoundType {
 #[derive(Debug, Clone, Serialize)]
 pub struct SequenceState {
     pub current_round: RoundType,
+    /// The round type that was active before `advance()` was last called.
+    /// `None` on the very first round (no preceding round exists).
+    pub previous_round: Option<RoundType>,
     /// Which work round we're currently in (1-based). Displayed to the user.
     pub work_round_number: u32,
     /// Total work rounds before a long break (from settings).
     pub work_rounds_total: u32,
+    /// Monotonically-increasing count of work rounds since the last reset.
+    /// Unlike `work_round_number` this never resets at cycle boundaries,
+    /// so it can be used as a session counter when long breaks are disabled.
+    pub session_work_count: u32,
 }
 
 impl SequenceState {
     pub fn new(work_rounds_total: u32) -> Self {
         Self {
             current_round: RoundType::Work,
+            previous_round: None,
             work_round_number: 1,
             work_rounds_total,
+            session_work_count: 1,
         }
     }
 
@@ -66,12 +75,29 @@ impl SequenceState {
     ///
     /// Call this when the engine fires `TimerEvent::Complete`.
     pub fn advance(&mut self, settings: &Settings) -> (RoundType, u32) {
+        self.previous_round = Some(self.current_round);
         self.current_round = match self.current_round {
             RoundType::Work => {
                 if self.work_round_number >= self.work_rounds_total {
-                    RoundType::LongBreak
-                } else {
+                    // At the long-break point.
+                    if settings.long_breaks_enabled {
+                        RoundType::LongBreak
+                    } else if settings.short_breaks_enabled {
+                        // Substitute a short break; set to 0 so the ShortBreak→Work arm
+                        // increments it to 1, preserving the cycle-reset invariant.
+                        self.work_round_number = 0;
+                        RoundType::ShortBreak
+                    } else {
+                        // Both breaks disabled: loop directly back to Work(1).
+                        self.work_round_number = 1;
+                        RoundType::Work
+                    }
+                } else if settings.short_breaks_enabled {
                     RoundType::ShortBreak
+                } else {
+                    // Short breaks disabled: skip directly to the next work round.
+                    self.work_round_number += 1;
+                    RoundType::Work
                 }
             }
             RoundType::ShortBreak => {
@@ -84,6 +110,11 @@ impl SequenceState {
             }
         };
 
+        // Increment the session counter every time we enter a new Work round.
+        if self.current_round == RoundType::Work {
+            self.session_work_count += 1;
+        }
+
         let duration = self.current_duration_secs(settings);
         (self.current_round, duration)
     }
@@ -91,7 +122,9 @@ impl SequenceState {
     /// Reset the sequence to the initial state (used by the Reset command).
     pub fn reset(&mut self) {
         self.current_round = RoundType::Work;
+        self.previous_round = None;
         self.work_round_number = 1;
+        self.session_work_count = 1;
     }
 }
 
@@ -110,6 +143,19 @@ mod tests {
             time_short_break_secs: short,
             time_long_break_secs: long,
             long_break_interval: 4,
+            ..Settings::default()
+        }
+    }
+
+    /// Build settings with break-enable flags set explicitly.
+    fn settings_with_flags(short_breaks_enabled: bool, long_breaks_enabled: bool) -> Settings {
+        Settings {
+            time_work_secs: 1500,
+            time_short_break_secs: 300,
+            time_long_break_secs: 900,
+            long_break_interval: 4,
+            short_breaks_enabled,
+            long_breaks_enabled,
             ..Settings::default()
         }
     }
@@ -295,5 +341,109 @@ mod tests {
             seq.work_round_number, 1,
             "work_round_number must reset to 1 after long break"
         );
+    }
+
+    // -----------------------------------------------------------------------
+    // Optional-breaks tests
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn short_breaks_disabled_chains_work_rounds() {
+        // short=false, long=true: Work rounds chain directly; long break still fires.
+        let s = settings_with_flags(false, true);
+        let mut seq = SequenceState::new(4);
+
+        // Work(1) → Work(2) → Work(3) → Work(4) → LongBreak → Work(1)
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(seq.work_round_number, 2);
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(seq.work_round_number, 3);
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(seq.work_round_number, 4);
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::LongBreak, "long break must still fire at round 4");
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(seq.work_round_number, 1, "counter must reset to 1 after long break");
+    }
+
+    #[test]
+    fn long_breaks_disabled_substitutes_short_break() {
+        // short=true, long=false: short break substituted at the long-break point.
+        let s = settings_with_flags(true, false);
+        let mut seq = SequenceState::new(2);
+
+        // Work(1) → ShortBreak (normal) → Work(2) → ShortBreak (substituted) → Work(1)
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::ShortBreak, "normal short break before long-break point");
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(seq.work_round_number, 2);
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::ShortBreak, "short break substituted at long-break point");
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(seq.work_round_number, 1, "counter must reset to 1 after substituted short break");
+    }
+
+    #[test]
+    fn both_breaks_disabled_pure_work_loop() {
+        // short=false, long=false: pure work loop; counter increments and resets.
+        let s = settings_with_flags(false, false);
+        let mut seq = SequenceState::new(3);
+
+        // Work(1) → Work(2) → Work(3) → Work(1) — cycle
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(seq.work_round_number, 2);
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(seq.work_round_number, 3);
+
+        // At long-break point with both disabled → Work(1)
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(seq.work_round_number, 1, "counter must reset to 1 at cycle boundary");
+
+        // Continues correctly in the next cycle.
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(seq.work_round_number, 2);
+    }
+
+    #[test]
+    fn long_breaks_disabled_short_breaks_fire_normally() {
+        // short=true, long=false: short breaks still fire before the long-break point.
+        let s = settings_with_flags(true, false);
+        let mut seq = SequenceState::new(3);
+
+        // Work(1) → ShortBreak → Work(2) → ShortBreak → Work(3) → ShortBreak* → Work(1)
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::ShortBreak, "short break fires at round 1 (before long-break point)");
+
+        seq.advance(&s); // → Work(2)
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::ShortBreak, "short break fires at round 2 (before long-break point)");
+
+        seq.advance(&s); // → Work(3)
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::ShortBreak, "short break substituted at long-break point when long=false");
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(seq.work_round_number, 1, "counter resets to 1");
     }
 }
