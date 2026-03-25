@@ -203,9 +203,16 @@ Pushing the tag triggers the [release workflow](.github/workflows/release.yml), 
 
 Go to the [Releases page](https://github.com/Splode/pomotroid/releases), review the draft, and click **Publish release**.
 
-**5. Add a new `[Unreleased]` section**
+**5. Open the changelog for the next release**
 
-After publishing, add a fresh `[Unreleased]` block at the top of `CHANGELOG.md` to start collecting the next release's changes.
+After publishing, run:
+
+```bash
+./scripts/new-release-cycle.sh
+git push origin main
+```
+
+This adds a fresh `[Unreleased]` block at the top of `CHANGELOG.md` and commits it, ready to collect the next release's changes.
 
 ### Version numbering
 
