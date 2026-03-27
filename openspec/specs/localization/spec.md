@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Paraglide-based message catalog
 The system SHALL use Paraglide JS v2 (`@inlang/paraglide-js`) to manage all user-visible strings. All strings SHALL be defined in message files (`messages/<locale>.json`) and accessed through generated type-safe message functions (`m.<key>()`). The base locale SHALL be `en`.
@@ -58,6 +58,33 @@ The system SHALL apply the active locale in both the main timer window and the s
 #### Scenario: Language change propagates to both windows
 - **WHEN** the user changes the language setting while the settings window is open
 - **THEN** both the timer window and the settings window SHALL update their displayed strings
+
+### Requirement: Tooltip strings in all locales
+
+All tooltip i18n keys SHALL be present in every supported locale message file. Non-English translations MAY be machine-translated. The following keys are defined:
+
+| Key | English value |
+|---|---|
+| `tooltip_settings` | `"Open Settings"` |
+| `tooltip_statistics` | `"Open Statistics"` |
+| `tooltip_restart_round` | `"Restart the current round from the beginning."` |
+| `tooltip_skip` | `"Skip to the next round."` |
+| `tooltip_reset` | `"Reset the timer to the first work round. Current session progress will be cleared."` |
+| `tooltip_mute` | `"Mute alert sounds"` |
+| `tooltip_unmute` | `"Unmute alert sounds"` |
+| `tooltip_round_counter` | `"Current work round out of the total rounds before a long break."` |
+| `tooltip_round_counter_session` | `"Continuous session round count. Resets only when the timer is reset."` |
+| `tooltip_verbose_logging` | `"Enables detailed debug logging. Use when reporting issues. Log files are accessible via Open Log Folder in Settings → About."` |
+| `tooltip_websocket` | `"Enables a local WebSocket server for external integrations such as stream overlays. Disabled by default."` |
+
+Note: `system_tray_gnome_hint` is reused by the Linux-only `TooltipInfo` icon on the System Tray toggle; it predates this feature and requires no new key.
+
+#### Scenario: All tooltip keys present in non-English locales
+
+- **WHEN** a non-English message file is loaded
+- **THEN** every tooltip key listed above SHALL have a corresponding entry in that file
+
+---
 
 ### Requirement: Translated desktop notifications
 The system SHALL send desktop notifications with titles and bodies constructed from translated Paraglide message strings. Notification string construction SHALL happen on the frontend; the Rust backend SHALL receive a pre-translated `title` and `body`.

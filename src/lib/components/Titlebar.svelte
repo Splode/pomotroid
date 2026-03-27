@@ -4,6 +4,8 @@
   import { setWindowVisibility } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import { isMac } from '$lib/utils/platform';
+  import Tooltip from './Tooltip.svelte';
+  import * as m from '$paraglide/messages.js';
 
   let maximized = $state(false);
 
@@ -78,26 +80,30 @@
 </script>
 
 {#snippet settingsBtn()}
-  <button class="btn-icon" onclick={openSettings} aria-label="Settings">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <line x1="2" y1="4"  x2="14" y2="4"  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      <circle cx="5"  cy="4"  r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
-      <line x1="2" y1="8"  x2="14" y2="8"  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      <circle cx="11" cy="8"  r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
-      <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-      <circle cx="7"  cy="12" r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
-    </svg>
-  </button>
+  <Tooltip text={m.tooltip_settings()}>
+    <button class="btn-icon" onclick={openSettings} aria-label="Settings">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <line x1="2" y1="4"  x2="14" y2="4"  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        <circle cx="5"  cy="4"  r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
+        <line x1="2" y1="8"  x2="14" y2="8"  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        <circle cx="11" cy="8"  r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
+        <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+        <circle cx="7"  cy="12" r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
+      </svg>
+    </button>
+  </Tooltip>
 {/snippet}
 
 {#snippet statsBtn()}
-  <button class="btn-icon" onclick={openStats} aria-label="Statistics">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <rect x="2"  y="9"  width="3" height="5" rx="0.5" fill="currentColor" opacity="0.6"/>
-      <rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" opacity="0.8"/>
-      <rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor"/>
-    </svg>
-  </button>
+  <Tooltip text={m.tooltip_statistics()}>
+    <button class="btn-icon" onclick={openStats} aria-label="Statistics">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <rect x="2"  y="9"  width="3" height="5" rx="0.5" fill="currentColor" opacity="0.6"/>
+        <rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" opacity="0.8"/>
+        <rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor"/>
+      </svg>
+    </button>
+  </Tooltip>
 {/snippet}
 
 <nav class="titlebar" data-tauri-drag-region>

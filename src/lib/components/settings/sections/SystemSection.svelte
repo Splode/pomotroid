@@ -4,7 +4,7 @@
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import * as m from '$paraglide/messages.js';
   import { setLocale } from '$lib/locale.svelte.js';
-  import { isMac } from '$lib/utils/platform';
+  import { isMac, isLinux } from '$lib/utils/platform';
 
   // Language options: value stored in DB, label shown in native language.
   const LANGUAGES = [
@@ -81,6 +81,7 @@
   <SettingsToggle
     label={m.system_toggle_websocket()}
     description={m.system_toggle_websocket_desc({ port: $settings.websocket_port })}
+    tooltip={m.tooltip_websocket()}
     checked={$settings.websocket_enabled}
     onclick={() => toggle('websocket_enabled', $settings.websocket_enabled)}
   />
@@ -151,6 +152,7 @@
   <SettingsToggle
     label={m.advanced_toggle_verbose_logging()}
     description={m.advanced_toggle_verbose_logging_desc()}
+    tooltip={m.tooltip_verbose_logging()}
     checked={$settings.verbose_logging}
     onclick={() => toggle('verbose_logging', $settings.verbose_logging)}
   />
@@ -161,6 +163,7 @@
   <SettingsToggle
     label={m.system_toggle_show_tray()}
     description={m.system_toggle_show_tray_desc()}
+    tooltip={isLinux ? m.system_tray_gnome_hint() : undefined}
     checked={$settings.tray_icon_enabled}
     onclick={() => toggle('tray_icon_enabled', $settings.tray_icon_enabled)}
   />

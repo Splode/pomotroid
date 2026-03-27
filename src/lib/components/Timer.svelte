@@ -20,6 +20,7 @@
   import TimerDisplay from './TimerDisplay.svelte';
   import TimerFooter from './TimerFooter.svelte';
   import MiniControls from './MiniControls.svelte';
+  import Tooltip from './Tooltip.svelte';
   import type { UnlistenFn } from '@tauri-apps/api/event';
   import * as m from '$paraglide/messages.js';
   import { notificationShow } from '$lib/ipc';
@@ -121,12 +122,14 @@
       <!-- Controls row: back | play/pause | skip -->
       <div class="controls">
         <!-- Back: restart current round -->
-        <button class="btn-side" onclick={timerRestartRound} aria-label="Restart round">
-          <svg width="18" height="18" viewBox="0 0 16 16">
-            <polygon points="15,1 6,8 15,15" fill="currentColor"/>
-            <rect x="1" y="1" width="3" height="14" rx="1" fill="currentColor"/>
-          </svg>
-        </button>
+        <Tooltip text={m.tooltip_restart_round()}>
+          <button class="btn-side" onclick={timerRestartRound} aria-label="Restart round">
+            <svg width="18" height="18" viewBox="0 0 16 16">
+              <polygon points="15,1 6,8 15,15" fill="currentColor"/>
+              <rect x="1" y="1" width="3" height="14" rx="1" fill="currentColor"/>
+            </svg>
+          </button>
+        </Tooltip>
 
         <!-- Play / Pause — icon fades when state changes -->
         <button
@@ -151,12 +154,14 @@
         </button>
 
         <!-- Skip: advance to next round -->
-        <button class="btn-side" onclick={timerSkip} aria-label="Skip round">
-          <svg width="18" height="18" viewBox="0 0 16 16">
-            <polygon points="1,1 10,8 1,15" fill="currentColor"/>
-            <rect x="12" y="1" width="3" height="14" rx="1" fill="currentColor"/>
-          </svg>
-        </button>
+        <Tooltip text={m.tooltip_skip()}>
+          <button class="btn-side" onclick={timerSkip} aria-label="Skip round">
+            <svg width="18" height="18" viewBox="0 0 16 16">
+              <polygon points="1,1 10,8 1,15" fill="currentColor"/>
+              <rect x="12" y="1" width="3" height="14" rx="1" fill="currentColor"/>
+            </svg>
+          </button>
+        </Tooltip>
       </div>
 
       <TimerFooter snap={state} />

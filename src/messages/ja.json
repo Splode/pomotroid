@@ -60,6 +60,7 @@
   "system_group_tray": "システムトレイ",
   "system_toggle_show_tray": "システムトレイに表示",
   "system_toggle_show_tray_desc": "システムトレイに常時アイコンを表示します。",
+  "system_tray_gnome_hint": "GNOMEでは、トレイアイコンにAppIndicator拡張機能が必要です。パッケージマネージャー（例：gnome-shell-extension-appindicator）またはextensions.gnome.orgからインストールし、ログアウト後に再ログインしてください。",
   "system_toggle_min_tray": "トレイに最小化",
   "system_toggle_min_tray_desc": "最小化時にウィンドウをトレイに隠します。",
   "system_toggle_close_tray": "トレイに閉じる",
@@ -124,5 +125,19 @@
   "notification_short_break_title": "作業ラウンド完了！",
   "notification_short_break_body": "短い休憩を取ってください。ストレッチ、深呼吸、リラックス。",
   "notification_long_break_title": "作業セッション完了！",
-  "notification_long_break_body": "長い休憩を取る資格があります。その場を離れてリフレッシュしてください。"
+  "notification_long_break_body": "長い休憩を取る資格があります。その場を離れてリフレッシュしてください。",
+  "tooltip_settings": "設定を開く",
+  "tooltip_statistics": "統計を開く",
+  "tooltip_restart_round": "現在のラウンドを最初からやり直す。",
+  "tooltip_skip": "次のラウンドにスキップする。",
+  "tooltip_reset": "タイマーを最初の作業ラウンドにリセットします。現在のセッションの進捗は消去されます。",
+  "tooltip_mute": "アラート音をミュート",
+  "tooltip_unmute": "アラート音のミュートを解除",
+  "tooltip_round_counter": "長い休憩前の総ラウンド数における現在の作業ラウンド。",
+  "tooltip_round_counter_session": "連続セッションラウンド数。タイマーのリセット時のみリセットされます。",
+  "tooltip_verbose_logging": "詳細なデバッグログを有効にします。問題を報告する際に使用してください。ログファイルは設定 → バージョン情報の「ログフォルダを開く」からアクセスできます。",
+  "tooltip_dial_countdown": "有効にすると、進捗アークがゼロに向かってカウントダウンします（塗りつぶしではなく）。",
+  "tooltip_auto_start_work": "休憩終了後に次の作業ラウンドを自動的に開始する。",
+  "tooltip_auto_start_break": "作業ラウンド終了後に休憩を自動的に開始する。",
+  "tooltip_websocket": "ストリームオーバーレイなどの外部統合用のローカルWebSocketサーバーを有効にします。デフォルトでは無効です。"
 }

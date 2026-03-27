@@ -116,21 +116,17 @@
     'var(--heat-3)',
   ] as const;
 
-  // Tooltip
+  // Tooltip — viewport-fixed so it escapes SVG/overflow clipping.
   let tooltip = $state<{ x: number; y: number; text: string } | null>(null);
+  let tooltipEl = $state<HTMLDivElement | undefined>(undefined);
 
   function showTooltip(event: MouseEvent, cell: GridCell) {
     if (cell.dimmed) { tooltip = null; return; }
-    const svgEl = (event.currentTarget as SVGRectElement).closest('svg')!;
-    const svgRect  = svgEl.getBoundingClientRect();
     const cellRect = (event.currentTarget as SVGRectElement).getBoundingClientRect();
-    tooltip = {
-      x: cellRect.left - svgRect.left + CELL / 2,
-      y: cellRect.top  - svgRect.top  - 8,
-      text: cell.count === 0
-        ? `${cell.date}: ${m.stats_no_sessions_today().toLowerCase()}`
-        : `${cell.date}: ${cell.count} ${cell.count === 1 ? m.stats_rounds().toLowerCase().replace(/s$/, '') : m.stats_rounds().toLowerCase()}`,
-    };
+    const text = cell.count === 0
+      ? `${cell.date}: ${m.stats_no_sessions_today().toLowerCase()}`
+      : `${cell.date}: ${cell.count} ${cell.count === 1 ? m.stats_rounds().toLowerCase().replace(/s$/, '') : m.stats_rounds().toLowerCase()}`;
+    tooltip = { x: cellRect.left + CELL / 2, y: cellRect.top - 8, text };
   }
 
   const { grid, months, weekCount } = $derived.by(() => {
@@ -239,16 +235,21 @@
             {/each}
           {/each}
 
-          <!-- Tooltip -->
-          {#if tooltip}
-            {@const tw = tooltip.text.length * 6.5 + 16}
-            {@const tx = Math.min(tooltip.x - tw / 2, SVG_W - tw - 4)}
-            <g style="pointer-events: none">
-              <rect x={tx} y={tooltip.y - 20} width={tw} height={20} rx="3" class="tooltip-bg"/>
-              <text x={tx + tw / 2} y={tooltip.y - 7} text-anchor="middle" class="tooltip-text">{tooltip.text}</text>
-            </g>
-          {/if}
         </svg>
+
+        <!-- Cell tooltip (HTML so it matches Tooltip.svelte style and escapes SVG clipping) -->
+        {#if tooltip}
+          {@const pad = 8}
+          {@const w = tooltipEl?.offsetWidth ?? 0}
+          {@const rawLeft = tooltip.x - w / 2}
+          {@const left = Math.max(pad, Math.min(rawLeft, window.innerWidth - w - pad))}
+          {@const arrowLeft = tooltip.x - left}
+          <div
+            bind:this={tooltipEl}
+            class="cell-tooltip"
+            style="top:{tooltip.y}px;left:{left}px;--arrow-left:{arrowLeft}px"
+          >{tooltip.text}</div>
+        {/if}
 
         <!-- Legend -->
         <div class="legend">
@@ -393,19 +394,43 @@
     font-size: 9px;
     font-weight: 500;
     letter-spacing: 0.03em;
+    cursor: default;
   }
 
   .dow-label {
     fill: var(--color-foreground-darker);
     font-size: 8px;
     letter-spacing: 0.02em;
+    cursor: default;
   }
 
-  .tooltip-bg  { fill: var(--color-foreground); }
-  .tooltip-text {
-    fill: var(--color-background);
-    font-size: 9px;
-    font-weight: 500;
+  .cell-tooltip {
+    --tooltip-bg: var(--color-background-light, color-mix(in oklch, var(--color-foreground) 10%, var(--color-background)));
+    position: fixed;
+    transform: translateY(-100%);
+    background: var(--tooltip-bg);
+    color: var(--color-foreground);
+    font-size: 0.72rem;
+    line-height: 1.4;
+    padding: 5px 9px;
+    border-radius: 4px;
+    width: max-content;
+    max-width: 240px;
+    white-space: normal;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: 0 2px 8px color-mix(in oklch, black 30%, transparent);
+    border: 1px solid color-mix(in oklch, var(--color-foreground) 12%, transparent);
+  }
+
+  .cell-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: var(--arrow-left, 50%);
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--tooltip-bg);
   }
 
   /* ── Legend ──────────────────────────────────────────────── */
