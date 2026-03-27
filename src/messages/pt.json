@@ -60,6 +60,7 @@
   "system_group_tray": "Bandeja do Sistema",
   "system_toggle_show_tray": "Mostrar na Bandeja do Sistema",
   "system_toggle_show_tray_desc": "Exibir um ícone persistente na bandeja do sistema.",
+  "system_tray_gnome_hint": "No GNOME, ícones na bandeja requerem a extensão AppIndicator. Instale-a pelo seu gerenciador de pacotes (ex. gnome-shell-extension-appindicator) ou em extensions.gnome.org, depois saia e entre novamente.",
   "system_toggle_min_tray": "Minimizar para a Bandeja",
   "system_toggle_min_tray_desc": "Ocultar a janela na bandeja ao minimizar.",
   "system_toggle_close_tray": "Fechar para a Bandeja",
@@ -125,5 +126,19 @@
   "notification_short_break_title": "Rodada de trabalho concluída!",
   "notification_short_break_body": "Faça uma pausa curta. Alongue-se, respire, relaxe.",
   "notification_long_break_title": "Sessão de trabalho concluída!",
-  "notification_long_break_body": "Você merece uma pausa longa. Afaste-se e recarregue as energias."
+  "notification_long_break_body": "Você merece uma pausa longa. Afaste-se e recarregue as energias.",
+  "tooltip_settings": "Abrir configurações",
+  "tooltip_statistics": "Abrir estatísticas",
+  "tooltip_restart_round": "Reiniciar a rodada atual do início.",
+  "tooltip_skip": "Pular para a próxima rodada.",
+  "tooltip_reset": "Redefinir o timer para a primeira rodada de trabalho. O progresso da sessão atual será apagado.",
+  "tooltip_mute": "Silenciar sons de alerta",
+  "tooltip_unmute": "Ativar sons de alerta",
+  "tooltip_round_counter": "Rodada de trabalho atual do total de rodadas antes de uma pausa longa.",
+  "tooltip_round_counter_session": "Contador contínuo de rodadas da sessão. Reinicia apenas ao redefinir o timer.",
+  "tooltip_verbose_logging": "Ativa o registro de depuração detalhado. Use ao reportar problemas. Os arquivos de log são acessíveis via Abrir pasta de logs em Configurações → Sobre.",
+  "tooltip_dial_countdown": "Quando ativado, o arco de progresso faz contagem regressiva até zero em vez de se preencher.",
+  "tooltip_auto_start_work": "Iniciar automaticamente a próxima rodada de trabalho quando uma pausa terminar.",
+  "tooltip_auto_start_break": "Iniciar automaticamente a pausa quando uma rodada de trabalho terminar.",
+  "tooltip_websocket": "Ativa um servidor WebSocket local para integrações externas como overlays de streaming. Desativado por padrão."
 }

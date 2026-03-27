@@ -222,6 +222,7 @@
     fill: var(--color-foreground-darker);
     font-size: 9px;
     font-variant-numeric: tabular-nums;
+    cursor: default;
   }
 
   .baseline {

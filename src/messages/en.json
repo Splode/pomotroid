@@ -60,6 +60,7 @@
   "system_group_tray": "System Tray",
   "system_toggle_show_tray": "Show in System Tray",
   "system_toggle_show_tray_desc": "Display a persistent icon in the system tray.",
+  "system_tray_gnome_hint": "On GNOME, tray icons require the AppIndicator extension. Install it with your package manager (e.g. gnome-shell-extension-appindicator) or from extensions.gnome.org, then log out and back in.",
   "system_toggle_min_tray": "Minimize to Tray",
   "system_toggle_min_tray_desc": "Hide the window to the tray when minimized.",
   "system_toggle_close_tray": "Close to Tray",
@@ -124,5 +125,19 @@
   "notification_short_break_title": "Work round complete!",
   "notification_short_break_body": "Take a short break. Stretch, breathe, relax.",
   "notification_long_break_title": "Work session done!",
-  "notification_long_break_body": "You've earned a long break. Step away and recharge."
+  "notification_long_break_body": "You've earned a long break. Step away and recharge.",
+  "tooltip_settings": "Open Settings",
+  "tooltip_statistics": "Open Statistics",
+  "tooltip_restart_round": "Restart the current round from the beginning.",
+  "tooltip_skip": "Skip to the next round.",
+  "tooltip_reset": "Reset the timer to the first work round. Current session progress will be cleared.",
+  "tooltip_mute": "Mute alert sounds",
+  "tooltip_unmute": "Unmute alert sounds",
+  "tooltip_round_counter": "Current work round out of the total rounds before a long break.",
+  "tooltip_round_counter_session": "Continuous session round count. Resets only when the timer is reset.",
+  "tooltip_verbose_logging": "Enables detailed debug logging. Use when reporting issues. Log files are accessible via Open Log Folder in Settings → About.",
+  "tooltip_dial_countdown": "When enabled, the progress arc counts down to zero instead of filling up.",
+  "tooltip_auto_start_work": "Automatically start the next work round when a break ends.",
+  "tooltip_auto_start_break": "Automatically start the break when a work round completes.",
+  "tooltip_websocket": "Enables a local WebSocket server for external integrations such as stream overlays. Disabled by default."
 }

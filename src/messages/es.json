@@ -60,6 +60,7 @@
   "system_group_tray": "Bandeja del sistema",
   "system_toggle_show_tray": "Mostrar en la bandeja del sistema",
   "system_toggle_show_tray_desc": "Muestra un icono permanente en la bandeja del sistema.",
+  "system_tray_gnome_hint": "En GNOME, los iconos de bandeja requieren la extensión AppIndicator. Instálala con tu gestor de paquetes (p. ej. gnome-shell-extension-appindicator) o desde extensions.gnome.org, luego cierra sesión y vuelve a iniciarla.",
   "system_toggle_min_tray": "Minimizar a la bandeja",
   "system_toggle_min_tray_desc": "Ocultar la ventana en la bandeja al minimizar.",
   "system_toggle_close_tray": "Cerrar a la bandeja",
@@ -125,5 +126,19 @@
   "notification_short_break_title": "¡Ronda de trabajo completada!",
   "notification_short_break_body": "Tómate un descanso corto. Estírate, respira, relájate.",
   "notification_long_break_title": "¡Sesión de trabajo terminada!",
-  "notification_long_break_body": "Te has ganado un descanso largo. Aléjate y recarga energías."
+  "notification_long_break_body": "Te has ganado un descanso largo. Aléjate y recarga energías.",
+  "tooltip_settings": "Abrir ajustes",
+  "tooltip_statistics": "Abrir estadísticas",
+  "tooltip_restart_round": "Reiniciar la ronda actual desde el principio.",
+  "tooltip_skip": "Saltar a la siguiente ronda.",
+  "tooltip_reset": "Restablecer el temporizador a la primera ronda de trabajo. El progreso de la sesión actual se borrará.",
+  "tooltip_mute": "Silenciar sonidos de alerta",
+  "tooltip_unmute": "Activar sonidos de alerta",
+  "tooltip_round_counter": "Ronda de trabajo actual del total de rondas antes de un descanso largo.",
+  "tooltip_round_counter_session": "Contador continuo de rondas de sesión. Se reinicia solo al restablecer el temporizador.",
+  "tooltip_verbose_logging": "Activa el registro de depuración detallado. Útil al reportar problemas. Los archivos de registro son accesibles desde Abrir carpeta de registros en Ajustes → Acerca de.",
+  "tooltip_dial_countdown": "Cuando está activado, el arco de progreso cuenta regresivamente hasta cero en lugar de llenarse.",
+  "tooltip_auto_start_work": "Iniciar automáticamente la siguiente ronda de trabajo cuando termina un descanso.",
+  "tooltip_auto_start_break": "Iniciar automáticamente el descanso cuando termina una ronda de trabajo.",
+  "tooltip_websocket": "Activa un servidor WebSocket local para integraciones externas como overlays de streaming. Desactivado por defecto."
 }

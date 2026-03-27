@@ -60,6 +60,7 @@
   "system_group_tray": "系统托盘",
   "system_toggle_show_tray": "显示在系统托盘",
   "system_toggle_show_tray_desc": "在系统托盘中显示持久图标。",
+  "system_tray_gnome_hint": "在 GNOME 中，托盘图标需要安装 AppIndicator 扩展。请通过包管理器安装（如 gnome-shell-extension-appindicator）或从 extensions.gnome.org 安装，然后重新登录。",
   "system_toggle_min_tray": "最小化到托盘",
   "system_toggle_min_tray_desc": "最小化时将窗口隐藏到托盘。",
   "system_toggle_close_tray": "关闭到托盘",
@@ -124,5 +125,19 @@
   "notification_short_break_title": "工作轮次完成！",
   "notification_short_break_body": "休息一下。伸伸腰、深呼吸、放松。",
   "notification_long_break_title": "工作时段完成！",
-  "notification_long_break_body": "你赢得了一次长休息。离开一下，充充电。"
+  "notification_long_break_body": "你赢得了一次长休息。离开一下，充充电。",
+  "tooltip_settings": "打开设置",
+  "tooltip_statistics": "打开统计",
+  "tooltip_restart_round": "从头开始重启当前轮次。",
+  "tooltip_skip": "跳过到下一轮。",
+  "tooltip_reset": "将计时器重置到第一个工作轮次。当前会话进度将被清除。",
+  "tooltip_mute": "静音提示音",
+  "tooltip_unmute": "取消静音",
+  "tooltip_round_counter": "当前工作轮次，显示在长休息前的总轮次中的位置。",
+  "tooltip_round_counter_session": "连续会话轮次计数。仅在重置计时器时重置。",
+  "tooltip_verbose_logging": "启用详细调试日志。用于报告问题时使用。日志文件可通过设置 → 关于中的\"打开日志文件夹\"访问。",
+  "tooltip_dial_countdown": "启用后，进度弧从满倒计时至零，而非从零填充。",
+  "tooltip_auto_start_work": "休息结束后自动开始下一个工作轮次。",
+  "tooltip_auto_start_break": "工作轮次结束后自动开始休息。",
+  "tooltip_websocket": "启用本地 WebSocket 服务器，用于直播覆盖层等外部集成。默认禁用。"
 }

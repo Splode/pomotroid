@@ -60,6 +60,7 @@
   "system_group_tray": "Systemablage",
   "system_toggle_show_tray": "Im Systembereich anzeigen",
   "system_toggle_show_tray_desc": "Zeigt ein dauerhaftes Symbol im Systembereich an.",
+  "system_tray_gnome_hint": "Unter GNOME benötigen Tray-Icons die AppIndicator-Erweiterung. Installiere sie über deinen Paketmanager (z. B. gnome-shell-extension-appindicator) oder von extensions.gnome.org, dann ab- und wieder anmelden.",
   "system_toggle_min_tray": "In Ablage minimieren",
   "system_toggle_min_tray_desc": "Fenster beim Minimieren in die Ablage ausblenden.",
   "system_toggle_close_tray": "In Ablage schließen",
@@ -124,5 +125,19 @@
   "notification_short_break_title": "Arbeitsrunde abgeschlossen!",
   "notification_short_break_body": "Mach eine kurze Pause. Strecken, atmen, entspannen.",
   "notification_long_break_title": "Arbeitssitzung beendet!",
-  "notification_long_break_body": "Du hast dir eine lange Pause verdient. Geh weg und tanke neue Energie."
+  "notification_long_break_body": "Du hast dir eine lange Pause verdient. Geh weg und tanke neue Energie.",
+  "tooltip_settings": "Einstellungen öffnen",
+  "tooltip_statistics": "Statistiken öffnen",
+  "tooltip_restart_round": "Die aktuelle Runde von vorne beginnen.",
+  "tooltip_skip": "Zur nächsten Runde springen.",
+  "tooltip_reset": "Den Timer auf die erste Arbeitsrunde zurücksetzen. Der aktuelle Sitzungsfortschritt wird gelöscht.",
+  "tooltip_mute": "Alarmtöne stummschalten",
+  "tooltip_unmute": "Alarmtöne aktivieren",
+  "tooltip_round_counter": "Aktuelle Arbeitsrunde von der Gesamtzahl der Runden vor einer langen Pause.",
+  "tooltip_round_counter_session": "Fortlaufender Sitzungsrundenzähler. Wird nur beim Zurücksetzen des Timers zurückgesetzt.",
+  "tooltip_verbose_logging": "Aktiviert detailliertes Debug-Logging. Verwende es beim Melden von Problemen. Protokolldateien sind über Protokollordner öffnen in Einstellungen → Info zugänglich.",
+  "tooltip_dial_countdown": "Wenn aktiviert, zählt der Fortschrittsbogen auf null herunter, anstatt sich zu füllen.",
+  "tooltip_auto_start_work": "Die nächste Arbeitsrunde automatisch starten, wenn eine Pause endet.",
+  "tooltip_auto_start_break": "Die Pause automatisch starten, wenn eine Arbeitsrunde endet.",
+  "tooltip_websocket": "Aktiviert einen lokalen WebSocket-Server für externe Integrationen wie Stream-Overlays. Standardmäßig deaktiviert."
 }

@@ -232,6 +232,7 @@
     font-variant-numeric: tabular-nums;
     animation: app-fade-in 0.3s ease both;
     animation-delay: 0.35s;
+    cursor: default;
   }
 
   .day-label {
@@ -240,6 +241,7 @@
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    cursor: default;
   }
 
   .day-label-today {

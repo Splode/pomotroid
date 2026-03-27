@@ -60,6 +60,7 @@
   "system_group_tray": "Barre des tâches",
   "system_toggle_show_tray": "Afficher dans la barre des tâches",
   "system_toggle_show_tray_desc": "Affiche une icône permanente dans la barre des tâches.",
+  "system_tray_gnome_hint": "Sous GNOME, les icônes de barre système nécessitent l'extension AppIndicator. Installez-la via votre gestionnaire de paquets (ex. gnome-shell-extension-appindicator) ou depuis extensions.gnome.org, puis déconnectez-vous et reconnectez-vous.",
   "system_toggle_min_tray": "Réduire dans la barre des tâches",
   "system_toggle_min_tray_desc": "Masquer la fenêtre dans la barre lors de la réduction.",
   "system_toggle_close_tray": "Fermer dans la barre des tâches",
@@ -124,5 +125,19 @@
   "notification_short_break_title": "Tour de travail terminé !",
   "notification_short_break_body": "Prenez une courte pause. Étirez-vous, respirez, détendez-vous.",
   "notification_long_break_title": "Session de travail terminée !",
-  "notification_long_break_body": "Vous méritez une longue pause. Éloignez-vous et rechargez les batteries."
+  "notification_long_break_body": "Vous méritez une longue pause. Éloignez-vous et rechargez les batteries.",
+  "tooltip_settings": "Ouvrir les paramètres",
+  "tooltip_statistics": "Ouvrir les statistiques",
+  "tooltip_restart_round": "Recommencer la session en cours depuis le début.",
+  "tooltip_skip": "Passer à la session suivante.",
+  "tooltip_reset": "Réinitialiser le minuteur à la première session de travail. La progression de la session en cours sera effacée.",
+  "tooltip_mute": "Couper les sons d'alerte",
+  "tooltip_unmute": "Réactiver les sons d'alerte",
+  "tooltip_round_counter": "Session de travail en cours sur le total avant une longue pause.",
+  "tooltip_round_counter_session": "Compteur de sessions continu. Se réinitialise uniquement lors de la réinitialisation du minuteur.",
+  "tooltip_verbose_logging": "Active la journalisation de débogage détaillée. À utiliser lors de signalements de problèmes. Les fichiers journaux sont accessibles via Ouvrir le dossier des journaux dans Paramètres → À propos.",
+  "tooltip_dial_countdown": "Lorsqu'activé, l'arc de progression compte à rebours vers zéro au lieu de se remplir.",
+  "tooltip_auto_start_work": "Démarrer automatiquement la prochaine session de travail lorsqu'une pause se termine.",
+  "tooltip_auto_start_break": "Démarrer automatiquement la pause lorsqu'une session de travail se termine.",
+  "tooltip_websocket": "Active un serveur WebSocket local pour les intégrations externes telles que les overlays de streaming. Désactivé par défaut."
 }

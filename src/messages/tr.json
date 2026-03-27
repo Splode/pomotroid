@@ -60,6 +60,7 @@
   "system_group_tray": "Sistem Tepsisi",
   "system_toggle_show_tray": "Sistem Tepsisinde Göster",
   "system_toggle_show_tray_desc": "Sistem tepsisinde kalıcı bir simge görüntüle.",
+  "system_tray_gnome_hint": "GNOME'da tepsi simgeleri AppIndicator eklentisini gerektirir. Paket yöneticinizle (ör. gnome-shell-extension-appindicator) veya extensions.gnome.org üzerinden yükleyin, ardından oturumu kapatıp yeniden açın.",
   "system_toggle_min_tray": "Tepsiye Küçült",
   "system_toggle_min_tray_desc": "Küçültüldüğünde pencereyi tepside gizle.",
   "system_toggle_close_tray": "Tepsiye Kapat",
@@ -124,5 +125,19 @@
   "notification_short_break_title": "Çalışma turu tamamlandı!",
   "notification_short_break_body": "Kısa bir mola ver. Ger, nefes al, dinlen.",
   "notification_long_break_title": "Çalışma oturumu bitti!",
-  "notification_long_break_body": "Uzun bir molayı hak ettin. Uzaklaş ve şarj ol."
+  "notification_long_break_body": "Uzun bir molayı hak ettin. Uzaklaş ve şarj ol.",
+  "tooltip_settings": "Ayarları aç",
+  "tooltip_statistics": "İstatistikleri aç",
+  "tooltip_restart_round": "Mevcut turu baştan başlat.",
+  "tooltip_skip": "Sonraki tura geç.",
+  "tooltip_reset": "Zamanlayıcıyı ilk çalışma turuna sıfırla. Mevcut oturum ilerlemesi silinecek.",
+  "tooltip_mute": "Uyarı seslerini kapat",
+  "tooltip_unmute": "Uyarı seslerini aç",
+  "tooltip_round_counter": "Uzun bir moladan önce toplam turlar içindeki mevcut çalışma turu.",
+  "tooltip_round_counter_session": "Sürekli oturum turu sayacı. Yalnızca zamanlayıcı sıfırlandığında sıfırlanır.",
+  "tooltip_verbose_logging": "Ayrıntılı hata ayıklama günlüğünü etkinleştirir. Sorun bildirirken kullanın. Günlük dosyalarına Ayarlar → Hakkında bölümündeki Günlük Klasörünü Aç üzerinden erişilebilir.",
+  "tooltip_dial_countdown": "Etkinleştirildiğinde, ilerleme yayı dolmak yerine sıfıra doğru geri sayar.",
+  "tooltip_auto_start_work": "Bir mola bittiğinde sonraki çalışma turunu otomatik olarak başlat.",
+  "tooltip_auto_start_break": "Bir çalışma turu tamamlandığında molayı otomatik olarak başlat.",
+  "tooltip_websocket": "Yayın yerleşimleri gibi harici entegrasyonlar için yerel bir WebSocket sunucusu etkinleştirir. Varsayılan olarak devre dışıdır."
 }

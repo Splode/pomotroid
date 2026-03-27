@@ -1,18 +1,21 @@
 <script lang="ts">
   // A labelled toggle-switch row. Click anywhere on the row to toggle.
+  import TooltipInfo from '$lib/components/TooltipInfo.svelte';
+
   interface Props {
     label: string;
     checked: boolean;
     description?: string;
+    tooltip?: string;
     onclick: () => void;
   }
 
-  let { label, checked, description, onclick }: Props = $props();
+  let { label, checked, description, tooltip, onclick }: Props = $props();
 </script>
 
 <button class="row" {onclick}>
   <span class="text">
-    <span class="label">{label}</span>
+    <span class="label">{label}{#if tooltip}<TooltipInfo text={tooltip} />{/if}</span>
     {#if description}
       <span class="desc">{description}</span>
     {/if}

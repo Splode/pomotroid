@@ -165,6 +165,7 @@
     color: var(--color-foreground);
     animation: app-fade-in 0.18s ease;
     overflow: hidden;
+    cursor: default;
   }
 
   /* ── Titlebar ──────────────────────────────────────────── */

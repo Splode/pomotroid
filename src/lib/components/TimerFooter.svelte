@@ -4,6 +4,7 @@
   import { timerReset, setSetting } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import * as m from '$paraglide/messages.js';
+  import Tooltip from './Tooltip.svelte';
 
   interface Props {
     snap: TimerState;
@@ -43,18 +44,22 @@
 
 <div class="footer">
   <!-- Round counter: X/Y when long breaks are active; labelled session count otherwise -->
-  <span class="rounds">
-    {#if $settings.long_breaks_enabled}
-      {snap.work_round_number} / {snap.work_rounds_total}
-    {:else}
-      {m.timer_session_round({ n: snap.session_work_count })}
-    {/if}
-  </span>
+  <Tooltip text={$settings.long_breaks_enabled ? m.tooltip_round_counter() : m.tooltip_round_counter_session()}>
+    <span class="rounds">
+      {#if $settings.long_breaks_enabled}
+        {snap.work_round_number} / {snap.work_rounds_total}
+      {:else}
+        {m.timer_session_round({ n: snap.session_work_count })}
+      {/if}
+    </span>
+  </Tooltip>
 
   <!-- Reset -->
-  <button class="btn-text" onclick={timerReset} aria-label={m.timer_reset()}>
-    {m.timer_reset()}
-  </button>
+  <Tooltip text={m.tooltip_reset()}>
+    <button class="btn-text" onclick={timerReset} aria-label={m.timer_reset()}>
+      {m.timer_reset()}
+    </button>
+  </Tooltip>
 
   <!-- Volume -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -63,6 +68,7 @@
     onmouseenter={() => (showVolume = true)}
     onmouseleave={() => (showVolume = false)}
   >
+    <Tooltip text={localVolume === 0 ? m.tooltip_unmute() : m.tooltip_mute()}>
     <button class="btn-icon" onclick={toggleMute} aria-label={localVolume === 0 ? 'Unmute' : 'Mute'}>
       {#if localVolume === 0}
         <svg width="16" height="16" viewBox="0 0 16 16">
@@ -77,6 +83,7 @@
         </svg>
       {/if}
     </button>
+    </Tooltip>
 
     {#if showVolume}
       <div class="volume-slider-wrapper">
@@ -110,6 +117,7 @@
     color: var(--color-foreground-darker, var(--color-foreground));
     min-width: 48px;
     text-align: center;
+    cursor: default;
   }
 
   .btn-text {
