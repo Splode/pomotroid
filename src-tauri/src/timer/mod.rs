@@ -390,6 +390,11 @@ fn listen_events(
                 if should_auto {
                     log::debug!("[timer] auto-starting {}", next_round.as_str());
                     engine.send(TimerCommand::Start);
+                } else {
+                    // Timer is idle waiting for the user to start the new round.
+                    // Reset the tray menu to "Start" so it doesn't keep showing
+                    // "Pause" from the round that just completed.
+                    tray::update_menu_items(&tray, false, false);
                 }
             }
 

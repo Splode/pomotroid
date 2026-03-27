@@ -1,6 +1,10 @@
 [Unreleased]
 -----------
 
+### Bug Fixes
+
+* **System tray context menu showing "Pause" when timer is idle** — when auto-start work was disabled, the tray menu kept showing "Pause" after a break finished instead of resetting to "Start". The round-complete handler updated the tray icon but never updated the menu label when auto-start was suppressed; only the subsequent `Started` event (which never fired) would have corrected it. The menu is now explicitly reset to "Start" whenever a new round begins without auto-starting.
+
 ### UI
 
 * **Tooltips** — hovering over timer controls (Restart Round, Skip, Reset, Mute/Unmute, round indicator) and titlebar buttons (Settings, Statistics) now shows a brief tooltip after 600 ms. Settings toggles for System Tray (Linux), Verbose Logging, and WebSocket Server gain an inline ⓘ icon with an instant tooltip. On Linux the System Tray tooltip explains the GNOME AppIndicator requirement. Tooltips use `position: fixed` to avoid clipping near window edges and flip below the trigger when too close to the top of the screen.
