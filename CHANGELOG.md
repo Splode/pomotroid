@@ -1,6 +1,9 @@
 [Unreleased]
 -----------
 
+### UI
+
+* **Tooltips** — hovering over timer controls (Restart Round, Skip, Reset, Mute/Unmute, round indicator) and titlebar buttons (Settings, Statistics) now shows a brief tooltip after 600 ms. Settings toggles for System Tray (Linux), Verbose Logging, and WebSocket Server gain an inline ⓘ icon with an instant tooltip. On Linux the System Tray tooltip explains the GNOME AppIndicator requirement. Tooltips use `position: fixed` to avoid clipping near window edges and flip below the trigger when too close to the top of the screen.
 
 [v1.3.0] - 2026-03-23
 -----------

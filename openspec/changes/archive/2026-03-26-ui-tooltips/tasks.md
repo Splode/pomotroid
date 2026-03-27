@@ -37,5 +37,5 @@
 
 - [x] 6.1 Verify all tooltips appear and dismiss correctly in both windows
 - [x] 6.2 Verify viewport-edge flip: resize window small and confirm tooltips near the top flip to below
-- [ ] 6.3 Verify GNOME hint tooltip appears on Linux build and is absent on macOS/Windows
+- [x] 6.3 Verify GNOME hint tooltip appears on Linux build and is absent on macOS/Windows
 - [x] 6.4 Verify `npm run check` passes (no TypeScript errors)
