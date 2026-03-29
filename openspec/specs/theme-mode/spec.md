@@ -20,7 +20,7 @@ The system SHALL provide three theme modes — Auto, Light, and Dark — that co
 - **THEN** `theme_mode` is saved as `"auto"` and the active theme is resolved from the OS color scheme immediately
 
 ### Requirement: Independent light and dark theme pickers
-The system SHALL maintain two independent theme selections: `theme_light` and `theme_dark`. Both pickers SHALL display all available themes. Defaults SHALL be `"Pomotroid"` for both.
+The system SHALL maintain two independent theme selections: `theme_light` and `theme_dark`. Both pickers SHALL display all available themes and SHALL be accessible via the collapsible theme picker UI. Defaults SHALL be `"Pomotroid"` for both.
 
 #### Scenario: Light theme selection when Light mode active
 - **WHEN** mode is `"light"` and the user selects a theme from the light picker
@@ -37,6 +37,10 @@ The system SHALL maintain two independent theme selections: `theme_light` and `t
 #### Scenario: Deferred light picker in Auto mode with OS dark
 - **WHEN** mode is `"auto"`, the OS is dark, and the user selects a theme from the light picker
 - **THEN** `theme_light` is saved but the active theme remains the dark theme
+
+#### Scenario: Both pickers accessible regardless of active mode
+- **WHEN** the user opens the settings Appearance section
+- **THEN** both the light and dark pickers are reachable by expanding their rows, regardless of `theme_mode`
 
 ### Requirement: Active theme resolution
 The system SHALL resolve the active theme using: Auto → OS dark? `theme_dark` : `theme_light`; Light → `theme_light`; Dark → `theme_dark`. The `theme` settings field SHALL be removed; the active theme SHALL always be derived at runtime.
