@@ -1,3 +1,4 @@
+pub mod achievements;
 pub mod audio;
 pub mod commands;
 pub mod db;
@@ -26,6 +27,8 @@ use commands::{
     notification_show,
     settings_get, settings_reset_defaults, settings_set,
     shortcuts_reload,
+    achievements_get_all,
+    achievement_record_event,
     sessions_clear,
     stats_get_detailed, stats_get_heatmap,
     themes_list,
@@ -87,6 +90,14 @@ pub fn run() {
             {
                 let conn = db.lock().unwrap();
                 settings::seed_defaults(&conn).expect("failed to seed default settings");
+                // Prune events older than 90 days (well beyond the 30-day streak window).
+                crate::db::queries::prune_events(&conn, 90);
+                // Fire the app_launched event for achievement tracking.
+                let _ = crate::db::queries::insert_event(
+                    &conn,
+                    crate::achievements::event::APP_LAUNCHED,
+                    None,
+                );
             }
             app.manage(db.clone());
 
@@ -331,6 +342,9 @@ pub fn run() {
             // Stats
             stats_get_detailed,
             stats_get_heatmap,
+            // Achievements
+            achievements_get_all,
+            achievement_record_event,
             // Window
             window_set_visibility,
             // Shortcuts

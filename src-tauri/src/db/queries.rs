@@ -1,5 +1,6 @@
-use rusqlite::{params, Connection, Result};
+use rusqlite::{params, Connection, OptionalExtension, Result};
 use serde::Serialize;
+use std::collections::HashSet;
 
 // ---------------------------------------------------------------------------
 // Session CRUD (DATA-03)
@@ -283,6 +284,291 @@ pub fn compute_streak(days: &[String], today: &str) -> StreakInfo {
     }
 
     StreakInfo { current, longest }
+}
+
+// ---------------------------------------------------------------------------
+// Achievement queries
+// ---------------------------------------------------------------------------
+
+/// Returns the set of achievement IDs that have been unlocked.
+pub fn get_earned_achievement_ids(conn: &Connection) -> Result<HashSet<String>> {
+    let mut stmt = conn.prepare("SELECT id FROM achievements")?;
+    let ids = stmt
+        .query_map([], |r| r.get::<_, String>(0))?
+        .flatten()
+        .collect();
+    Ok(ids)
+}
+
+/// Inserts an achievement unlock record. No-ops if the ID already exists.
+pub fn insert_achievement(conn: &Connection, id: &str, unlocked_at: i64) -> Result<()> {
+    conn.execute(
+        "INSERT OR IGNORE INTO achievements (id, unlocked_at) VALUES (?1, ?2)",
+        params![id, unlocked_at],
+    )?;
+    Ok(())
+}
+
+/// Returns the unlock timestamp for a specific achievement, if earned.
+pub fn get_achievement_unlocked_at(conn: &Connection, id: &str) -> Result<Option<i64>> {
+    conn.query_row(
+        "SELECT unlocked_at FROM achievements WHERE id = ?1",
+        params![id],
+        |r| r.get(0),
+    )
+    .optional()
+}
+
+/// Max completed work sessions in any single local calendar day.
+pub fn get_hat_trick_max_day(conn: &Connection) -> Result<u32> {
+    let max: u32 = conn.query_row(
+        "SELECT COALESCE(MAX(cnt), 0) FROM (
+            SELECT COUNT(*) as cnt
+            FROM sessions
+            WHERE round_type = 'work' AND completed = 1
+            GROUP BY date(started_at, 'unixepoch', 'localtime')
+         )",
+        [],
+        |r| r.get(0),
+    )?;
+    Ok(max)
+}
+
+/// True if any completed work session was started before 07:00 local time.
+pub fn get_early_sessions(conn: &Connection) -> Result<bool> {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM sessions
+         WHERE round_type = 'work' AND completed = 1
+         AND CAST(strftime('%H', datetime(started_at, 'unixepoch', 'localtime')) AS INTEGER) < 7",
+        [],
+        |r| r.get(0),
+    )?;
+    Ok(count > 0)
+}
+
+/// True if any completed work session was started at or after 23:00 local time.
+pub fn get_midnight_sessions(conn: &Connection) -> Result<bool> {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM sessions
+         WHERE round_type = 'work' AND completed = 1
+         AND CAST(strftime('%H', datetime(started_at, 'unixepoch', 'localtime')) AS INTEGER) >= 23",
+        [],
+        |r| r.get(0),
+    )?;
+    Ok(count > 0)
+}
+
+/// True if any local calendar day had ≥4 started work sessions with 100% completion.
+pub fn get_perfect_day_exists(conn: &Connection) -> Result<bool> {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM (
+            SELECT
+                date(started_at, 'unixepoch', 'localtime') as day,
+                COUNT(*) as total,
+                SUM(completed) as done
+            FROM sessions
+            WHERE round_type = 'work'
+            GROUP BY day
+            HAVING total >= 4 AND total = done
+         )",
+        [],
+        |r| r.get(0),
+    )?;
+    Ok(count > 0)
+}
+
+/// True if ≥5 distinct local calendar days share the same clock-hour of a completed work session.
+pub fn get_creature_of_habit(conn: &Connection) -> Result<bool> {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM (
+            SELECT
+                CAST(strftime('%H', datetime(started_at, 'unixepoch', 'localtime')) AS INTEGER) as hour,
+                COUNT(DISTINCT date(started_at, 'unixepoch', 'localtime')) as day_count
+            FROM sessions
+            WHERE round_type = 'work' AND completed = 1
+            GROUP BY hour
+            HAVING day_count >= 5
+         )",
+        [],
+        |r| r.get(0),
+    )?;
+    Ok(count > 0)
+}
+
+/// True if the user has prior session history, a current streak of 1, and a gap
+/// of ≥2 days between the second-most-recent and most-recent active session days.
+pub fn get_comeback_kid(conn: &Connection) -> Result<bool> {
+    // Get all distinct days with completed work sessions, ordered ascending.
+    let mut stmt = conn.prepare(
+        "SELECT date(started_at, 'unixepoch', 'localtime') as day
+         FROM sessions
+         WHERE round_type = 'work' AND completed = 1
+         GROUP BY day
+         ORDER BY day",
+    )?;
+    let days: Vec<String> = stmt
+        .query_map([], |r| r.get(0))?
+        .flatten()
+        .collect();
+
+    if days.len() < 2 {
+        return Ok(false);
+    }
+
+    let today: String = conn.query_row(
+        "SELECT date('now', 'localtime')", [], |r| r.get(0),
+    )?;
+
+    let streak = crate::db::queries::compute_streak(&days, &today);
+    if streak.current != 1 {
+        return Ok(false);
+    }
+
+    // Check gap between second-to-last day and last day.
+    let last = days.last().unwrap();
+    let prev = &days[days.len() - 2];
+    let last_n = date_to_day_num(last).unwrap_or(0);
+    let prev_n = date_to_day_num(prev).unwrap_or(0);
+    Ok(last_n - prev_n >= 2)
+}
+
+/// True if any long-break session is marked completed.
+pub fn get_long_break_completed(conn: &Connection) -> Result<bool> {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM sessions WHERE round_type = 'long-break' AND completed = 1",
+        [],
+        |r| r.get(0),
+    )?;
+    Ok(count > 0)
+}
+
+// ---------------------------------------------------------------------------
+// Event log queries
+// ---------------------------------------------------------------------------
+
+/// Delete events older than `days` days.  Called on startup to keep the table lean.
+pub fn prune_events(conn: &Connection, days: i64) {
+    let cutoff = unix_now() - days * 86_400;
+    if let Err(e) = conn.execute("DELETE FROM events WHERE ts < ?1", params![cutoff]) {
+        log::warn!("[db] prune_events failed: {e}");
+    }
+}
+
+/// Insert a named event into the log.  `payload` is optional JSON context.
+pub fn insert_event(conn: &Connection, name: &str, payload: Option<&str>) -> Result<i64> {
+    let ts = unix_now();
+    conn.execute(
+        "INSERT INTO events (name, ts, payload) VALUES (?1, ?2, ?3)",
+        params![name, ts, payload],
+    )?;
+    Ok(conn.last_insert_rowid())
+}
+
+/// Count how many times a named event has been recorded.
+pub fn count_events(conn: &Connection, name: &str) -> i64 {
+    conn.query_row(
+        "SELECT COUNT(*) FROM events WHERE name = ?1",
+        params![name],
+        |r| r.get(0),
+    )
+    .unwrap_or(0)
+}
+
+/// Count how many distinct calendar days (UTC) a named event has occurred on.
+pub fn count_event_days(conn: &Connection, name: &str) -> i64 {
+    conn.query_row(
+        "SELECT COUNT(DISTINCT date(ts, 'unixepoch')) FROM events WHERE name = ?1",
+        params![name],
+        |r| r.get(0),
+    )
+    .unwrap_or(0)
+}
+
+/// Count distinct consecutive days up to today on which a named event occurred.
+/// Returns the current streak length (0 if the event didn't occur today).
+pub fn event_current_streak(conn: &Connection, name: &str) -> i64 {
+    // Pull all distinct days descending; walk until a gap is found.
+    let mut stmt = conn
+        .prepare(
+            "SELECT DISTINCT date(ts, 'unixepoch') AS d
+             FROM events WHERE name = ?1
+             ORDER BY d DESC",
+        )
+        .unwrap();
+    let days: Vec<String> = stmt
+        .query_map(params![name], |r| r.get(0))
+        .unwrap()
+        .filter_map(|r| r.ok())
+        .collect();
+
+    let today = {
+        use std::time::{SystemTime, UNIX_EPOCH};
+        let secs = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        // Format as YYYY-MM-DD (UTC)
+        let d = chrono_day_from_secs(secs);
+        d
+    };
+
+    let mut streak = 0i64;
+    let mut expected = today;
+    for day in &days {
+        if day.as_str() == expected.as_str() {
+            streak += 1;
+            expected = prev_day(&expected);
+        } else {
+            break;
+        }
+    }
+    streak
+}
+
+fn chrono_day_from_secs(secs: u64) -> String {
+    // Simple UTC date without pulling in chrono: days since epoch.
+    let days = secs / 86400;
+    let (y, m, d) = days_to_ymd(days as i64);
+    format!("{y:04}-{m:02}-{d:02}")
+}
+
+fn prev_day(date: &str) -> String {
+    // Parse YYYY-MM-DD, subtract one day.
+    let parts: Vec<&str> = date.split('-').collect();
+    if parts.len() != 3 { return date.to_string(); }
+    let (y, m, d): (i64, i64, i64) = (
+        parts[0].parse().unwrap_or(2000),
+        parts[1].parse().unwrap_or(1),
+        parts[2].parse().unwrap_or(1),
+    );
+    let days = ymd_to_days(y, m, d) - 1;
+    let (ny, nm, nd) = days_to_ymd(days);
+    format!("{ny:04}-{nm:02}-{nd:02}")
+}
+
+fn ymd_to_days(y: i64, m: i64, d: i64) -> i64 {
+    // Days since Unix epoch (1970-01-01) using proleptic Gregorian calendar.
+    let m = if m <= 2 { m + 12 } else { m };
+    let y = if m <= 14 { y - 1 } else { y };  // Adjust for Jan/Feb
+    let a = y / 100;
+    let b = 2 - a + a / 4;
+    ((365.25 * (y + 4716) as f64) as i64)
+        + ((30.6001 * (m + 1) as f64) as i64)
+        + d as i64 + b - 1524 - 2440588
+}
+
+fn days_to_ymd(days: i64) -> (i64, i64, i64) {
+    let jd = days + 2440588; // Unix epoch → Julian day
+    let a = jd + 32044;
+    let b = (4 * a + 3) / 146097;
+    let c = a - (146097 * b) / 4;
+    let d = (4 * c + 3) / 1461;
+    let e = c - (1461 * d) / 4;
+    let m = (5 * e + 2) / 153;
+    let day = e - (153 * m + 2) / 5 + 1;
+    let month = m + 3 - 12 * (m / 10);
+    let year = 100 * b + d - 4800 + m / 10;
+    (year, month, day)
 }
 
 // ---------------------------------------------------------------------------

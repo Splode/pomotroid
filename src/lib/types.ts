@@ -57,6 +57,34 @@ export interface Settings {
   local_shortcut_volume_up: string;
   local_shortcut_mute: string;
   local_shortcut_fullscreen: string;
+  achievement_notifications: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Achievement types — mirror Rust structs in achievements/mod.rs
+// ---------------------------------------------------------------------------
+
+export type AchievementCategory = 'Milestone' | 'Habit' | 'Discovery';
+
+/** Mirrors Rust `AchievementView` — returned by `achievements_get_all`. */
+export interface AchievementView {
+  id: string;
+  /** null for unearned secret achievements */
+  name: string | null;
+  /** null for unearned secret achievements */
+  description: string | null;
+  category: AchievementCategory;
+  secret: boolean;
+  /** null for unearned secret achievements */
+  color: string | null;
+  emoji: string;
+  earned: boolean;
+  /** Unix timestamp (seconds) when unlocked; null if not earned */
+  unlocked_at: number | null;
+  /** Current progress value for milestone achievements; null for binary ones */
+  progress_current: number | null;
+  /** Target progress value for milestone achievements; null for binary ones */
+  progress_total: number | null;
 }
 
 /** Returned by `check_update` — describes an available update. */

@@ -7,6 +7,7 @@ use std::time::Duration;
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
 
+use crate::achievements::{eval as achievements_eval, event as achievement_event};
 use crate::audio::{AudioCue, AudioManager};
 use crate::db::{queries, DbState};
 use crate::settings::Settings;
@@ -309,10 +310,25 @@ fn listen_events(
                 );
 
                 // --- Session recording: mark the completed round ---
-                if let Some(session_id) = current_session_id.take() {
+                let newly_unlocked = if let Some(session_id) = current_session_id.take() {
                     if let Ok(conn) = db.lock() {
                         let _ = queries::complete_session(&conn, session_id, !was_skipped);
+                        // Check achievements while lock is held, then release before notifying.
+                        achievements_eval::record_event(
+                            &conn,
+                            &app,
+                            achievement_event::SESSION_COMPLETED,
+                            None,
+                        )
+                    } else {
+                        vec![]
                     }
+                } else {
+                    vec![]
+                };
+                // DB lock is released; safe to re-acquire inside notify_and_spawn_toast.
+                if !newly_unlocked.is_empty() {
+                    achievements_eval::notify_and_spawn_toast(newly_unlocked, &app);
                 }
 
                 // Advance sequence.

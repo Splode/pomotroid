@@ -5,6 +5,7 @@
     getSettings, getThemes,
     onSettingsChanged, onThemesChanged, onRoundChange, onSessionsCleared,
     statsGetDetailed, statsGetHeatmap,
+    onAchievementUnlocked, onAchievementsCleared,
   } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
@@ -20,13 +21,15 @@
   import DailyView from '$lib/components/stats/DailyView.svelte';
   import WeeklyView from '$lib/components/stats/WeeklyView.svelte';
   import YearlyView from '$lib/components/stats/YearlyView.svelte';
+  import AchievementsTab from '$lib/components/stats/AchievementsTab.svelte';
 
-  type Tab = 'today' | 'week' | 'alltime';
+  type Tab = 'today' | 'week' | 'alltime' | 'achievements';
 
   let activeTab = $state<Tab>('today');
   let detailed = $state<DetailedStats | null>(null);
   let heatmap = $state<HeatmapStats | null>(null);
   let heatmapLoaded = $state(false);
+  let achievementsTab = $state<AchievementsTab | null>(null);
 
   async function switchTab(tab: Tab) {
     activeTab = tab;
@@ -70,6 +73,14 @@
       }
 
       cleanups.push(
+        await onAchievementUnlocked(async () => {
+          if (activeTab === 'achievements') {
+            await achievementsTab?.refresh();
+          }
+        }),
+        await onAchievementsCleared(async () => {
+          await achievementsTab?.refresh();
+        }),
         await onRoundChange(async () => {
           try {
             detailed = await statsGetDetailed();
@@ -82,6 +93,7 @@
           try {
             detailed = await statsGetDetailed();
             if (heatmapLoaded) heatmap = await statsGetHeatmap();
+            await achievementsTab?.refresh();
           } catch (e) {
             await logError(`[stats] failed to refresh stats after session clear: ${e}`);
           }
@@ -139,9 +151,10 @@
 
   <!-- Tab bar -->
   <div class="tabs">
-    <button class="tab" class:active={activeTab === 'today'}   onclick={() => switchTab('today')}>{m.stats_tab_today()}</button>
-    <button class="tab" class:active={activeTab === 'week'}    onclick={() => switchTab('week')}>{m.stats_tab_week()}</button>
-    <button class="tab" class:active={activeTab === 'alltime'} onclick={() => switchTab('alltime')}>{m.stats_tab_alltime()}</button>
+    <button class="tab" class:active={activeTab === 'today'}        onclick={() => switchTab('today')}>{m.stats_tab_today()}</button>
+    <button class="tab" class:active={activeTab === 'week'}         onclick={() => switchTab('week')}>{m.stats_tab_week()}</button>
+    <button class="tab" class:active={activeTab === 'alltime'}      onclick={() => switchTab('alltime')}>{m.stats_tab_alltime()}</button>
+    <button class="tab" class:active={activeTab === 'achievements'} onclick={() => switchTab('achievements')}>{m.stats_tab_achievements()}</button>
   </div>
 
   <!-- Content -->
@@ -150,8 +163,10 @@
       <DailyView today={detailed?.today ?? null} />
     {:else if activeTab === 'week'}
       <WeeklyView week={detailed?.week ?? null} streak={detailed?.streak ?? null} />
-    {:else}
+    {:else if activeTab === 'alltime'}
       <YearlyView {heatmap} />
+    {:else}
+      <AchievementsTab bind:this={achievementsTab} />
     {/if}
   </div>
 </div>
@@ -242,6 +257,10 @@
   .tab.active {
     color: var(--color-focus-round);
     border-bottom-color: var(--color-focus-round);
+  }
+
+  .tab:first-child {
+    padding-left: 0;
   }
 
   /* ── Content ───────────────────────────────────────────── */

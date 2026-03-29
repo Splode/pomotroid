@@ -7,6 +7,7 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 use std::sync::Arc;
 
+use crate::achievements::{eval as achievements_eval, AchievementView};
 use crate::audio::{self, AudioManager};
 use crate::notifications;
 use crate::db::{queries, DbState};
@@ -317,19 +318,87 @@ pub fn themes_list(app: AppHandle) -> Result<Vec<Theme>, String> {
 // CMD-04 — Sessions commands
 // ---------------------------------------------------------------------------
 
-/// Deletes all rows from the `sessions` table (irreversible bulk clear).
-/// Emits `sessions:cleared` so any open stats window can refresh immediately.
+/// Deletes all rows from the `sessions` table and any achievements/events that are
+/// derived purely from session data.  Achievements earned through other means
+/// (e.g. theme creation, app launches, shortcuts) are intentionally preserved.
+/// Emits `sessions:cleared` and `achievements:cleared` so open windows can refresh.
 #[tauri::command]
 pub fn sessions_clear(db: State<'_, DbState>, app: AppHandle) -> Result<(), String> {
-    log::info!("[sessions] clearing all session history");
+    use crate::achievements::{ACHIEVEMENTS, event};
+
     let conn = db.lock().map_err(|e| e.to_string())?;
+
     let n = conn.execute("DELETE FROM sessions", []).map_err(|e| {
         log::error!("[sessions] failed to clear history: {e}");
         e.to_string()
     })?;
-    log::info!("[sessions] cleared {n} rows");
+
+    // Remove events that are tied to sessions; leave unrelated events intact.
+    conn.execute(
+        "DELETE FROM events WHERE name = ?1",
+        rusqlite::params![event::SESSION_COMPLETED],
+    ).map_err(|e| {
+        log::error!("[sessions] failed to clear session events: {e}");
+        e.to_string()
+    })?;
+
+    // Remove only achievements whose triggers are exclusively session-based.
+    // Achievements driven by other events (theme_created, app_launched, etc.) are kept.
+    let mut a = 0usize;
+    for def in ACHIEVEMENTS {
+        let is_session_only = def.triggers.iter().all(|&t| t == event::SESSION_COMPLETED);
+        if is_session_only {
+            a += conn.execute(
+                "DELETE FROM achievements WHERE id = ?1",
+                rusqlite::params![def.id],
+            ).unwrap_or(0);
+        }
+    }
+
+    log::info!("[sessions] cleared {n} session rows and {a} session-based achievement rows");
     app.emit("sessions:cleared", ()).ok();
+    app.emit("achievements:cleared", ()).ok();
     Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// CMD-06 — Achievement commands
+// ---------------------------------------------------------------------------
+
+/// Return the full list of achievements with earned status and progress.
+/// Silently catches up on any achievements earned from pre-existing session
+/// data (e.g. sessions completed before the achievement system was added).
+#[tauri::command]
+pub fn achievements_get_all(
+    db: State<'_, DbState>,
+    app: AppHandle,
+) -> Result<Vec<AchievementView>, String> {
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    // Silently catch up on any retroactively-earned achievements (no toast).
+    achievements_eval::check_all_achievements(&conn, &app);
+    Ok(achievements_eval::build_all_views(&conn, &app))
+}
+
+/// Record a named achievement event from the frontend (e.g. settings_opened,
+/// shortcut_used).  Fires toasts for any newly-unlocked achievements.
+#[tauri::command]
+pub fn achievement_record_event(
+    db: State<'_, DbState>,
+    app: AppHandle,
+    name: String,
+    payload: Option<String>,
+) {
+    if let Ok(conn) = db.lock() {
+        let newly_unlocked = achievements_eval::record_event(
+            &conn,
+            &app,
+            &name,
+            payload.as_deref(),
+        );
+        if !newly_unlocked.is_empty() {
+            achievements_eval::notify_and_spawn_toast(newly_unlocked, &app);
+        }
+    }
 }
 
 // CMD-05 — Stats commands

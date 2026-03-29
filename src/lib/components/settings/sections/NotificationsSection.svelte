@@ -121,6 +121,12 @@
     checked={$settings.notifications_enabled}
     onclick={() => toggle('notifications', $settings.notifications_enabled)}
   />
+  <SettingsToggle
+    label={m.notif_toggle_achievements()}
+    description={m.notif_toggle_achievements_desc()}
+    checked={$settings.achievement_notifications}
+    onclick={() => toggle('achievement_notifications', $settings.achievement_notifications)}
+  />
 
   <div class="group-heading">{m.notif_group_tick()}</div>
 

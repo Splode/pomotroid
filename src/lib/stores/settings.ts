@@ -43,6 +43,7 @@ const defaults: Settings = {
   local_shortcut_volume_up: 'ArrowUp',
   local_shortcut_mute: 'm',
   local_shortcut_fullscreen: 'F11',
+  achievement_notifications: true,
 };
 
 export const settings = writable<Settings>(defaults);

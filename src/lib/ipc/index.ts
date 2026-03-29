@@ -4,7 +4,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
-import type { TimerState, Settings, Theme, CustomAudioInfo, DetailedStats, HeatmapStats, UpdateInfo } from '$lib/types';
+import type { TimerState, Settings, Theme, CustomAudioInfo, DetailedStats, HeatmapStats, UpdateInfo, AchievementView } from '$lib/types';
 
 // --- Timer commands ---
 
@@ -128,3 +128,23 @@ export const onThemesChanged = (cb: (themes: Theme[]) => void): Promise<Unlisten
 
 export const onSessionsCleared = (cb: () => void): Promise<UnlistenFn> =>
   listen<void>('sessions:cleared', () => cb());
+
+// --- Achievement commands ---
+
+/** Return all achievements with earned status and progress. */
+export const achievementsGetAll = () =>
+  invoke<AchievementView[]>('achievements_get_all');
+
+/** Record a named achievement event from the frontend. */
+export const achievementRecordEvent = (name: string, payload?: string) =>
+  invoke<void>('achievement_record_event', { name, payload: payload ?? null });
+
+// --- Achievement event listeners ---
+
+export const onAchievementUnlocked = (
+  cb: (payload: { ids: string[]; count: number }) => void,
+): Promise<UnlistenFn> =>
+  listen<{ ids: string[]; count: number }>('achievement:unlocked', (e) => cb(e.payload));
+
+export const onAchievementsCleared = (cb: () => void): Promise<UnlistenFn> =>
+  listen<void>('achievements:cleared', () => cb());

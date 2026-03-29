@@ -2,7 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main", "settings", "stats"],
+  "windows": ["main", "settings", "stats", "achievement-toast-*"],
   "permissions": [
     "core:default",
     "log:default",
@@ -10,6 +10,7 @@
     "core:window:allow-minimize",
     "core:webview:allow-create-webview-window",
     "core:window:allow-show",
+    "core:window:allow-set-size",
     "core:window:allow-set-focus",
     "core:window:allow-start-dragging",
     "core:window:allow-start-resize-dragging",

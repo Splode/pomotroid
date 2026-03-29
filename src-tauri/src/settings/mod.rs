@@ -57,6 +57,7 @@ pub struct Settings {
     pub local_shortcut_volume_up: String,
     pub local_shortcut_mute: String,
     pub local_shortcut_fullscreen: String,
+    pub achievement_notifications: bool,
 }
 
 impl Default for Settings {
@@ -112,6 +113,7 @@ impl Default for Settings {
             local_shortcut_volume_up: "ArrowUp".to_string(),
             local_shortcut_mute: "m".to_string(),
             local_shortcut_fullscreen: "F11".to_string(),
+            achievement_notifications: true,
         }
     }
 }
@@ -233,6 +235,7 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         local_shortcut_volume_up: map.get("local_shortcut_volume_up").cloned().unwrap_or(d.local_shortcut_volume_up),
         local_shortcut_mute: map.get("local_shortcut_mute").cloned().unwrap_or(d.local_shortcut_mute),
         local_shortcut_fullscreen: map.get("local_shortcut_fullscreen").cloned().unwrap_or(d.local_shortcut_fullscreen),
+        achievement_notifications: parse_bool(&map, "achievement_notifications", d.achievement_notifications),
     })
 }
 
