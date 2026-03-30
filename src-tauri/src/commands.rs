@@ -412,7 +412,7 @@ pub fn achievement_record_event(
         return;
     };
     if !newly_unlocked.is_empty() {
-        achievements_eval::notify_and_spawn_toast(newly_unlocked, &app);
+        achievements_eval::notify_and_spawn_toast(newly_unlocked, &app, false);
     }
 }
 

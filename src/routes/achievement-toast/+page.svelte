@@ -13,33 +13,10 @@
   const color   = params.get('color') ?? '#888888';
   const bg      = params.get('bg')    ?? '#0e0e12';
   const fg      = params.get('fg')    ?? '#ddd0bc';
-
   const isRollup = count > 1;
 
   let visible = $state(false);
   let exiting = $state(false);
-
-  // --- Bell chime via Web Audio API ---
-  function playChime() {
-    try {
-      const ctx = new AudioContext();
-      const freqs = [880, 2429];
-      const gains = [0.5, 0.25];
-      for (let i = 0; i < freqs.length; i++) {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = freqs[i];
-        gain.gain.setValueAtTime(gains[i], ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.8);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 1.8);
-      }
-      setTimeout(() => ctx.close(), 2000);
-    } catch { /* audio not available */ }
-  }
 
   // --- Auto-close ---
   function scheduleClose() {
@@ -70,7 +47,6 @@
       requestAnimationFrame(() => { visible = true; });
     });
 
-    playChime();
     scheduleClose();
   });
 

@@ -215,8 +215,12 @@ pub fn make_subscriber() -> impl Fn(&crate::bus::AppEvent, &AppHandle) + Send + 
         };
         // ── DB lock scope end ────────────────────────────────────────────────
 
+        // Mute the toast chime when triggered by session completion — the round
+        // completion sound already plays at this moment.
+        let mute_chime = matches!(event, AppEvent::SessionCompleted { .. });
+
         if !newly.is_empty() {
-            notify_and_spawn_toast(newly, app);
+            notify_and_spawn_toast(newly, app, mute_chime);
         }
     }
 }
@@ -411,7 +415,9 @@ pub fn build_all_views(conn: &Connection, _app: &AppHandle) -> Vec<AchievementVi
 
 /// Emit the `achievement:unlocked` event and optionally spawn the toast window.
 /// Call this AFTER releasing the DB lock (toast spawn re-acquires the lock).
-pub fn notify_and_spawn_toast(newly_unlocked: Vec<String>, app: &AppHandle) {
+/// `mute_chime` suppresses the bell sound in the toast (e.g. when a round
+/// completion sound is already playing).
+pub fn notify_and_spawn_toast(newly_unlocked: Vec<String>, app: &AppHandle, mute_chime: bool) {
     let count = newly_unlocked.len() as u32;
     let payload = AchievementUnlockedPayload {
         ids: newly_unlocked.clone(),
@@ -431,6 +437,11 @@ pub fn notify_and_spawn_toast(newly_unlocked: Vec<String>, app: &AppHandle) {
         .unwrap_or(true);
 
     if notifications_on {
+        if !mute_chime {
+            if let Some(audio) = app.try_state::<std::sync::Arc<crate::audio::AudioManager>>() {
+                audio.play_cue(crate::audio::AudioCue::Achievement);
+            }
+        }
         crate::achievements::toast::spawn_toast_window(app, &newly_unlocked, count);
     }
 }

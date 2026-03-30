@@ -30,6 +30,7 @@ const ALERT_WORK: &[u8] = include_bytes!("../../../static/audio/alert-work.mp3")
 const ALERT_SHORT_BREAK: &[u8] = include_bytes!("../../../static/audio/alert-short-break.mp3");
 const ALERT_LONG_BREAK: &[u8] = include_bytes!("../../../static/audio/alert-long-break.mp3");
 const TICK: &[u8] = include_bytes!("../../../static/audio/tick.mp3");
+const ACHIEVEMENT: &[u8] = include_bytes!("../../../static/audio/achievement.mp3");
 
 // ---------------------------------------------------------------------------
 // Public types
@@ -41,6 +42,7 @@ pub enum AudioCue {
     ShortBreakAlert,
     LongBreakAlert,
     Tick,
+    Achievement,
 }
 
 /// Paths to currently active custom audio files (one per alert cue).
@@ -130,7 +132,7 @@ impl AudioManager {
                 AudioCue::WorkAlert => paths.work_alert.clone(),
                 AudioCue::ShortBreakAlert => paths.short_break_alert.clone(),
                 AudioCue::LongBreakAlert => paths.long_break_alert.clone(),
-                AudioCue::Tick => None,
+                AudioCue::Tick | AudioCue::Achievement => None,
             }
         };
         let _ = self.tx.try_send(PlayRequest { cue, custom_path, volume });
@@ -256,6 +258,7 @@ fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
                 AudioCue::ShortBreakAlert => ALERT_SHORT_BREAK,
                 AudioCue::LongBreakAlert => ALERT_LONG_BREAK,
                 AudioCue::Tick => TICK,
+                AudioCue::Achievement => ACHIEVEMENT,
             };
             match Decoder::new(Cursor::new(bytes)) {
                 Ok(source) => player.append(source),
