@@ -443,6 +443,370 @@ pub fn get_long_break_completed(conn: &Connection) -> Result<bool> {
 }
 
 // ---------------------------------------------------------------------------
+// Additional achievement queries (new achievements)
+// ---------------------------------------------------------------------------
+
+/// Longest streak of consecutive days where ≥3 completed work sessions were
+/// started before noon (local time).  Used for Morning Ritual (target: 5).
+pub fn get_morning_ritual_streak(conn: &Connection) -> u32 {
+    let days: Vec<String> = conn
+        .prepare(
+            "SELECT date(started_at, 'unixepoch', 'localtime') as day
+             FROM sessions
+             WHERE round_type = 'work' AND completed = 1
+               AND CAST(strftime('%H', datetime(started_at, 'unixepoch', 'localtime')) AS INTEGER) < 12
+             GROUP BY day HAVING COUNT(*) >= 3
+             ORDER BY day",
+        )
+        .and_then(|mut s| Ok(s.query_map([], |r| r.get(0))?.flatten().collect()))
+        .unwrap_or_default();
+    max_consecutive_day_streak(&days)
+}
+
+/// True if any calendar week (Mon–Sun) had at least one completed work session
+/// and zero skipped break sessions.  Used for Balanced.
+pub fn get_balanced_week(conn: &Connection) -> bool {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM (
+            SELECT strftime('%Y-%W', started_at, 'unixepoch', 'localtime') as wk
+            FROM sessions WHERE round_type = 'work' AND completed = 1
+            GROUP BY wk
+         ) work_weeks
+         WHERE wk NOT IN (
+             SELECT DISTINCT strftime('%Y-%W', started_at, 'unixepoch', 'localtime')
+             FROM sessions WHERE round_type != 'work' AND completed = 0
+         )",
+        [],
+        |r| r.get(0),
+    ).unwrap_or(0);
+    count > 0
+}
+
+/// True if no long-break session has been skipped in the last 14 days AND
+/// the user has had at least one long-break (complete or otherwise) in that
+/// window.  Used for Stretch Break.
+pub fn get_stretch_break(conn: &Connection) -> bool {
+    let cutoff = unix_now() - 14 * 86_400;
+    // Any skipped long break in the last 14 days?
+    let skipped: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM sessions
+         WHERE round_type = 'long-break' AND completed = 0 AND started_at >= ?1",
+        params![cutoff],
+        |r| r.get(0),
+    ).unwrap_or(1);
+    if skipped > 0 { return false; }
+    // At least one long break event in the window (so the user actually had some).
+    let any: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM sessions
+         WHERE round_type = 'long-break' AND started_at >= ?1",
+        params![cutoff],
+        |r| r.get(0),
+    ).unwrap_or(0);
+    any > 0
+}
+
+/// Longest streak of consecutive calendar weeks where stats were opened at
+/// least once.  Used for Weekly Review (target: 4).
+pub fn get_stats_weekly_streak(conn: &Connection) -> u32 {
+    let weeks: Vec<String> = conn
+        .prepare(
+            "SELECT DISTINCT strftime('%Y-%W', ts, 'unixepoch') as wk
+             FROM events WHERE name = 'stats_opened'
+             ORDER BY wk ASC",
+        )
+        .and_then(|mut s| Ok(s.query_map([], |r| r.get(0))?.flatten().collect()))
+        .unwrap_or_default();
+
+    let mut max_streak = 0u32;
+    let mut run = 0u32;
+    for i in 0..weeks.len() {
+        if i == 0 {
+            run = 1;
+        } else if is_next_week(&weeks[i - 1], &weeks[i]) {
+            run += 1;
+        } else {
+            run = 1;
+        }
+        if run > max_streak { max_streak = run; }
+    }
+    max_streak
+}
+
+fn is_next_week(w1: &str, w2: &str) -> bool {
+    let parse = |w: &str| -> Option<(i32, i32)> {
+        let mut it = w.splitn(2, '-');
+        Some((it.next()?.parse().ok()?, it.next()?.parse().ok()?))
+    };
+    let (Some((y1, wk1)), Some((y2, wk2))) = (parse(w1), parse(w2)) else { return false };
+    (y1 == y2 && wk2 == wk1 + 1) || (y2 == y1 + 1 && wk1 >= 52 && wk2 <= 1)
+}
+
+/// Maximum consecutive completed work sessions where no break was skipped
+/// between any two.  Used for Flow State (target: 4).
+pub fn get_flow_state(conn: &Connection) -> u32 {
+    conn.query_row(
+        "WITH with_resets AS (
+             SELECT round_type, completed,
+                 SUM(CASE WHEN round_type != 'work' AND completed = 0 THEN 1 ELSE 0 END)
+                     OVER (ORDER BY id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS grp
+             FROM sessions
+         )
+         SELECT COALESCE(MAX(cnt), 0) FROM (
+             SELECT COUNT(*) AS cnt FROM with_resets
+             WHERE round_type = 'work' AND completed = 1
+             GROUP BY grp
+         )",
+        [],
+        |r| r.get(0),
+    ).unwrap_or(0)
+}
+
+/// Longest streak of consecutive days where ≥5 completed work sessions occurred.
+/// Used for Heatmap Inferno (target: 7).
+pub fn get_heatmap_inferno_streak(conn: &Connection) -> u32 {
+    let days: Vec<String> = conn
+        .prepare(
+            "SELECT date(started_at, 'unixepoch', 'localtime') as day
+             FROM sessions
+             WHERE round_type = 'work' AND completed = 1
+             GROUP BY day HAVING COUNT(*) >= 5
+             ORDER BY day",
+        )
+        .and_then(|mut s| Ok(s.query_map([], |r| r.get(0))?.flatten().collect()))
+        .unwrap_or_default();
+    max_consecutive_day_streak(&days)
+}
+
+/// Count of distinct payload values for a named event.
+/// Used for The Full Palette (count distinct themes applied).
+pub fn count_distinct_event_payloads(conn: &Connection, name: &str) -> i64 {
+    conn.query_row(
+        "SELECT COUNT(DISTINCT payload) FROM events WHERE name = ?1 AND payload IS NOT NULL",
+        params![name],
+        |r| r.get(0),
+    ).unwrap_or(0)
+}
+
+/// True if any day had ≥4 completed work sessions and zero skipped breaks.
+/// Used for Rest is Productive.
+pub fn get_rest_is_productive(conn: &Connection) -> bool {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM (
+             SELECT date(started_at, 'unixepoch', 'localtime') as day
+             FROM sessions WHERE round_type = 'work' AND completed = 1
+             GROUP BY day HAVING COUNT(*) >= 4
+         ) work_days
+         WHERE day NOT IN (
+             SELECT DISTINCT date(started_at, 'unixepoch', 'localtime')
+             FROM sessions WHERE round_type != 'work' AND completed = 0
+         )",
+        [],
+        |r| r.get(0),
+    ).unwrap_or(0);
+    count > 0
+}
+
+/// Count of work sessions that started within 3 seconds of any preceding
+/// session ending.  Used for Too Eager (target: 3).
+pub fn get_too_eager_count(conn: &Connection) -> i64 {
+    conn.query_row(
+        "SELECT COUNT(*) FROM sessions s2
+         WHERE s2.round_type = 'work' AND s2.completed = 1
+           AND s2.ended_at IS NOT NULL
+           AND EXISTS (
+               SELECT 1 FROM sessions s1
+               WHERE s1.id < s2.id
+                 AND s1.ended_at IS NOT NULL
+                 AND s2.started_at - s1.ended_at BETWEEN 0 AND 3
+           )",
+        [],
+        |r| r.get(0),
+    ).unwrap_or(0)
+}
+
+/// Longest streak of consecutive days where the first completed work session
+/// started more than 5 minutes after the first app_launched event that day.
+/// Used for Slow and Steady (target: 7).
+pub fn get_slow_and_steady_streak(conn: &Connection) -> u32 {
+    let days: Vec<String> = conn
+        .prepare(
+            "SELECT date(s.started_at, 'unixepoch', 'localtime') as day
+             FROM sessions s
+             WHERE s.round_type = 'work' AND s.completed = 1
+             GROUP BY day
+             HAVING (
+                 SELECT MIN(e.ts) FROM events e
+                 WHERE e.name = 'app_launched'
+                   AND date(e.ts, 'unixepoch', 'localtime') = day
+             ) IS NOT NULL
+             AND MIN(s.started_at) - (
+                 SELECT MIN(e.ts) FROM events e
+                 WHERE e.name = 'app_launched'
+                   AND date(e.ts, 'unixepoch', 'localtime') = day
+             ) > 300
+             ORDER BY day",
+        )
+        .and_then(|mut s| Ok(s.query_map([], |r| r.get(0))?.flatten().collect()))
+        .unwrap_or_default();
+    max_consecutive_day_streak(&days)
+}
+
+/// True if there are 10 or more consecutive settings_opened events with no
+/// settings_saved event between them.  Used for Obsessive Saver.
+pub fn get_obsessive_saver(conn: &Connection) -> bool {
+    let events: Vec<String> = conn
+        .prepare(
+            "SELECT name FROM events
+             WHERE name IN ('settings_opened', 'settings_saved')
+             ORDER BY ts ASC",
+        )
+        .and_then(|mut s| Ok(s.query_map([], |r| r.get(0))?.flatten().collect()))
+        .unwrap_or_default();
+
+    let mut max_run = 0u32;
+    let mut run = 0u32;
+    for ev in &events {
+        if ev == "settings_opened" {
+            run += 1;
+            if run > max_run { max_run = run; }
+        } else {
+            run = 0;
+        }
+    }
+    max_run >= 10
+}
+
+/// True if any completed work session was started on the given month and day
+/// (local time).  Used for holiday achievements.
+pub fn get_session_on_month_day(conn: &Connection, month: u32, day: u32) -> bool {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM sessions
+         WHERE round_type = 'work' AND completed = 1
+           AND CAST(strftime('%m', datetime(started_at, 'unixepoch', 'localtime')) AS INTEGER) = ?1
+           AND CAST(strftime('%d', datetime(started_at, 'unixepoch', 'localtime')) AS INTEGER) = ?2",
+        params![month, day],
+        |r| r.get(0),
+    ).unwrap_or(0);
+    count > 0
+}
+
+/// True if any local calendar day had exactly `exact` completed work sessions.
+/// Used for Lucky Streak (7) and Perfect Ten (10).
+pub fn get_exact_daily_work_count(conn: &Connection, exact: u32) -> bool {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM (
+             SELECT date(started_at, 'unixepoch', 'localtime') as day
+             FROM sessions WHERE round_type = 'work' AND completed = 1
+             GROUP BY day HAVING COUNT(*) = ?1
+         )",
+        params![exact],
+        |r| r.get(0),
+    ).unwrap_or(0);
+    count > 0
+}
+
+/// True if the user has had 5 or more consecutive days with app_launched events
+/// and zero settings_saved events on any of those days.  Used for Ghost Mode.
+pub fn get_ghost_mode_streak(conn: &Connection) -> bool {
+    let days: Vec<String> = conn
+        .prepare(
+            "SELECT DISTINCT date(ts, 'unixepoch') as day
+             FROM events WHERE name = 'app_launched'
+             AND date(ts, 'unixepoch') NOT IN (
+                 SELECT DISTINCT date(ts, 'unixepoch') FROM events WHERE name = 'settings_saved'
+             )
+             ORDER BY day ASC",
+        )
+        .and_then(|mut s| Ok(s.query_map([], |r| r.get(0))?.flatten().collect()))
+        .unwrap_or_default();
+    max_consecutive_day_streak(&days) >= 5
+}
+
+/// True if any completed work session used a duration of 3600+ seconds (60 min).
+/// Used for Marathon.
+pub fn get_marathon(conn: &Connection) -> bool {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM sessions
+         WHERE round_type = 'work' AND completed = 1 AND duration_secs >= 3600",
+        [],
+        |r| r.get(0),
+    ).unwrap_or(0);
+    count > 0
+}
+
+/// True if there are 3 or more consecutive completed work sessions with
+/// duration_secs ≤ 300 (5 minutes).  Used for Baby Steps.
+pub fn get_baby_steps(conn: &Connection) -> bool {
+    let max: u32 = conn.query_row(
+        "WITH with_resets AS (
+             SELECT completed, duration_secs,
+                 SUM(CASE WHEN round_type = 'work' AND (completed = 0 OR duration_secs > 300)
+                          THEN 1 ELSE 0 END)
+                     OVER (ORDER BY id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS grp
+             FROM sessions
+             WHERE round_type = 'work'
+         )
+         SELECT COALESCE(MAX(cnt), 0) FROM (
+             SELECT COUNT(*) AS cnt FROM with_resets
+             WHERE completed = 1 AND duration_secs <= 300
+             GROUP BY grp
+         )",
+        [],
+        |r| r.get(0),
+    ).unwrap_or(0);
+    max >= 3
+}
+
+/// True if any completed work session followed a gap of 14+ days from the
+/// previous session.  Used for Cold Spell.
+pub fn get_cold_spell(conn: &Connection) -> bool {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM sessions s2
+         WHERE s2.round_type = 'work' AND s2.completed = 1
+           AND EXISTS (
+               SELECT 1 FROM sessions s1
+               WHERE s1.id < s2.id
+                 AND s1.ended_at IS NOT NULL
+                 AND s2.started_at - s1.ended_at >= 1209600
+           )",
+        [],
+        |r| r.get(0),
+    ).unwrap_or(0);
+    count > 0
+}
+
+/// True if a named event occurred on December 31st (any year, local time).
+/// Used for History Buff.
+pub fn get_event_on_dec31(conn: &Connection, event_name: &str) -> bool {
+    let count: i64 = conn.query_row(
+        "SELECT COUNT(*) FROM events
+         WHERE name = ?1
+           AND CAST(strftime('%m', datetime(ts, 'unixepoch', 'localtime')) AS INTEGER) = 12
+           AND CAST(strftime('%d', datetime(ts, 'unixepoch', 'localtime')) AS INTEGER) = 31",
+        params![event_name],
+        |r| r.get(0),
+    ).unwrap_or(0);
+    count > 0
+}
+
+/// Maximum streak of consecutive days in a sorted list of date strings.
+fn max_consecutive_day_streak(days: &[String]) -> u32 {
+    if days.is_empty() { return 0; }
+    let nums: Vec<i32> = days.iter().filter_map(|s| date_to_day_num(s)).collect();
+    let mut max_run = 1u32;
+    let mut run = 1u32;
+    for i in 1..nums.len() {
+        if nums[i] == nums[i - 1] + 1 {
+            run += 1;
+            if run > max_run { max_run = run; }
+        } else {
+            run = 1;
+        }
+    }
+    max_run
+}
+
+// ---------------------------------------------------------------------------
 // Event log queries
 // ---------------------------------------------------------------------------
 
@@ -469,6 +833,16 @@ pub fn count_events(conn: &Connection, name: &str) -> i64 {
     conn.query_row(
         "SELECT COUNT(*) FROM events WHERE name = ?1",
         params![name],
+        |r| r.get(0),
+    )
+    .unwrap_or(0)
+}
+
+/// Count events matching `name` whose payload equals `payload`.
+pub fn count_events_with_payload(conn: &Connection, name: &str, payload: &str) -> i64 {
+    conn.query_row(
+        "SELECT COUNT(*) FROM events WHERE name = ?1 AND payload = ?2",
+        params![name, payload],
         |r| r.get(0),
     )
     .unwrap_or(0)
@@ -508,8 +882,7 @@ pub fn event_current_streak(conn: &Connection, name: &str) -> i64 {
             .unwrap_or_default()
             .as_secs();
         // Format as YYYY-MM-DD (UTC)
-        let d = chrono_day_from_secs(secs);
-        d
+        chrono_day_from_secs(secs)
     };
 
     let mut streak = 0i64;
@@ -554,7 +927,7 @@ fn ymd_to_days(y: i64, m: i64, d: i64) -> i64 {
     let b = 2 - a + a / 4;
     ((365.25 * (y + 4716) as f64) as i64)
         + ((30.6001 * (m + 1) as f64) as i64)
-        + d as i64 + b - 1524 - 2440588
+        + d + b - 1524 - 2440588
 }
 
 fn days_to_ymd(days: i64) -> (i64, i64, i64) {

@@ -6,6 +6,7 @@
     onSettingsChanged, onThemesChanged, onRoundChange, onSessionsCleared,
     statsGetDetailed, statsGetHeatmap,
     onAchievementUnlocked, onAchievementsCleared,
+    achievementRecordEvent,
   } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
@@ -67,6 +68,13 @@
 
         detailed = await statsGetDetailed();
         await info(`[stats] initialized, theme=${activeTheme?.name ?? 'none'}`);
+
+        // Achievement events: record page open and schedule long-view.
+        achievementRecordEvent('stats_opened').catch(() => {});
+        const longViewTimer = setTimeout(() => {
+          achievementRecordEvent('stats_long_view').catch(() => {});
+        }, 5 * 60 * 1000);
+        cleanups.push(() => clearTimeout(longViewTimer));
       } catch (e) {
         await logError(`[stats] initialization failed: ${e}`);
         throw e;

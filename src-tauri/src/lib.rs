@@ -1,5 +1,6 @@
 pub mod achievements;
 pub mod audio;
+pub mod bus;
 pub mod commands;
 pub mod db;
 pub mod notifications;
@@ -92,14 +93,15 @@ pub fn run() {
                 settings::seed_defaults(&conn).expect("failed to seed default settings");
                 // Prune events older than 90 days (well beyond the 30-day streak window).
                 crate::db::queries::prune_events(&conn, 90);
-                // Fire the app_launched event for achievement tracking.
-                let _ = crate::db::queries::insert_event(
-                    &conn,
-                    crate::achievements::event::APP_LAUNCHED,
-                    None,
-                );
             }
             app.manage(db.clone());
+
+            // --- Event bus ---
+            let bus = crate::bus::EventBus::new();
+            bus.subscribe(crate::achievements::eval::make_subscriber());
+            app.manage(Arc::clone(&bus));
+            // Publish AppLaunched now that the bus and DB state are both registered.
+            bus.publish(crate::bus::AppEvent::AppLaunched, app.handle());
 
             // --- Tray state (always created; icon populated only when min_to_tray is on) ---
             let tray_state = tray::TrayState::new();

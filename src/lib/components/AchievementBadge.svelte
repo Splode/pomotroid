@@ -14,9 +14,14 @@
   const center = $derived(size / 2);
   const iconSize = $derived(Math.round(size * 0.45));
   const fluentSrc = $derived(emoji ? (FLUENT_EMOJI[emoji] ?? null) : null);
+  const badgeColor = $derived(color ?? '#888888');
 </script>
 
-<span class="badge-wrapper" class:unearned={!earned}>
+<span
+  class="badge-wrapper"
+  class:unearned={!earned}
+  style="--badge-color: {badgeColor}; --size: {size}px"
+>
   {#if locked}
     <svg
       width={size}
@@ -72,6 +77,14 @@
   .badge-wrapper {
     display: inline-flex;
     flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: var(--size, 28px);
+    height: var(--size, 28px);
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--badge-color) 18%, transparent);
+    border: 1.5px solid color-mix(in srgb, var(--badge-color) 50%, transparent);
+    box-sizing: border-box;
   }
 
   .badge-wrapper.unearned {

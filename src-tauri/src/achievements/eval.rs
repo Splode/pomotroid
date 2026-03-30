@@ -69,6 +69,19 @@ pub fn on_event(event_name: &str, conn: &Connection, app: &AppHandle) -> Vec<Str
         }
     }
 
+    // The Completionist is checked after every unlock, not on a specific trigger.
+    if !newly_unlocked.is_empty()
+        && !earned.contains("the_completionist")
+        && criteria_met("the_completionist", conn, app)
+    {
+        if let Err(e) = queries::insert_achievement(conn, "the_completionist", now) {
+            log::warn!("[achievements] failed to insert the_completionist: {e}");
+        } else {
+            log::info!("[achievements] unlocked: the_completionist");
+            newly_unlocked.push("the_completionist".to_string());
+        }
+    }
+
     newly_unlocked
 }
 
@@ -97,74 +110,242 @@ pub fn check_all_achievements(conn: &Connection, app: &AppHandle) {
 }
 
 // ---------------------------------------------------------------------------
+// Bus subscriber — single registration point for all achievement side-effects
+// ---------------------------------------------------------------------------
+
+/// Delete achievements that are exclusively driven by `SESSION_COMPLETED` events.
+/// Called by the bus subscriber when `SessionsCleared` is received.
+pub fn cleanup_session_achievements(conn: &Connection) {
+    use crate::achievements::event;
+    let mut count = 0usize;
+    for def in crate::achievements::ACHIEVEMENTS {
+        if def.triggers.iter().all(|&t| t == event::SESSION_COMPLETED) {
+            count += conn
+                .execute(
+                    "DELETE FROM achievements WHERE id = ?1",
+                    rusqlite::params![def.id],
+                )
+                .unwrap_or(0);
+        }
+    }
+    log::info!("[achievements] removed {count} session-based achievement rows on sessions_clear");
+}
+
+/// Build the achievement handler to register with the `EventBus`.
+///
+/// The returned closure:
+/// 1. Acquires the DB lock.
+/// 2. Inserts event-log rows and evaluates any newly-earned achievements.
+/// 3. **Drops the lock** before calling `notify_and_spawn_toast`, which
+///    re-acquires the lock internally.
+pub fn make_subscriber() -> impl Fn(&crate::bus::AppEvent, &AppHandle) + Send + Sync + 'static {
+    move |event, app| {
+        use crate::achievements::event as ev;
+        use crate::bus::AppEvent;
+        use crate::db::queries;
+
+        let Some(db) = app.try_state::<crate::db::DbState>() else { return };
+
+        // ── DB lock scope ────────────────────────────────────────────────────
+        // INVARIANT: `conn` must be dropped before `notify_and_spawn_toast()`
+        // because that function re-acquires the DB lock.
+        let newly = {
+            let Ok(conn) = db.lock() else { return };
+
+            match event {
+                AppEvent::AppLaunched =>
+                    record_event(&conn, app, ev::APP_LAUNCHED, None),
+
+                AppEvent::SessionCompleted {
+                    round_type,
+                    was_skipped,
+                    elapsed_secs,
+                    round_duration_secs,
+                    in_tray,
+                    always_on_top,
+                    websocket_active,
+                    silent,
+                } => {
+                    // Context flags are already pre-gated to false for non-work
+                    // rounds at the publish site, so no round_type check needed here.
+                    if *in_tray {
+                        let _ = queries::insert_event(&conn, ev::SESSION_TRAY, None);
+                    }
+                    if *always_on_top {
+                        let _ = queries::insert_event(&conn, ev::SESSION_ALWAYS_ON_TOP, None);
+                    }
+                    if *websocket_active {
+                        let _ = queries::insert_event(&conn, ev::SESSION_WEBSOCKET_ACTIVE, None);
+                    }
+                    if *silent {
+                        let _ = queries::insert_event(&conn, ev::SESSION_SILENT, None);
+                    }
+                    if *was_skipped
+                        && round_type == "work"
+                        && round_duration_secs.saturating_sub(*elapsed_secs) < 60
+                    {
+                        let _ = queries::insert_event(&conn, ev::SESSION_SKIPPED_LATE, None);
+                    }
+                    record_event(&conn, app, ev::SESSION_COMPLETED, None)
+                }
+
+                AppEvent::SessionsCleared => {
+                    cleanup_session_achievements(&conn);
+                    vec![]
+                }
+
+                AppEvent::SettingsSaved { key } =>
+                    record_event(&conn, app, ev::SETTINGS_SAVED, Some(key.as_str())),
+                AppEvent::ThemeApplied { name } =>
+                    record_event(&conn, app, ev::THEME_APPLIED, Some(name.as_str())),
+                AppEvent::LanguageChanged { language } =>
+                    record_event(&conn, app, ev::LANGUAGE_CHANGED, Some(language.as_str())),
+                AppEvent::WebSocketEnabled =>
+                    record_event(&conn, app, ev::WEBSOCKET_ENABLED, None),
+                AppEvent::WebSocketMessage { msg_type } =>
+                    record_event(&conn, app, ev::WEBSOCKET_MESSAGE, Some(msg_type.as_str())),
+                AppEvent::ShortcutUsed { action } =>
+                    record_event(&conn, app, ev::SHORTCUT_USED, Some(action.as_str())),
+                AppEvent::AudioCustomLoaded =>
+                    record_event(&conn, app, ev::AUDIO_CUSTOM_LOADED, None),
+                AppEvent::ThemeCreated =>
+                    record_event(&conn, app, ev::THEME_CREATED, None),
+            }
+            // `conn` guard drops here — lock released before notify below.
+        };
+        // ── DB lock scope end ────────────────────────────────────────────────
+
+        if !newly.is_empty() {
+            notify_and_spawn_toast(newly, app);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Criteria — one arm per achievement, querying the DB directly
 // ---------------------------------------------------------------------------
 
 fn criteria_met(id: &str, conn: &Connection, app: &AppHandle) -> bool {
+    use crate::achievements::event;
     match id {
-        // --- Milestone ---
-        "the_seed" => {
-            queries::get_all_time_stats(conn)
-                .map(|s| s.completed_work_sessions >= 1)
-                .unwrap_or(false)
-        }
-        "hat_trick" => {
-            queries::get_hat_trick_max_day(conn)
-                .map(|n| n >= 3)
-                .unwrap_or(false)
-        }
-        "the_centurion" => {
-            queries::get_all_time_stats(conn)
-                .map(|s| s.completed_work_sessions >= 100)
-                .unwrap_or(false)
-        }
-        "tomato_baron" => {
-            queries::get_all_time_stats(conn)
-                .map(|s| s.completed_work_sessions >= 500)
-                .unwrap_or(false)
-        }
-        "tomato_tycoon" => {
-            queries::get_all_time_stats(conn)
-                .map(|s| s.completed_work_sessions >= 1000)
-                .unwrap_or(false)
-        }
-        "time_lord" => {
-            queries::get_all_time_stats(conn)
-                .map(|s| s.total_work_secs >= 360_000)
-                .unwrap_or(false)
-        }
-        // --- Habit ---
-        "on_a_roll" => {
-            queries::get_streak(conn)
-                .map(|s| s.longest >= 3)
-                .unwrap_or(false)
-        }
-        "week_warrior" => {
-            queries::get_streak(conn)
-                .map(|s| s.longest >= 7)
-                .unwrap_or(false)
-        }
-        "month_of_zen" => {
-            queries::get_streak(conn)
-                .map(|s| s.longest >= 30)
-                .unwrap_or(false)
-        }
+        // --- Original Milestone ---
+        "the_seed" => queries::get_all_time_stats(conn)
+            .map(|s| s.completed_work_sessions >= 1).unwrap_or(false),
+        "hat_trick" => queries::get_hat_trick_max_day(conn)
+            .map(|n| n >= 3).unwrap_or(false),
+        "the_centurion" => queries::get_all_time_stats(conn)
+            .map(|s| s.completed_work_sessions >= 100).unwrap_or(false),
+        "tomato_baron" => queries::get_all_time_stats(conn)
+            .map(|s| s.completed_work_sessions >= 500).unwrap_or(false),
+        "tomato_tycoon" => queries::get_all_time_stats(conn)
+            .map(|s| s.completed_work_sessions >= 1000).unwrap_or(false),
+        "time_lord" => queries::get_all_time_stats(conn)
+            .map(|s| s.total_work_secs >= 360_000).unwrap_or(false),
+        // --- Original Habit ---
+        "on_a_roll"    => queries::get_streak(conn).map(|s| s.longest >= 3).unwrap_or(false),
+        "week_warrior" => queries::get_streak(conn).map(|s| s.longest >= 7).unwrap_or(false),
+        "month_of_zen" => queries::get_streak(conn).map(|s| s.longest >= 30).unwrap_or(false),
         "comeback_kid" => queries::get_comeback_kid(conn).unwrap_or(false),
-        // --- Discovery ---
+        // --- Original Discovery ---
         "early_bird"        => queries::get_early_sessions(conn).unwrap_or(false),
         "midnight_oil"      => queries::get_midnight_sessions(conn).unwrap_or(false),
         "perfect_day"       => queries::get_perfect_day_exists(conn).unwrap_or(false),
         "the_long_haul"     => queries::get_long_break_completed(conn).unwrap_or(false),
         "creature_of_habit" => queries::get_creature_of_habit(conn).unwrap_or(false),
         "theme_artist" => {
-            // Check the events log first (fast path); fall back to filesystem.
-            if queries::count_events(conn, crate::achievements::event::THEME_CREATED) > 0 {
-                return true;
-            }
+            if queries::count_events(conn, event::THEME_CREATED) > 0 { return true; }
             app.path().app_data_dir().map(|dir| {
                 !crate::themes::load_custom(&dir.join("themes")).is_empty()
             }).unwrap_or(false)
         }
+
+        // --- New Habit ---
+        "showing_up"     => queries::event_current_streak(conn, event::APP_LAUNCHED) >= 7,
+        "daily_devotee"  => queries::event_current_streak(conn, event::APP_LAUNCHED) >= 30,
+        "the_long_game"  => queries::get_streak(conn).map(|s| s.longest >= 100).unwrap_or(false),
+        "morning_ritual" => queries::get_morning_ritual_streak(conn) >= 5,
+        "balanced"       => queries::get_balanced_week(conn),
+        "stretch_break"  => queries::get_stretch_break(conn),
+        "weekly_review"  => queries::get_stats_weekly_streak(conn) >= 4,
+
+        // --- New Milestone ---
+        "flow_state"      => queries::get_flow_state(conn) >= 4,
+        "heatmap_inferno" => queries::get_heatmap_inferno_streak(conn) >= 7,
+        "full_palette"    => queries::count_distinct_event_payloads(conn, event::THEME_APPLIED) >= 10,
+        "front_and_center" => queries::count_events(conn, event::SESSION_ALWAYS_ON_TOP) >= 4,
+        "compact_champion" => queries::count_events(conn, event::SESSION_COMPACT) >= 5,
+        "power_user"       => queries::count_events(conn, event::SHORTCUT_USED) >= 50,
+
+        // --- New Discovery ---
+        "rest_is_productive"  => queries::get_rest_is_productive(conn),
+        "first_impression"    => queries::count_events(conn, event::THEME_APPLIED) > 0,
+        "by_the_numbers"      => queries::count_events(conn, event::STATS_OPENED) > 0,
+        "your_rules" => {
+            // Fires when time_work_secs key is saved; payload is the key name.
+            queries::count_events_with_payload(conn, event::SETTINGS_SAVED, "time_work_secs") > 0
+        }
+        "sound_check"         => queries::count_events(conn, event::AUDIO_CUSTOM_LOADED) > 0,
+        "lost_in_translation" => queries::count_events(conn, event::LANGUAGE_CHANGED) > 0,
+        "background_worker"   => queries::count_events(conn, event::SESSION_TRAY) > 0,
+
+        // --- New Secret ---
+        "too_eager"      => queries::get_too_eager_count(conn) >= 3,
+        "slow_and_steady" => queries::get_slow_and_steady_streak(conn) >= 7,
+        "obsessive_saver" => queries::get_obsessive_saver(conn),
+        "rebel"           => queries::count_events(conn, event::SESSION_SKIPPED_LATE) >= 3,
+        "holiday_focus"   => queries::get_session_on_month_day(conn, 12, 25),
+        "new_year_focus"  => queries::get_session_on_month_day(conn, 1, 1),
+        "self_love"       => queries::get_session_on_month_day(conn, 2, 14),
+        "lucky_streak"    => queries::get_exact_daily_work_count(conn, 7),
+        "perfect_ten"     => queries::get_exact_daily_work_count(conn, 10),
+        "ghost_mode"      => queries::get_ghost_mode_streak(conn),
+        "the_completionist" => {
+            // All non-secret achievements must be earned.
+            let earned = match queries::get_earned_achievement_ids(conn) {
+                Ok(s) => s,
+                Err(_) => return false,
+            };
+            crate::achievements::ACHIEVEMENTS.iter()
+                .filter(|d| !d.secret)
+                .all(|d| earned.contains(d.id))
+        }
+        "wired_in"        => queries::count_events(conn, event::WEBSOCKET_ENABLED) > 0,
+        "streaming_live"  => queries::count_events(conn, event::SESSION_WEBSOCKET_ACTIVE) >= 5,
+        "automated"       => queries::count_events(conn, event::WEBSOCKET_MESSAGE) > 0,
+        "deep_dive"       => queries::count_events(conn, event::STATS_LONG_VIEW) > 0,
+        "history_buff"    => queries::get_event_on_dec31(conn, event::STATS_OPENED),
+        "tres_bien" => {
+            // Session completed today while language is set to French.
+            let is_french = crate::settings::get_setting(conn, "language")
+                .map(|v| v == "fr")
+                .unwrap_or(false);
+            if !is_french { return false; }
+            let count: i64 = conn.query_row(
+                "SELECT COUNT(*) FROM sessions
+                 WHERE round_type = 'work' AND completed = 1
+                   AND date(started_at, 'unixepoch', 'localtime') = date('now', 'localtime')",
+                [],
+                |r| r.get(0),
+            ).unwrap_or(0);
+            count > 0
+        }
+        "chromesthete" => {
+            app.path().app_data_dir().map(|dir| {
+                crate::themes::load_custom(&dir.join("themes")).len() >= 3
+            }).unwrap_or(false)
+        }
+        "marathon"   => queries::get_marathon(conn),
+        "baby_steps" => queries::get_baby_steps(conn),
+        "no_rest" => {
+            // Long break interval must be 6+ and a long break must have been completed.
+            let interval = crate::settings::get_setting(conn, "work_rounds")
+                .and_then(|v| v.parse::<u32>().ok())
+                .unwrap_or(4);
+            interval >= 6 && queries::get_long_break_completed(conn).unwrap_or(false)
+        }
+        "cold_spell"   => queries::get_cold_spell(conn),
+        "library_mode" => queries::count_events(conn, event::SESSION_SILENT) >= 4,
+
         _ => false,
     }
 }
@@ -174,6 +355,7 @@ fn criteria_met(id: &str, conn: &Connection, app: &AppHandle) -> bool {
 // ---------------------------------------------------------------------------
 
 pub fn progress_for(id: &str, conn: &Connection) -> Option<u32> {
+    use crate::achievements::event;
     match id {
         "the_seed" | "hat_trick" | "the_centurion" | "tomato_baron" | "tomato_tycoon" => {
             queries::get_all_time_stats(conn).ok()
@@ -186,6 +368,16 @@ pub fn progress_for(id: &str, conn: &Connection) -> Option<u32> {
         "on_a_roll" | "week_warrior" | "month_of_zen" => {
             queries::get_streak(conn).ok().map(|s| s.longest)
         }
+        "showing_up"    => Some(queries::event_current_streak(conn, event::APP_LAUNCHED).min(7) as u32),
+        "daily_devotee" => Some(queries::event_current_streak(conn, event::APP_LAUNCHED).min(30) as u32),
+        "the_long_game" => queries::get_streak(conn).ok().map(|s| s.longest.min(100)),
+        "flow_state"       => Some(queries::get_flow_state(conn).min(4)),
+        "full_palette"     => Some(queries::count_distinct_event_payloads(conn, event::THEME_APPLIED).min(10) as u32),
+        "front_and_center" => Some(queries::count_events(conn, event::SESSION_ALWAYS_ON_TOP).min(4) as u32),
+        "compact_champion" => Some(queries::count_events(conn, event::SESSION_COMPACT).min(5) as u32),
+        "power_user"       => Some(queries::count_events(conn, event::SHORTCUT_USED).min(50) as u32),
+        "streaming_live"   => Some(queries::count_events(conn, event::SESSION_WEBSOCKET_ACTIVE).min(5) as u32),
+        "library_mode"     => Some(queries::count_events(conn, event::SESSION_SILENT).min(4) as u32),
         _ => None,
     }
 }

@@ -12,6 +12,7 @@
     onTimerResumed,
     onRoundChange,
     onTimerReset,
+    achievementRecordEvent,
   } from '$lib/ipc';
   import { timerState } from '$lib/stores/timer';
   import { settings } from '$lib/stores/settings';
@@ -66,6 +67,10 @@
         }),
         await onRoundChange((snap) => {
           timerState.set(snap);
+          // Work session just completed in compact mode → record for Compact Champion.
+          if (snap.previous_round_type === 'work' && isCompact) {
+            achievementRecordEvent('session_compact').catch(() => {});
+          }
           if ($settings.notifications_enabled) {
             let title: string;
             let body: string;

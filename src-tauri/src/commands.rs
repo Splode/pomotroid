@@ -215,6 +215,31 @@ pub fn settings_set(
         });
     }
 
+    // Publish domain events; the achievement subscriber handles recording + evaluation.
+    if let Some(bus) = app.try_state::<Arc<crate::bus::EventBus>>() {
+        bus.publish(crate::bus::AppEvent::SettingsSaved { key: key.clone() }, &app);
+
+        if matches!(key.as_str(), "theme_light" | "theme_dark") {
+            let name = if key == "theme_light" {
+                new_settings.theme_light.clone()
+            } else {
+                new_settings.theme_dark.clone()
+            };
+            bus.publish(crate::bus::AppEvent::ThemeApplied { name }, &app);
+        }
+        if key == "language" {
+            bus.publish(
+                crate::bus::AppEvent::LanguageChanged {
+                    language: new_settings.language.clone(),
+                },
+                &app,
+            );
+        }
+        if key == "websocket_enabled" && new_settings.websocket_enabled {
+            bus.publish(crate::bus::AppEvent::WebSocketEnabled, &app);
+        }
+    }
+
     app.emit("settings:changed", &new_settings).ok();
     Ok(new_settings)
 }
@@ -324,8 +349,6 @@ pub fn themes_list(app: AppHandle) -> Result<Vec<Theme>, String> {
 /// Emits `sessions:cleared` and `achievements:cleared` so open windows can refresh.
 #[tauri::command]
 pub fn sessions_clear(db: State<'_, DbState>, app: AppHandle) -> Result<(), String> {
-    use crate::achievements::{ACHIEVEMENTS, event};
-
     let conn = db.lock().map_err(|e| e.to_string())?;
 
     let n = conn.execute("DELETE FROM sessions", []).map_err(|e| {
@@ -333,29 +356,23 @@ pub fn sessions_clear(db: State<'_, DbState>, app: AppHandle) -> Result<(), Stri
         e.to_string()
     })?;
 
-    // Remove events that are tied to sessions; leave unrelated events intact.
+    // Remove events tied to sessions; leave unrelated events intact.
     conn.execute(
         "DELETE FROM events WHERE name = ?1",
-        rusqlite::params![event::SESSION_COMPLETED],
+        rusqlite::params![crate::achievements::event::SESSION_COMPLETED],
     ).map_err(|e| {
         log::error!("[sessions] failed to clear session events: {e}");
         e.to_string()
     })?;
 
-    // Remove only achievements whose triggers are exclusively session-based.
-    // Achievements driven by other events (theme_created, app_launched, etc.) are kept.
-    let mut a = 0usize;
-    for def in ACHIEVEMENTS {
-        let is_session_only = def.triggers.iter().all(|&t| t == event::SESSION_COMPLETED);
-        if is_session_only {
-            a += conn.execute(
-                "DELETE FROM achievements WHERE id = ?1",
-                rusqlite::params![def.id],
-            ).unwrap_or(0);
-        }
+    log::info!("[sessions] cleared {n} session rows");
+    drop(conn); // Release DB lock before publishing — subscriber re-acquires it.
+
+    // The achievement subscriber handles selective achievement deletion.
+    if let Some(bus) = app.try_state::<Arc<crate::bus::EventBus>>() {
+        bus.publish(crate::bus::AppEvent::SessionsCleared, &app);
     }
 
-    log::info!("[sessions] cleared {n} session rows and {a} session-based achievement rows");
     app.emit("sessions:cleared", ()).ok();
     app.emit("achievements:cleared", ()).ok();
     Ok(())
@@ -388,16 +405,14 @@ pub fn achievement_record_event(
     name: String,
     payload: Option<String>,
 ) {
-    if let Ok(conn) = db.lock() {
-        let newly_unlocked = achievements_eval::record_event(
-            &conn,
-            &app,
-            &name,
-            payload.as_deref(),
-        );
-        if !newly_unlocked.is_empty() {
-            achievements_eval::notify_and_spawn_toast(newly_unlocked, &app);
-        }
+    // DB lock must be released before notify_and_spawn_toast — it re-acquires the lock.
+    let newly_unlocked = if let Ok(conn) = db.lock() {
+        achievements_eval::record_event(&conn, &app, &name, payload.as_deref())
+    } else {
+        return;
+    };
+    if !newly_unlocked.is_empty() {
+        achievements_eval::notify_and_spawn_toast(newly_unlocked, &app);
     }
 }
 
@@ -534,6 +549,12 @@ pub fn audio_set_custom(
     settings::save_setting(&conn, name_key, &display_name).map_err(|e| e.to_string())?;
 
     log::info!("[audio] custom sound set cue={cue} file={display_name}");
+    drop(conn); // Release DB lock before publishing to bus.
+
+    if let Some(bus) = app.try_state::<Arc<crate::bus::EventBus>>() {
+        bus.publish(crate::bus::AppEvent::AudioCustomLoaded, &app);
+    }
+
     Ok(display_name)
 }
 

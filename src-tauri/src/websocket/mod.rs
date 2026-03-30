@@ -200,17 +200,23 @@ async fn handle_client_message(
         return;
     };
 
-    if let Some("getState") = msg.get("type").and_then(|t| t.as_str()) {
+    let msg_type = msg.get("type").and_then(|t| t.as_str()).unwrap_or("");
+
+    if msg_type == "getState" {
         if let Some(timer) = app.try_state::<TimerController>() {
             let snapshot = timer.get_snapshot();
             let response = serde_json::json!({
                 "type": "state",
                 "payload": snapshot,
             });
-            // Note: we can't send directly here without the sender;
-            // the client will receive state via the next broadcast.
-            // For an immediate reply, broadcast it.
             let _ = app.emit("timer:state-query", response);
+        }
+
+        if let Some(bus) = app.try_state::<std::sync::Arc<crate::bus::EventBus>>() {
+            bus.publish(
+                crate::bus::AppEvent::WebSocketMessage { msg_type: msg_type.to_string() },
+                app,
+            );
         }
     }
 }

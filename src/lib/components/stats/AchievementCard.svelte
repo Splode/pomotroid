@@ -22,7 +22,12 @@
   }
 </script>
 
-<div class="card" class:earned={achievement.earned} class:secret={isSecret} style="--delay: {delay}ms">
+<div
+  class="card"
+  class:earned={achievement.earned}
+  class:secret={isSecret}
+  style="--delay: {delay}ms; --achievement-color: {achievement.color ?? 'transparent'}"
+>
   <div class="badge-wrap">
     <AchievementBadge
       color={achievement.color}
@@ -60,6 +65,13 @@
     background: var(--color-background-light);
     animation: card-rise 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: var(--delay, 0ms);
+    opacity: 0.55;
+  }
+
+  .card.earned {
+    opacity: 1;
+    border-left: 3px solid var(--achievement-color, transparent);
+    padding-left: 9px; /* compensate for border */
   }
 
   @keyframes card-rise {

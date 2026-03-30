@@ -1,7 +1,7 @@
 <script lang="ts">
   import '../../app.css';
   import { onMount } from 'svelte';
-  import { getSettings, getThemes, onSettingsChanged, onThemesChanged } from '$lib/ipc';
+  import { getSettings, getThemes, onSettingsChanged, onThemesChanged, achievementRecordEvent } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
   import { resolveThemeName } from '$lib/utils/theme';
@@ -73,6 +73,9 @@
 
       // Show the window now that the theme is applied (avoids white flash)
       await getCurrentWebviewWindow().show();
+
+      // Achievement: record settings page opened.
+      achievementRecordEvent('settings_opened').catch(() => {});
       } catch (e) {
         await logError(`[settings] initialization failed: ${e}`);
         throw e;

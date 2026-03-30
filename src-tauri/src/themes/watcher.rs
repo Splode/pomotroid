@@ -120,25 +120,13 @@ fn drain_within(rx: &mpsc::Receiver<notify::Result<Event>>, window: Duration) {
 }
 
 /// Re-scan themes directory and emit `themes:changed` with the updated list.
-/// Also checks for newly-earned Theme Artist achievement.
 fn reload_and_emit(app_data_dir: &Path, app: &AppHandle) {
     let themes: Vec<Theme> = list_all(app_data_dir);
     if let Err(e) = app.emit("themes:changed", &themes) {
         log::warn!("[themes/watcher] emit error: {e}");
     }
 
-    // Check achievement — only fires if a custom theme now exists.
-    if let Some(db) = app.try_state::<crate::db::DbState>() {
-        if let Ok(conn) = db.lock() {
-            let newly_unlocked = crate::achievements::eval::record_event(
-                &conn,
-                app,
-                crate::achievements::event::THEME_CREATED,
-                None,
-            );
-            if !newly_unlocked.is_empty() {
-                crate::achievements::eval::notify_and_spawn_toast(newly_unlocked, app);
-            }
-        }
+    if let Some(bus) = app.try_state::<std::sync::Arc<crate::bus::EventBus>>() {
+        bus.publish(crate::bus::AppEvent::ThemeCreated, app);
     }
 }

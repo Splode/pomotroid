@@ -7,8 +7,8 @@ use std::time::Duration;
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
 
-use crate::achievements::{eval as achievements_eval, event as achievement_event};
 use crate::audio::{AudioCue, AudioManager};
+use crate::bus::{AppEvent, EventBus};
 use crate::db::{queries, DbState};
 use crate::settings::Settings;
 use crate::tray::{self, TrayState};
@@ -309,26 +309,58 @@ fn listen_events(
                     "[timer] round complete type={completed_round} skipped={was_skipped}"
                 );
 
+                // Capture elapsed time before anything else (needed for skipped-late check).
+                let elapsed_at_complete = shared.lock().unwrap().elapsed_secs;
+                let round_duration_secs = {
+                    let seq = sequence.lock().unwrap();
+                    let s   = settings.lock().unwrap();
+                    match seq.current_round {
+                        crate::timer::sequence::RoundType::Work       => s.time_work_secs,
+                        crate::timer::sequence::RoundType::ShortBreak => s.time_short_break_secs,
+                        crate::timer::sequence::RoundType::LongBreak  => s.time_long_break_secs,
+                    }
+                };
+                let is_work_round = completed_round == "work";
+
                 // --- Session recording: mark the completed round ---
-                let newly_unlocked = if let Some(session_id) = current_session_id.take() {
+                // complete_session is core business logic — stays in the timer.
+                if let Some(session_id) = current_session_id.take() {
                     if let Ok(conn) = db.lock() {
                         let _ = queries::complete_session(&conn, session_id, !was_skipped);
-                        // Check achievements while lock is held, then release before notifying.
-                        achievements_eval::record_event(
-                            &conn,
-                            &app,
-                            achievement_event::SESSION_COMPLETED,
-                            None,
-                        )
-                    } else {
-                        vec![]
                     }
-                } else {
-                    vec![]
+                    // DB lock released before publishing to bus.
+                }
+
+                // Gather context flags; the timer has this data, the subscriber does not.
+                let in_tray = app
+                    .get_webview_window("main")
+                    .map(|w| !w.is_visible().unwrap_or(true))
+                    .unwrap_or(false);
+                let (always_on_top, websocket_active, silent) = {
+                    let s = settings.lock().unwrap();
+                    let sil = !s.tick_sounds_during_work
+                        && !s.tick_sounds_during_break
+                        && s.volume <= 0.0;
+                    (s.always_on_top, s.websocket_enabled, sil)
                 };
-                // DB lock is released; safe to re-acquire inside notify_and_spawn_toast.
-                if !newly_unlocked.is_empty() {
-                    achievements_eval::notify_and_spawn_toast(newly_unlocked, &app);
+
+                // Publish through the bus; the achievement subscriber handles all
+                // event-log inserts and achievement evaluation.
+                if let Some(bus) = app.try_state::<Arc<EventBus>>() {
+                    bus.publish(
+                        AppEvent::SessionCompleted {
+                            round_type: completed_round.clone(),
+                            was_skipped,
+                            elapsed_secs: elapsed_at_complete,
+                            round_duration_secs,
+                            // Pre-gate context flags to false for non-work rounds.
+                            in_tray:          is_work_round && in_tray,
+                            always_on_top:    is_work_round && always_on_top,
+                            websocket_active: is_work_round && websocket_active,
+                            silent:           is_work_round && silent,
+                        },
+                        &app,
+                    );
                 }
 
                 // Advance sequence.

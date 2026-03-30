@@ -157,6 +157,12 @@ impl ShortcutAction {
 
 fn fire_action(app: &AppHandle, action: ShortcutAction) {
     log::info!("[shortcut] fired: {}", action.as_str());
+    if let Some(bus) = app.try_state::<std::sync::Arc<crate::bus::EventBus>>() {
+        bus.publish(
+            crate::bus::AppEvent::ShortcutUsed { action: action.as_str().to_string() },
+            app,
+        );
+    }
     let Some(timer) = app.try_state::<TimerController>() else { return };
     match action {
         ShortcutAction::Toggle       => timer.toggle(),
