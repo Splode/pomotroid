@@ -434,3 +434,144 @@ pub fn notify_and_spawn_toast(newly_unlocked: Vec<String>, app: &AppHandle) {
         crate::achievements::toast::spawn_toast_window(app, &newly_unlocked, count);
     }
 }
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::db::{migrations, queries};
+    use rusqlite::{Connection, params};
+
+    fn setup() -> Connection {
+        let conn = Connection::open_in_memory().unwrap();
+        migrations::run(&conn).unwrap();
+        conn
+    }
+
+    fn now_secs() -> i64 {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs() as i64
+    }
+
+    /// Insert a session with explicit timestamps (bypasses unix_now()).
+    fn insert_session_at(
+        conn: &Connection,
+        round_type: &str,
+        duration_secs: u32,
+        started_at: i64,
+        completed: bool,
+    ) {
+        let ended_at = started_at + duration_secs as i64;
+        conn.execute(
+            "INSERT INTO sessions (started_at, ended_at, round_type, duration_secs, completed)
+             VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![started_at, ended_at, round_type, duration_secs, completed as i64],
+        )
+        .unwrap();
+    }
+
+    /// Insert an achievement row directly (simulates a prior unlock).
+    fn unlock(conn: &Connection, id: &str) {
+        queries::insert_achievement(conn, id, now_secs()).unwrap();
+    }
+
+    // -------------------------------------------------------------------------
+    // cleanup_session_achievements
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn cleanup_empty_db_no_panic() {
+        let conn = setup();
+        // Should complete without panicking or erroring on an empty DB
+        cleanup_session_achievements(&conn);
+        let earned = queries::get_earned_achievement_ids(&conn).unwrap();
+        assert!(earned.is_empty());
+    }
+
+    #[test]
+    fn cleanup_removes_session_only_achievements() {
+        let conn = setup();
+        // Unlock one SESSION_COMPLETED-only achievement and one non-session achievement
+        unlock(&conn, "the_seed");          // triggers: [SESSION_COMPLETED]
+        unlock(&conn, "first_impression"); // triggers: [THEME_APPLIED]
+
+        cleanup_session_achievements(&conn);
+
+        let earned = queries::get_earned_achievement_ids(&conn).unwrap();
+        assert!(
+            !earned.contains("the_seed"),
+            "the_seed should be removed (session-only trigger)"
+        );
+        assert!(
+            earned.contains("first_impression"),
+            "first_impression should be kept (theme trigger)"
+        );
+    }
+
+    #[test]
+    fn cleanup_removes_multiple_session_achievements() {
+        let conn = setup();
+        unlock(&conn, "the_seed");
+        unlock(&conn, "hat_trick");
+        unlock(&conn, "on_a_roll");
+        unlock(&conn, "by_the_numbers"); // triggers: [STATS_OPENED] — must survive
+
+        cleanup_session_achievements(&conn);
+
+        let earned = queries::get_earned_achievement_ids(&conn).unwrap();
+        assert!(!earned.contains("the_seed"));
+        assert!(!earned.contains("hat_trick"));
+        assert!(!earned.contains("on_a_roll"));
+        assert!(earned.contains("by_the_numbers"));
+    }
+
+    // -------------------------------------------------------------------------
+    // progress_for
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn progress_for_the_seed_zero() {
+        let conn = setup();
+        assert_eq!(progress_for("the_seed", &conn), Some(0));
+    }
+
+    #[test]
+    fn progress_for_the_seed_five_sessions() {
+        let conn = setup();
+        let t = now_secs() - 10 * 3600;
+        for i in 0..5_i64 {
+            insert_session_at(&conn, "work", 1500, t + i * 1800, true);
+        }
+        assert_eq!(progress_for("the_seed", &conn), Some(5));
+    }
+
+    #[test]
+    fn progress_for_time_lord_in_hours() {
+        let conn = setup();
+        // 7200 s completed = 2 hours
+        let t = now_secs() - 10 * 3600;
+        insert_session_at(&conn, "work", 7200, t, true);
+        assert_eq!(progress_for("time_lord", &conn), Some(2));
+    }
+
+    #[test]
+    fn progress_for_on_a_roll_two_day_streak() {
+        let conn = setup();
+        let today_midnight = (now_secs() / 86_400) * 86_400;
+        insert_session_at(&conn, "work", 1500, today_midnight - 86_400 + 36_000, true); // yesterday
+        insert_session_at(&conn, "work", 1500, today_midnight + 36_000, true);          // today
+        // Longest streak = 2
+        assert_eq!(progress_for("on_a_roll", &conn), Some(2));
+    }
+
+    #[test]
+    fn progress_for_unknown_id_returns_none() {
+        let conn = setup();
+        assert_eq!(progress_for("nonexistent_achievement", &conn), None);
+    }
+}

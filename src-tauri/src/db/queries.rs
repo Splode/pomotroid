@@ -922,7 +922,7 @@ fn prev_day(date: &str) -> String {
 fn ymd_to_days(y: i64, m: i64, d: i64) -> i64 {
     // Days since Unix epoch (1970-01-01) using proleptic Gregorian calendar.
     let m = if m <= 2 { m + 12 } else { m };
-    let y = if m <= 14 { y - 1 } else { y };  // Adjust for Jan/Feb
+    let y = if m >= 13 { y - 1 } else { y };  // Adjust for Jan/Feb (m=13/14 after above)
     let a = y / 100;
     let b = 2 - a + a / 4;
     ((365.25 * (y + 4716) as f64) as i64)
@@ -1100,5 +1100,746 @@ mod tests {
         assert_eq!(stats.total_work_sessions, 2);
         assert_eq!(stats.completed_work_sessions, 1);
         assert_eq!(stats.total_work_secs, 1500);
+    }
+
+    // -------------------------------------------------------------------------
+    // Test helpers for achievement queries.
+    //
+    // NOTE: All time-sensitive tests assume UTC == local time, which holds on
+    // most CI environments.  Tests that depend on clock-hour boundaries
+    // (early_bird, midnight_oil) and calendar-day grouping use UTC timestamps.
+    // -------------------------------------------------------------------------
+
+    fn now_secs() -> i64 {
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs() as i64
+    }
+
+    /// Returns the Unix timestamp for midnight UTC on the day that is `n` days
+    /// before today (n=0 = start of today in UTC).
+    fn day_start(n: i64) -> i64 {
+        let today_midnight = (now_secs() / 86_400) * 86_400;
+        today_midnight - n * 86_400
+    }
+
+    /// Insert a session row with explicit timestamps, bypassing unix_now().
+    fn insert_session_at(
+        conn: &Connection,
+        round_type: &str,
+        duration_secs: u32,
+        started_at: i64,
+        completed: bool,
+    ) -> i64 {
+        let ended_at = started_at + duration_secs as i64;
+        conn.execute(
+            "INSERT INTO sessions (started_at, ended_at, round_type, duration_secs, completed)
+             VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![started_at, ended_at, round_type, duration_secs, completed as i64],
+        )
+        .unwrap();
+        conn.last_insert_rowid()
+    }
+
+    /// Insert an event row with an explicit timestamp.
+    fn insert_event_at(conn: &Connection, name: &str, ts: i64) {
+        conn.execute(
+            "INSERT INTO events (name, ts) VALUES (?1, ?2)",
+            params![name, ts],
+        )
+        .unwrap();
+    }
+
+    /// Return a UTC timestamp for today at `hour` in the *local* timezone.
+    /// Uses SQLite to derive the UTC offset so the result is correct regardless
+    /// of the machine's timezone — matching how the queries use `'localtime'`.
+    fn ts_at_local_hour(conn: &Connection, hour: i64) -> i64 {
+        // UTC offset in seconds (positive = east of UTC)
+        let utc_now: i64 = conn
+            .query_row("SELECT CAST(strftime('%s','now') AS INTEGER)", [], |r| r.get(0))
+            .unwrap();
+        let local_as_ts: i64 = conn
+            .query_row(
+                "SELECT CAST(strftime('%s',datetime('now','localtime')) AS INTEGER)",
+                [],
+                |r| r.get(0),
+            )
+            .unwrap();
+        let offset_secs = local_as_ts - utc_now;
+
+        // Local midnight in UTC
+        let local_date: String = conn
+            .query_row("SELECT date('now','localtime')", [], |r| r.get(0))
+            .unwrap();
+        let local_midnight_utc: i64 = conn
+            .query_row(
+                "SELECT CAST(strftime('%s',?1) AS INTEGER)",
+                params![local_date],
+                |r| r.get(0),
+            )
+            .unwrap();
+
+        // Shift from UTC-stored midnight back to a real UTC timestamp that,
+        // when fed through SQLite localtime, shows `hour`.
+        local_midnight_utc - offset_secs + hour * 3600
+    }
+
+    // -------------------------------------------------------------------------
+    // Group A — Simple event-count queries
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn count_events_empty() {
+        let conn = setup();
+        assert_eq!(count_events(&conn, "session_completed"), 0);
+    }
+
+    #[test]
+    fn count_events_basic() {
+        let conn = setup();
+        let t = now_secs();
+        insert_event_at(&conn, "shortcut_used", t);
+        insert_event_at(&conn, "shortcut_used", t + 1);
+        insert_event_at(&conn, "shortcut_used", t + 2);
+        assert_eq!(count_events(&conn, "shortcut_used"), 3);
+    }
+
+    #[test]
+    fn count_events_with_payload_match() {
+        let conn = setup();
+        conn.execute(
+            "INSERT INTO events (name, ts, payload) VALUES ('settings_saved', ?1, 'time_work_secs')",
+            params![now_secs()],
+        )
+        .unwrap();
+        assert_eq!(count_events_with_payload(&conn, "settings_saved", "time_work_secs"), 1);
+    }
+
+    #[test]
+    fn count_events_with_payload_no_match() {
+        let conn = setup();
+        conn.execute(
+            "INSERT INTO events (name, ts, payload) VALUES ('settings_saved', ?1, 'volume')",
+            params![now_secs()],
+        )
+        .unwrap();
+        assert_eq!(count_events_with_payload(&conn, "settings_saved", "time_work_secs"), 0);
+    }
+
+    #[test]
+    fn count_distinct_payloads_two_unique() {
+        let conn = setup();
+        let t = now_secs();
+        conn.execute(
+            "INSERT INTO events (name, ts, payload) VALUES ('theme_applied', ?1, 'Dark')",
+            params![t],
+        ).unwrap();
+        conn.execute(
+            "INSERT INTO events (name, ts, payload) VALUES ('theme_applied', ?1, 'Dark')",
+            params![t + 1],
+        ).unwrap();
+        conn.execute(
+            "INSERT INTO events (name, ts, payload) VALUES ('theme_applied', ?1, 'Pomotroid')",
+            params![t + 2],
+        ).unwrap();
+        // 2 distinct payloads across 3 events
+        assert_eq!(count_distinct_event_payloads(&conn, "theme_applied"), 2);
+    }
+
+    // -------------------------------------------------------------------------
+    // Group B — Session-count milestone queries
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn hat_trick_two_sessions_same_day() {
+        let conn = setup();
+        let base = day_start(0) + 10 * 3600; // 10am today
+        insert_session_at(&conn, "work", 1500, base, true);
+        insert_session_at(&conn, "work", 1500, base + 3600, true);
+        assert_eq!(get_hat_trick_max_day(&conn).unwrap(), 2);
+    }
+
+    #[test]
+    fn hat_trick_three_sessions_same_day() {
+        let conn = setup();
+        let base = day_start(0) + 10 * 3600;
+        insert_session_at(&conn, "work", 1500, base, true);
+        insert_session_at(&conn, "work", 1500, base + 2000, true);
+        insert_session_at(&conn, "work", 1500, base + 4000, true);
+        assert_eq!(get_hat_trick_max_day(&conn).unwrap(), 3);
+    }
+
+    #[test]
+    fn hat_trick_split_across_days() {
+        let conn = setup();
+        // 2 sessions today, 2 sessions yesterday → max per-day = 2
+        let today = day_start(0) + 10 * 3600;
+        let yesterday = day_start(1) + 10 * 3600;
+        insert_session_at(&conn, "work", 1500, today, true);
+        insert_session_at(&conn, "work", 1500, today + 2000, true);
+        insert_session_at(&conn, "work", 1500, yesterday, true);
+        insert_session_at(&conn, "work", 1500, yesterday + 2000, true);
+        assert_eq!(get_hat_trick_max_day(&conn).unwrap(), 2);
+    }
+
+    #[test]
+    fn long_break_completed_false() {
+        let conn = setup();
+        assert!(!get_long_break_completed(&conn).unwrap());
+    }
+
+    #[test]
+    fn long_break_completed_true() {
+        let conn = setup();
+        insert_session_at(&conn, "long-break", 900, day_start(0) + 3600, true);
+        assert!(get_long_break_completed(&conn).unwrap());
+    }
+
+    #[test]
+    fn marathon_1500s_false() {
+        let conn = setup();
+        insert_session_at(&conn, "work", 1500, day_start(0) + 3600, true);
+        assert!(!get_marathon(&conn));
+    }
+
+    #[test]
+    fn marathon_3600s_true() {
+        let conn = setup();
+        insert_session_at(&conn, "work", 3600, day_start(0) + 3600, true);
+        assert!(get_marathon(&conn));
+    }
+
+    #[test]
+    fn cold_spell_no_gap_false() {
+        let conn = setup();
+        // Two sessions only an hour apart
+        let t = day_start(1) + 10 * 3600;
+        insert_session_at(&conn, "work", 1500, t, true);
+        insert_session_at(&conn, "work", 1500, t + 3600, true);
+        assert!(!get_cold_spell(&conn));
+    }
+
+    #[test]
+    fn cold_spell_exactly_14_days_true() {
+        let conn = setup();
+        // s1 ends at T+1500; s2 starts at T+1500+1209600 → gap = 1209600 s (14 days)
+        let t = day_start(20) + 10 * 3600; // 20 days ago
+        insert_session_at(&conn, "work", 1500, t, true);
+        insert_session_at(&conn, "work", 1500, t + 1500 + 1_209_600, true);
+        assert!(get_cold_spell(&conn));
+    }
+
+    #[test]
+    fn cold_spell_13_day_gap_false() {
+        let conn = setup();
+        let t = day_start(20) + 10 * 3600;
+        insert_session_at(&conn, "work", 1500, t, true);
+        // One second short of 14-day gap
+        insert_session_at(&conn, "work", 1500, t + 1500 + 1_209_599, true);
+        assert!(!get_cold_spell(&conn));
+    }
+
+    #[test]
+    fn exact_daily_count_seven_true() {
+        let conn = setup();
+        let base = day_start(0) + 8 * 3600;
+        for i in 0..7_i64 {
+            insert_session_at(&conn, "work", 1500, base + i * 1800, true);
+        }
+        assert!(get_exact_daily_work_count(&conn, 7));
+    }
+
+    #[test]
+    fn exact_daily_count_seven_false_eight_sessions() {
+        let conn = setup();
+        let base = day_start(0) + 8 * 3600;
+        for i in 0..8_i64 {
+            insert_session_at(&conn, "work", 1500, base + i * 1800, true);
+        }
+        assert!(!get_exact_daily_work_count(&conn, 7));
+    }
+
+    #[test]
+    fn session_on_dec25_true() {
+        let conn = setup();
+        // Dec 25, 2024 10:00:00 UTC = 1735084800 + 10*3600
+        insert_session_at(&conn, "work", 1500, 1_735_084_800 + 10 * 3600, true);
+        assert!(get_session_on_month_day(&conn, 12, 25));
+    }
+
+    #[test]
+    fn session_on_dec25_false_dec24() {
+        let conn = setup();
+        // Dec 24, 2024 10:00:00 UTC = 1734998400 + 10*3600
+        insert_session_at(&conn, "work", 1500, 1_734_998_400 + 10 * 3600, true);
+        assert!(!get_session_on_month_day(&conn, 12, 25));
+    }
+
+    // -------------------------------------------------------------------------
+    // Group C — Time-of-day queries (assumes UTC == localtime)
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn early_bird_before_7am_true() {
+        let conn = setup();
+        let ts = ts_at_local_hour(&conn, 6); // 6am local
+        insert_session_at(&conn, "work", 1500, ts, true);
+        assert!(get_early_sessions(&conn).unwrap());
+    }
+
+    #[test]
+    fn early_bird_at_7am_false() {
+        let conn = setup();
+        let ts = ts_at_local_hour(&conn, 7); // 7am local — boundary, not < 7
+        insert_session_at(&conn, "work", 1500, ts, true);
+        assert!(!get_early_sessions(&conn).unwrap());
+    }
+
+    #[test]
+    fn midnight_oil_at_23h_true() {
+        let conn = setup();
+        let ts = ts_at_local_hour(&conn, 23); // 11pm local
+        insert_session_at(&conn, "work", 1500, ts, true);
+        assert!(get_midnight_sessions(&conn).unwrap());
+    }
+
+    #[test]
+    fn midnight_oil_at_22h_false() {
+        let conn = setup();
+        let ts = ts_at_local_hour(&conn, 22); // 10pm local — not >= 23
+        insert_session_at(&conn, "work", 1500, ts, true);
+        assert!(!get_midnight_sessions(&conn).unwrap());
+    }
+
+    // -------------------------------------------------------------------------
+    // Group D — Per-day quality queries
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn perfect_day_false_three_sessions() {
+        let conn = setup();
+        let base = day_start(0) + 8 * 3600;
+        for i in 0..3_i64 {
+            insert_session_at(&conn, "work", 1500, base + i * 1800, true);
+        }
+        assert!(!get_perfect_day_exists(&conn).unwrap());
+    }
+
+    #[test]
+    fn perfect_day_true_four_completed() {
+        let conn = setup();
+        let base = day_start(0) + 8 * 3600;
+        for i in 0..4_i64 {
+            insert_session_at(&conn, "work", 1500, base + i * 1800, true);
+        }
+        assert!(get_perfect_day_exists(&conn).unwrap());
+    }
+
+    #[test]
+    fn perfect_day_false_one_skipped() {
+        let conn = setup();
+        let base = day_start(0) + 8 * 3600;
+        // 3 completed + 1 skipped = 4 total but completion rate < 100%
+        insert_session_at(&conn, "work", 1500, base, true);
+        insert_session_at(&conn, "work", 1500, base + 1800, true);
+        insert_session_at(&conn, "work", 1500, base + 3600, true);
+        insert_session_at(&conn, "work", 1500, base + 5400, false); // skipped
+        assert!(!get_perfect_day_exists(&conn).unwrap());
+    }
+
+    #[test]
+    fn rest_is_productive_true() {
+        let conn = setup();
+        let base = day_start(0) + 8 * 3600;
+        for i in 0..4_i64 {
+            insert_session_at(&conn, "work", 1500, base + i * 1800, true);
+        }
+        // No skipped breaks → day qualifies
+        assert!(get_rest_is_productive(&conn));
+    }
+
+    #[test]
+    fn rest_is_productive_false_skipped_break() {
+        let conn = setup();
+        let base = day_start(0) + 8 * 3600;
+        for i in 0..4_i64 {
+            insert_session_at(&conn, "work", 1500, base + i * 1800, true);
+        }
+        // One skipped short-break on the same day disqualifies it
+        insert_session_at(&conn, "short-break", 300, base + 10 * 3600, false);
+        assert!(!get_rest_is_productive(&conn));
+    }
+
+    #[test]
+    fn morning_ritual_none() {
+        let conn = setup();
+        assert_eq!(get_morning_ritual_streak(&conn), 0);
+    }
+
+    #[test]
+    fn morning_ritual_five_day_streak() {
+        let conn = setup();
+        for d in 0..5_i64 {
+            let base = day_start(4 - d) + 8 * 3600; // 8am, 9am, 10am
+            insert_session_at(&conn, "work", 1500, base, true);
+            insert_session_at(&conn, "work", 1500, base + 3600, true);
+            insert_session_at(&conn, "work", 1500, base + 7200, true);
+        }
+        assert_eq!(get_morning_ritual_streak(&conn), 5);
+    }
+
+    #[test]
+    fn morning_ritual_broken_at_day_four() {
+        let conn = setup();
+        // 4 consecutive days only
+        for d in 0..4_i64 {
+            let base = day_start(3 - d) + 8 * 3600;
+            insert_session_at(&conn, "work", 1500, base, true);
+            insert_session_at(&conn, "work", 1500, base + 3600, true);
+            insert_session_at(&conn, "work", 1500, base + 7200, true);
+        }
+        assert_eq!(get_morning_ritual_streak(&conn), 4);
+    }
+
+    #[test]
+    fn heatmap_inferno_seven_consecutive() {
+        let conn = setup();
+        for d in 0..7_i64 {
+            let base = day_start(6 - d) + 8 * 3600;
+            for i in 0..5_i64 {
+                insert_session_at(&conn, "work", 1500, base + i * 1800, true);
+            }
+        }
+        assert_eq!(get_heatmap_inferno_streak(&conn), 7);
+    }
+
+    #[test]
+    fn heatmap_inferno_broken_streak() {
+        let conn = setup();
+        // 3 days, gap, 3 more days — max streak = 3
+        for d in [0_i64, 1, 2, 4, 5, 6] {
+            let base = day_start(6 - d) + 8 * 3600;
+            for i in 0..5_i64 {
+                insert_session_at(&conn, "work", 1500, base + i * 1800, true);
+            }
+        }
+        assert_eq!(get_heatmap_inferno_streak(&conn), 3);
+    }
+
+    #[test]
+    fn balanced_week_true() {
+        let conn = setup();
+        let base = day_start(0) + 10 * 3600;
+        insert_session_at(&conn, "work", 1500, base, true);
+        insert_session_at(&conn, "short-break", 300, base + 1800, true); // completed break
+        assert!(get_balanced_week(&conn));
+    }
+
+    #[test]
+    fn balanced_week_false_skipped_break() {
+        let conn = setup();
+        let base = day_start(0) + 10 * 3600;
+        insert_session_at(&conn, "work", 1500, base, true);
+        insert_session_at(&conn, "short-break", 300, base + 1800, false); // skipped
+        assert!(!get_balanced_week(&conn));
+    }
+
+    #[test]
+    fn stretch_break_true() {
+        let conn = setup();
+        // A completed long-break within the last 14 days, no skipped ones
+        insert_session_at(&conn, "long-break", 900, day_start(3) + 10 * 3600, true);
+        assert!(get_stretch_break(&conn));
+    }
+
+    #[test]
+    fn stretch_break_false_skipped_long_break() {
+        let conn = setup();
+        // A skipped long-break within the last 14 days → false
+        insert_session_at(&conn, "long-break", 900, day_start(3) + 10 * 3600, false);
+        assert!(!get_stretch_break(&conn));
+    }
+
+    // -------------------------------------------------------------------------
+    // Group E — Streak and gap queries
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn comeback_kid_false_first_session_ever() {
+        let conn = setup();
+        // Only one session → days.len() < 2 → false
+        insert_session_at(&conn, "work", 1500, day_start(0) + 10 * 3600, true);
+        assert!(!get_comeback_kid(&conn).unwrap());
+    }
+
+    #[test]
+    fn comeback_kid_false_continuous_streak() {
+        let conn = setup();
+        // Three consecutive days → current streak = 3 ≠ 1 → false
+        for d in [0_i64, 1, 2] {
+            insert_session_at(&conn, "work", 1500, day_start(d) + 10 * 3600, true);
+        }
+        assert!(!get_comeback_kid(&conn).unwrap());
+    }
+
+    #[test]
+    fn comeback_kid_true() {
+        let conn = setup();
+        // Old session 10 days ago, then new session today → gap ≥ 2, current streak = 1
+        insert_session_at(&conn, "work", 1500, day_start(10) + 10 * 3600, true);
+        insert_session_at(&conn, "work", 1500, day_start(0) + 10 * 3600, true);
+        assert!(get_comeback_kid(&conn).unwrap());
+    }
+
+    #[test]
+    fn flow_state_empty() {
+        let conn = setup();
+        assert_eq!(get_flow_state(&conn), 0);
+    }
+
+    #[test]
+    fn flow_state_four_no_skips() {
+        let conn = setup();
+        let mut t = day_start(0) + 8 * 3600;
+        // 4 work sessions interleaved with completed breaks — no resets
+        for _ in 0..4 {
+            insert_session_at(&conn, "work", 1500, t, true);
+            t += 1600;
+            insert_session_at(&conn, "short-break", 300, t, true);
+            t += 400;
+        }
+        assert_eq!(get_flow_state(&conn), 4);
+    }
+
+    #[test]
+    fn flow_state_reset_by_skipped_break() {
+        let conn = setup();
+        let mut t = day_start(0) + 8 * 3600;
+        // 2 work, 1 skipped break, then 3 more work → max = 3
+        insert_session_at(&conn, "work", 1500, t, true);      t += 1600;
+        insert_session_at(&conn, "short-break", 300, t, true); t += 400;
+        insert_session_at(&conn, "work", 1500, t, true);      t += 1600;
+        insert_session_at(&conn, "short-break", 300, t, false); t += 400; // skipped → reset
+        insert_session_at(&conn, "work", 1500, t, true);      t += 1600;
+        insert_session_at(&conn, "short-break", 300, t, true); t += 400;
+        insert_session_at(&conn, "work", 1500, t, true);      t += 1600;
+        insert_session_at(&conn, "short-break", 300, t, true); t += 400;
+        insert_session_at(&conn, "work", 1500, t, true);
+        assert_eq!(get_flow_state(&conn), 3);
+    }
+
+    #[test]
+    fn event_current_streak_zero() {
+        let conn = setup();
+        assert_eq!(event_current_streak(&conn, "app_launched"), 0);
+    }
+
+    #[test]
+    fn event_current_streak_three() {
+        let conn = setup();
+        // Events on today, yesterday, day-before → streak = 3
+        insert_event_at(&conn, "app_launched", day_start(0) + 43_200);
+        insert_event_at(&conn, "app_launched", day_start(1) + 43_200);
+        insert_event_at(&conn, "app_launched", day_start(2) + 43_200);
+        assert_eq!(event_current_streak(&conn, "app_launched"), 3);
+    }
+
+    #[test]
+    fn event_current_streak_broken_two_days_ago() {
+        let conn = setup();
+        // Only an event 2 days ago (not today) → streak = 0
+        insert_event_at(&conn, "app_launched", day_start(2) + 43_200);
+        assert_eq!(event_current_streak(&conn, "app_launched"), 0);
+    }
+
+    #[test]
+    fn stats_weekly_streak_four_consecutive() {
+        let conn = setup();
+        // Insert stats_opened events one per week for 4 consecutive weeks
+        for w in 0..4_i64 {
+            insert_event_at(&conn, "stats_opened", day_start(21 - w * 7) + 43_200);
+        }
+        assert_eq!(get_stats_weekly_streak(&conn), 4);
+    }
+
+    #[test]
+    fn stats_weekly_streak_broken() {
+        let conn = setup();
+        // Week 0 (4 weeks ago) and week 2 (2 weeks ago), skip week 1 → max run = 1
+        insert_event_at(&conn, "stats_opened", day_start(28) + 43_200);
+        insert_event_at(&conn, "stats_opened", day_start(14) + 43_200);
+        assert_eq!(get_stats_weekly_streak(&conn), 1);
+    }
+
+    #[test]
+    fn ghost_mode_five_days_true() {
+        let conn = setup();
+        for d in 0..5_i64 {
+            insert_event_at(&conn, "app_launched", day_start(4 - d) + 43_200);
+        }
+        assert!(get_ghost_mode_streak(&conn));
+    }
+
+    #[test]
+    fn ghost_mode_false_settings_saved_on_day2() {
+        let conn = setup();
+        for d in 0..5_i64 {
+            let ts = day_start(4 - d) + 43_200;
+            insert_event_at(&conn, "app_launched", ts);
+            if d == 2 {
+                insert_event_at(&conn, "settings_saved", ts + 3600);
+            }
+        }
+        // Day 2 is excluded → runs: [0,1] and [3,4] → max = 2 < 5
+        assert!(!get_ghost_mode_streak(&conn));
+    }
+
+    #[test]
+    fn slow_and_steady_seven_days_true() {
+        let conn = setup();
+        for d in 0..7_i64 {
+            let base = day_start(6 - d) + 8 * 3600;
+            insert_event_at(&conn, "app_launched", base);          // 8:00am
+            insert_session_at(&conn, "work", 1500, base + 301, true); // 8:05:01am
+        }
+        assert_eq!(get_slow_and_steady_streak(&conn), 7);
+    }
+
+    #[test]
+    fn slow_and_steady_broken() {
+        let conn = setup();
+        for d in 0..7_i64 {
+            let base = day_start(6 - d) + 8 * 3600;
+            let offset = if d == 3 { 100 } else { 301 }; // day 3 is too quick
+            insert_event_at(&conn, "app_launched", base);
+            insert_session_at(&conn, "work", 1500, base + offset, true);
+        }
+        // Days 0-2 and 4-6 qualify; max run = 3
+        assert!(get_slow_and_steady_streak(&conn) < 7);
+    }
+
+    // -------------------------------------------------------------------------
+    // Group F — Sequential behavior queries
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn too_eager_zero() {
+        let conn = setup();
+        let t = day_start(1) + 8 * 3600;
+        // Sessions 60 seconds apart — well outside the 0–3 s window
+        insert_session_at(&conn, "work", 1500, t, true);
+        insert_session_at(&conn, "work", 1500, t + 1560, true); // 60 s after end
+        assert_eq!(get_too_eager_count(&conn), 0);
+    }
+
+    #[test]
+    fn too_eager_three() {
+        let conn = setup();
+        let t = day_start(1) + 8 * 3600;
+        // Chain of 4 sessions each starting 1 s after the previous one ended
+        insert_session_at(&conn, "work", 1500, t, true);
+        insert_session_at(&conn, "work", 1500, t + 1501, true); // 1 s after s1 ends
+        insert_session_at(&conn, "work", 1500, t + 3002, true); // 1 s after s2 ends
+        insert_session_at(&conn, "work", 1500, t + 4503, true); // 1 s after s3 ends
+        // s2, s3, s4 each qualify → count = 3
+        assert_eq!(get_too_eager_count(&conn), 3);
+    }
+
+    #[test]
+    fn obsessive_saver_false() {
+        let conn = setup();
+        let t = now_secs();
+        // Each open followed immediately by a save — run never reaches 10
+        for i in 0..5_i64 {
+            insert_event_at(&conn, "settings_opened", t + i * 10);
+            insert_event_at(&conn, "settings_saved", t + i * 10 + 1);
+        }
+        assert!(!get_obsessive_saver(&conn));
+    }
+
+    #[test]
+    fn obsessive_saver_true() {
+        let conn = setup();
+        let t = now_secs();
+        // 10 consecutive opens, then a save
+        for i in 0..10_i64 {
+            insert_event_at(&conn, "settings_opened", t + i);
+        }
+        insert_event_at(&conn, "settings_saved", t + 100);
+        assert!(get_obsessive_saver(&conn));
+    }
+
+    #[test]
+    fn baby_steps_false_one_long_session() {
+        let conn = setup();
+        let t = day_start(0) + 8 * 3600;
+        // Short, long, short — not consecutive short sessions
+        insert_session_at(&conn, "work", 300, t, true);
+        insert_session_at(&conn, "work", 3600, t + 400, true); // long one breaks chain
+        insert_session_at(&conn, "work", 300, t + 4200, true);
+        assert!(!get_baby_steps(&conn));
+    }
+
+    #[test]
+    fn baby_steps_true() {
+        let conn = setup();
+        let t = day_start(0) + 8 * 3600;
+        insert_session_at(&conn, "work", 300, t, true);
+        insert_session_at(&conn, "work", 300, t + 400, true);
+        insert_session_at(&conn, "work", 300, t + 800, true);
+        assert!(get_baby_steps(&conn));
+    }
+
+    #[test]
+    fn creature_of_habit_four_days_false() {
+        let conn = setup();
+        // Same UTC hour (10am) on 4 distinct days — one short of the target
+        for d in 0..4_i64 {
+            insert_session_at(&conn, "work", 1500, day_start(d) + 10 * 3600, true);
+        }
+        assert!(!get_creature_of_habit(&conn).unwrap());
+    }
+
+    #[test]
+    fn creature_of_habit_five_days_true() {
+        let conn = setup();
+        // Same UTC hour (10am) on 5 distinct days
+        for d in 0..5_i64 {
+            insert_session_at(&conn, "work", 1500, day_start(d) + 10 * 3600, true);
+        }
+        assert!(get_creature_of_habit(&conn).unwrap());
+    }
+
+    // -------------------------------------------------------------------------
+    // Group G — Holiday / calendar-date queries
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn session_on_dec25_known_timestamp() {
+        let conn = setup();
+        // Dec 25, 2024 12:00:00 UTC = 1735084800 + 12*3600
+        insert_session_at(&conn, "work", 1500, 1_735_084_800 + 12 * 3600, true);
+        assert!(get_session_on_month_day(&conn, 12, 25));
+        assert!(!get_session_on_month_day(&conn, 12, 26));
+        assert!(!get_session_on_month_day(&conn, 11, 25));
+    }
+
+    #[test]
+    fn event_on_dec31_true() {
+        let conn = setup();
+        // Dec 31, 2024 12:00:00 UTC = 1735603200 + 12*3600
+        insert_event_at(&conn, "stats_opened", 1_735_603_200 + 12 * 3600);
+        assert!(get_event_on_dec31(&conn, "stats_opened"));
+        assert!(!get_event_on_dec31(&conn, "app_launched")); // different event name
+    }
+
+    #[test]
+    fn session_on_jan1_true() {
+        let conn = setup();
+        // Jan 1, 2025 12:00:00 UTC = 1735689600 + 12*3600
+        insert_session_at(&conn, "work", 1500, 1_735_689_600 + 12 * 3600, true);
+        assert!(get_session_on_month_day(&conn, 1, 1));
+        assert!(!get_session_on_month_day(&conn, 1, 2));
     }
 }
