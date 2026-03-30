@@ -318,21 +318,7 @@ fn criteria_met(id: &str, conn: &Connection, app: &AppHandle) -> bool {
         "automated"       => queries::count_events(conn, event::WEBSOCKET_MESSAGE) > 0,
         "deep_dive"       => queries::count_events(conn, event::STATS_LONG_VIEW) > 0,
         "history_buff"    => queries::get_event_on_dec31(conn, event::STATS_OPENED),
-        "tres_bien" => {
-            // Session completed today while language is set to French.
-            let is_french = crate::settings::get_setting(conn, "language")
-                .map(|v| v == "fr")
-                .unwrap_or(false);
-            if !is_french { return false; }
-            let count: i64 = conn.query_row(
-                "SELECT COUNT(*) FROM sessions
-                 WHERE round_type = 'work' AND completed = 1
-                   AND date(started_at, 'unixepoch', 'localtime') = date('now', 'localtime')",
-                [],
-                |r| r.get(0),
-            ).unwrap_or(0);
-            count > 0
-        }
+        "tres_bien" => queries::get_tres_bien_today(conn),
         "chromesthete" => {
             app.path().app_data_dir().map(|dir| {
                 crate::themes::load_custom(&dir.join("themes")).len() >= 3
@@ -340,13 +326,7 @@ fn criteria_met(id: &str, conn: &Connection, app: &AppHandle) -> bool {
         }
         "marathon"   => queries::get_marathon(conn),
         "baby_steps" => queries::get_baby_steps(conn),
-        "no_rest" => {
-            // Long break interval must be 6+ and a long break must have been completed.
-            let interval = crate::settings::get_setting(conn, "work_rounds")
-                .and_then(|v| v.parse::<u32>().ok())
-                .unwrap_or(4);
-            interval >= 6 && queries::get_long_break_completed(conn).unwrap_or(false)
-        }
+        "no_rest" => queries::get_no_rest_criteria(conn),
         "cold_spell"   => queries::get_cold_spell(conn),
         "library_mode" => queries::count_events(conn, event::SESSION_SILENT) >= 4,
 
@@ -584,5 +564,37 @@ mod tests {
     fn progress_for_unknown_id_returns_none() {
         let conn = setup();
         assert_eq!(progress_for("nonexistent_achievement", &conn), None);
+    }
+
+    // -------------------------------------------------------------------------
+    // the_completionist
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn the_completionist_all_non_secret_true() {
+        let conn = setup();
+        for def in ACHIEVEMENTS.iter().filter(|d| !d.secret) {
+            unlock(&conn, def.id);
+        }
+        let earned = queries::get_earned_achievement_ids(&conn).unwrap();
+        assert!(
+            ACHIEVEMENTS.iter().filter(|d| !d.secret).all(|d| earned.contains(d.id)),
+            "all non-secret achievements should be in the earned set"
+        );
+    }
+
+    #[test]
+    fn the_completionist_missing_one_false() {
+        let conn = setup();
+        let non_secret: Vec<_> = ACHIEVEMENTS.iter().filter(|d| !d.secret).collect();
+        // Unlock all except the last non-secret achievement.
+        for def in non_secret.iter().take(non_secret.len() - 1) {
+            unlock(&conn, def.id);
+        }
+        let earned = queries::get_earned_achievement_ids(&conn).unwrap();
+        assert!(
+            !ACHIEVEMENTS.iter().filter(|d| !d.secret).all(|d| earned.contains(d.id)),
+            "should not be complete when one non-secret achievement is missing"
+        );
     }
 }

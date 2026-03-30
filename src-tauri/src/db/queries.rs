@@ -698,6 +698,31 @@ pub fn get_session_on_month_day(conn: &Connection, month: u32, day: u32) -> bool
     count > 0
 }
 
+/// True if the app language is currently set to French AND a work session
+/// was completed today (local time).  Used for the `tres_bien` achievement.
+pub fn get_tres_bien_today(conn: &Connection) -> bool {
+    let is_french = crate::settings::get_setting(conn, "language")
+        .map(|v| v == "fr")
+        .unwrap_or(false);
+    if !is_french { return false; }
+    conn.query_row(
+        "SELECT COUNT(*) FROM sessions
+         WHERE round_type = 'work' AND completed = 1
+           AND date(started_at, 'unixepoch', 'localtime') = date('now', 'localtime')",
+        [],
+        |r| r.get(0),
+    ).map(|n: i64| n > 0).unwrap_or(false)
+}
+
+/// True if the long-break interval setting is 6+ rounds AND a long break
+/// session has been completed.  Used for the `no_rest` achievement.
+pub fn get_no_rest_criteria(conn: &Connection) -> bool {
+    let interval = crate::settings::get_setting(conn, "work_rounds")
+        .and_then(|v| v.parse::<u32>().ok())
+        .unwrap_or(4);
+    interval >= 6 && get_long_break_completed(conn).unwrap_or(false)
+}
+
 /// True if any *past* local calendar day (not today) had exactly `exact`
 /// completed work sessions.  Today is excluded so the count can't change
 /// mid-day and award the achievement before the day is actually over.
@@ -1883,5 +1908,251 @@ mod tests {
         insert_session_at(&conn, "work", 1500, 1_735_689_600 + 12 * 3600, true);
         assert!(get_session_on_month_day(&conn, 1, 1));
         assert!(!get_session_on_month_day(&conn, 1, 2));
+    }
+
+    // -------------------------------------------------------------------------
+    // self_love
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn self_love_feb14_true() {
+        let conn = setup();
+        // Feb 14, 2024 12:00:00 UTC = 1707868800 + 12*3600
+        insert_session_at(&conn, "work", 1500, 1_707_868_800 + 12 * 3600, true);
+        assert!(get_session_on_month_day(&conn, 2, 14));
+    }
+
+    #[test]
+    fn self_love_feb14_false() {
+        let conn = setup();
+        // Feb 15, 2024 12:00:00 UTC = 1707955200 + 12*3600
+        insert_session_at(&conn, "work", 1500, 1_707_955_200 + 12 * 3600, true);
+        assert!(!get_session_on_month_day(&conn, 2, 14));
+    }
+
+    // -------------------------------------------------------------------------
+    // front_and_center
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn front_and_center_three_false() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..3_i64 { insert_event_at(&conn, "session_always_on_top", t + i); }
+        assert!(count_events(&conn, "session_always_on_top") < 4);
+    }
+
+    #[test]
+    fn front_and_center_four_true() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..4_i64 { insert_event_at(&conn, "session_always_on_top", t + i); }
+        assert!(count_events(&conn, "session_always_on_top") >= 4);
+    }
+
+    // -------------------------------------------------------------------------
+    // compact_champion
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn compact_champion_four_false() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..4_i64 { insert_event_at(&conn, "session_compact", t + i); }
+        assert!(count_events(&conn, "session_compact") < 5);
+    }
+
+    #[test]
+    fn compact_champion_five_true() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..5_i64 { insert_event_at(&conn, "session_compact", t + i); }
+        assert!(count_events(&conn, "session_compact") >= 5);
+    }
+
+    // -------------------------------------------------------------------------
+    // power_user
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn power_user_forty_nine_false() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..49_i64 { insert_event_at(&conn, "shortcut_used", t + i); }
+        assert!(count_events(&conn, "shortcut_used") < 50);
+    }
+
+    #[test]
+    fn power_user_fifty_true() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..50_i64 { insert_event_at(&conn, "shortcut_used", t + i); }
+        assert!(count_events(&conn, "shortcut_used") >= 50);
+    }
+
+    // -------------------------------------------------------------------------
+    // rebel
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn rebel_two_false() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..2_i64 { insert_event_at(&conn, "session_skipped_late", t + i); }
+        assert!(count_events(&conn, "session_skipped_late") < 3);
+    }
+
+    #[test]
+    fn rebel_three_true() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..3_i64 { insert_event_at(&conn, "session_skipped_late", t + i); }
+        assert!(count_events(&conn, "session_skipped_late") >= 3);
+    }
+
+    // -------------------------------------------------------------------------
+    // streaming_live
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn streaming_live_four_false() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..4_i64 { insert_event_at(&conn, "session_websocket_active", t + i); }
+        assert!(count_events(&conn, "session_websocket_active") < 5);
+    }
+
+    #[test]
+    fn streaming_live_five_true() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..5_i64 { insert_event_at(&conn, "session_websocket_active", t + i); }
+        assert!(count_events(&conn, "session_websocket_active") >= 5);
+    }
+
+    // -------------------------------------------------------------------------
+    // library_mode
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn library_mode_three_false() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..3_i64 { insert_event_at(&conn, "session_silent", t + i); }
+        assert!(count_events(&conn, "session_silent") < 4);
+    }
+
+    #[test]
+    fn library_mode_four_true() {
+        let conn = setup();
+        let t = now_secs();
+        for i in 0..4_i64 { insert_event_at(&conn, "session_silent", t + i); }
+        assert!(count_events(&conn, "session_silent") >= 4);
+    }
+
+    // -------------------------------------------------------------------------
+    // wired_in / automated / deep_dive / theme_artist  (> 0 threshold)
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn wired_in_one_event_true() {
+        let conn = setup();
+        insert_event_at(&conn, "websocket_enabled", now_secs());
+        assert!(count_events(&conn, "websocket_enabled") > 0);
+    }
+
+    #[test]
+    fn automated_one_event_true() {
+        let conn = setup();
+        insert_event_at(&conn, "websocket_message", now_secs());
+        assert!(count_events(&conn, "websocket_message") > 0);
+    }
+
+    #[test]
+    fn deep_dive_one_event_true() {
+        let conn = setup();
+        insert_event_at(&conn, "stats_long_view", now_secs());
+        assert!(count_events(&conn, "stats_long_view") > 0);
+    }
+
+    #[test]
+    fn theme_artist_event_path_true() {
+        let conn = setup();
+        insert_event_at(&conn, "theme_created", now_secs());
+        assert!(count_events(&conn, "theme_created") > 0);
+    }
+
+    // -------------------------------------------------------------------------
+    // tres_bien
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn tres_bien_false_wrong_language() {
+        let conn = setup();
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('language', 'en')",
+            [],
+        ).unwrap();
+        insert_session_at(&conn, "work", 1500, now_secs() - 60, true);
+        assert!(!get_tres_bien_today(&conn));
+    }
+
+    #[test]
+    fn tres_bien_false_no_session() {
+        let conn = setup();
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('language', 'fr')",
+            [],
+        ).unwrap();
+        assert!(!get_tres_bien_today(&conn));
+    }
+
+    #[test]
+    fn tres_bien_true() {
+        let conn = setup();
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('language', 'fr')",
+            [],
+        ).unwrap();
+        insert_session_at(&conn, "work", 1500, now_secs() - 60, true);
+        assert!(get_tres_bien_today(&conn));
+    }
+
+    // -------------------------------------------------------------------------
+    // no_rest
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn no_rest_false_low_interval() {
+        let conn = setup();
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('work_rounds', '4')",
+            [],
+        ).unwrap();
+        // Long break completed but interval too low.
+        insert_session_at(&conn, "long-break", 900, now_secs() - 3600, true);
+        assert!(!get_no_rest_criteria(&conn));
+    }
+
+    #[test]
+    fn no_rest_false_no_long_break() {
+        let conn = setup();
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('work_rounds', '6')",
+            [],
+        ).unwrap();
+        // Interval high enough but no long break session.
+        assert!(!get_no_rest_criteria(&conn));
+    }
+
+    #[test]
+    fn no_rest_true() {
+        let conn = setup();
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES ('work_rounds', '6')",
+            [],
+        ).unwrap();
+        insert_session_at(&conn, "long-break", 900, now_secs() - 3600, true);
+        assert!(get_no_rest_criteria(&conn));
     }
 }
