@@ -1,4 +1,5 @@
 <script lang="ts">
+  import '../../app.css';
   import { onMount } from 'svelte';
   import AchievementBadge from '$lib/components/AchievementBadge.svelte';
   import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
