@@ -1,23 +1,23 @@
 {
-  "version": "1.3.0",
-  "notes": "See https://github.com/Splode/pomotroid/releases/tag/v1.3.0 for release notes.",
-  "pub_date": "2026-03-23T13:50:12Z",
+  "version": "1.4.0",
+  "notes": "See https://github.com/Splode/pomotroid/releases/tag/v1.4.0 for release notes.",
+  "pub_date": "2026-03-30T13:54:15Z",
   "platforms": {
     "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSbVBDQU1qNUFSZk81S1IzTWQyTDYwaHUwNkdzOVo5d243ZTRjVGJESHJxaFBIVDRKOFB4Ky9CbzFEYVhBRDR6ajdYTHVlYWpLdFdDanJNNDMrWWhMSHZzSFN4M0l4cEFNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MjczNzM5CWZpbGU6UG9tb3Ryb2lkXzEuMy4wX2FtZDY0LkFwcEltYWdlCitWYUhlU280NGxyS0Q2dTlBNXhKcmxqb1ZBeExWelZ6ZFI3SUxyK0hiVk9xSkVldVVua2lhajhBWnVCOVFLRTFRK1I1ZE14YUw3REdpUS9aeUpwVUFnPT0K",
-      "url": "https://github.com/Splode/pomotroid/releases/download/v1.3.0/Pomotroid_1.3.0_amd64.AppImage"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSbVBDQU1qNUFSZk1EWXZ5dW5NYVRUQi9SbHFMWEVtdU5VdS81bGtRTk1DRHB4UUViUVduYjQ5QjZLdUw5cFhvUnBKYVNOWCs1TksxUFVYK2Y1TmNUcGlDSzUzTGptbkF3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0ODc4NzQyCWZpbGU6UG9tb3Ryb2lkXzEuNC4wX2FtZDY0LkFwcEltYWdlCm1WQVZtQUkzemxHV0ZRYkswTlJvakhTSTZIT3c3eFpJb294V01jaUdqNlJtSmdvZFJabVZtcmV5RW1sTVg2MzVKaVFmQ1A3SXNhTFRGVEc5QURjOURnPT0K",
+      "url": "https://github.com/Splode/pomotroid/releases/download/v1.4.0/Pomotroid_1.4.0_amd64.AppImage"
     },
     "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSbVBDQU1qNUFSZlB4MjZtaXByUE56SW1wTUExenREdm9xWWNCQmFJaktxdUxCZEFyTGtrZk9EcVdVMlVkd2xoVDJ4V2ZLaDBMNy9oZFVQMlJhbHhyWmw2bXdyTkhNUGdJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MjczNjExCWZpbGU6UG9tb3Ryb2lkLmFwcC50YXIuZ3oKb3l2T0UzcWtyeitzVTVrNGN0eVQ1ZmZ2bmdVaktpUTJra3cwaWdTWE53UmhDY1FEbVAzZTRCMlF5T1dmcW9CR3FQTFhOMFdGNHlPbFF3RDlpcVo0QlE9PQo=",
-      "url": "https://github.com/Splode/pomotroid/releases/download/v1.3.0/Pomotroid.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSbVBDQU1qNUFSZkxqQzR4TTBXaUNhSmZFV2liQkdKQXBCc0Z4eDE1SGdVQlVzcDEvL1V4OTBYOTNpd2JheWJmTm5DZDJ2NGExdzh0RHhOL1JLVzJucFpicVpoYXJYRkFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0ODc4NzgzCWZpbGU6UG9tb3Ryb2lkLmFwcC50YXIuZ3oKZVp0ZjFBaS9HWHE2UHVPV1F1alQxWGhTWktYenBsQjA2d0dtZlhqMml4aGRFaytneWY1SkY0Q1oyZW82NWh5UmM2eUNZNGJRbnJmYVZJOUwxdUN3RFE9PQo=",
+      "url": "https://github.com/Splode/pomotroid/releases/download/v1.4.0/Pomotroid.app.tar.gz"
     },
     "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSbVBDQU1qNUFSZlB4MjZtaXByUE56SW1wTUExenREdm9xWWNCQmFJaktxdUxCZEFyTGtrZk9EcVdVMlVkd2xoVDJ4V2ZLaDBMNy9oZFVQMlJhbHhyWmw2bXdyTkhNUGdJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MjczNjExCWZpbGU6UG9tb3Ryb2lkLmFwcC50YXIuZ3oKb3l2T0UzcWtyeitzVTVrNGN0eVQ1ZmZ2bmdVaktpUTJra3cwaWdTWE53UmhDY1FEbVAzZTRCMlF5T1dmcW9CR3FQTFhOMFdGNHlPbFF3RDlpcVo0QlE9PQo=",
-      "url": "https://github.com/Splode/pomotroid/releases/download/v1.3.0/Pomotroid.app.tar.gz"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSbVBDQU1qNUFSZkxqQzR4TTBXaUNhSmZFV2liQkdKQXBCc0Z4eDE1SGdVQlVzcDEvL1V4OTBYOTNpd2JheWJmTm5DZDJ2NGExdzh0RHhOL1JLVzJucFpicVpoYXJYRkFrPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0ODc4NzgzCWZpbGU6UG9tb3Ryb2lkLmFwcC50YXIuZ3oKZVp0ZjFBaS9HWHE2UHVPV1F1alQxWGhTWktYenBsQjA2d0dtZlhqMml4aGRFaytneWY1SkY0Q1oyZW82NWh5UmM2eUNZNGJRbnJmYVZJOUwxdUN3RFE9PQo=",
+      "url": "https://github.com/Splode/pomotroid/releases/download/v1.4.0/Pomotroid.app.tar.gz"
     },
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSbVBDQU1qNUFSZkNZOWs1N09tQUd5ZkU1U0JvanBYTDlKUmxJdng2SVdHcG9vZCs0R00xWUV4MlZ2Zzhpa0M1ZXBwNStoMGcwUWFvWXdKdGhQN2p5V2t5WkcyRjNMdndVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0MjczNzQwCWZpbGU6UG9tb3Ryb2lkXzEuMy4wX3g2NC1zZXR1cC5leGUKNmNXTHF4aWVHUitrVG11bXlrSjlTRGkyV3ZrNitOZ2MyT093bENhTlh5M2xiUVFkQ3ZkQWxFSEozenZiNDNqWE1SM2xtcUs3b0p4bHgycS9IWnpZQ0E9PQo=",
-      "url": "https://github.com/Splode/pomotroid/releases/download/v1.3.0/Pomotroid_1.3.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVSbVBDQU1qNUFSZklLOEEwSUlXWlprTisyWlpWakRqcjZuQWdXZHdWUHJJVlVUaEFqYU5DbysvZmFEelZ6T3BYdDVMdFIwZ0hWeHUxVmE5ZG5OSHg5dE9zeEV0Y1FxYWc0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzc0ODc4NzA5CWZpbGU6UG9tb3Ryb2lkXzEuNC4wX3g2NC1zZXR1cC5leGUKNUZUMlRZaWNsZjZITHMzcTlFTWNkbE04ZzdPWmFUd2l5UWk4V3pmWWtYVzVQcUR0a3RjYlVMVk55ZXcyVC9lUTR3Q2FtcG5LWS9JYThaU3ZNYXJyREE9PQo=",
+      "url": "https://github.com/Splode/pomotroid/releases/download/v1.4.0/Pomotroid_1.4.0_x64-setup.exe"
     }
   }
 }
