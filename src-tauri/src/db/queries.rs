@@ -358,7 +358,9 @@ pub fn get_midnight_sessions(conn: &Connection) -> Result<bool> {
     Ok(count > 0)
 }
 
-/// True if any local calendar day had ≥4 started work sessions with 100% completion.
+/// True if any *past* local calendar day (not today) had ≥4 started work sessions
+/// with 100% completion.  Today is excluded so a later skip can't retroactively
+/// un-earn the achievement before the day is over.
 pub fn get_perfect_day_exists(conn: &Connection) -> Result<bool> {
     let count: i64 = conn.query_row(
         "SELECT COUNT(*) FROM (
@@ -370,7 +372,7 @@ pub fn get_perfect_day_exists(conn: &Connection) -> Result<bool> {
             WHERE round_type = 'work'
             GROUP BY day
             HAVING total >= 4 AND total = done
-         )",
+         ) WHERE day < date('now', 'localtime')",
         [],
         |r| r.get(0),
     )?;
@@ -463,8 +465,10 @@ pub fn get_morning_ritual_streak(conn: &Connection) -> u32 {
     max_consecutive_day_streak(&days)
 }
 
-/// True if any calendar week (Mon–Sun) had at least one completed work session
-/// and zero skipped break sessions.  Used for Balanced.
+/// True if any *past* calendar week (not the current week) had at least one
+/// completed work session and zero skipped break sessions.  The current week
+/// is excluded so a skipped break later this week can't invalidate an award
+/// made mid-week.  Used for Balanced.
 pub fn get_balanced_week(conn: &Connection) -> bool {
     let count: i64 = conn.query_row(
         "SELECT COUNT(*) FROM (
@@ -472,7 +476,8 @@ pub fn get_balanced_week(conn: &Connection) -> bool {
             FROM sessions WHERE round_type = 'work' AND completed = 1
             GROUP BY wk
          ) work_weeks
-         WHERE wk NOT IN (
+         WHERE wk < strftime('%Y-%W', 'now', 'localtime')
+           AND wk NOT IN (
              SELECT DISTINCT strftime('%Y-%W', started_at, 'unixepoch', 'localtime')
              FROM sessions WHERE round_type != 'work' AND completed = 0
          )",
@@ -510,7 +515,7 @@ pub fn get_stretch_break(conn: &Connection) -> bool {
 pub fn get_stats_weekly_streak(conn: &Connection) -> u32 {
     let weeks: Vec<String> = conn
         .prepare(
-            "SELECT DISTINCT strftime('%Y-%W', ts, 'unixepoch') as wk
+            "SELECT DISTINCT strftime('%Y-%W', ts, 'unixepoch', 'localtime') as wk
              FROM events WHERE name = 'stats_opened'
              ORDER BY wk ASC",
         )
@@ -587,7 +592,9 @@ pub fn count_distinct_event_payloads(conn: &Connection, name: &str) -> i64 {
     ).unwrap_or(0)
 }
 
-/// True if any day had ≥4 completed work sessions and zero skipped breaks.
+/// True if any *past* local calendar day (not today) had ≥4 completed work
+/// sessions and zero skipped breaks.  Today is excluded so a skipped break
+/// later in the day can't invalidate a prematurely awarded achievement.
 /// Used for Rest is Productive.
 pub fn get_rest_is_productive(conn: &Connection) -> bool {
     let count: i64 = conn.query_row(
@@ -596,7 +603,8 @@ pub fn get_rest_is_productive(conn: &Connection) -> bool {
              FROM sessions WHERE round_type = 'work' AND completed = 1
              GROUP BY day HAVING COUNT(*) >= 4
          ) work_days
-         WHERE day NOT IN (
+         WHERE day < date('now', 'localtime')
+           AND day NOT IN (
              SELECT DISTINCT date(started_at, 'unixepoch', 'localtime')
              FROM sessions WHERE round_type != 'work' AND completed = 0
          )",
@@ -690,7 +698,9 @@ pub fn get_session_on_month_day(conn: &Connection, month: u32, day: u32) -> bool
     count > 0
 }
 
-/// True if any local calendar day had exactly `exact` completed work sessions.
+/// True if any *past* local calendar day (not today) had exactly `exact`
+/// completed work sessions.  Today is excluded so the count can't change
+/// mid-day and award the achievement before the day is actually over.
 /// Used for Lucky Streak (7) and Perfect Ten (10).
 pub fn get_exact_daily_work_count(conn: &Connection, exact: u32) -> bool {
     let count: i64 = conn.query_row(
@@ -698,7 +708,7 @@ pub fn get_exact_daily_work_count(conn: &Connection, exact: u32) -> bool {
              SELECT date(started_at, 'unixepoch', 'localtime') as day
              FROM sessions WHERE round_type = 'work' AND completed = 1
              GROUP BY day HAVING COUNT(*) = ?1
-         )",
+         ) WHERE day < date('now', 'localtime')",
         params![exact],
         |r| r.get(0),
     ).unwrap_or(0);
@@ -710,10 +720,10 @@ pub fn get_exact_daily_work_count(conn: &Connection, exact: u32) -> bool {
 pub fn get_ghost_mode_streak(conn: &Connection) -> bool {
     let days: Vec<String> = conn
         .prepare(
-            "SELECT DISTINCT date(ts, 'unixepoch') as day
+            "SELECT DISTINCT date(ts, 'unixepoch', 'localtime') as day
              FROM events WHERE name = 'app_launched'
-             AND date(ts, 'unixepoch') NOT IN (
-                 SELECT DISTINCT date(ts, 'unixepoch') FROM events WHERE name = 'settings_saved'
+             AND date(ts, 'unixepoch', 'localtime') NOT IN (
+                 SELECT DISTINCT date(ts, 'unixepoch', 'localtime') FROM events WHERE name = 'settings_saved'
              )
              ORDER BY day ASC",
         )
@@ -861,10 +871,10 @@ pub fn count_event_days(conn: &Connection, name: &str) -> i64 {
 /// Count distinct consecutive days up to today on which a named event occurred.
 /// Returns the current streak length (0 if the event didn't occur today).
 pub fn event_current_streak(conn: &Connection, name: &str) -> i64 {
-    // Pull all distinct days descending; walk until a gap is found.
+    // Pull all distinct local-calendar days descending; walk until a gap is found.
     let mut stmt = conn
         .prepare(
-            "SELECT DISTINCT date(ts, 'unixepoch') AS d
+            "SELECT DISTINCT date(ts, 'unixepoch', 'localtime') AS d
              FROM events WHERE name = ?1
              ORDER BY d DESC",
         )
@@ -875,15 +885,11 @@ pub fn event_current_streak(conn: &Connection, name: &str) -> i64 {
         .filter_map(|r| r.ok())
         .collect();
 
-    let today = {
-        use std::time::{SystemTime, UNIX_EPOCH};
-        let secs = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_secs();
-        // Format as YYYY-MM-DD (UTC)
-        chrono_day_from_secs(secs)
-    };
+    // Ask SQLite for today in local time — guarantees the same calendar boundary
+    // as the date() calls above.
+    let today: String = conn
+        .query_row("SELECT date('now', 'localtime')", [], |r| r.get(0))
+        .unwrap_or_default();
 
     let mut streak = 0i64;
     let mut expected = today;
@@ -896,13 +902,6 @@ pub fn event_current_streak(conn: &Connection, name: &str) -> i64 {
         }
     }
     streak
-}
-
-fn chrono_day_from_secs(secs: u64) -> String {
-    // Simple UTC date without pulling in chrono: days since epoch.
-    let days = secs / 86400;
-    let (y, m, d) = days_to_ymd(days as i64);
-    format!("{y:04}-{m:02}-{d:02}")
 }
 
 fn prev_day(date: &str) -> String {
@@ -1343,7 +1342,7 @@ mod tests {
     #[test]
     fn exact_daily_count_seven_true() {
         let conn = setup();
-        let base = day_start(0) + 8 * 3600;
+        let base = day_start(1) + 8 * 3600; // yesterday — past day qualifies
         for i in 0..7_i64 {
             insert_session_at(&conn, "work", 1500, base + i * 1800, true);
         }
@@ -1351,9 +1350,20 @@ mod tests {
     }
 
     #[test]
+    fn exact_daily_count_seven_false_today() {
+        let conn = setup();
+        // Today's count is excluded — even exactly 7 today must not trigger yet.
+        let base = day_start(0) + 8 * 3600;
+        for i in 0..7_i64 {
+            insert_session_at(&conn, "work", 1500, base + i * 1800, true);
+        }
+        assert!(!get_exact_daily_work_count(&conn, 7));
+    }
+
+    #[test]
     fn exact_daily_count_seven_false_eight_sessions() {
         let conn = setup();
-        let base = day_start(0) + 8 * 3600;
+        let base = day_start(1) + 8 * 3600; // yesterday with 8 sessions → not exactly 7
         for i in 0..8_i64 {
             insert_session_at(&conn, "work", 1500, base + i * 1800, true);
         }
@@ -1429,7 +1439,7 @@ mod tests {
     #[test]
     fn perfect_day_true_four_completed() {
         let conn = setup();
-        let base = day_start(0) + 8 * 3600;
+        let base = day_start(1) + 8 * 3600; // yesterday — past day qualifies
         for i in 0..4_i64 {
             insert_session_at(&conn, "work", 1500, base + i * 1800, true);
         }
@@ -1437,9 +1447,20 @@ mod tests {
     }
 
     #[test]
+    fn perfect_day_false_today() {
+        let conn = setup();
+        // Today's sessions must not trigger — day isn't over yet.
+        let base = day_start(0) + 8 * 3600;
+        for i in 0..4_i64 {
+            insert_session_at(&conn, "work", 1500, base + i * 1800, true);
+        }
+        assert!(!get_perfect_day_exists(&conn).unwrap());
+    }
+
+    #[test]
     fn perfect_day_false_one_skipped() {
         let conn = setup();
-        let base = day_start(0) + 8 * 3600;
+        let base = day_start(1) + 8 * 3600; // yesterday
         // 3 completed + 1 skipped = 4 total but completion rate < 100%
         insert_session_at(&conn, "work", 1500, base, true);
         insert_session_at(&conn, "work", 1500, base + 1800, true);
@@ -1451,7 +1472,7 @@ mod tests {
     #[test]
     fn rest_is_productive_true() {
         let conn = setup();
-        let base = day_start(0) + 8 * 3600;
+        let base = day_start(1) + 8 * 3600; // yesterday — past day qualifies
         for i in 0..4_i64 {
             insert_session_at(&conn, "work", 1500, base + i * 1800, true);
         }
@@ -1460,9 +1481,20 @@ mod tests {
     }
 
     #[test]
+    fn rest_is_productive_false_today() {
+        let conn = setup();
+        // Today must not qualify — day isn't over yet.
+        let base = day_start(0) + 8 * 3600;
+        for i in 0..4_i64 {
+            insert_session_at(&conn, "work", 1500, base + i * 1800, true);
+        }
+        assert!(!get_rest_is_productive(&conn));
+    }
+
+    #[test]
     fn rest_is_productive_false_skipped_break() {
         let conn = setup();
-        let base = day_start(0) + 8 * 3600;
+        let base = day_start(1) + 8 * 3600; // yesterday
         for i in 0..4_i64 {
             insert_session_at(&conn, "work", 1500, base + i * 1800, true);
         }
@@ -1530,16 +1562,26 @@ mod tests {
     #[test]
     fn balanced_week_true() {
         let conn = setup();
-        let base = day_start(0) + 10 * 3600;
+        let base = day_start(7) + 10 * 3600; // last week — past week qualifies
         insert_session_at(&conn, "work", 1500, base, true);
         insert_session_at(&conn, "short-break", 300, base + 1800, true); // completed break
         assert!(get_balanced_week(&conn));
     }
 
     #[test]
+    fn balanced_week_false_current_week() {
+        let conn = setup();
+        // This week must not qualify — it isn't over yet.
+        let base = day_start(0) + 10 * 3600;
+        insert_session_at(&conn, "work", 1500, base, true);
+        insert_session_at(&conn, "short-break", 300, base + 1800, true);
+        assert!(!get_balanced_week(&conn));
+    }
+
+    #[test]
     fn balanced_week_false_skipped_break() {
         let conn = setup();
-        let base = day_start(0) + 10 * 3600;
+        let base = day_start(7) + 10 * 3600; // last week
         insert_session_at(&conn, "work", 1500, base, true);
         insert_session_at(&conn, "short-break", 300, base + 1800, false); // skipped
         assert!(!get_balanced_week(&conn));
