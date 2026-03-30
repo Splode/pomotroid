@@ -1,6 +1,10 @@
 [Unreleased]
 -----------
 
+### UI
+
+* **Collapsible theme pickers** — the Light Theme and Dark Theme pickers in Settings → Appearance are now collapsible rows instead of two permanently expanded lists. Each row shows the configured theme name and a color chip (round-type swatches on the theme's own background color) when collapsed. Clicking a row expands its full theme list; opening one automatically closes the other. A checkmark marks the selected theme in either picker regardless of which mode is currently active.
+
 [v1.4.0] - 2026-03-30
 -----------
 
@@ -10,7 +14,6 @@
 
 ### UI
 
-* **Collapsible theme pickers** — the Light Theme and Dark Theme pickers in Settings → Appearance are now collapsible rows instead of two permanently expanded lists. Each row shows the configured theme name and a color chip (round-type swatches on the theme's own background color) when collapsed. Clicking a row expands its full theme list; opening one automatically closes the other. A checkmark marks the selected theme in either picker regardless of which mode is currently active.
 * **Tooltips** — hovering over timer controls (Restart Round, Skip, Reset, Mute/Unmute, round indicator) and titlebar buttons (Settings, Statistics) now shows a brief tooltip after 600 ms. Settings toggles for System Tray (Linux), Verbose Logging, and WebSocket Server gain an inline ⓘ icon with an instant tooltip. On Linux the System Tray tooltip explains the GNOME AppIndicator requirement. Tooltips use `position: fixed` to avoid clipping near window edges and flip below the trigger when too close to the top of the screen.
 
 [v1.3.0] - 2026-03-23
