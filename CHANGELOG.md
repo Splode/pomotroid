@@ -1,6 +1,10 @@
 [Unreleased]
 -----------
 
+### UI
+
+* **Collapsible theme pickers** — the Light Theme and Dark Theme pickers in Settings → Appearance are now collapsible rows instead of two permanently expanded lists. Each row shows the configured theme name and a color chip (round-type swatches on the theme's own background color) when collapsed. Clicking a row expands its full theme list; opening one automatically closes the other. A checkmark marks the selected theme in either picker regardless of which mode is currently active.
+
 [v1.4.0] - 2026-03-30
 -----------
 
