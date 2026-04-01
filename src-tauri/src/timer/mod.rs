@@ -332,10 +332,19 @@ fn listen_events(
                 }
 
                 // Gather context flags; the timer has this data, the subscriber does not.
-                let in_tray = app
+                let (in_tray, compact) = app
                     .get_webview_window("main")
-                    .map(|w| !w.is_visible().unwrap_or(true))
-                    .unwrap_or(false);
+                    .map(|w| {
+                        let hidden = !w.is_visible().unwrap_or(true);
+                        let small = w.inner_size().map(|s| {
+                            let scale = w.scale_factor().unwrap_or(1.0);
+                            let lw = s.width  as f64 / scale;
+                            let lh = s.height as f64 / scale;
+                            lw < 300.0 || lh < 300.0
+                        }).unwrap_or(false);
+                        (hidden, small)
+                    })
+                    .unwrap_or((false, false));
                 let (always_on_top, websocket_active, silent) = {
                     let s = settings.lock().unwrap();
                     let sil = !s.tick_sounds_during_work
@@ -358,6 +367,7 @@ fn listen_events(
                             always_on_top:    is_work_round && always_on_top,
                             websocket_active: is_work_round && websocket_active,
                             silent:           is_work_round && silent,
+                            compact:          is_work_round && compact,
                         },
                         &app,
                     );

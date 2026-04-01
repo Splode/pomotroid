@@ -173,7 +173,7 @@ pub static ACHIEVEMENTS: &[AchievementDef] = &[
     AchievementDef {
         id: "on_a_roll",
         name: "On a Roll",
-        description: "Maintain a 3-day streak.",
+        description: "Maintain a 3-day work session streak.",
         category: Category::Habit,
         secret: false,
         color: "#fb923c",
@@ -184,7 +184,7 @@ pub static ACHIEVEMENTS: &[AchievementDef] = &[
     AchievementDef {
         id: "week_warrior",
         name: "Week Warrior",
-        description: "Maintain a 7-day streak.",
+        description: "Maintain a 7-day work session streak.",
         category: Category::Habit,
         secret: false,
         color: "#10b981",
@@ -195,7 +195,7 @@ pub static ACHIEVEMENTS: &[AchievementDef] = &[
     AchievementDef {
         id: "month_of_zen",
         name: "Month of Zen",
-        description: "Maintain a 30-day streak.",
+        description: "Maintain a 30-day work session streak.",
         category: Category::Habit,
         secret: false,
         color: "#14b8a6",
@@ -310,7 +310,7 @@ pub static ACHIEVEMENTS: &[AchievementDef] = &[
     AchievementDef {
         id: "the_long_game",
         name: "The Long Game",
-        description: "Use the app 100 days in a row.",
+        description: "Achieve a 100-day work session streak.",
         category: Category::Habit,
         secret: false,
         color: "#0f766e",

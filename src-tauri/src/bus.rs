@@ -39,6 +39,8 @@ pub enum AppEvent {
         websocket_active: bool,
         /// All tick sounds and volume were off during this session.
         silent: bool,
+        /// Window was in compact mode (either dimension < 300 logical px).
+        compact: bool,
     },
 
     /// All session rows were deleted by the user.

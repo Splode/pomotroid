@@ -204,6 +204,7 @@ pub fn make_subscriber() -> impl Fn(&crate::bus::AppEvent, &AppHandle) + Send + 
                     always_on_top,
                     websocket_active,
                     silent,
+                    compact,
                 } => {
                     // Context flags are already pre-gated to false for non-work
                     // rounds at the publish site, so no round_type check needed here.
@@ -221,6 +222,9 @@ pub fn make_subscriber() -> impl Fn(&crate::bus::AppEvent, &AppHandle) + Send + 
                     }
                     if *silent {
                         newly.extend(record_event(&conn, app, ev::SESSION_SILENT, None));
+                    }
+                    if *compact {
+                        newly.extend(record_event(&conn, app, ev::SESSION_COMPACT, None));
                     }
                     if *was_skipped
                         && round_type == "work"
@@ -268,7 +272,22 @@ pub fn make_subscriber() -> impl Fn(&crate::bus::AppEvent, &AppHandle) + Send + 
         // completion sound already plays at this moment.
         let mute_chime = matches!(event, AppEvent::SessionCompleted { .. });
 
-        if !newly.is_empty() {
+        // Suppress the toast for events that are not explicit in-app user actions
+        // and can arrive while a work round is actively running (filesystem watcher,
+        // external WebSocket polling).  The achievement is still recorded in the DB;
+        // only the interrupting notification is withheld.
+        let suppress_toast = matches!(
+            event,
+            AppEvent::ThemeCreated | AppEvent::WebSocketMessage { .. }
+        ) && app
+            .try_state::<crate::timer::TimerController>()
+            .map(|t| {
+                let snap = t.get_snapshot();
+                snap.round_type == "work" && snap.is_running
+            })
+            .unwrap_or(false);
+
+        if !newly.is_empty() && !suppress_toast {
             notify_and_spawn_toast(newly, app, mute_chime);
         }
     }
