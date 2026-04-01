@@ -91,8 +91,12 @@ pub fn run() {
             {
                 let conn = db.lock().unwrap();
                 settings::seed_defaults(&conn).expect("failed to seed default settings");
-                // Prune events older than 90 days (well beyond the 30-day streak window).
-                crate::db::queries::prune_events(&conn, 90);
+                // Prune events older than 365 days.  90 days was the original window
+                // (sufficient for the 30-day streak criteria), but count-based achievements
+                // such as power_user (50 shortcuts) can realistically accumulate over many
+                // months, so a full year of history is retained to avoid silently discarding
+                // progress toward unearned achievements.
+                crate::db::queries::prune_events(&conn, 365);
             }
             app.manage(db.clone());
 

@@ -24,8 +24,10 @@ pub fn spawn_toast_window(app: &AppHandle, ids: &[String], count: u32) {
     // Resolve theme background + foreground so the toast matches the app.
     let (bg, fg) = resolve_theme_colors(app);
 
+    let ids_str = ids.join(",");
     let url = format!(
-        "/achievement-toast?count={count}&name={name}&emoji={emoji}&color={color}&bg={bg}&fg={fg}",
+        "/achievement-toast?count={count}&ids={ids}&name={name}&emoji={emoji}&color={color}&bg={bg}&fg={fg}",
+        ids   = urlencoding::encode(&ids_str),
         name  = urlencoding::encode(&name),
         emoji = urlencoding::encode(emoji),
         color = urlencoding::encode(color),

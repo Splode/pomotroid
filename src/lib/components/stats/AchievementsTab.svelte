@@ -5,6 +5,8 @@
   import type { AchievementView, AchievementCategory } from '$lib/types';
   import { error as logError } from '@tauri-apps/plugin-log';
 
+  let { highlightId = null }: { highlightId?: string | null } = $props();
+
   const CATEGORY_ORDER: AchievementCategory[] = ['Milestone', 'Habit', 'Discovery'];
 
   let achievements = $state<AchievementView[]>([]);
@@ -26,6 +28,17 @@
 
   const totalEarned = $derived(achievements.filter((a) => a.earned).length);
   const total = $derived(achievements.length);
+
+  // Scroll whenever both the list is loaded and a highlight target is set.
+  $effect(() => {
+    if (!highlightId || loading) return;
+    // achievements is read to make this effect re-run when the list changes.
+    achievements;
+    requestAnimationFrame(() => {
+      const el = document.querySelector<HTMLElement>(`[data-achievement-id="${highlightId}"]`);
+      el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    });
+  });
 
   onMount(async () => {
     try {
@@ -49,7 +62,12 @@
     <div class="list">
       <div class="grid">
         {#each sorted as achievement, i (achievement.id)}
-          <AchievementCard {achievement} delay={i * 40} />
+          <AchievementCard
+            {achievement}
+            delay={highlightId ? 0 : i * 40}
+            highlighted={achievement.id === highlightId}
+            instant={!!highlightId}
+          />
         {/each}
       </div>
     </div>

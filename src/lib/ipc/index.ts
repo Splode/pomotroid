@@ -146,5 +146,8 @@ export const onAchievementUnlocked = (
 ): Promise<UnlistenFn> =>
   listen<{ ids: string[]; count: number }>('achievement:unlocked', (e) => cb(e.payload));
 
+export const onAchievementProgress = (cb: () => void): Promise<UnlistenFn> =>
+  listen<void>('achievement:progress', () => cb());
+
 export const onAchievementsCleared = (cb: () => void): Promise<UnlistenFn> =>
   listen<void>('achievements:cleared', () => cb());

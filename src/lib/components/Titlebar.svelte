@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { getCurrentWebviewWindow, WebviewWindow } from '@tauri-apps/api/webviewWindow';
+  import { emit, listen } from '@tauri-apps/api/event';
   import { setWindowVisibility } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import { isMac } from '$lib/utils/platform';
@@ -12,10 +13,16 @@
   onMount(() => {
     const win = getCurrentWebviewWindow();
     win.isMaximized().then((v) => { maximized = v; });
-    const unlisten = win.onResized(async () => {
+    const unlistenResize = win.onResized(async () => {
       maximized = await win.isMaximized();
     });
-    return () => { unlisten.then((fn) => fn()); };
+    const unlistenOpenStats = listen<{ highlight: string }>('achievement:open-stats', (e) => {
+      openStats(e.payload.highlight);
+    });
+    return () => {
+      unlistenResize.then((fn) => fn());
+      unlistenOpenStats.then((fn) => fn());
+    };
   });
 
   async function openSettings() {
@@ -41,15 +48,21 @@
     });
   }
 
-  async function openStats() {
+  async function openStats(highlightId?: string) {
     const existing = await WebviewWindow.getByLabel('stats');
     if (existing) {
+      if (highlightId) {
+        await emit('stats:navigate', { tab: 'achievements', highlight: highlightId });
+      }
       await existing.show();
       await existing.setFocus();
       return;
     }
+    const url = highlightId
+      ? `/stats?tab=achievements&highlight=${encodeURIComponent(highlightId)}`
+      : '/stats';
     new WebviewWindow('stats', {
-      url: '/stats',
+      url,
       title: 'Pomotroid — Statistics',
       width: 840,
       height: 520,
@@ -96,7 +109,7 @@
 
 {#snippet statsBtn()}
   <Tooltip text={m.tooltip_statistics()}>
-    <button class="btn-icon" onclick={openStats} aria-label="Statistics">
+    <button class="btn-icon" onclick={() => openStats()} aria-label="Statistics">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <rect x="2"  y="9"  width="3" height="5" rx="0.5" fill="currentColor" opacity="0.6"/>
         <rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" opacity="0.8"/>

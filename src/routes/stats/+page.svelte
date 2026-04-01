@@ -5,9 +5,10 @@
     getSettings, getThemes,
     onSettingsChanged, onThemesChanged, onRoundChange, onSessionsCleared,
     statsGetDetailed, statsGetHeatmap,
-    onAchievementUnlocked, onAchievementsCleared,
+    onAchievementUnlocked, onAchievementProgress, onAchievementsCleared,
     achievementRecordEvent,
   } from '$lib/ipc';
+  import { listen } from '@tauri-apps/api/event';
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
   import { setLocale } from '$lib/locale.svelte.js';
@@ -26,7 +27,13 @@
 
   type Tab = 'today' | 'week' | 'alltime' | 'achievements';
 
-  let activeTab = $state<Tab>('today');
+  // Read initial tab + highlight from URL (set when opened via toast click).
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlTab = urlParams.get('tab') as Tab | null;
+  const urlHighlight = urlParams.get('highlight') ?? null;
+
+  let activeTab = $state<Tab>(urlTab ?? 'today');
+  let highlightId = $state<string | null>(urlHighlight);
   let detailed = $state<DetailedStats | null>(null);
   let heatmap = $state<HeatmapStats | null>(null);
   let heatmapLoaded = $state(false);
@@ -68,20 +75,22 @@
 
         detailed = await statsGetDetailed();
         await info(`[stats] initialized, theme=${activeTheme?.name ?? 'none'}`);
-
-        // Achievement events: record page open and schedule long-view.
-        achievementRecordEvent('stats_opened').catch(() => {});
-        const longViewTimer = setTimeout(() => {
-          achievementRecordEvent('stats_long_view').catch(() => {});
-        }, 5 * 60 * 1000);
-        cleanups.push(() => clearTimeout(longViewTimer));
       } catch (e) {
         await logError(`[stats] initialization failed: ${e}`);
         throw e;
       }
 
       cleanups.push(
+        await listen<{ tab: Tab; highlight?: string }>('stats:navigate', async (e) => {
+          highlightId = e.payload.highlight ?? null;
+          await switchTab(e.payload.tab);
+        }),
         await onAchievementUnlocked(async () => {
+          if (activeTab === 'achievements') {
+            await achievementsTab?.refresh();
+          }
+        }),
+        await onAchievementProgress(async () => {
           if (activeTab === 'achievements') {
             await achievementsTab?.refresh();
           }
@@ -135,6 +144,14 @@
           if (current) applyTheme(current);
         }),
       );
+
+      // Record after listeners are registered so onAchievementUnlocked fires
+      // if this visit earns the stats_opened achievement.
+      achievementRecordEvent('stats_opened').catch(() => {});
+      const longViewTimer = setTimeout(() => {
+        achievementRecordEvent('stats_long_view').catch(() => {});
+      }, 5 * 60 * 1000);
+      cleanups.push(() => clearTimeout(longViewTimer));
     })();
 
     return () => {
@@ -174,7 +191,7 @@
     {:else if activeTab === 'alltime'}
       <YearlyView {heatmap} />
     {:else}
-      <AchievementsTab bind:this={achievementsTab} />
+      <AchievementsTab bind:this={achievementsTab} {highlightId} />
     {/if}
   </div>
 </div>

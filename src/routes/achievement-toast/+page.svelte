@@ -3,11 +3,13 @@
   import { onMount } from 'svelte';
   import AchievementBadge from '$lib/components/AchievementBadge.svelte';
   import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+  import { emit } from '@tauri-apps/api/event';
   import { LogicalSize } from '@tauri-apps/api/dpi';
 
   // All display data comes from URL params — no IPC calls needed.
   const params  = new URLSearchParams(window.location.search);
   const count   = parseInt(params.get('count') ?? '1', 10);
+  const ids     = (params.get('ids') ?? '').split(',').filter(Boolean);
   const name    = params.get('name') ?? 'Achievement';
   const emoji   = params.get('emoji') ?? '';
   const color   = params.get('color') ?? '#888888';
@@ -15,15 +17,28 @@
   const fg      = params.get('fg')    ?? '#ddd0bc';
   const isRollup = count > 1;
 
+  // The first unlocked ID is used to scroll to in the achievements gallery.
+  const highlightId = ids[0] ?? '';
+
   let visible = $state(false);
   let exiting = $state(false);
+  let closeTimer: ReturnType<typeof setTimeout> | undefined;
 
-  // --- Auto-close ---
+  // --- Close helpers ---
+  function startExit() {
+    clearTimeout(closeTimer);
+    exiting = true;
+    setTimeout(() => getCurrentWebviewWindow().close(), 300);
+  }
+
   function scheduleClose() {
-    setTimeout(() => {
-      exiting = true;
-      setTimeout(() => getCurrentWebviewWindow().close(), 300);
-    }, 7000);
+    closeTimer = setTimeout(startExit, 7000);
+  }
+
+  // --- Click: open achievements gallery and highlight the card ---
+  async function handleClick() {
+    await emit('achievement:open-stats', { highlight: highlightId });
+    startExit();
   }
 
   onMount(async () => {
@@ -58,6 +73,10 @@
   class:visible
   class:exiting
   style="--achievement-color: {color}; --bg: {bg}; --fg: {fg};"
+  role="button"
+  tabindex="0"
+  onclick={handleClick}
+  onkeydown={(e) => e.key === 'Enter' && handleClick()}
 >
   <!-- Badge -->
   <div class="badge-area" class:pop={visible}>
@@ -88,6 +107,7 @@
     height: 66px;
     max-height: 66px;
     overflow: hidden;
+    cursor: default;
   }
 
   .toast {
@@ -100,6 +120,7 @@
     background: var(--bg);
     opacity: 0;
     transition: opacity 200ms ease-out;
+    cursor: pointer;
   }
 
   .toast.visible {

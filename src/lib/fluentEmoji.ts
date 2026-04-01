@@ -20,6 +20,10 @@ export const FLUENT_EMOJI: Record<string, string> = {
   '🏔️': '/emoji/snow_capped_mountain.svg',
   '🔄': '/emoji/counterclockwise_arrows_button.svg',
   '🎨': '/emoji/artist_palette.svg',
+  '🪷': '/emoji/lotus.svg',
+  '🌋': '/emoji/volcano.svg',
+  '🖼️': '/emoji/framed_picture.svg',
+  '📜': '/emoji/scroll.svg',
 
   // --- Habit / streaks ---
   '📅': '/emoji/calendar.svg',

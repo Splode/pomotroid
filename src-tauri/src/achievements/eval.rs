@@ -113,6 +113,41 @@ pub fn check_all_achievements(conn: &Connection, app: &AppHandle) {
 // Bus subscriber — single registration point for all achievement side-effects
 // ---------------------------------------------------------------------------
 
+/// At first launch after the achievements system is introduced, synthesize
+/// `THEME_APPLIED` events for users who already had a non-default theme set.
+/// Idempotent: does nothing if any `THEME_APPLIED` event already exists.
+fn backfill_inferred_events(conn: &Connection) {
+    use crate::achievements::event;
+
+    if queries::count_events(conn, event::THEME_APPLIED) > 0 {
+        return;
+    }
+
+    const DEFAULT_LIGHT: &str = "Pomotroid Light";
+    const DEFAULT_DARK: &str = "Pomotroid";
+
+    let light = crate::settings::get_setting(conn, "theme_light").unwrap_or_default();
+    let dark  = crate::settings::get_setting(conn, "theme_dark").unwrap_or_default();
+
+    let non_default = [
+        (light.as_str(),  DEFAULT_LIGHT),
+        (dark.as_str(),   DEFAULT_DARK),
+    ]
+    .iter()
+    .find_map(|&(val, def)| (!val.is_empty() && val != def).then(|| val.to_string()));
+
+    if let Some(theme_name) = non_default {
+        match queries::insert_event(conn, event::THEME_APPLIED, Some(theme_name.as_str())) {
+            Ok(_) => log::info!(
+                "[achievements] backfill: synthesized THEME_APPLIED for '{theme_name}'"
+            ),
+            Err(e) => log::warn!(
+                "[achievements] backfill: failed to insert THEME_APPLIED: {e}"
+            ),
+        }
+    }
+}
+
 /// Delete achievements that are exclusively driven by `SESSION_COMPLETED` events.
 /// Called by the bus subscriber when `SessionsCleared` is received.
 pub fn cleanup_session_achievements(conn: &Connection) {
@@ -142,7 +177,6 @@ pub fn make_subscriber() -> impl Fn(&crate::bus::AppEvent, &AppHandle) + Send + 
     move |event, app| {
         use crate::achievements::event as ev;
         use crate::bus::AppEvent;
-        use crate::db::queries;
 
         let Some(db) = app.try_state::<crate::db::DbState>() else { return };
 
@@ -153,8 +187,13 @@ pub fn make_subscriber() -> impl Fn(&crate::bus::AppEvent, &AppHandle) + Send + 
             let Ok(conn) = db.lock() else { return };
 
             match event {
-                AppEvent::AppLaunched =>
-                    record_event(&conn, app, ev::APP_LAUNCHED, None),
+                AppEvent::AppLaunched => {
+                    // Retroactively award achievements that can be inferred from
+                    // existing settings/data (silently — no toast for past actions).
+                    backfill_inferred_events(&conn);
+                    check_all_achievements(&conn, app);
+                    record_event(&conn, app, ev::APP_LAUNCHED, None)
+                }
 
                 AppEvent::SessionCompleted {
                     round_type,
@@ -168,25 +207,29 @@ pub fn make_subscriber() -> impl Fn(&crate::bus::AppEvent, &AppHandle) + Send + 
                 } => {
                     // Context flags are already pre-gated to false for non-work
                     // rounds at the publish site, so no round_type check needed here.
+                    // Use record_event (not insert_event) so achievements triggered
+                    // by these context events are evaluated immediately.
+                    let mut newly = vec![];
                     if *in_tray {
-                        let _ = queries::insert_event(&conn, ev::SESSION_TRAY, None);
+                        newly.extend(record_event(&conn, app, ev::SESSION_TRAY, None));
                     }
                     if *always_on_top {
-                        let _ = queries::insert_event(&conn, ev::SESSION_ALWAYS_ON_TOP, None);
+                        newly.extend(record_event(&conn, app, ev::SESSION_ALWAYS_ON_TOP, None));
                     }
                     if *websocket_active {
-                        let _ = queries::insert_event(&conn, ev::SESSION_WEBSOCKET_ACTIVE, None);
+                        newly.extend(record_event(&conn, app, ev::SESSION_WEBSOCKET_ACTIVE, None));
                     }
                     if *silent {
-                        let _ = queries::insert_event(&conn, ev::SESSION_SILENT, None);
+                        newly.extend(record_event(&conn, app, ev::SESSION_SILENT, None));
                     }
                     if *was_skipped
                         && round_type == "work"
                         && round_duration_secs.saturating_sub(*elapsed_secs) < 60
                     {
-                        let _ = queries::insert_event(&conn, ev::SESSION_SKIPPED_LATE, None);
+                        newly.extend(record_event(&conn, app, ev::SESSION_SKIPPED_LATE, None));
                     }
-                    record_event(&conn, app, ev::SESSION_COMPLETED, None)
+                    newly.extend(record_event(&conn, app, ev::SESSION_COMPLETED, None));
+                    newly
                 }
 
                 AppEvent::SessionsCleared => {
@@ -214,6 +257,12 @@ pub fn make_subscriber() -> impl Fn(&crate::bus::AppEvent, &AppHandle) + Send + 
             // `conn` guard drops here — lock released before notify below.
         };
         // ── DB lock scope end ────────────────────────────────────────────────
+
+        // Signal the stats window that achievement data may have changed
+        // (progress counts update even when no achievement is newly unlocked).
+        if !matches!(event, AppEvent::SessionsCleared) {
+            let _ = app.emit("achievement:progress", ());
+        }
 
         // Mute the toast chime when triggered by session completion — the round
         // completion sound already plays at this moment.
