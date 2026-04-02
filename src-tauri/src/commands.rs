@@ -175,8 +175,19 @@ pub fn settings_set(
 
     // Create or destroy the tray when tray_icon_enabled or min_to_tray changes.
     // The tray exists when either flag is true.
+    // On Linux, spawn tray creation on a background thread to avoid blocking
+    // the main thread on KDE Plasma 6 / Wayland (D-Bus StatusNotifier hang).
     if matches!(key.as_str(), "tray_icon_enabled" | "min_to_tray") {
         if new_settings.tray_icon_enabled || new_settings.min_to_tray {
+            #[cfg(target_os = "linux")]
+            {
+                let app_handle = app.clone();
+                let ts = Arc::clone(&tray_state);
+                std::thread::spawn(move || {
+                    tray::create_tray(&app_handle, &ts);
+                });
+            }
+            #[cfg(not(target_os = "linux"))]
             tray::create_tray(&app, &tray_state);
         } else {
             tray::destroy_tray(&tray_state);
@@ -578,6 +589,21 @@ pub fn accessibility_trusted() -> bool {
         unsafe { AXIsProcessTrusted() }
     }
     #[cfg(not(target_os = "macos"))]
+    {
+        true
+    }
+}
+
+/// Returns whether the system tray is supported on this platform/install.
+/// On Linux, probes for libayatana-appindicator3 / libappindicator3 at runtime.
+/// On macOS and Windows, always returns true.
+#[tauri::command]
+pub fn tray_supported() -> bool {
+    #[cfg(target_os = "linux")]
+    {
+        tray::appindicator_available()
+    }
+    #[cfg(not(target_os = "linux"))]
     {
         true
     }

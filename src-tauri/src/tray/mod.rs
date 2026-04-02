@@ -7,6 +7,14 @@
 ///
 /// Colors come from the active theme, updated when theme changes.
 /// The tray is created/destroyed when `min_to_tray` setting changes.
+///
+/// ## Linux / Wayland note
+/// Tauri's tray support on Linux is backed by `libappindicator-sys`, which
+/// `dlopen`s `libayatana-appindicator3` or `libappindicator3` at runtime and
+/// panics (aborting the process) if neither is found.  KDE Plasma 6 on Wayland
+/// typically does not ship these libraries.  `create_tray` probes for them
+/// before calling `TrayIconBuilder::build()` and returns early with a warning
+/// when they are absent, preventing the abort.
 use std::f32::consts::{FRAC_PI_2, PI, TAU};
 use std::sync::{Arc, Mutex};
 
@@ -124,6 +132,61 @@ impl TrayState {
 // Tray lifecycle
 // ---------------------------------------------------------------------------
 
+/// Check whether the appindicator shared library is loadable on this system.
+///
+/// `libappindicator-sys` panics with an unrecoverable abort when none of the
+/// four candidate `.so` names can be opened.  We probe via `dlopen` first so
+/// `create_tray` can return gracefully instead of crashing the process.
+///
+/// KDE Plasma 6 on Wayland typically does not ship these libraries.
+#[cfg(target_os = "linux")]
+pub(crate) fn appindicator_available() -> bool {
+    use std::ffi::c_char;
+    extern "C" {
+        fn dlopen(filename: *const c_char, flags: i32) -> *mut std::ffi::c_void;
+        fn dlclose(handle: *mut std::ffi::c_void) -> i32;
+    }
+    const RTLD_LAZY: i32 = 0x0001;
+    // Mirror the four names tried by libappindicator-sys 0.9.
+    let candidates: &[&[u8]] = &[
+        b"libayatana-appindicator3.so.1\0",
+        b"libappindicator3.so.1\0",
+        b"libayatana-appindicator3.so\0",
+        b"libappindicator3.so\0",
+    ];
+    log::debug!("[tray] probing for appindicator shared library");
+    let result = candidates.iter().find_map(|name| unsafe {
+        let name_str = std::str::from_utf8(name)
+            .unwrap_or("?")
+            .trim_end_matches('\0');
+        log::debug!("[tray] trying {name_str}");
+        let handle = dlopen(name.as_ptr() as *const c_char, RTLD_LAZY);
+        if !handle.is_null() {
+            dlclose(handle);
+            Some(name_str)
+        } else {
+            None
+        }
+    });
+    match result {
+        Some(found) => {
+            log::info!("[tray] appindicator found: {found}");
+            true
+        }
+        None => {
+            log::warn!(
+                "[tray] appindicator not found — checked: {}",
+                candidates
+                    .iter()
+                    .map(|n| std::str::from_utf8(n).unwrap_or("?").trim_end_matches('\0'))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            );
+            false
+        }
+    }
+}
+
 /// Show the system tray icon.
 ///
 /// If the icon has already been created (e.g. it was previously hidden), it is
@@ -138,6 +201,19 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
             log::info!("[tray] shown (reused existing icon)");
             return;
         }
+    }
+
+    // On Linux, libappindicator-sys aborts the process if neither
+    // libayatana-appindicator3 nor libappindicator3 is installed (common on
+    // KDE Plasma 6 / Wayland).  Bail out gracefully if the probe fails.
+    #[cfg(target_os = "linux")]
+    if !appindicator_available() {
+        log::warn!(
+            "[tray] libayatana-appindicator3 / libappindicator3 not found — \
+             system tray is unavailable on this system. \
+             Install libayatana-appindicator3 to enable it."
+        );
+        return;
     }
 
     let toggle_item = match MenuItem::with_id(app, "toggle", "Start", true, None::<&str>) {

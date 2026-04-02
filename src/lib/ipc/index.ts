@@ -84,6 +84,11 @@ export const statsGetHeatmap = () => invoke<HeatmapStats>('stats_get_heatmap');
 
 export const accessibilityTrusted = () => invoke<boolean>('accessibility_trusted');
 
+/** Returns true if the system tray is usable on this platform/install.
+ *  On Linux this probes for libayatana-appindicator3 / libappindicator3 at
+ *  runtime; on macOS and Windows it always returns true. */
+export const traySupported = () => invoke<boolean>('tray_supported');
+
 // --- Updater commands ---
 
 /** Check for an available update. Returns update info or null if already up to date. */
