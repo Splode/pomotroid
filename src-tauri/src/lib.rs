@@ -17,6 +17,7 @@ use tauri_plugin_log::{Builder as LogBuilder, RotationStrategy, Target, TargetKi
 
 use commands::{
     accessibility_trusted,
+    tray_supported,
     app_version,
     check_update,
     install_update,
@@ -139,7 +140,22 @@ pub fn run() {
 
             // Create initial tray icon if tray_icon_enabled is on, or if an
             // existing user has min_to_tray enabled (backwards compatibility).
+            //
+            // On Linux, TrayIconBuilder::build() can block the main thread
+            // indefinitely on KDE Plasma 6 / Wayland while waiting for the
+            // StatusNotifierWatcher D-Bus service to respond.  Spawning on a
+            // background thread lets setup() return so the event loop starts
+            // and the window can appear while the tray registers asynchronously.
             if initial_settings.tray_icon_enabled || initial_settings.min_to_tray {
+                #[cfg(target_os = "linux")]
+                {
+                    let app_handle = app.handle().clone();
+                    let ts = Arc::clone(&tray_state);
+                    std::thread::spawn(move || {
+                        tray::create_tray(&app_handle, &ts);
+                    });
+                }
+                #[cfg(not(target_os = "linux"))]
                 tray::create_tray(app.handle(), &tray_state);
             }
 
@@ -329,6 +345,7 @@ pub fn run() {
             open_log_dir,
             get_log_dir,
             accessibility_trusted,
+            tray_supported,
             app_version,
             // Updater
             check_update,

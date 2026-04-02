@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { settings } from '$lib/stores/settings';
-  import { setSetting, resetSettings, clearSessionHistory } from '$lib/ipc';
+  import { setSetting, resetSettings, clearSessionHistory, traySupported } from '$lib/ipc';
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import * as m from '$paraglide/messages.js';
   import { setLocale } from '$lib/locale.svelte.js';
@@ -18,6 +19,14 @@
     { value: 'pt',   label: 'Português' },
     { value: 'tr',   label: 'Türkçe' },
   ];
+
+  // On Linux, probe for libayatana-appindicator3 at runtime.  The tray section
+  // is hidden entirely when the library is absent so users can't enable a
+  // feature that would crash the app.  Non-Linux platforms always support tray.
+  let trayAvailable = $state(!isLinux);
+  onMount(async () => {
+    if (isLinux) trayAvailable = await traySupported();
+  });
 
   let localPort = $state(String($settings.websocket_port));
   $effect(() => { localPort = String($settings.websocket_port); });
@@ -157,36 +166,38 @@
     onclick={() => toggle('verbose_logging', $settings.verbose_logging)}
   />
 
-  <div class="group-heading">{m.system_group_tray()}</div>
+  {#if trayAvailable}
+    <div class="group-heading">{m.system_group_tray()}</div>
 
-  <!-- Show in System Tray: available on all platforms. -->
-  <SettingsToggle
-    label={m.system_toggle_show_tray()}
-    description={m.system_toggle_show_tray_desc()}
-    tooltip={isLinux ? m.system_tray_gnome_hint() : undefined}
-    checked={$settings.tray_icon_enabled}
-    onclick={() => toggle('tray_icon_enabled', $settings.tray_icon_enabled)}
-  />
+    <!-- Show in System Tray: available on all platforms. -->
+    <SettingsToggle
+      label={m.system_toggle_show_tray()}
+      description={m.system_toggle_show_tray_desc()}
+      tooltip={isLinux ? m.system_tray_gnome_hint() : undefined}
+      checked={$settings.tray_icon_enabled}
+      onclick={() => toggle('tray_icon_enabled', $settings.tray_icon_enabled)}
+    />
 
-  {#if $settings.tray_icon_enabled}
-    <!-- Minimize to Tray is Windows/Linux only: the macOS yellow traffic-light
-         button routes to the Dock and cannot be intercepted by the app. -->
-    {#if !isMac}
+    {#if $settings.tray_icon_enabled}
+      <!-- Minimize to Tray is Windows/Linux only: the macOS yellow traffic-light
+           button routes to the Dock and cannot be intercepted by the app. -->
+      {#if !isMac}
+        <SettingsToggle
+          label={m.system_toggle_min_tray()}
+          description={m.system_toggle_min_tray_desc()}
+          checked={$settings.min_to_tray}
+          onclick={() => toggle('min_to_tray', $settings.min_to_tray)}
+        />
+      {/if}
+      <!-- Close to Tray is available on all platforms: the CloseRequested event
+           fires on macOS (red button / Cmd+W) and can be intercepted. -->
       <SettingsToggle
-        label={m.system_toggle_min_tray()}
-        description={m.system_toggle_min_tray_desc()}
-        checked={$settings.min_to_tray}
-        onclick={() => toggle('min_to_tray', $settings.min_to_tray)}
+        label={m.system_toggle_close_tray()}
+        description={m.system_toggle_close_tray_desc()}
+        checked={$settings.min_to_tray_on_close}
+        onclick={() => toggle('min_to_tray_on_close', $settings.min_to_tray_on_close)}
       />
     {/if}
-    <!-- Close to Tray is available on all platforms: the CloseRequested event
-         fires on macOS (red button / Cmd+W) and can be intercepted. -->
-    <SettingsToggle
-      label={m.system_toggle_close_tray()}
-      description={m.system_toggle_close_tray_desc()}
-      checked={$settings.min_to_tray_on_close}
-      onclick={() => toggle('min_to_tray_on_close', $settings.min_to_tray_on_close)}
-    />
   {/if}
 
   <div class="group-heading">{m.system_group_window()}</div>

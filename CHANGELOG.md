@@ -1,6 +1,10 @@
 [Unreleased]
 -----------
 
+### Bug Fixes
+
+* **App freeze / crash on launch when "Show in System Tray" is enabled on KDE Plasma 6 / Wayland** — enabling the system tray on a Linux system without `libayatana-appindicator3` or `libappindicator3` installed caused `libappindicator-sys` to panic inside an `extern "C"` function, which aborts the process. Because the setting is persisted before the crash, every subsequent launch would abort before the window could appear. The fix probes for the shared library via `dlopen` before calling `TrayIconBuilder::build()` and returns early with a warning when it is absent. The System Tray section in Settings → System is now hidden entirely on Linux systems where the library is not found, preventing the setting from being enabled in the first place. The required library can be installed on Arch / Manjaro with `sudo pacman -S libayatana-appindicator`.
+
 ### UI
 
 * **Collapsible theme pickers** — the Light Theme and Dark Theme pickers in Settings → Appearance are now collapsible rows instead of two permanently expanded lists. Each row shows the configured theme name and a color chip (round-type swatches on the theme's own background color) when collapsed. Clicking a row expands its full theme list; opening one automatically closes the other. A checkmark marks the selected theme in either picker regardless of which mode is currently active.
