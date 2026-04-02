@@ -12,6 +12,13 @@
   import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
   import type { UnlistenFn } from '@tauri-apps/api/event';
   import { info, error as logError } from '@tauri-apps/plugin-log';
+  import { createLocalShortcutHandler } from '$lib/utils/localShortcuts';
+
+  // Local shortcut state — volume and fullscreen tracked separately so the
+  // handler can read current values without waiting for settings:changed round-trip.
+  let localVolume = $state(1.0);
+  let preMuteVolume = $state(0.5);
+  let isFullscreen = $state(false);
 
   // Base window dimensions (natural/default size).
   const BASE_W = 360;
@@ -59,11 +66,25 @@
   onMount(() => {
     const cleanups: UnlistenFn[] = [];
 
+    // Mount local keyboard shortcut handler.
+    const shortcutHandler = createLocalShortcutHandler({
+      getSettings: () => $settings,
+      getVolume: () => localVolume,
+      setVolume: (v) => { localVolume = v; },
+      getPreMuteVolume: () => preMuteVolume,
+      setPreMuteVolume: (v) => { preMuteVolume = v; },
+      getFullscreen: () => isFullscreen,
+      setFullscreen: (v) => { isFullscreen = v; },
+    });
+    document.addEventListener('keydown', shortcutHandler);
+    cleanups.push(() => document.removeEventListener('keydown', shortcutHandler));
+
     (async () => {
       try {
       // Load settings from backend.
       const s = await getSettings();
       settings.set(s);
+      localVolume = s.volume;
 
       // Apply the stored locale on mount.
       setLocale(s.language);
@@ -100,6 +121,7 @@
           const prevDark = $settings.theme_dark;
           const prevLanguage = $settings.language;
           settings.set(updated);
+          localVolume = updated.volume;
           if (updated.language !== prevLanguage) {
             setLocale(updated.language);
           }

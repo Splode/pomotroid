@@ -50,6 +50,13 @@ export interface Settings {
   verbose_logging: boolean;
   check_for_updates: boolean;
   global_shortcuts_enabled: boolean;
+  local_shortcut_toggle: string;
+  local_shortcut_reset: string;
+  local_shortcut_skip: string;
+  local_shortcut_volume_down: string;
+  local_shortcut_volume_up: string;
+  local_shortcut_mute: string;
+  local_shortcut_fullscreen: string;
 }
 
 /** Returned by `check_update` — describes an available update. */

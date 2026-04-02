@@ -3,6 +3,7 @@
   import { settings } from '$lib/stores/settings';
   import { setSetting, reloadShortcuts, accessibilityTrusted } from '$lib/ipc';
   import ShortcutInput from '$lib/components/ShortcutInput.svelte';
+  import LocalShortcutInput from '$lib/components/LocalShortcutInput.svelte';
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import * as m from '$paraglide/messages.js';
   import { isMac } from '$lib/utils/platform';
@@ -39,58 +40,129 @@
     settings.set(updated);
     await reloadShortcuts();
   }
+
+  async function setLocalShortcut(dbKey: string, value: string) {
+    const updated = await setSetting(dbKey, value);
+    settings.set(updated);
+  }
 </script>
 
 <div class="section">
-  <SettingsToggle
-    label={m.shortcuts_toggle_enabled()}
-    description={m.shortcuts_toggle_enabled_desc()}
-    checked={$settings.global_shortcuts_enabled}
-    onclick={() => toggle('global_shortcuts_enabled', $settings.global_shortcuts_enabled)}
-  />
+  <!-- Local shortcuts first -->
+  <div class="shortcut-group">
+    <div class="group-heading">{m.shortcuts_local_heading()}</div>
+    <p class="note">{m.shortcuts_local_note()}</p>
 
-  {#if isMac && !trusted}
-    <div class="accessibility-notice">
-      <p class="notice-text">{m.shortcuts_accessibility_notice()}</p>
-      <button class="notice-btn" onclick={() => openUrl(ACCESSIBILITY_URL)}>
-        {m.shortcuts_accessibility_open()}
-      </button>
+    <div class="row">
+      <span class="label">{m.shortcuts_local_toggle_timer()}</span>
+      <LocalShortcutInput
+        value={$settings.local_shortcut_toggle}
+        onchange={(v) => setLocalShortcut('local_shortcut_toggle', v)}
+      />
     </div>
-  {/if}
 
-  <div class="shortcuts-body" class:disabled={!$settings.global_shortcuts_enabled}>
+    <div class="row">
+      <span class="label">{m.shortcuts_local_reset_round()}</span>
+      <LocalShortcutInput
+        value={$settings.local_shortcut_reset}
+        onchange={(v) => setLocalShortcut('local_shortcut_reset', v)}
+      />
+    </div>
+
+    <div class="row">
+      <span class="label">{m.shortcuts_local_skip_round()}</span>
+      <LocalShortcutInput
+        value={$settings.local_shortcut_skip}
+        onchange={(v) => setLocalShortcut('local_shortcut_skip', v)}
+      />
+    </div>
+
+    <div class="row">
+      <span class="label">{m.shortcuts_local_volume_down()}</span>
+      <LocalShortcutInput
+        value={$settings.local_shortcut_volume_down}
+        onchange={(v) => setLocalShortcut('local_shortcut_volume_down', v)}
+      />
+    </div>
+
+    <div class="row">
+      <span class="label">{m.shortcuts_local_volume_up()}</span>
+      <LocalShortcutInput
+        value={$settings.local_shortcut_volume_up}
+        onchange={(v) => setLocalShortcut('local_shortcut_volume_up', v)}
+      />
+    </div>
+
+    <div class="row">
+      <span class="label">{m.shortcuts_local_mute()}</span>
+      <LocalShortcutInput
+        value={$settings.local_shortcut_mute}
+        onchange={(v) => setLocalShortcut('local_shortcut_mute', v)}
+      />
+    </div>
+
+    <div class="row">
+      <span class="label">{m.shortcuts_local_fullscreen()}</span>
+      <LocalShortcutInput
+        value={$settings.local_shortcut_fullscreen}
+        onchange={(v) => setLocalShortcut('local_shortcut_fullscreen', v)}
+      />
+    </div>
+  </div>
+
+  <!-- Global shortcuts second -->
+  <div class="shortcut-group">
+    <div class="group-heading">{m.shortcuts_global_heading()}</div>
     <p class="note">{m.shortcuts_note()}</p>
 
-    <div class="row">
-      <span class="label">{m.shortcuts_toggle_timer()}</span>
-      <ShortcutInput
-        value={$settings.shortcut_toggle}
-        onchange={(v) => setShortcut('shortcut_toggle', v)}
-      />
-    </div>
+    <SettingsToggle
+      label={m.shortcuts_toggle_enabled()}
+      description={m.shortcuts_toggle_enabled_desc()}
+      checked={$settings.global_shortcuts_enabled}
+      onclick={() => toggle('global_shortcuts_enabled', $settings.global_shortcuts_enabled)}
+    />
 
-    <div class="row">
-      <span class="label">{m.shortcuts_reset_timer()}</span>
-      <ShortcutInput
-        value={$settings.shortcut_reset}
-        onchange={(v) => setShortcut('shortcut_reset', v)}
-      />
-    </div>
+    {#if isMac && !trusted}
+      <div class="accessibility-notice">
+        <p class="notice-text">{m.shortcuts_accessibility_notice()}</p>
+        <button class="notice-btn" onclick={() => openUrl(ACCESSIBILITY_URL)}>
+          {m.shortcuts_accessibility_open()}
+        </button>
+      </div>
+    {/if}
 
-    <div class="row">
-      <span class="label">{m.shortcuts_skip_round()}</span>
-      <ShortcutInput
-        value={$settings.shortcut_skip}
-        onchange={(v) => setShortcut('shortcut_skip', v)}
-      />
-    </div>
+    <div class="shortcuts-body" class:disabled={!$settings.global_shortcuts_enabled}>
+      <div class="row">
+        <span class="label">{m.shortcuts_toggle_timer()}</span>
+        <ShortcutInput
+          value={$settings.shortcut_toggle}
+          onchange={(v) => setShortcut('shortcut_toggle', v)}
+        />
+      </div>
 
-    <div class="row">
-      <span class="label">{m.shortcuts_restart_round()}</span>
-      <ShortcutInput
-        value={$settings.shortcut_restart}
-        onchange={(v) => setShortcut('shortcut_restart', v)}
-      />
+      <div class="row">
+        <span class="label">{m.shortcuts_reset_timer()}</span>
+        <ShortcutInput
+          value={$settings.shortcut_reset}
+          onchange={(v) => setShortcut('shortcut_reset', v)}
+        />
+      </div>
+
+      <div class="row">
+        <span class="label">{m.shortcuts_skip_round()}</span>
+        <ShortcutInput
+          value={$settings.shortcut_skip}
+          onchange={(v) => setShortcut('shortcut_skip', v)}
+        />
+      </div>
+
+      <div class="row">
+        <span class="label">{m.shortcuts_restart_round()}</span>
+        <ShortcutInput
+          value={$settings.shortcut_restart}
+          onchange={(v) => setShortcut('shortcut_restart', v)}
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -165,5 +237,26 @@
     font-size: 0.85rem;
     color: var(--color-foreground);
     letter-spacing: 0.02em;
+  }
+
+  .shortcut-group {
+    border-top: 1px solid var(--color-separator);
+    padding-top: 4px;
+  }
+
+  .shortcut-group:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .group-heading {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-foreground-darker, var(--color-foreground));
+    opacity: 0.6;
+    margin: 0;
+    padding: 16px 20px 6px;
   }
 </style>

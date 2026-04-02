@@ -76,6 +76,20 @@ const MIGRATION_5: &str = "
     INSERT INTO schema_version VALUES (5);
 ";
 
+/// Seeds the seven local shortcut key bindings for users upgrading from a version
+/// that did not have this feature. These shortcuts are handled entirely by the frontend
+/// (keydown listeners) and require no Rust-side dispatch logic.
+const MIGRATION_6: &str = "
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('local_shortcut_toggle', ' ');
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('local_shortcut_reset', 'ArrowLeft');
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('local_shortcut_skip', 'ArrowRight');
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('local_shortcut_volume_down', 'ArrowDown');
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('local_shortcut_volume_up', 'ArrowUp');
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('local_shortcut_mute', 'm');
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('local_shortcut_fullscreen', 'F11');
+    INSERT INTO schema_version VALUES (6);
+";
+
 /// Apply any pending migrations. Each migration is wrapped in a transaction
 /// so a partial failure leaves the database unchanged.
 pub fn run(conn: &Connection) -> Result<()> {
@@ -109,6 +123,12 @@ pub fn run(conn: &Connection) -> Result<()> {
         log::info!("[db/migrations] applying MIGRATION_5: seed short_breaks_enabled and long_breaks_enabled");
         conn.execute_batch(&format!("BEGIN; {MIGRATION_5} COMMIT;"))?;
         log::info!("[db/migrations] MIGRATION_5 complete");
+    }
+
+    if version < 6 {
+        log::info!("[db/migrations] applying MIGRATION_6: seed local shortcut key bindings");
+        conn.execute_batch(&format!("BEGIN; {MIGRATION_6} COMMIT;"))?;
+        log::info!("[db/migrations] MIGRATION_6 complete");
     }
 
     Ok(())
@@ -146,7 +166,7 @@ mod tests {
         let v: i64 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(v, 5);
+        assert_eq!(v, 6);
     }
 
     #[test]
