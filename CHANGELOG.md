@@ -4,6 +4,9 @@
 ### Bug Fixes
 
 * **App freeze / crash on launch when "Show in System Tray" is enabled on KDE Plasma 6 / Wayland** — enabling the system tray on a Linux system without `libayatana-appindicator3` or `libappindicator3` installed caused `libappindicator-sys` to panic inside an `extern "C"` function, which aborts the process. Because the setting is persisted before the crash, every subsequent launch would abort before the window could appear. The fix probes for the shared library via `dlopen` before calling `TrayIconBuilder::build()` and returns early with a warning when it is absent. The System Tray section in Settings → System is now hidden entirely on Linux systems where the library is not found, preventing the setting from being enabled in the first place. The required library can be installed on Arch / Manjaro with `sudo pacman -S libayatana-appindicator`.
+### Shortcuts
+
+* **Local keyboard shortcuts** — a set of keyboard shortcuts now activates while the main timer window has focus, with no system-wide registration required. Default bindings: Space (pause/resume), Left Arrow (reset current round), Right Arrow (skip round), Down Arrow (volume down), Up Arrow (volume up), M (mute toggle), F11 (fullscreen toggle). All seven bindings are re-mappable in Settings → Shortcuts under the new Local Shortcuts section, which appears above the existing Global Shortcuts section. Bindings persist across restarts and are restored to defaults when Reset All Settings is used.
 
 ### UI
 

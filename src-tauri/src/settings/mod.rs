@@ -49,6 +49,14 @@ pub struct Settings {
     pub verbose_logging: bool,
     pub check_for_updates: bool,
     pub global_shortcuts_enabled: bool,
+    /// Local shortcut key bindings (KeyboardEvent.key strings, frontend-only).
+    pub local_shortcut_toggle: String,
+    pub local_shortcut_reset: String,
+    pub local_shortcut_skip: String,
+    pub local_shortcut_volume_down: String,
+    pub local_shortcut_volume_up: String,
+    pub local_shortcut_mute: String,
+    pub local_shortcut_fullscreen: String,
 }
 
 impl Default for Settings {
@@ -97,6 +105,13 @@ impl Default for Settings {
             verbose_logging: false,
             check_for_updates: true,
             global_shortcuts_enabled: false,
+            local_shortcut_toggle: " ".to_string(),
+            local_shortcut_reset: "ArrowLeft".to_string(),
+            local_shortcut_skip: "ArrowRight".to_string(),
+            local_shortcut_volume_down: "ArrowDown".to_string(),
+            local_shortcut_volume_up: "ArrowUp".to_string(),
+            local_shortcut_mute: "m".to_string(),
+            local_shortcut_fullscreen: "F11".to_string(),
         }
     }
 }
@@ -211,6 +226,13 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         verbose_logging: parse_bool(&map, "verbose_logging", d.verbose_logging),
         check_for_updates: parse_bool(&map, "check_for_updates", d.check_for_updates),
         global_shortcuts_enabled: parse_bool(&map, "global_shortcuts_enabled", d.global_shortcuts_enabled),
+        local_shortcut_toggle: map.get("local_shortcut_toggle").cloned().unwrap_or(d.local_shortcut_toggle),
+        local_shortcut_reset: map.get("local_shortcut_reset").cloned().unwrap_or(d.local_shortcut_reset),
+        local_shortcut_skip: map.get("local_shortcut_skip").cloned().unwrap_or(d.local_shortcut_skip),
+        local_shortcut_volume_down: map.get("local_shortcut_volume_down").cloned().unwrap_or(d.local_shortcut_volume_down),
+        local_shortcut_volume_up: map.get("local_shortcut_volume_up").cloned().unwrap_or(d.local_shortcut_volume_up),
+        local_shortcut_mute: map.get("local_shortcut_mute").cloned().unwrap_or(d.local_shortcut_mute),
+        local_shortcut_fullscreen: map.get("local_shortcut_fullscreen").cloned().unwrap_or(d.local_shortcut_fullscreen),
     })
 }
 

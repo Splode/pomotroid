@@ -32,4 +32,11 @@ pub const DEFAULTS: &[(&str, &str)] = &[
     ("global_shortcuts_enabled", "false"),
     ("short_breaks_enabled", "true"),
     ("long_breaks_enabled", "true"),
+    ("local_shortcut_toggle", " "),
+    ("local_shortcut_reset", "ArrowLeft"),
+    ("local_shortcut_skip", "ArrowRight"),
+    ("local_shortcut_volume_down", "ArrowDown"),
+    ("local_shortcut_volume_up", "ArrowUp"),
+    ("local_shortcut_mute", "m"),
+    ("local_shortcut_fullscreen", "F11"),
 ];

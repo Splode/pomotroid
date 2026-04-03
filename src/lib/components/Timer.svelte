@@ -49,14 +49,6 @@
   onMount(() => {
     const cleanups: UnlistenFn[] = [];
 
-    function onKeydown(e: KeyboardEvent) {
-      if (e.code === 'Space' && e.target === document.body) {
-        e.preventDefault();
-        timerToggle();
-      }
-    }
-    window.addEventListener('keydown', onKeydown);
-
     // Async setup: hydrate state and register event listeners.
     (async () => {
       const initial = await getTimerState();
@@ -99,7 +91,6 @@
 
     return () => {
       for (const unlisten of cleanups) unlisten();
-      window.removeEventListener('keydown', onKeydown);
     };
   });
 </script>

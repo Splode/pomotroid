@@ -18,7 +18,7 @@ The system SHALL seed shortcut defaults that are appropriate for the host operat
 ---
 
 ### Requirement: Global shortcuts can be enabled or disabled as a unit
-The system SHALL provide a `global_shortcuts_enabled` boolean setting (DB key: `global_shortcuts_enabled`, default `false`). When `false`, no global shortcuts SHALL be registered with the OS. When `true`, all four shortcuts SHALL be registered using the current key bindings. The change SHALL take effect immediately without requiring a restart.
+The system SHALL provide a `global_shortcuts_enabled` boolean setting (DB key: `global_shortcuts_enabled`, default `false`). When `false`, no global shortcuts SHALL be registered with the OS. When `true`, all four shortcuts SHALL be registered using the current key bindings. The change SHALL take effect immediately without requiring a restart. When settings are reset to defaults, `global_shortcuts_enabled` SHALL revert to `false` and all local shortcut bindings SHALL also revert to their defaults.
 
 #### Scenario: Global shortcuts disabled by default on first launch
 - **WHEN** the application is launched for the first time with no existing settings
@@ -40,9 +40,10 @@ The system SHALL provide a `global_shortcuts_enabled` boolean setting (DB key: `
 - **WHEN** the user re-enables global shortcuts after previously disabling them
 - **THEN** the shortcuts registered SHALL reflect the key bindings currently stored in the database
 
-#### Scenario: Reset All Settings disables global shortcuts
+#### Scenario: Reset All Settings disables global shortcuts and restores local defaults
 - **WHEN** the user resets all settings to defaults
 - **THEN** `global_shortcuts_enabled` SHALL be `false` and any previously registered shortcuts SHALL be unregistered
+- **AND** all seven local shortcut bindings SHALL revert to their defaults
 
 #### Scenario: Disabled state persists across restarts
 - **WHEN** global shortcuts are disabled and the application is restarted
