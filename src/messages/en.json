@@ -24,6 +24,8 @@
   "timer_toggle_long_breaks_desc": "Skip the long break at the end of each cycle.",
   "timer_toggle_countdown": "Countdown Dial",
   "timer_toggle_countdown_desc": "Arc starts full and subtracts as time passes.",
+  "timer_toggle_task_labels": "Task Labels",
+  "timer_toggle_task_labels_desc": "Show a label input during work rounds to tag sessions by activity.",
   "timer_reset": "Reset",
   "timer_reset_defaults": "Reset to Defaults",
   "appearance_group_mode": "Mode",

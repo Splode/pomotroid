@@ -24,6 +24,8 @@
   "timer_toggle_long_breaks_desc": "Her döngünün sonundaki uzun molayı atla.",
   "timer_toggle_countdown": "Geri Sayım Kadranı",
   "timer_toggle_countdown_desc": "Yay dolu başlar ve zaman geçtikçe azalır.",
+  "timer_toggle_task_labels": "Görev Etiketleri",
+  "timer_toggle_task_labels_desc": "Çalışma turları sırasında oturumları aktiviteye göre etiketlemek için bir etiket girişi gösterir.",
   "timer_reset": "Sıfırla",
   "timer_reset_defaults": "Varsayılanlara Sıfırla",
   "appearance_group_mode": "Mod",

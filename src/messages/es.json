@@ -24,6 +24,8 @@
   "timer_toggle_long_breaks_desc": "Omitir el descanso largo al final de cada ciclo.",
   "timer_toggle_countdown": "Dial de cuenta regresiva",
   "timer_toggle_countdown_desc": "El arco comienza lleno y se reduce a medida que pasa el tiempo.",
+  "timer_toggle_task_labels": "Etiquetas de tarea",
+  "timer_toggle_task_labels_desc": "Muestra un campo de etiqueta durante las rondas de trabajo para clasificar las sesiones por actividad.",
   "timer_reset": "Restablecer",
   "timer_reset_defaults": "Restablecer valores predeterminados",
   "appearance_group_mode": "Modo",

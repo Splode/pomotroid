@@ -24,6 +24,8 @@
   "timer_toggle_long_breaks_desc": "Lange Pause am Ende jedes Zyklus überspringen.",
   "timer_toggle_countdown": "Countdown-Zifferblatt",
   "timer_toggle_countdown_desc": "Der Bogen beginnt voll und nimmt im Laufe der Zeit ab.",
+  "timer_toggle_task_labels": "Aufgabenbezeichnungen",
+  "timer_toggle_task_labels_desc": "Zeigt ein Beschriftungsfeld während der Arbeitsrunden an, um Sitzungen nach Aktivität zu kennzeichnen.",
   "timer_reset": "Zurücksetzen",
   "timer_reset_defaults": "Auf Standardwerte zurücksetzen",
   "appearance_group_mode": "Modus",

@@ -26,10 +26,10 @@ use commands::{
     notification_show,
     settings_get, settings_reset_defaults, settings_set,
     shortcuts_reload,
-    sessions_clear,
-    stats_get_detailed, stats_get_heatmap,
+    sessions_clear, sessions_rename_label,
+    stats_get_detailed, stats_get_heatmap, stats_get_label_breakdown, stats_get_weekly_labels,
     themes_list,
-    timer_get_state, timer_reset, timer_restart_round, timer_skip, timer_toggle,
+    timer_get_state, timer_reset, timer_restart_round, timer_skip, timer_toggle, timer_set_label,
     window_set_visibility,
 };
 
@@ -320,6 +320,7 @@ pub fn run() {
             timer_restart_round,
             timer_skip,
             timer_get_state,
+            timer_set_label,
             // Settings
             settings_get,
             settings_set,
@@ -328,9 +329,12 @@ pub fn run() {
             themes_list,
             // Sessions
             sessions_clear,
+            sessions_rename_label,
             // Stats
             stats_get_detailed,
             stats_get_heatmap,
+            stats_get_label_breakdown,
+            stats_get_weekly_labels,
             // Window
             window_set_visibility,
             // Shortcuts

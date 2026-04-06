@@ -52,7 +52,7 @@
       url: '/stats',
       title: 'Pomotroid — Statistics',
       width: 840,
-      height: 520,
+      height: 580,
       decorations: isMac,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       titleBarStyle: isMac ? ('Overlay' as any) : undefined,

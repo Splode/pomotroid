@@ -1,9 +1,16 @@
 <script lang="ts">
-  import type { DayStat, StreakInfo } from '$lib/types';
+  import type { DayStat, StreakInfo, LabelStat, DayLabelStat } from '$lib/types';
   import * as m from '$paraglide/messages.js';
   import { getLocale } from '$paraglide/runtime.js';
+  import LabelBreakdown from './LabelBreakdown.svelte';
 
-  let { week, streak }: { week: DayStat[] | null; streak: StreakInfo | null } = $props();
+  let { week, streak, labelBreakdown = [], weeklyLabels = [], onrename }: {
+    week: DayStat[] | null;
+    streak: StreakInfo | null;
+    labelBreakdown?: LabelStat[];
+    weeklyLabels?: DayLabelStat[];
+    onrename?: (from: string, to: string) => void;
+  } = $props();
 
   const CHART_H = 140;  // px, max bar height
   const BAR_W   = 52;   // px per bar
@@ -42,6 +49,55 @@
   const maxRounds = $derived(Math.max(1, ...days.map((d) => d.rounds)));
   const totalWeek  = $derived(days.reduce((s, d) => s + d.rounds, 0));
   const hasData    = $derived(totalWeek > 0);
+
+  // Same palette as LabelBreakdown — must stay in sync.
+  const SLICE_COLORS = [
+    'var(--color-focus-round)',
+    'var(--color-short-round)',
+    'var(--color-long-round)',
+    'color-mix(in oklch, var(--color-focus-round) 60%, var(--color-long-round))',
+    'color-mix(in oklch, var(--color-short-round) 60%, var(--color-focus-round))',
+  ];
+  const UNLABELED_COLOR = 'color-mix(in oklch, var(--color-foreground-darker) 35%, transparent)';
+
+  // Map label → color using the same index ordering as LabelBreakdown (sorted by weekly duration).
+  const labelColorMap = $derived.by(() => {
+    const map = new Map<string | null, string>();
+    const sorted = [...labelBreakdown]
+      .filter((e) => e.label !== null)
+      .sort((a, b) => b.duration_mins - a.duration_mins);
+    sorted.forEach((e, i) => map.set(e.label, SLICE_COLORS[i % SLICE_COLORS.length]));
+    map.set(null, UNLABELED_COLOR);
+    return map;
+  });
+
+  // Group weeklyLabels by date for O(1) tooltip lookup.
+  const labelsByDate = $derived.by(() => {
+    const map = new Map<string, DayLabelStat[]>();
+    for (const entry of weeklyLabels) {
+      const list = map.get(entry.date) ?? [];
+      list.push(entry);
+      map.set(entry.date, list);
+    }
+    return map;
+  });
+
+  // Tooltip — viewport-fixed so it escapes SVG/overflow clipping.
+  let tooltip = $state<{ x: number; y: number; date: string; rounds: number; entries: DayLabelStat[] } | null>(null);
+  let tooltipEl = $state<HTMLDivElement | undefined>(undefined);
+
+  function showTooltip(event: MouseEvent, date: string, rounds: number) {
+    const entries = labelsByDate.get(date) ?? [];
+    const rect = (event.currentTarget as SVGRectElement).getBoundingClientRect();
+    tooltip = { x: rect.left + rect.width / 2, y: rect.top - 8, date, rounds, entries };
+  }
+
+  function fmtMins(mins: number): string {
+    if (mins < 60) return `${mins}m`;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  }
 </script>
 
 <div class="view">
@@ -79,6 +135,9 @@
           height={CHART_H + 36}
           viewBox="0 0 {CHART_W} {CHART_H + 36}"
           class="chart"
+          onmouseleave={() => { tooltip = null; }}
+          role="img"
+          aria-label="Weekly activity chart"
         >
           {#each days as day, i}
             {@const barH = Math.max(day.rounds > 0 ? 4 : 0, Math.round((day.rounds / maxRounds) * CHART_H))}
@@ -116,6 +175,22 @@
               class="day-label"
               class:day-label-today={day.isToday}
             >{day.short}</text>
+
+            <!-- Invisible full-column hit area for tooltip (covers bar + empty space above) -->
+            {#if day.rounds > 0}
+              <rect
+                {x}
+                y={0}
+                width={BAR_W}
+                height={CHART_H}
+                fill="transparent"
+                class="hit-area"
+                role="img"
+                aria-label="{day.date} label breakdown"
+                onmouseenter={(e) => showTooltip(e, day.date, day.rounds)}
+                onmouseleave={() => { tooltip = null; }}
+              />
+            {/if}
           {/each}
 
           <!-- Baseline -->
@@ -125,16 +200,46 @@
             class="baseline"
           />
         </svg>
+
+        <!-- Bar tooltip (viewport-fixed to escape SVG clipping) -->
+        {#if tooltip}
+          {@const pad = 8}
+          {@const w = tooltipEl?.offsetWidth ?? 0}
+          {@const rawLeft = tooltip.x - w / 2}
+          {@const left = Math.max(pad, Math.min(rawLeft, window.innerWidth - w - pad))}
+          {@const arrowLeft = tooltip.x - left}
+          <div
+            bind:this={tooltipEl}
+            class="bar-tooltip"
+            style="top:{tooltip.y}px;left:{left}px;--arrow-left:{arrowLeft}px"
+          >
+            <div class="bar-tooltip-date">{tooltip.date}</div>
+            {#if tooltip.entries.length === 0 || tooltip.entries.every((e) => e.label === null)}
+              <div class="bar-tooltip-row bar-tooltip-no-labels">
+                {tooltip.rounds} {tooltip.rounds === 1 ? 'round' : 'rounds'}
+              </div>
+            {:else}
+              {#each tooltip.entries as entry}
+                <div class="bar-tooltip-row">
+                  <span class="bar-tooltip-dot" style="background: {labelColorMap.get(entry.label) ?? UNLABELED_COLOR}"></span>
+                  <span class="bar-tooltip-label" class:bar-tooltip-unlabeled={entry.label === null}>{entry.label ?? '(unlabeled)'}</span>
+                  <span class="bar-tooltip-mins">{fmtMins(entry.duration_mins)}</span>
+                </div>
+              {/each}
+            {/if}
+          </div>
+        {/if}
       </div>
     {/if}
   </div>
+
+  <LabelBreakdown entries={labelBreakdown} variant="list" {onrename} />
 </div>
 
 <style>
   .view {
     display: flex;
     flex-direction: column;
-    height: 100%;
     animation: app-fade-in 0.2s ease;
   }
 
@@ -200,8 +305,87 @@
     opacity: 0.7;
   }
 
-  .chart-wrap { overflow: visible; }
+  .chart-wrap { overflow: visible; position: relative; }
   .chart { display: block; overflow: visible; }
+
+  .hit-area { cursor: default; }
+
+  /* ── Bar tooltip ─────────────────────────────────────────── */
+  .bar-tooltip {
+    --tooltip-bg: var(--color-background-light, color-mix(in oklch, var(--color-foreground) 10%, var(--color-background)));
+    position: fixed;
+    transform: translateY(-100%);
+    background: var(--tooltip-bg);
+    color: var(--color-foreground);
+    font-size: 0.72rem;
+    line-height: 1.4;
+    padding: 7px 10px;
+    border-radius: 4px;
+    width: max-content;
+    max-width: 200px;
+    pointer-events: none;
+    z-index: 9999;
+    box-shadow: 0 2px 8px color-mix(in oklch, black 30%, transparent);
+    border: 1px solid color-mix(in oklch, var(--color-foreground) 12%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .bar-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: var(--arrow-left, 50%);
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--tooltip-bg);
+  }
+
+  .bar-tooltip-date {
+    font-size: 0.67rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--color-foreground-darker);
+    margin-bottom: 2px;
+  }
+
+  .bar-tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .bar-tooltip-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .bar-tooltip-label {
+    flex: 1;
+    color: var(--color-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+
+  .bar-tooltip-no-labels {
+    color: var(--color-foreground-darker);
+  }
+
+  .bar-tooltip-unlabeled {
+    color: var(--color-foreground-darker);
+    font-style: italic;
+  }
+
+  .bar-tooltip-mins {
+    color: var(--color-foreground-darker);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
 
   .bar {
     fill: color-mix(in oklch, var(--color-focus-round) 55%, var(--color-background-light));

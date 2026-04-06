@@ -6,12 +6,14 @@
     timerToggle,
     timerRestartRound,
     timerSkip,
+    timerSetLabel,
     getTimerState,
     onTimerTick,
     onTimerPaused,
     onTimerResumed,
     onRoundChange,
     onTimerReset,
+    onLabelClear,
   } from '$lib/ipc';
   import { timerState } from '$lib/stores/timer';
   import { settings } from '$lib/stores/settings';
@@ -20,6 +22,7 @@
   import TimerDisplay from './TimerDisplay.svelte';
   import TimerFooter from './TimerFooter.svelte';
   import MiniControls from './MiniControls.svelte';
+  import TaskLabelInput from './TaskLabelInput.svelte';
   import Tooltip from './Tooltip.svelte';
   import type { UnlistenFn } from '@tauri-apps/api/event';
   import * as m from '$paraglide/messages.js';
@@ -32,7 +35,28 @@
 
   let { isCompact = false, uiScale = 1 }: Props = $props();
 
-  let state = $derived($timerState);
+  let snap = $derived($timerState);
+
+  // Task label — sticky across round transitions; cleared only by explicit reset.
+  let taskLabel = $state('');
+  let labelDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function handleLabelChange(value: string) {
+    taskLabel = value;
+    if (labelDebounceTimer !== null) clearTimeout(labelDebounceTimer);
+    labelDebounceTimer = setTimeout(() => {
+      timerSetLabel(value || null).catch(() => {});
+      labelDebounceTimer = null;
+    }, 350);
+  }
+
+  // Clear the active label immediately when the user disables task labels.
+  $effect(() => {
+    if (!$settings.task_labels_enabled) {
+      taskLabel = '';
+      timerSetLabel(null).catch(() => {});
+    }
+  });
 
   function roundColor(rt: string): string {
     if (rt === 'work') return 'var(--color-focus-round)';
@@ -86,6 +110,10 @@
         await onTimerReset((snap) => {
           timerState.set(snap);
         }),
+        await onLabelClear(() => {
+          taskLabel = '';
+          timerSetLabel(null).catch(() => {});
+        }),
       );
     })();
 
@@ -99,16 +127,23 @@
   <div class="timer" style="zoom: {uiScale}">
     <!-- Dial + display stacked (display centered over dial) -->
     <div class="dial-stack">
-      <TimerDial snap={state} countdown={$settings.dial_countdown} />
-      <TimerDisplay {state} />
+      <TimerDial {snap} countdown={$settings.dial_countdown} />
+      <TimerDisplay state={snap} />
     </div>
 
     {#if !isCompact}
       <!-- Round type label sits below the dial as a normal flex child so it
            does not affect the dial-stack height used to centre TimerDisplay. -->
-      <div class="round-label" style="color: {roundColor(state.round_type)}">
-        {roundLabel(state.round_type)}
+      <div class="round-label" style="color: {roundColor(snap.round_type)}">
+        {roundLabel(snap.round_type)}
       </div>
+
+      {#if snap.round_type === 'work' && $settings.task_labels_enabled}
+        <TaskLabelInput
+          value={taskLabel}
+          onchange={handleLabelChange}
+        />
+      {/if}
 
       <!-- Controls row: back | play/pause | skip -->
       <div class="controls">
@@ -126,11 +161,11 @@
         <button
           class="play-pause"
           onclick={timerToggle}
-          aria-label={state.is_running ? 'Pause' : 'Play'}
+          aria-label={snap.is_running ? 'Pause' : 'Play'}
         >
-          {#key state.is_running}
+          {#key snap.is_running}
             <span class="icon" in:fade={{ duration: 120 }}>
-              {#if state.is_running}
+              {#if snap.is_running}
                 <svg width="24" height="24" viewBox="0 0 24 24">
                   <rect x="4" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
                   <rect x="15" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
@@ -155,7 +190,7 @@
         </Tooltip>
       </div>
 
-      <TimerFooter snap={state} />
+      <TimerFooter {snap} />
     {/if}
   </div>
 
@@ -248,4 +283,6 @@
     /* Collapse the gap above: the flex gap already provides spacing from the dial. */
     margin-top: -8px;
   }
+
+
 </style>

@@ -4,7 +4,8 @@
   import {
     getSettings, getThemes,
     onSettingsChanged, onThemesChanged, onRoundChange, onSessionsCleared,
-    statsGetDetailed, statsGetHeatmap,
+    statsGetDetailed, statsGetHeatmap, statsGetLabelBreakdown, statsGetWeeklyLabels,
+    sessionsRenameLabel,
   } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
@@ -13,7 +14,7 @@
   import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
   import { isMac } from '$lib/utils/platform';
   import type { UnlistenFn } from '@tauri-apps/api/event';
-  import type { DetailedStats, HeatmapStats } from '$lib/types';
+  import type { DetailedStats, HeatmapStats, LabelStat, DayLabelStat } from '$lib/types';
   import * as m from '$paraglide/messages.js';
   import { info, error as logError } from '@tauri-apps/plugin-log';
 
@@ -27,9 +28,32 @@
   let detailed = $state<DetailedStats | null>(null);
   let heatmap = $state<HeatmapStats | null>(null);
   let heatmapLoaded = $state(false);
+  let labelBreakdown = $state<LabelStat[]>([]);
+  let weeklyLabels = $state<DayLabelStat[]>([]);
+
+  async function loadLabelBreakdown(tab: Tab) {
+    try {
+      labelBreakdown = await statsGetLabelBreakdown(tab);
+    } catch (e) {
+      await logError(`[stats] failed to load label breakdown: ${e}`);
+    }
+  }
+
+  async function handleRename(from: string, to: string) {
+    try {
+      await sessionsRenameLabel(from, to);
+      detailed = await statsGetDetailed();
+      if (heatmapLoaded) heatmap = await statsGetHeatmap();
+      await loadLabelBreakdown(activeTab);
+      weeklyLabels = await statsGetWeeklyLabels();
+    } catch (e) {
+      await logError(`[stats] rename label failed: ${e}`);
+    }
+  }
 
   async function switchTab(tab: Tab) {
     activeTab = tab;
+    await loadLabelBreakdown(tab);
     if (tab === 'alltime' && !heatmapLoaded) {
       try {
         heatmap = await statsGetHeatmap();
@@ -69,11 +93,18 @@
         throw e;
       }
 
+      // Load label breakdown outside the critical path so a failure here
+      // cannot prevent event listener registration.
+      await loadLabelBreakdown('today');
+      try { weeklyLabels = await statsGetWeeklyLabels(); } catch { /* non-critical */ }
+
       cleanups.push(
         await onRoundChange(async () => {
           try {
             detailed = await statsGetDetailed();
             if (heatmapLoaded) heatmap = await statsGetHeatmap();
+            await loadLabelBreakdown(activeTab);
+            weeklyLabels = await statsGetWeeklyLabels();
           } catch (e) {
             await logError(`[stats] failed to refresh stats after round change: ${e}`);
           }
@@ -82,6 +113,8 @@
           try {
             detailed = await statsGetDetailed();
             if (heatmapLoaded) heatmap = await statsGetHeatmap();
+            labelBreakdown = [];
+            weeklyLabels = [];
           } catch (e) {
             await logError(`[stats] failed to refresh stats after session clear: ${e}`);
           }
@@ -147,11 +180,11 @@
   <!-- Content -->
   <div class="content">
     {#if activeTab === 'today'}
-      <DailyView today={detailed?.today ?? null} />
+      <DailyView today={detailed?.today ?? null} {labelBreakdown} onrename={handleRename} />
     {:else if activeTab === 'week'}
-      <WeeklyView week={detailed?.week ?? null} streak={detailed?.streak ?? null} />
+      <WeeklyView week={detailed?.week ?? null} streak={detailed?.streak ?? null} {labelBreakdown} {weeklyLabels} onrename={handleRename} />
     {:else}
-      <YearlyView {heatmap} />
+      <YearlyView {heatmap} {labelBreakdown} onrename={handleRename} />
     {/if}
   </div>
 </div>
@@ -247,7 +280,7 @@
   /* ── Content ───────────────────────────────────────────── */
   .content {
     flex: 1;
-    overflow: hidden;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
   }

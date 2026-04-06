@@ -24,16 +24,18 @@ pub fn insert_session(
 }
 
 /// Updates a session when the round ends (by completion or skip).
+/// `label` is the active task label at completion time, or `None` if unset.
 pub fn complete_session(
     conn: &Connection,
     session_id: i64,
     completed: bool,
+    label: Option<&str>,
 ) -> Result<()> {
     conn.execute(
-        "UPDATE sessions SET ended_at = ?1, completed = ?2 WHERE id = ?3",
-        params![unix_now(), completed as i64, session_id],
+        "UPDATE sessions SET ended_at = ?1, completed = ?2, label = ?3 WHERE id = ?4",
+        params![unix_now(), completed as i64, label, session_id],
     )?;
-    log::debug!("[db] session ended: id={session_id} completed={completed}");
+    log::debug!("[db] session ended: id={session_id} completed={completed} label={label:?}");
     Ok(())
 }
 
@@ -108,6 +110,77 @@ pub struct HeatmapEntry {
 pub struct StreakInfo {
     pub current: u32,
     pub longest: u32,
+}
+
+/// Per-label focus time breakdown. `label` is `None` for sessions with no label set.
+#[derive(Debug, Serialize)]
+pub struct LabelStat {
+    pub label: Option<String>,
+    pub duration_mins: u32,
+}
+
+/// Completed work session time grouped by label for a given period.
+/// `period` must be `"today"`, `"week"`, or `"alltime"`.
+/// Rows are ordered by total duration descending.
+pub fn get_label_breakdown(conn: &Connection, period: &str) -> Result<Vec<LabelStat>> {
+    let date_filter = match period {
+        "today" => "AND date(started_at, 'unixepoch', 'localtime') = date('now', 'localtime')",
+        "week"  => "AND date(started_at, 'unixepoch', 'localtime') >= date('now', 'localtime', '-6 days')",
+        _       => "", // alltime: no date filter
+    };
+    let sql = format!(
+        "SELECT label, CAST((SUM(duration_secs) + 30) / 60 AS INTEGER) as duration_mins
+         FROM sessions
+         WHERE round_type = 'work' AND completed = 1
+         {date_filter}
+         GROUP BY label
+         ORDER BY SUM(duration_secs) DESC"
+    );
+    let mut stmt = conn.prepare(&sql)?;
+    let rows = stmt
+        .query_map([], |r| Ok(LabelStat { label: r.get(0)?, duration_mins: r.get(1)? }))?
+        .collect();
+    rows
+}
+
+/// Rename (or clear) a label across all sessions.
+/// `from` is the current label value; `to` is the new value (pass `None` to remove the label).
+/// Returns the number of rows updated.
+pub fn rename_label(conn: &Connection, from: &str, to: Option<&str>) -> Result<usize> {
+    let n = conn.execute(
+        "UPDATE sessions SET label = ?1 WHERE label = ?2",
+        params![to, from],
+    )?;
+    log::debug!("[db] rename_label: '{from}' → {to:?} ({n} rows)");
+    Ok(n)
+}
+
+/// Per-day, per-label focus time for the last 7 days (used by weekly bar chart tooltips).
+#[derive(Debug, Serialize)]
+pub struct DayLabelStat {
+    /// Local calendar date in "YYYY-MM-DD" format.
+    pub date: String,
+    pub label: Option<String>,
+    pub duration_mins: u32,
+}
+
+/// Completed work session time grouped by calendar day and label for the last 7 days.
+/// Rows are ordered by day ascending, then duration descending within each day.
+pub fn get_weekly_label_breakdown_by_day(conn: &Connection) -> Result<Vec<DayLabelStat>> {
+    let mut stmt = conn.prepare(
+        "SELECT date(started_at, 'unixepoch', 'localtime') as day,
+                label,
+                CAST((SUM(duration_secs) + 30) / 60 AS INTEGER) as duration_mins
+         FROM sessions
+         WHERE round_type = 'work' AND completed = 1
+           AND date(started_at, 'unixepoch', 'localtime') >= date('now', 'localtime', '-6 days')
+         GROUP BY day, label
+         ORDER BY day ASC, SUM(duration_secs) DESC",
+    )?;
+    let rows = stmt
+        .query_map([], |r| Ok(DayLabelStat { date: r.get(0)?, label: r.get(1)?, duration_mins: r.get(2)? }))?
+        .collect();
+    rows
 }
 
 /// Completed work rounds and focus time for today (local calendar date).
@@ -313,7 +386,7 @@ mod tests {
         let id = insert_session(&conn, "work", 1500).unwrap();
         assert!(id > 0);
 
-        complete_session(&conn, id, true).unwrap();
+        complete_session(&conn, id, true, None).unwrap();
 
         let completed: i64 = conn
             .query_row(
@@ -406,21 +479,21 @@ mod tests {
 
         // 339 s = 5:39 → rounds up to 6 min (remainder 39 ≥ 30).
         let id1 = insert_session(&conn, "work", 339).unwrap();
-        complete_session(&conn, id1, true).unwrap();
+        complete_session(&conn, id1, true, None).unwrap();
         let stats = get_daily_stats(&conn).unwrap();
         assert_eq!(stats.focus_mins, 6, "339 s should round to 6 min");
 
         // Reset and test round-down: 324 s = 5:24 → rounds down to 5 min (remainder 24 < 30).
         let conn2 = setup();
         let id2 = insert_session(&conn2, "work", 324).unwrap();
-        complete_session(&conn2, id2, true).unwrap();
+        complete_session(&conn2, id2, true, None).unwrap();
         let stats2 = get_daily_stats(&conn2).unwrap();
         assert_eq!(stats2.focus_mins, 5, "324 s should round to 5 min");
 
         // Exact minute boundary: 1500 s = 25:00 → stays 25 min.
         let conn3 = setup();
         let id3 = insert_session(&conn3, "work", 1500).unwrap();
-        complete_session(&conn3, id3, true).unwrap();
+        complete_session(&conn3, id3, true, None).unwrap();
         let stats3 = get_daily_stats(&conn3).unwrap();
         assert_eq!(stats3.focus_mins, 25, "1500 s should be exactly 25 min");
     }
@@ -430,10 +503,10 @@ mod tests {
         let conn = setup();
 
         let id1 = insert_session(&conn, "work", 1500).unwrap();
-        complete_session(&conn, id1, true).unwrap();
+        complete_session(&conn, id1, true, None).unwrap();
 
         let id2 = insert_session(&conn, "work", 1500).unwrap();
-        complete_session(&conn, id2, false).unwrap(); // skipped
+        complete_session(&conn, id2, false, None).unwrap(); // skipped
 
         let _id3 = insert_session(&conn, "short-break", 300).unwrap();
 

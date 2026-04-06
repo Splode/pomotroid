@@ -29,9 +29,22 @@ pub fn timer_toggle(timer: State<'_, TimerController>) {
 }
 
 /// Reset the current round's timer without advancing the sequence.
+/// Also clears the active task label and notifies the frontend via `label:clear`.
 #[tauri::command]
-pub fn timer_reset(timer: State<'_, TimerController>) {
+pub fn timer_reset(timer: State<'_, TimerController>, app: AppHandle) {
     timer.reset();
+    timer.clear_label();
+    app.emit("label:clear", ()).ok();
+}
+
+/// Set the active task label. An empty string is treated as no label (None).
+/// The label is stored in TimerController and written to the session row at completion time.
+#[tauri::command]
+pub fn timer_set_label(label: Option<String>, timer: State<'_, TimerController>) {
+    let normalized = label
+        .map(|s| s.trim().to_lowercase())
+        .filter(|s| !s.is_empty());
+    timer.set_label(normalized);
 }
 
 /// Skip the current round: fires Complete immediately and advances to the next.
@@ -262,6 +275,10 @@ pub fn settings_reset_defaults(
         }
     }
 
+    // Clear the task label — "reset all" is an explicit user-initiated reset.
+    timer.clear_label();
+    app.emit("label:clear", ()).ok();
+
     // After reset, defaults have tray_icon_enabled=false and min_to_tray=false,
     // so destroy any active tray icon.
     tray::destroy_tray(&tray_state);
@@ -332,6 +349,31 @@ pub fn sessions_clear(db: State<'_, DbState>, app: AppHandle) -> Result<(), Stri
     Ok(())
 }
 
+/// Rename a label across all past sessions.
+/// `from` is the current label text; `to` is the new text (trimmed + lowercased).
+/// Pass an empty string for `to` to clear the label (set to NULL).
+/// Emits `sessions:cleared` so stats windows refresh. Returns the number of rows updated.
+#[tauri::command]
+pub fn sessions_rename_label(
+    from: String,
+    to: String,
+    db: State<'_, DbState>,
+    app: AppHandle,
+) -> Result<usize, String> {
+    let normalized_to: Option<String> = {
+        let t = to.trim().to_lowercase();
+        if t.is_empty() { None } else { Some(t) }
+    };
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    let n = queries::rename_label(&conn, &from, normalized_to.as_deref()).map_err(|e| {
+        log::error!("[sessions] rename_label failed: {e}");
+        e.to_string()
+    })?;
+    log::info!("[sessions] renamed label '{from}' → {normalized_to:?} ({n} rows)");
+    app.emit("sessions:cleared", ()).ok();
+    Ok(n)
+}
+
 // CMD-05 — Stats commands
 // ---------------------------------------------------------------------------
 
@@ -352,6 +394,27 @@ pub fn stats_get_detailed(db: State<'_, DbState>) -> Result<DetailedStats, Strin
         e.to_string()
     })?;
     Ok(DetailedStats { today, week, streak })
+}
+
+/// Label breakdown for a given period: completed work session time grouped by task label.
+/// `period` must be `"today"`, `"week"`, or `"alltime"`.
+#[tauri::command]
+pub fn stats_get_label_breakdown(period: String, db: State<'_, DbState>) -> Result<Vec<queries::LabelStat>, String> {
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    queries::get_label_breakdown(&conn, &period).map_err(|e| {
+        log::error!("[stats] failed to query label breakdown: {e}");
+        e.to_string()
+    })
+}
+
+/// Per-day, per-label focus time for the last 7 days (weekly bar chart tooltips).
+#[tauri::command]
+pub fn stats_get_weekly_labels(db: State<'_, DbState>) -> Result<Vec<queries::DayLabelStat>, String> {
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    queries::get_weekly_label_breakdown_by_day(&conn).map_err(|e| {
+        log::error!("[stats] failed to query weekly label breakdown: {e}");
+        e.to_string()
+    })
 }
 
 /// Heatmap data + lifetime totals for the All Time tab.

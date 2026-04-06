@@ -58,14 +58,32 @@ LONG_SECS  = 900    # 15 minutes
 
 ROUNDS_PER_CYCLE = 4  # Work rounds before a long break
 
+# Labels assigned to work sessions. None = unlabeled (blank).
+LABELS = [
+    "deep work",
+    "code review",
+    "writing",
+    "planning",
+    "research",
+    None,   # unlabeled
+    None,   # unlabeled (weighted higher so blanks are common)
+]
 
-def make_session(ts: int, duration: int, round_type: str, completed: int = 1) -> dict:
+
+def make_session(
+    ts: int,
+    duration: int,
+    round_type: str,
+    completed: int = 1,
+    label: str | None = None,
+) -> dict:
     return {
         "started_at":    ts,
         "ended_at":      ts + duration,
         "round_type":    round_type,
         "duration_secs": duration,
         "completed":     completed,
+        "label":         label,
     }
 
 
@@ -96,9 +114,12 @@ def generate_sessions(days: int, rng: random.Random) -> list[dict]:
         ts     = int(datetime(day.year, day.month, day.day, hour, minute).timestamp())
 
         for cycle in range(num_cycles):
+            # Pick one label per cycle (sticky across the cycle's work rounds).
+            cycle_label = rng.choice(LABELS)
+
             for work_idx in range(ROUNDS_PER_CYCLE):
                 # Work round
-                sessions.append(make_session(ts, WORK_SECS, "work"))
+                sessions.append(make_session(ts, WORK_SECS, "work", label=cycle_label))
                 ts += WORK_SECS
 
                 is_last_work  = work_idx == ROUNDS_PER_CYCLE - 1
@@ -125,8 +146,8 @@ def generate_sessions(days: int, rng: random.Random) -> list[dict]:
 # ── Database I/O ──────────────────────────────────────────────────────────────
 
 INSERT_SQL = """
-    INSERT INTO sessions (started_at, ended_at, round_type, duration_secs, completed)
-    VALUES (:started_at, :ended_at, :round_type, :duration_secs, :completed)
+    INSERT INTO sessions (started_at, ended_at, round_type, duration_secs, completed, label)
+    VALUES (:started_at, :ended_at, :round_type, :duration_secs, :completed, :label)
 """
 
 
@@ -141,12 +162,19 @@ def summarise(sessions: list[dict]) -> None:
         for s in work_sessions
     })
 
+    from collections import Counter
+    label_counts = Counter(s["label"] for s in work_sessions)
+
     print(f"  Total sessions : {len(sessions)}")
     print(f"    Work         : {len(work_sessions)}")
     print(f"    Short breaks : {len(short_sessions)}")
     print(f"    Long breaks  : {len(long_sessions)}")
     print(f"  Active days    : {active_days}")
     print(f"  Focus time     : {focus_hours:.1f} hours")
+    print(f"  Labels         :")
+    for label, count in sorted(label_counts.items(), key=lambda x: (-x[1], x[0] or "")):
+        name = f'"{label}"' if label else "(unlabeled)"
+        print(f"    {name:<20} {count}")
 
 
 def seed(db_path: str, sessions: list[dict], *, clear: bool, dry_run: bool) -> None:

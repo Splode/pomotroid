@@ -4,7 +4,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen, type UnlistenFn } from '@tauri-apps/api/event';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
-import type { TimerState, Settings, Theme, CustomAudioInfo, DetailedStats, HeatmapStats, UpdateInfo } from '$lib/types';
+import type { TimerState, Settings, Theme, CustomAudioInfo, DetailedStats, HeatmapStats, UpdateInfo, LabelStat, DayLabelStat } from '$lib/types';
 
 // --- Timer commands ---
 
@@ -13,6 +13,9 @@ export const timerReset = () => invoke<void>('timer_reset');
 export const timerRestartRound = () => invoke<void>('timer_restart_round');
 export const timerSkip = () => invoke<void>('timer_skip');
 export const getTimerState = () => invoke<TimerState>('timer_get_state');
+/** Set the active task label. Pass null or empty string to clear. */
+export const timerSetLabel = (label: string | null) =>
+  invoke<void>('timer_set_label', { label: label || null });
 
 // --- Settings commands ---
 
@@ -72,6 +75,10 @@ export const appVersion = () => invoke<string>('app_version');
 
 export const clearSessionHistory = () => invoke<void>('sessions_clear');
 
+/** Rename a label across all past sessions. Pass empty string for `to` to clear. Returns rows updated. */
+export const sessionsRenameLabel = (from: string, to: string) =>
+  invoke<number>('sessions_rename_label', { from, to });
+
 // --- Stats commands ---
 
 /** Daily + weekly data + streak in one call (Today and This Week tabs). */
@@ -79,6 +86,14 @@ export const statsGetDetailed = () => invoke<DetailedStats>('stats_get_detailed'
 
 /** Heatmap entries + lifetime totals (All Time tab). */
 export const statsGetHeatmap = () => invoke<HeatmapStats>('stats_get_heatmap');
+
+/** Label breakdown for a period: completed work time grouped by task label.
+ *  `period` must be `'today'`, `'week'`, or `'alltime'`. */
+export const statsGetLabelBreakdown = (period: 'today' | 'week' | 'alltime') =>
+  invoke<LabelStat[]>('stats_get_label_breakdown', { period });
+
+/** Per-day, per-label focus time for the last 7 days (weekly bar chart tooltips). */
+export const statsGetWeeklyLabels = () => invoke<DayLabelStat[]>('stats_get_weekly_labels');
 
 // --- Platform commands ---
 
@@ -128,3 +143,7 @@ export const onThemesChanged = (cb: (themes: Theme[]) => void): Promise<Unlisten
 
 export const onSessionsCleared = (cb: () => void): Promise<UnlistenFn> =>
   listen<void>('sessions:cleared', () => cb());
+
+/** Fires when the task label should be cleared (explicit timer reset or settings defaults reset). */
+export const onLabelClear = (cb: () => void): Promise<UnlistenFn> =>
+  listen<void>('label:clear', () => cb());

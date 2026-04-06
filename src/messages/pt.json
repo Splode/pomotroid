@@ -24,6 +24,8 @@
   "timer_toggle_long_breaks_desc": "Pular a pausa longa ao final de cada ciclo.",
   "timer_toggle_countdown": "Mostrador de Contagem Regressiva",
   "timer_toggle_countdown_desc": "O arco começa cheio e diminui conforme o tempo passa.",
+  "timer_toggle_task_labels": "Rótulos de tarefa",
+  "timer_toggle_task_labels_desc": "Exibe um campo de rótulo durante as rodadas de trabalho para classificar as sessões por atividade.",
   "timer_reset": "Redefinir",
   "timer_reset_defaults": "Redefinir para Padrões",
   "appearance_group_mode": "Modo",

@@ -1,8 +1,13 @@
 <script lang="ts">
-  import type { DailyStats } from '$lib/types';
+  import type { DailyStats, LabelStat } from '$lib/types';
   import * as m from '$paraglide/messages.js';
+  import LabelBreakdown from './LabelBreakdown.svelte';
 
-  let { today }: { today: DailyStats | null } = $props();
+  let { today, labelBreakdown = [], onrename }: {
+    today: DailyStats | null;
+    labelBreakdown?: LabelStat[];
+    onrename?: (from: string, to: string) => void;
+  } = $props();
 
   const CHART_H = 80;   // px, max bar height in the hourly chart
   const CHART_W = 744;  // px, total SVG width for 24 bars
@@ -101,6 +106,8 @@
       </svg>
     </div>
   </div>
+
+  <LabelBreakdown entries={labelBreakdown} variant="pie" {onrename} />
 </div>
 
 <style>
@@ -108,7 +115,6 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    height: 100%;
     padding: 0;
     animation: app-fade-in 0.2s ease;
   }
@@ -163,12 +169,10 @@
 
   /* ── Section ─────────────────────────────────────────────── */
   .section {
-    flex: 1;
     display: flex;
     flex-direction: column;
     padding: 20px 24px 16px;
     gap: 12px;
-    overflow: hidden;
   }
 
   .section-header {

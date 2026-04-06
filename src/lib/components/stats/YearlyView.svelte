@@ -1,9 +1,14 @@
 <script lang="ts">
-  import type { HeatmapStats, HeatmapEntry } from '$lib/types';
+  import type { HeatmapStats, HeatmapEntry, LabelStat } from '$lib/types';
   import * as m from '$paraglide/messages.js';
   import { getLocale } from '$paraglide/runtime.js';
+  import LabelBreakdown from './LabelBreakdown.svelte';
 
-  let { heatmap }: { heatmap: HeatmapStats | null } = $props();
+  let { heatmap, labelBreakdown = [], onrename }: {
+    heatmap: HeatmapStats | null;
+    labelBreakdown?: LabelStat[];
+    onrename?: (from: string, to: string) => void;
+  } = $props();
 
   // Heatmap grid constants
   const CELL   = 11;
@@ -288,6 +293,8 @@
     {#if !hasData}
       <div class="empty-overlay"><span>{m.stats_empty_history()}</span></div>
     {/if}
+
+    <LabelBreakdown entries={labelBreakdown} variant="list" {onrename} />
   {/if}
 </div>
 
@@ -295,7 +302,6 @@
   .view {
     display: flex;
     flex-direction: column;
-    height: 100%;
     position: relative;
     animation: app-fade-in 0.2s ease;
   }
@@ -312,12 +318,11 @@
 
   /* ── Heatmap ──────────────────────────────────────────────── */
   .heatmap-section {
-    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 16px 24px 8px;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .heatmap-wrap {

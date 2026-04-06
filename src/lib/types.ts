@@ -57,6 +57,7 @@ export interface Settings {
   local_shortcut_volume_up: string;
   local_shortcut_mute: string;
   local_shortcut_fullscreen: string;
+  task_labels_enabled: boolean;
 }
 
 /** Returned by `check_update` — describes an available update. */
@@ -119,4 +120,17 @@ export interface HeatmapStats {
   total_rounds: number;
   total_hours: number;
   longest_streak: number;
+}
+
+/** One entry from stats_get_label_breakdown. `label` is null for unlabeled sessions. */
+export interface LabelStat {
+  label: string | null;
+  duration_mins: number;
+}
+
+/** One entry from stats_get_weekly_labels — per-day, per-label focus time. */
+export interface DayLabelStat {
+  date: string;   // "YYYY-MM-DD"
+  label: string | null;
+  duration_mins: number;
 }

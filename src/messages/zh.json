@@ -24,6 +24,8 @@
   "timer_toggle_long_breaks_desc": "跳过每个周期结束时的长休息。",
   "timer_toggle_countdown": "倒计时表盘",
   "timer_toggle_countdown_desc": "表盘从满格开始，随时间推移减少。",
+  "timer_toggle_task_labels": "任务标签",
+  "timer_toggle_task_labels_desc": "在工作阶段显示标签输入框，以便按活动类型标记会话。",
   "timer_reset": "重置",
   "timer_reset_defaults": "恢复默认设置",
   "appearance_group_mode": "模式",

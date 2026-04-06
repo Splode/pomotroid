@@ -24,6 +24,8 @@
   "timer_toggle_long_breaks_desc": "各サイクルの終わりに長い休憩をスキップします。",
   "timer_toggle_countdown": "カウントダウンダイヤル",
   "timer_toggle_countdown_desc": "アークが満タンから始まり、時間の経過とともに減少します。",
+  "timer_toggle_task_labels": "タスクラベル",
+  "timer_toggle_task_labels_desc": "作業ラウンド中にラベル入力欄を表示し、セッションをアクティビティ別に分類できます。",
   "timer_reset": "リセット",
   "timer_reset_defaults": "デフォルトにリセット",
   "appearance_group_mode": "モード",

@@ -57,6 +57,7 @@ pub struct Settings {
     pub local_shortcut_volume_up: String,
     pub local_shortcut_mute: String,
     pub local_shortcut_fullscreen: String,
+    pub task_labels_enabled: bool,
 }
 
 impl Default for Settings {
@@ -112,6 +113,7 @@ impl Default for Settings {
             local_shortcut_volume_up: "ArrowUp".to_string(),
             local_shortcut_mute: "m".to_string(),
             local_shortcut_fullscreen: "F11".to_string(),
+            task_labels_enabled: true,
         }
     }
 }
@@ -233,6 +235,7 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         local_shortcut_volume_up: map.get("local_shortcut_volume_up").cloned().unwrap_or(d.local_shortcut_volume_up),
         local_shortcut_mute: map.get("local_shortcut_mute").cloned().unwrap_or(d.local_shortcut_mute),
         local_shortcut_fullscreen: map.get("local_shortcut_fullscreen").cloned().unwrap_or(d.local_shortcut_fullscreen),
+        task_labels_enabled: parse_bool(&map, "task_labels_enabled", d.task_labels_enabled),
     })
 }
 
@@ -402,8 +405,9 @@ mod tests {
     fn migration_2_converts_mins_to_secs_and_removes_old_keys() {
         // Simulate a pre-migration DB: schema version 1, `*_mins` keys present.
         let conn = Connection::open_in_memory().unwrap();
-        // Run only migration 1 manually to get v1 state.
-        conn.execute_batch("BEGIN; CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL); INSERT INTO schema_version VALUES (1); COMMIT;").unwrap();
+        // Run only migration 1 manually to get v1 state (include sessions table so later
+        // migrations that alter it don't fail on a missing table).
+        conn.execute_batch("BEGIN; CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL); CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, started_at INTEGER NOT NULL, ended_at INTEGER, round_type TEXT NOT NULL, duration_secs INTEGER NOT NULL, completed INTEGER NOT NULL DEFAULT 0); INSERT INTO schema_version VALUES (1); COMMIT;").unwrap();
         conn.execute("INSERT INTO settings (key, value) VALUES ('time_work_mins', '30')", []).unwrap();
         conn.execute("INSERT INTO settings (key, value) VALUES ('time_short_break_mins', '7')", []).unwrap();
         conn.execute("INSERT INTO settings (key, value) VALUES ('time_long_break_mins', '20')", []).unwrap();

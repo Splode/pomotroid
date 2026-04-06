@@ -24,6 +24,8 @@
   "timer_toggle_long_breaks_desc": "Ignorer la pause longue à la fin de chaque cycle.",
   "timer_toggle_countdown": "Cadran à rebours",
   "timer_toggle_countdown_desc": "L'arc commence plein et se réduit au fil du temps.",
+  "timer_toggle_task_labels": "Étiquettes de tâche",
+  "timer_toggle_task_labels_desc": "Affiche un champ de saisie d'étiquette pendant les plages de travail pour annoter les sessions par activité.",
   "timer_reset": "Réinitialiser",
   "timer_reset_defaults": "Rétablir les paramètres par défaut",
   "appearance_group_mode": "Mode",

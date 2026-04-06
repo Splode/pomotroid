@@ -58,6 +58,9 @@ pub struct TimerController {
     sequence: Arc<Mutex<SequenceState>>,
     settings: Arc<Mutex<Settings>>,
     shared: Arc<Mutex<TimerShared>>,
+    /// Active task label — written by `timer_set_label`, read at session completion.
+    /// In-memory only; cleared by explicit timer reset or settings defaults reset.
+    current_label: Arc<Mutex<Option<String>>>,
     /// Kept alive so TrayState is not dropped if lib.rs forgets its copy.
     #[allow(dead_code)]
     tray: Arc<TrayState>,
@@ -83,11 +86,13 @@ impl TimerController {
             elapsed_secs: 0,
             is_running: false,
         }));
+        let current_label: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
 
         // Clone handles for the event-listener thread.
         let seq_thread = Arc::clone(&sequence);
         let settings_thread = Arc::clone(&settings_arc);
         let shared_thread = Arc::clone(&shared);
+        let label_thread = Arc::clone(&current_label);
         let engine_thread = engine.clone();
         let tray_thread = Arc::clone(&tray);
 
@@ -101,6 +106,7 @@ impl TimerController {
                         sequence: seq_thread,
                         settings: settings_thread,
                         shared: shared_thread,
+                        current_label: label_thread,
                         engine: engine_thread,
                         tray: tray_thread,
                         db,
@@ -114,6 +120,7 @@ impl TimerController {
             sequence,
             settings: settings_arc,
             shared,
+            current_label,
             tray,
         }
     }
@@ -156,6 +163,16 @@ impl TimerController {
     pub fn skip(&self) {
         log::info!("[timer] skip");
         self.engine.send(TimerCommand::Skip);
+    }
+
+    /// Update the active task label. An empty string is normalised to None.
+    pub fn set_label(&self, label: Option<String>) {
+        *self.current_label.lock().unwrap() = label;
+    }
+
+    /// Clear the active task label (called on explicit timer reset).
+    pub fn clear_label(&self) {
+        *self.current_label.lock().unwrap() = None;
     }
 
     pub fn suspend(&self) {
@@ -227,6 +244,7 @@ struct ListenContext {
     sequence: Arc<Mutex<SequenceState>>,
     settings: Arc<Mutex<Settings>>,
     shared: Arc<Mutex<TimerShared>>,
+    current_label: Arc<Mutex<Option<String>>>,
     engine: EngineHandle,
     tray: Arc<TrayState>,
     db: DbState,
@@ -237,7 +255,7 @@ fn listen_events(
     event_rx: std::sync::mpsc::Receiver<TimerEvent>,
     ctx: ListenContext,
 ) {
-    let ListenContext { sequence, settings, shared, engine, tray, db } = ctx;
+    let ListenContext { sequence, settings, shared, current_label, engine, tray, db } = ctx;
     // Track last tray progress to throttle redraws to ≥ 1% delta.
     let mut last_tray_progress: f32 = -1.0;
     // Active session row ID for recording (None = not started yet).
@@ -311,7 +329,8 @@ fn listen_events(
                 // --- Session recording: mark the completed round ---
                 if let Some(session_id) = current_session_id.take() {
                     if let Ok(conn) = db.lock() {
-                        let _ = queries::complete_session(&conn, session_id, !was_skipped);
+                        let label = current_label.lock().unwrap().clone();
+                        let _ = queries::complete_session(&conn, session_id, !was_skipped, label.as_deref());
                     }
                 }
 

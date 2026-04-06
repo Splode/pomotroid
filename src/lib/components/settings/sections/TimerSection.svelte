@@ -240,6 +240,12 @@
     checked={$settings.dial_countdown}
     onclick={() => toggle('dial_countdown', $settings.dial_countdown)}
   />
+  <SettingsToggle
+    label={m.timer_toggle_task_labels()}
+    description={m.timer_toggle_task_labels_desc()}
+    checked={$settings.task_labels_enabled}
+    onclick={() => toggle('task_labels_enabled', $settings.task_labels_enabled)}
+  />
 
 </div>
 
