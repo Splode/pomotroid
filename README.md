@@ -127,7 +127,7 @@ npm run tauri build
 
 ### Localization
 
-UI strings live in `src/messages/<locale>.json` (en, es, fr, de, ja, zh, pt). The compiled output in `src/paraglide/` is generated at build time and is not committed to the repository.
+UI strings live in `src/messages/<locale>.json` (en, es, fr, de, ja, zh, pt, tr). The compiled output in `src/paraglide/` is generated at build time and is not committed to the repository.
 
 **During development**, the Paraglide Vite plugin compiles messages automatically whenever `npm run tauri dev` or `npm run tauri build` is run — no manual step required.
 
