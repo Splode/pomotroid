@@ -3,7 +3,7 @@
 
 ### Localization
 
-* **Turkish** — full UI translation contributed by [@NandeMD](https://github.com/NandeMD). All settings, notifications, tooltips, and statistics strings are translated.
+* **Turkish** — UI translation corrections contributed by [@NandeMD](https://github.com/NandeMD).
 
 [v1.5.0] - 2026-04-06
 -----------
