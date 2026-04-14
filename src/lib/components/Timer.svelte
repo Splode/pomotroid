@@ -132,8 +132,7 @@
         {roundLabel(state.round_type)}
       </div>
 
-      <!-- Controls row: back | play/pause | skip -->
-      <div class="controls">
+      <div class="controls-wrapper">
         <!-- Back: restart current round -->
         <Tooltip text={m.tooltip_restart_round()}>
           <button
@@ -217,9 +216,9 @@
             </svg>
           </button>
         </Tooltip>
-      </div>
 
-      <TimerFooter snap={state} />
+        <TimerFooter snap={state} />
+      </div>
     {/if}
   </div>
 
@@ -250,10 +249,10 @@
     justify-content: center;
   }
 
-  .controls {
-    display: flex;
-    align-items: center;
-    gap: 20px;
+  .controls-wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px 12px;
   }
 
   .btn-side {
@@ -294,6 +293,7 @@
       border-color var(--transition-default),
       background var(--transition-default);
     overflow: hidden; /* clip the fading icon within the circle */
+    aspect-ratio: 1;
   }
 
   .play-pause:hover {

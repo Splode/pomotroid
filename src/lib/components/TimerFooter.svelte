@@ -1,10 +1,10 @@
 <script lang="ts">
   // Round counter, reset/skip buttons, and volume slider.
-  import type { TimerState } from '$lib/types';
-  import { timerReset, setSetting } from '$lib/ipc';
-  import { settings } from '$lib/stores/settings';
-  import * as m from '$paraglide/messages.js';
-  import Tooltip from './Tooltip.svelte';
+  import type { TimerState } from "$lib/types";
+  import { timerReset, setSetting } from "$lib/ipc";
+  import { settings } from "$lib/stores/settings";
+  import * as m from "$paraglide/messages.js";
+  import Tooltip from "./Tooltip.svelte";
 
   interface Props {
     snap: TimerState;
@@ -17,7 +17,9 @@
   // Local volume for immediate slider feedback — avoids waiting for the
   // async IPC round-trip before the thumb visually moves.
   let localVolume = $state($settings.volume);
-  $effect(() => { localVolume = $settings.volume; });
+  $effect(() => {
+    localVolume = $settings.volume;
+  });
 
   // Remembered pre-mute level so the button can restore it on unmute.
   let premuteVolume = $state<number | null>(null);
@@ -25,7 +27,7 @@
   function handleVolumeChange(e: Event) {
     const val = (e.target as HTMLInputElement).valueAsNumber;
     localVolume = val;
-    setSetting('volume', String(Math.round(val * 100)));
+    setSetting("volume", String(Math.round(val * 100)));
   }
 
   function toggleMute() {
@@ -33,85 +35,102 @@
       const restore = premuteVolume ?? 1.0;
       premuteVolume = null;
       localVolume = restore;
-      setSetting('volume', String(Math.round(restore * 100)));
+      setSetting("volume", String(Math.round(restore * 100)));
     } else {
       premuteVolume = localVolume;
       localVolume = 0;
-      setSetting('volume', '0');
+      setSetting("volume", "0");
     }
   }
 </script>
 
-<div class="footer">
-  <!-- Round counter: X/Y when long breaks are active; labelled session count otherwise -->
-  <Tooltip text={$settings.long_breaks_enabled ? m.tooltip_round_counter() : m.tooltip_round_counter_session()}>
-    <span class="rounds">
-      {#if $settings.long_breaks_enabled}
-        {snap.work_round_number} / {snap.work_rounds_total}
-      {:else}
-        {m.timer_session_round({ n: snap.session_work_count })}
-      {/if}
-    </span>
-  </Tooltip>
+<!-- Round counter: X/Y when long breaks are active; labelled session count otherwise -->
+<Tooltip
+  text={$settings.long_breaks_enabled
+    ? m.tooltip_round_counter()
+    : m.tooltip_round_counter_session()}
+>
+  <span class="rounds">
+    {#if $settings.long_breaks_enabled}
+      {snap.work_round_number} &nbsp;|&nbsp; {snap.work_rounds_total}
+    {:else}
+      {m.timer_session_round({ n: snap.session_work_count })}
+    {/if}
+  </span>
+</Tooltip>
 
-  <!-- Reset -->
-  <Tooltip text={m.tooltip_reset()}>
-    <button class="btn-text" onclick={timerReset} aria-label={m.timer_reset()}>
-      {m.timer_reset()}
-    </button>
-  </Tooltip>
+<!-- Reset -->
+<Tooltip text={m.tooltip_reset()}>
+  <button class="btn-text" onclick={timerReset} aria-label={m.timer_reset()}>
+    {m.timer_reset()}
+  </button>
+</Tooltip>
 
-  <!-- Volume -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div
-    class="volume-wrapper"
-    onmouseenter={() => (showVolume = true)}
-    onmouseleave={() => (showVolume = false)}
-  >
-    <Tooltip text={localVolume === 0 ? m.tooltip_unmute() : m.tooltip_mute()}>
-    <button class="btn-icon" onclick={toggleMute} aria-label={localVolume === 0 ? 'Unmute' : 'Mute'}>
+<!-- Volume -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="volume-wrapper">
+  <Tooltip text={localVolume === 0 ? m.tooltip_unmute() : m.tooltip_mute()}>
+    <button
+      class="btn-icon"
+      onclick={toggleMute}
+      aria-label={localVolume === 0 ? "Unmute" : "Mute"}
+      onmouseenter={() => (showVolume = true)}
+      onmouseleave={() => (showVolume = false)}
+    >
       {#if localVolume === 0}
         <svg width="16" height="16" viewBox="0 0 16 16">
-          <polygon points="1,5 5,5 10,1 10,15 5,11 1,11" fill="currentColor"/>
-          <line x1="12" y1="5" x2="16" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="16" y1="5" x2="12" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <polygon points="1,5 5,5 10,1 10,15 5,11 1,11" fill="currentColor" />
+          <line
+            x1="12"
+            y1="5"
+            x2="16"
+            y2="11"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+          <line
+            x1="16"
+            y1="5"
+            x2="12"
+            y2="11"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
         </svg>
       {:else}
         <svg width="16" height="16" viewBox="0 0 16 16">
-          <polygon points="1,5 5,5 10,1 10,15 5,11 1,11" fill="currentColor"/>
-          <path d="M12,5 Q15,8 12,11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <polygon points="1,5 5,5 10,1 10,15 5,11 1,11" fill="currentColor" />
+          <path
+            d="M12,5 Q15,8 12,11"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
         </svg>
       {/if}
     </button>
-    </Tooltip>
+  </Tooltip>
 
-    {#if showVolume}
-      <div class="volume-slider-wrapper">
-        <input
-          type="range"
-          min="0"
-          max="1"
-          step="0.01"
-          value={localVolume}
-          oninput={handleVolumeChange}
-          class="volume-slider"
-          aria-label="Volume"
-        />
-      </div>
-    {/if}
-  </div>
+  {#if showVolume}
+    <div class="volume-slider-wrapper">
+      <input
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
+        value={localVolume}
+        oninput={handleVolumeChange}
+        class="volume-slider"
+        aria-label="Volume"
+      />
+    </div>
+  {/if}
 </div>
 
 <style>
-  .footer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 8px 16px;
-    width: 100%;
-  }
-
   .rounds {
     font-size: 0.8rem;
     color: var(--color-foreground-darker, var(--color-foreground));
@@ -128,7 +147,9 @@
     font-size: 0.8rem;
     padding: 4px 8px;
     border-radius: 4px;
-    transition: color 0.15s, background 0.15s;
+    transition:
+      color 0.15s,
+      background 0.15s;
   }
 
   .btn-text:hover {
@@ -147,7 +168,9 @@
     width: 28px;
     height: 28px;
     border-radius: 4px;
-    transition: color 0.15s, background 0.15s;
+    transition:
+      color 0.15s,
+      background 0.15s;
   }
 
   .btn-icon:hover {
@@ -159,6 +182,8 @@
     position: relative;
     display: flex;
     align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
   }
 
   .volume-slider-wrapper {
