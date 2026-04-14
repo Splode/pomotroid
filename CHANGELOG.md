@@ -1,4 +1,4 @@
-[Unreleased]
+[v1.5.1] - 2026-04-13
 -----------
 
 ### Localization
