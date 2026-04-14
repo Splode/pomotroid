@@ -254,6 +254,9 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 4px 12px;
   }
+  .controls-wrapper > :global(*) {
+    aspect-ratio: 1;
+  }
 
   .btn-side {
     background: none;
@@ -293,7 +296,6 @@
       border-color var(--transition-default),
       background var(--transition-default);
     overflow: hidden; /* clip the fading icon within the circle */
-    aspect-ratio: 1;
   }
 
   .play-pause:hover {
