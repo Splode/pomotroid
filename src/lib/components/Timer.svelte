@@ -188,12 +188,7 @@
                   viewBox="0 0 24 24"
                   style="overflow: visible;"
                 >
-                  <polygon
-                    points="0,0 24,12 0,24"
-                    fill="currentColor"
-                    // median X: 24/2 = 12 (default), centroid X: 24/3 = 8
-                    style="transform: translateX(4px);"
-                  />
+                  <polygon points="4,0 28,12 4,24" fill="currentColor" />
                 </svg>
               {/if}
             </span>
