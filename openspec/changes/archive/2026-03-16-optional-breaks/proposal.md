@@ -13,9 +13,11 @@ The Pomodoro technique prescribes fixed work/break cycles, but real workflows va
 ## Capabilities
 
 ### New Capabilities
+
 - none
 
 ### Modified Capabilities
+
 - `timer-sequence`: Add requirement that short breaks and long breaks can each be independently disabled; document the resulting cycle behaviour for all four combinations.
 - `settings`: Add `short_breaks_enabled` and `long_breaks_enabled` setting keys, both defaulting to `true`.
 

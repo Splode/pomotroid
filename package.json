@@ -18,6 +18,7 @@
     "paraglide:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide",
     "check": "npm run paraglide:compile && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "npm run paraglide:compile && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "format": "prettier --write .",
     "tauri": "tauri"
   },
   "dependencies": {
@@ -34,6 +35,8 @@
     "@sveltejs/vite-plugin-svelte": "^7.0.0",
     "@tauri-apps/cli": "^2",
     "@types/node": "^25.6.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-svelte": "^3.5.1",
     "svelte": "^5.55.3",
     "svelte-check": "^4.4.6",
     "typescript": "~5.9.3",

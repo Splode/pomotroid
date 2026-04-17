@@ -17,7 +17,7 @@ Compact mode (window < 300px in either dimension) shows only the timer dial with
 
 ### Modified Capabilities
 
-*(none — no existing spec-level requirements change)*
+_(none — no existing spec-level requirements change)_
 
 ## Impact
 

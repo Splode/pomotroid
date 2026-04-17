@@ -3,6 +3,7 @@
 The timer sequence is owned entirely by `SequenceState::advance()` in `src-tauri/src/timer/sequence.rs`. This function already receives `&Settings` and determines the next `RoundType` and duration. All four combinations of break enable/disable flags are handled purely inside this function — no other layer of the timer stack needs to change.
 
 The current branching logic in `advance()`:
+
 ```
 Work → if work_round_number >= work_rounds_total → LongBreak, else → ShortBreak
 ShortBreak → work_round_number += 1; → Work
@@ -30,12 +31,14 @@ Setting `work_round_number = 0` before a substituted ShortBreak is the key detai
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Independent enable/disable for short and long breaks.
 - All four combinations produce correct, well-defined cycle behaviour.
 - `work_round_number` always resets cleanly at the natural cycle boundary (the long-break point), regardless of whether a long break actually fires.
 - UI dims (not hides) dependent controls when a break type is disabled.
 
 **Non-Goals:**
+
 - Per-round skip (transient — the existing Skip Round button covers this).
 - Different behaviour per cycle (e.g., disable only the first short break).
 - Changes to auto-start logic (it simply has nothing to do when a break is skipped).
@@ -65,6 +68,7 @@ Setting `work_round_number = 0` before a substituted ShortBreak is the key detai
 ## Migration Plan
 
 Migration 5 in `db/migrations.rs`:
+
 ```sql
 INSERT OR IGNORE INTO settings (key, value) VALUES ('short_breaks_enabled', 'true');
 INSERT OR IGNORE INTO settings (key, value) VALUES ('long_breaks_enabled', 'true');

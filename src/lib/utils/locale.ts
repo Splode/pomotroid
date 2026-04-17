@@ -4,7 +4,7 @@
 import { locales, baseLocale } from '$paraglide/runtime.js';
 
 /** Supported locale tags (matches project.inlang locales). */
-export type SupportedLocale = typeof locales[number];
+export type SupportedLocale = (typeof locales)[number];
 
 /**
  * Resolve the active locale from the stored `language` setting.

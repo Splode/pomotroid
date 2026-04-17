@@ -15,7 +15,9 @@
 
 <button class="row" {onclick}>
   <span class="text">
-    <span class="label">{label}{#if tooltip}<TooltipInfo text={tooltip} />{/if}</span>
+    <span class="label"
+      >{label}{#if tooltip}<TooltipInfo text={tooltip} />{/if}</span
+    >
     {#if description}
       <span class="desc">{description}</span>
     {/if}
@@ -87,7 +89,9 @@
     background: var(--color-foreground-darker, var(--color-foreground));
     top: 3px;
     left: 3px;
-    transition: transform 0.2s, background 0.2s;
+    transition:
+      transform 0.2s,
+      background 0.2s;
   }
 
   .toggle.on {

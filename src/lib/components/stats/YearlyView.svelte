@@ -6,26 +6,28 @@
   let { heatmap }: { heatmap: HeatmapStats | null } = $props();
 
   // Heatmap grid constants
-  const CELL   = 11;
-  const GAP    = 2;
+  const CELL = 11;
+  const GAP = 2;
   const STRIDE = CELL + GAP;
-  const DAYS   = 7;
+  const DAYS = 7;
   const GRID_H = DAYS * STRIDE - GAP; // 89px
 
   // Locale-aware month and day-of-week names — reactive to app language setting
-  const monthFmt    = $derived(new Intl.DateTimeFormat(getLocale(), { month: 'short' }));
-  const dowFmt      = $derived(new Intl.DateTimeFormat(getLocale(), { weekday: 'short' }));
-  const MONTH_NAMES: string[] = $derived(Array.from({ length: 12 }, (_, i) => monthFmt.format(new Date(2000, i, 1))));
+  const monthFmt = $derived(new Intl.DateTimeFormat(getLocale(), { month: 'short' }));
+  const dowFmt = $derived(new Intl.DateTimeFormat(getLocale(), { weekday: 'short' }));
+  const MONTH_NAMES: string[] = $derived(
+    Array.from({ length: 12 }, (_, i) => monthFmt.format(new Date(2000, i, 1)))
+  );
   // Row labels: Mon (row 1), Wed (row 3), Fri (row 5) — reference dates that land on those days
   const ROW_LABELS: Record<number, string> = $derived({
-    1: dowFmt.format(new Date(2000, 0, 3)),  // Monday
-    3: dowFmt.format(new Date(2000, 0, 5)),  // Wednesday
-    5: dowFmt.format(new Date(2000, 0, 7)),  // Friday
+    1: dowFmt.format(new Date(2000, 0, 3)), // Monday
+    3: dowFmt.format(new Date(2000, 0, 5)), // Wednesday
+    5: dowFmt.format(new Date(2000, 0, 7)), // Friday
   });
 
   // Year navigation state
   const currentYear = new Date().getFullYear();
-  let selectedYear  = $state(currentYear);
+  let selectedYear = $state(currentYear);
 
   // Earliest year with recorded sessions (determines how far back the user can navigate)
   const firstYear = $derived.by(() => {
@@ -37,7 +39,7 @@
     date: string;
     count: number;
     level: 0 | 1 | 2 | 3;
-    dimmed: boolean;  // future or out-of-year
+    dimmed: boolean; // future or out-of-year
   }
 
   interface MonthLabel {
@@ -47,7 +49,7 @@
 
   function buildGridForYear(
     year: number,
-    entries: HeatmapEntry[],
+    entries: HeatmapEntry[]
   ): { grid: GridCell[][]; months: MonthLabel[]; weekCount: number } {
     const byDate = new Map(entries.map((e) => [e.date, e.count]));
 
@@ -77,9 +79,9 @@
         const dt = new Date(gridStart);
         dt.setDate(gridStart.getDate() + w * DAYS + d);
         const dateStr = fmtDate(dt);
-        const count   = byDate.get(dateStr) ?? 0;
-        const dimmed  = dt > today || dt.getFullYear() !== year;
-        const level   = dimmed || count === 0 ? 0 : count <= 3 ? 1 : count <= 7 ? 2 : 3;
+        const count = byDate.get(dateStr) ?? 0;
+        const dimmed = dt > today || dt.getFullYear() !== year;
+        const level = dimmed || count === 0 ? 0 : count <= 3 ? 1 : count <= 7 ? 2 : 3;
         col.push({ date: dateStr, count, level: level as 0 | 1 | 2 | 3, dimmed });
       }
 
@@ -109,23 +111,22 @@
     return h >= 1000 ? `${(h / 1000).toFixed(1)}k` : String(h);
   }
 
-  const LEVEL_FILL = [
-    'var(--heat-0)',
-    'var(--heat-1)',
-    'var(--heat-2)',
-    'var(--heat-3)',
-  ] as const;
+  const LEVEL_FILL = ['var(--heat-0)', 'var(--heat-1)', 'var(--heat-2)', 'var(--heat-3)'] as const;
 
   // Tooltip — viewport-fixed so it escapes SVG/overflow clipping.
   let tooltip = $state<{ x: number; y: number; text: string } | null>(null);
   let tooltipEl = $state<HTMLDivElement | undefined>(undefined);
 
   function showTooltip(event: MouseEvent, cell: GridCell) {
-    if (cell.dimmed) { tooltip = null; return; }
+    if (cell.dimmed) {
+      tooltip = null;
+      return;
+    }
     const cellRect = (event.currentTarget as SVGRectElement).getBoundingClientRect();
-    const text = cell.count === 0
-      ? `${cell.date}: ${m.stats_no_sessions_today().toLowerCase()}`
-      : `${cell.date}: ${cell.count} ${cell.count === 1 ? m.stats_rounds().toLowerCase().replace(/s$/, '') : m.stats_rounds().toLowerCase()}`;
+    const text =
+      cell.count === 0
+        ? `${cell.date}: ${m.stats_no_sessions_today().toLowerCase()}`
+        : `${cell.date}: ${cell.count} ${cell.count === 1 ? m.stats_rounds().toLowerCase().replace(/s$/, '') : m.stats_rounds().toLowerCase()}`;
     tooltip = { x: cellRect.left + CELL / 2, y: cellRect.top - 8, text };
   }
 
@@ -134,8 +135,8 @@
     return buildGridForYear(selectedYear, heatmap.entries);
   });
 
-  const GRID_W  = $derived(weekCount * STRIDE - GAP);
-  const LEFT_OFFSET  = 28;
+  const GRID_W = $derived(weekCount * STRIDE - GAP);
+  const LEFT_OFFSET = 28;
   const MONTH_LABEL_H = 16;
   const SVG_W = $derived(LEFT_OFFSET + GRID_W);
   const SVG_H = MONTH_LABEL_H + GRID_H;
@@ -162,28 +163,45 @@
     <!-- Heatmap section -->
     <div class="heatmap-section">
       <div class="heatmap-wrap">
-
         <!-- Year navigation -->
         <div class="year-nav">
           <button
             class="year-btn"
-            onclick={() => { selectedYear -= 1; tooltip = null; }}
+            onclick={() => {
+              selectedYear -= 1;
+              tooltip = null;
+            }}
             disabled={selectedYear <= firstYear}
             aria-label={m.stats_prev_year()}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <polyline points="9,2 4,7 9,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline
+                points="9,2 4,7 9,12"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
           <span class="year-label">{selectedYear}</span>
           <button
             class="year-btn"
-            onclick={() => { selectedYear += 1; tooltip = null; }}
+            onclick={() => {
+              selectedYear += 1;
+              tooltip = null;
+            }}
             disabled={selectedYear >= currentYear}
             aria-label={m.stats_next_year()}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <polyline points="5,2 10,7 5,12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <polyline
+                points="5,2 10,7 5,12"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -194,7 +212,9 @@
           height={SVG_H}
           viewBox="0 0 {SVG_W} {SVG_H}"
           class="heatmap-svg"
-          onmouseleave={() => { tooltip = null; }}
+          onmouseleave={() => {
+            tooltip = null;
+          }}
           role="img"
           aria-label="Annual activity heatmap"
         >
@@ -209,8 +229,8 @@
               x={LEFT_OFFSET - 4}
               y={MONTH_LABEL_H + Number(rowIdx) * STRIDE + CELL / 2 + 4}
               text-anchor="end"
-              class="dow-label"
-            >{rowLabel}</text>
+              class="dow-label">{rowLabel}</text
+            >
           {/each}
 
           <!-- Grid cells -->
@@ -230,11 +250,12 @@
                 role="img"
                 aria-label="{cell.date}: {cell.count} {m.stats_rounds().toLowerCase()}"
                 onmouseenter={(e) => showTooltip(e, cell)}
-                onmouseleave={() => { tooltip = null; }}
+                onmouseleave={() => {
+                  tooltip = null;
+                }}
               />
             {/each}
           {/each}
-
         </svg>
 
         <!-- Cell tooltip (HTML so it matches Tooltip.svelte style and escapes SVG clipping) -->
@@ -248,7 +269,9 @@
             bind:this={tooltipEl}
             class="cell-tooltip"
             style="top:{tooltip.y}px;left:{left}px;--arrow-left:{arrowLeft}px"
-          >{tooltip.text}</div>
+          >
+            {tooltip.text}
+          </div>
         {/if}
 
         <!-- Legend -->
@@ -332,7 +355,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: 28px;  /* align with heatmap grid left edge */
+    margin-left: 28px; /* align with heatmap grid left edge */
   }
 
   .year-label {
@@ -356,7 +379,9 @@
     width: 24px;
     height: 24px;
     border-radius: 4px;
-    transition: color 0.15s, background 0.15s;
+    transition:
+      color 0.15s,
+      background 0.15s;
     padding: 0;
   }
 
@@ -405,7 +430,10 @@
   }
 
   .cell-tooltip {
-    --tooltip-bg: var(--color-background-light, color-mix(in oklch, var(--color-foreground) 10%, var(--color-background)));
+    --tooltip-bg: var(
+      --color-background-light,
+      color-mix(in oklch, var(--color-foreground) 10%, var(--color-background))
+    );
     position: fixed;
     transform: translateY(-100%);
     background: var(--tooltip-bg);
@@ -474,8 +502,14 @@
   }
 
   @keyframes card-rise {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .total-label {

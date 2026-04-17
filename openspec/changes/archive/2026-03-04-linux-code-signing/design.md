@@ -7,12 +7,14 @@ GPG is available on GitHub Actions' Ubuntu runners without any `apt-get install`
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Sign all three Linux artifacts with a single GPG key using detached ASCII-armored signatures
 - Keep the private key out of the repository — stored only in GitHub Actions secrets
 - Make `.asc` files available alongside packages on the GitHub Release page
 - Document verification and key management for users and maintainers
 
 **Non-Goals:**
+
 - Tauri-native AppImage signing via `SIGN=1` / `appimagetool` — this is AppImage-only and doesn't compose with `.deb`/`.rpm` signing
 - Format-native embedded signing (`dpkg-sig`, `rpmsign`) — higher CI complexity, different verification UX per format
 - Repo-level signing for APT, RPM, Flatpak, Snap, or AUR distribution — those channels have their own signing mechanisms, handled separately when each channel is set up

@@ -5,12 +5,14 @@ Pomotroid has all user-visible strings hardcoded in English across 8+ Svelte com
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Translate all user-visible strings in the frontend via Paraglide message functions
 - Detect system locale automatically; allow user override via a language dropdown in System settings
 - Ship 5 locales at launch: `en` (base), `es`, `fr`, `de`, `ja`
 - Refactor notification strings to be constructed on the frontend (translated), then passed to Rust as plain title + body
 
 **Non-Goals:**
+
 - RTL language support (layout changes required — future work)
 - Pluralization beyond what Paraglide's ICU message format handles naturally
 - Community translation tooling / Inlang editor integration (the message format is compatible, but no workflow is set up now)

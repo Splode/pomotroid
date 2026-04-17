@@ -12,7 +12,7 @@ The "Reset to Defaults" button currently lives inside the Timer section, but the
 
 ### New Capabilities
 
-*(none — this is a UI reorganization, no new capability is introduced)*
+_(none — this is a UI reorganization, no new capability is introduced)_
 
 ### Modified Capabilities
 

@@ -1,7 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { settings } from '$lib/stores/settings';
-  import { setSetting, getCustomAudioInfo, setCustomAudio, clearCustomAudio, openAudioFilePicker, onSettingsChanged } from '$lib/ipc';
+  import {
+    setSetting,
+    getCustomAudioInfo,
+    setCustomAudio,
+    clearCustomAudio,
+    openAudioFilePicker,
+    onSettingsChanged,
+  } from '$lib/ipc';
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import type { CustomAudioInfo } from '$lib/types';
   import * as m from '$paraglide/messages.js';
@@ -10,17 +17,19 @@
   type CueKey = keyof CustomAudioInfo;
 
   const CUE_LIST: { id: CueKey; label: () => string }[] = [
-    { id: 'work_alert',        label: m.notif_alert_work },
+    { id: 'work_alert', label: m.notif_alert_work },
     { id: 'short_break_alert', label: m.notif_alert_short_break },
-    { id: 'long_break_alert',  label: m.notif_alert_long_break },
+    { id: 'long_break_alert', label: m.notif_alert_long_break },
   ];
 
   let localVolume = $state($settings.volume);
-  $effect(() => { localVolume = $settings.volume; });
+  $effect(() => {
+    localVolume = $settings.volume;
+  });
 
-  let workAlert       = $state<string | null>(null);
+  let workAlert = $state<string | null>(null);
   let shortBreakAlert = $state<string | null>(null);
-  let longBreakAlert  = $state<string | null>(null);
+  let longBreakAlert = $state<string | null>(null);
 
   function getFileName(id: CueKey): string | null {
     if (id === 'work_alert') return workAlert;
@@ -37,9 +46,9 @@
   async function refreshAudioInfo() {
     try {
       const info: CustomAudioInfo = await getCustomAudioInfo();
-      workAlert       = info.work_alert;
+      workAlert = info.work_alert;
       shortBreakAlert = info.short_break_alert;
-      longBreakAlert  = info.long_break_alert;
+      longBreakAlert = info.long_break_alert;
     } catch (err) {
       await warn(`[audio] getCustomAudioInfo failed (audio unavailable?): ${err}`);
     }
@@ -106,7 +115,9 @@
       </div>
       <div class="audio-actions">
         {#if getFileName(id) !== null}
-          <button class="btn-restore" onclick={() => restoreAudio(id)}>{m.notif_btn_restore()}</button>
+          <button class="btn-restore" onclick={() => restoreAudio(id)}
+            >{m.notif_btn_restore()}</button
+          >
         {/if}
         <button class="btn-choose" onclick={() => pickAudio(id)}>{m.notif_btn_choose()}</button>
       </div>
@@ -146,7 +157,10 @@
     </div>
     <div class="slider-wrap">
       <input
-        type="range" min="0" max="1" step="0.01"
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
         value={localVolume}
         class="slider"
         oninput={handleVolumeInput}

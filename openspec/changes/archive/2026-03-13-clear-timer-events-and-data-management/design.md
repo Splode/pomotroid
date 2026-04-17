@@ -5,6 +5,7 @@ The `sessions` table records every timer round (work, short break, long break) w
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Add a `sessions_clear` Rust command that runs `DELETE FROM sessions` inside a transaction.
 - Add a `clearSessionHistory` IPC wrapper in `ipc/index.ts`.
 - Add a Clear Session History row to `SystemSection.svelte` using the same two-step inline confirmation pattern already used by Reset All Settings.
@@ -12,6 +13,7 @@ The `sessions` table records every timer round (work, short break, long break) w
 - Clean up `AboutSection.svelte` by removing the reset group and its associated styles.
 
 **Non-Goals:**
+
 - Selective deletion (by date range, round type, etc.) — bulk clear only.
 - Exporting history before clearing — out of scope.
 - Any change to what data the `sessions` table records or when rows are written.

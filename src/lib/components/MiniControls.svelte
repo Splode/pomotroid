@@ -10,27 +10,23 @@
   <!-- Restart current round -->
   <button class="btn-side" onclick={timerRestartRound} aria-label="Restart round">
     <svg width="10" height="10" viewBox="0 0 16 16">
-      <polygon points="15,1 6,8 15,15" fill="currentColor"/>
-      <rect x="1" y="1" width="3" height="14" rx="1" fill="currentColor"/>
+      <polygon points="15,1 6,8 15,15" fill="currentColor" />
+      <rect x="1" y="1" width="3" height="14" rx="1" fill="currentColor" />
     </svg>
   </button>
 
   <!-- Play / Pause -->
-  <button
-    class="play-pause"
-    onclick={timerToggle}
-    aria-label={state.is_running ? 'Pause' : 'Play'}
-  >
+  <button class="play-pause" onclick={timerToggle} aria-label={state.is_running ? 'Pause' : 'Play'}>
     {#key state.is_running}
       <span class="icon" in:fade={{ duration: 100 }}>
         {#if state.is_running}
           <svg width="12" height="12" viewBox="0 0 24 24">
-            <rect x="4" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
-            <rect x="15" y="3" width="5" height="18" rx="1.5" fill="currentColor"/>
+            <rect x="4" y="3" width="5" height="18" rx="1.5" fill="currentColor" />
+            <rect x="15" y="3" width="5" height="18" rx="1.5" fill="currentColor" />
           </svg>
         {:else}
           <svg width="12" height="12" viewBox="0 0 24 24">
-            <polygon points="5,3 21,12 5,21" fill="currentColor"/>
+            <polygon points="5,3 21,12 5,21" fill="currentColor" />
           </svg>
         {/if}
       </span>
@@ -40,8 +36,8 @@
   <!-- Skip round -->
   <button class="btn-side" onclick={timerSkip} aria-label="Skip round">
     <svg width="10" height="10" viewBox="0 0 16 16">
-      <polygon points="1,1 10,8 1,15" fill="currentColor"/>
-      <rect x="12" y="1" width="3" height="14" rx="1" fill="currentColor"/>
+      <polygon points="1,1 10,8 1,15" fill="currentColor" />
+      <rect x="12" y="1" width="3" height="14" rx="1" fill="currentColor" />
     </svg>
   </button>
 </div>
@@ -64,7 +60,9 @@
     border-radius: 3px;
     cursor: pointer;
     color: var(--color-foreground-darker, var(--color-foreground));
-    transition: color var(--transition-default), background var(--transition-default);
+    transition:
+      color var(--transition-default),
+      background var(--transition-default);
   }
 
   .btn-side:hover {
@@ -84,7 +82,9 @@
     cursor: pointer;
     color: var(--color-foreground);
     overflow: hidden;
-    transition: color var(--transition-default), border-color var(--transition-default),
+    transition:
+      color var(--transition-default),
+      border-color var(--transition-default),
       background var(--transition-default);
   }
 

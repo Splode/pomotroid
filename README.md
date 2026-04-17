@@ -94,17 +94,17 @@ Pomotroid exposes an optional WebSocket server (disabled by default) for integra
 
 **Client → Server**
 
-| Message | Description |
-|---|---|
+| Message                  | Description                     |
+| ------------------------ | ------------------------------- |
 | `{ "type": "getState" }` | Request the current timer state |
 
 **Server → Client**
 
-| Event | Payload | Description |
-|---|---|---|
-| `state` | `TimerState` object | Response to `getState` |
+| Event         | Payload             | Description                                      |
+| ------------- | ------------------- | ------------------------------------------------ |
+| `state`       | `TimerState` object | Response to `getState`                           |
 | `roundChange` | `TimerState` object | Fired whenever the timer advances to a new round |
-| `error` | `{ message }` | Protocol error |
+| `error`       | `{ message }`       | Protocol error                                   |
 
 `TimerState` fields: `elapsed_secs`, `total_secs`, `is_running`, `is_paused`, `round_type`, `work_round_number`, `work_rounds_total`.
 

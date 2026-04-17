@@ -14,9 +14,11 @@ Global shortcuts in Pomotroid use system-wide key combinations (e.g. `Control+F1
 ## Capabilities
 
 ### New Capabilities
+
 - none
 
 ### Modified Capabilities
+
 - `shortcuts`: Add requirement that global shortcuts can be enabled or disabled as a unit via a single toggle; disabled state unregisters all shortcuts immediately and persists across restarts.
 - `settings`: Add `global_shortcuts_enabled` setting key with default value `false`.
 

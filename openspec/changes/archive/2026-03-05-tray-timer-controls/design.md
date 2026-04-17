@@ -9,11 +9,13 @@ The `TimerController` public API already exposes all required operations: `toggl
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Add Toggle (Start/Pause/Resume), Skip, and Reset Round items to the tray context menu.
 - Keep item labels and enabled states in sync with timer state transitions.
 - Dispatch timer commands from `on_menu_event` via `app.try_state::<TimerController>()`.
 
 **Non-Goals:**
+
 - Displaying the remaining time or round type in the menu (tooltip already covers visual state).
 - Keyboard shortcuts for tray menu items.
 - Tray controls when the tray icon is not visible (tray is optional; controls exist only when the icon exists).
@@ -48,4 +50,4 @@ From idle, `skip()` would advance the sequence without completing a real round, 
 
 - **`MenuItem::set_text()` thread safety**: Tauri 2 `MenuItem` handles are `Send + Sync`; the pattern mirrors how `update_icon()` already mutates tray state from the `timer-events` thread. No known issues.
 - **Menu not shown when tray is disabled**: `TrayState.menu_items` will be `None` when the tray icon has never been created or has been destroyed. `update_menu_items()` is a no-op in that case — safe.
-- **`create_tray()` reuse path**: On subsequent calls (show after hide), the existing icon is made visible again and the function returns early. Menu item handles must be stored on the *first* call only; subsequent early-returns leave existing handles intact.
+- **`create_tray()` reuse path**: On subsequent calls (show after hide), the existing icon is made visible again and the function returns early. Menu item handles must be stored on the _first_ call only; subsequent early-returns leave existing handles intact.

@@ -5,6 +5,7 @@ The app uses `font-family: system-ui` with no custom font assets. `TimerDisplay`
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Consistent cross-platform typography via a single embedded font family
 - Optical sizing applied automatically across the entire UI with zero per-component effort
 - Width-axis animation on the timer display that responds to running/paused state
@@ -12,6 +13,7 @@ The app uses `font-family: system-ui` with no custom font assets. `TimerDisplay`
 - Monospaced shortcut display using the matching Mona Sans Mono companion
 
 **Non-Goals:**
+
 - Per-theme font overrides
 - Custom fonts for any component other than those listed in the proposal
 - Subsetting or tree-shaking the font files (file size is not a concern for a desktop app)

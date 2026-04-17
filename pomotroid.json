@@ -9,12 +9,7 @@
     "script": "Start-Process \"$dir\\dl.exe\" -ArgumentList '/S', \"/D=$dir\" -Wait"
   },
   "post_install": "Remove-Item \"$dir\\dl.exe\" -Force",
-  "shortcuts": [
-    [
-      "Pomotroid.exe",
-      "Pomotroid"
-    ]
-  ],
+  "shortcuts": [["Pomotroid.exe", "Pomotroid"]],
   "autoupdate": {
     "url": "https://github.com/Splode/pomotroid/releases/download/v$version/Pomotroid_$version_x64-setup.exe#/dl.exe"
   }

@@ -4,10 +4,10 @@
 
   let { today }: { today: DailyStats | null } = $props();
 
-  const CHART_H = 80;   // px, max bar height in the hourly chart
-  const CHART_W = 744;  // px, total SVG width for 24 bars
-  const BAR_W   = 22;   // px per bar
-  const BAR_GAP = 9;    // px between bars
+  const CHART_H = 80; // px, max bar height in the hourly chart
+  const CHART_W = 744; // px, total SVG width for 24 bars
+  const BAR_W = 22; // px per bar
+  const BAR_GAP = 9; // px between bars
 
   function fmtTime(mins: number): string {
     if (mins < 60) return `${mins}m`;
@@ -83,21 +83,14 @@
 
           <!-- Hour label (every 6 hours) -->
           {#if hourLabels.includes(h)}
-            <text
-              x={x + BAR_W / 2}
-              y={CHART_H + 18}
-              text-anchor="middle"
-              class="hour-label"
-            >{h === 0 ? '12a' : h === 12 ? '12p' : h < 12 ? `${h}a` : `${h - 12}p`}</text>
+            <text x={x + BAR_W / 2} y={CHART_H + 18} text-anchor="middle" class="hour-label"
+              >{h === 0 ? '12a' : h === 12 ? '12p' : h < 12 ? `${h}a` : `${h - 12}p`}</text
+            >
           {/if}
         {/each}
 
         <!-- Baseline -->
-        <line
-          x1="0" y1={CHART_H}
-          x2={CHART_W} y2={CHART_H}
-          class="baseline"
-        />
+        <line x1="0" y1={CHART_H} x2={CHART_W} y2={CHART_H} class="baseline" />
       </svg>
     </div>
   </div>
@@ -133,8 +126,14 @@
   }
 
   @keyframes card-rise {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .card-label {
@@ -197,7 +196,9 @@
     overflow-y: hidden;
   }
 
-  .chart { display: block; }
+  .chart {
+    display: block;
+  }
 
   .bar {
     fill: var(--color-focus-round);
@@ -209,8 +210,14 @@
   }
 
   @keyframes bar-rise {
-    from { transform: scaleY(0.05); opacity: 0; }
-    to   { transform: scaleY(1);    opacity: 0.85; }
+    from {
+      transform: scaleY(0.05);
+      opacity: 0;
+    }
+    to {
+      transform: scaleY(1);
+      opacity: 0.85;
+    }
   }
 
   .bar-empty {

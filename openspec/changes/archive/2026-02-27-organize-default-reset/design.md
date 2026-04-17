@@ -5,12 +5,14 @@ The Settings window has six sections (Timer, Appearance, Notifications, Shortcut
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Move the reset action to `AboutSection.svelte`, visually separated from the navigation links.
 - Add inline two-step confirmation: first click reveals "Are you sure?" with Cancel and Reset buttons; second click fires the reset; Cancel restores the original button.
 - Remove the reset UI from `TimerSection.svelte` entirely.
 - Keep all changes frontend-only — no backend or IPC changes.
 
 **Non-Goals:**
+
 - Section-scoped resets (reset only timer settings, etc.) — out of scope for this change.
 - Undo/restore after reset — out of scope.
 - Any new Tauri dialog plugin usage.
@@ -23,9 +25,10 @@ The Settings window has six sections (Timer, Appearance, Notifications, Shortcut
 **Decision**: Place the reset row in `AboutSection.svelte`, below the existing links group and separated by a visual gap or separator.
 
 **Alternatives considered**:
-- *System section*: Already dense with WebSocket, language, logging, tray, and window groups. Adding a destructive action there adds cognitive weight to an area users visit frequently to adjust integrations.
-- *Persistent footer*: A global footer always in view would give the action unwarranted prominence for something that should rarely be used.
-- *Timer section* (status quo): Misleading scope — users infer it resets only timer settings.
+
+- _System section_: Already dense with WebSocket, language, logging, tray, and window groups. Adding a destructive action there adds cognitive weight to an area users visit frequently to adjust integrations.
+- _Persistent footer_: A global footer always in view would give the action unwarranted prominence for something that should rarely be used.
+- _Timer section_ (status quo): Misleading scope — users infer it resets only timer settings.
 
 About is visited infrequently (meta/administrative use), which matches the expected frequency of a factory reset.
 
@@ -34,9 +37,10 @@ About is visited infrequently (meta/administrative use), which matches the expec
 **Decision**: Use a `$state` boolean (`confirming`) in `AboutSection.svelte`. When `confirming` is false, show a single "Reset All Settings" button styled as a muted/danger row. When `confirming` is true, replace it with a "Are you sure?" label and two buttons: "Cancel" (sets `confirming = false`) and "Reset" (calls `resetSettings()`, then sets `confirming = false`).
 
 **Alternatives considered**:
-- *Native `confirm()` dialog from `tauri-plugin-dialog`*: Already installed. Rejected because the OS dialog is a stylistic mismatch — the app has a distinctive custom aesthetic and an OS modal breaks that context at exactly the moment the user should feel in control.
-- *Countdown/cancel pattern*: Async timer state is more complexity than warranted for a settings panel. Inline two-step is simpler and equally legible.
-- *Hold-to-confirm*: Unfamiliar on desktop, no existing pattern in the app.
+
+- _Native `confirm()` dialog from `tauri-plugin-dialog`_: Already installed. Rejected because the OS dialog is a stylistic mismatch — the app has a distinctive custom aesthetic and an OS modal breaks that context at exactly the moment the user should feel in control.
+- _Countdown/cancel pattern_: Async timer state is more complexity than warranted for a settings panel. Inline two-step is simpler and equally legible.
+- _Hold-to-confirm_: Unfamiliar on desktop, no existing pattern in the app.
 
 ### D3: Styling the reset row
 

@@ -15,6 +15,7 @@ The app currently uses `system-ui` which renders differently on every platform (
 ## Capabilities
 
 ### New Capabilities
+
 - `variable-font-typography`: Embedded variable font with axis-driven typographic variation — optical sizing globally, width-axis animation on timer state, compact-mode condensing, and monospaced companion for shortcut display
 
 ### Modified Capabilities

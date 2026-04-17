@@ -16,9 +16,11 @@ Users have no way to know when a new Pomotroid version is available short of man
 ## Capabilities
 
 ### New Capabilities
+
 - `autoupdate`: In-app update detection and installation via Tauri's updater plugin. Covers the check_update command, latest.json manifest format, CI signing and publishing flow, and the opt-out setting.
 
 ### Modified Capabilities
+
 - `settings`: New `check_for_updates` boolean setting added to the settings schema.
 
 ## Impact

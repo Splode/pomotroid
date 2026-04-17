@@ -70,33 +70,39 @@
     const shortcutHandler = createLocalShortcutHandler({
       getSettings: () => $settings,
       getVolume: () => localVolume,
-      setVolume: (v) => { localVolume = v; },
+      setVolume: (v) => {
+        localVolume = v;
+      },
       getPreMuteVolume: () => preMuteVolume,
-      setPreMuteVolume: (v) => { preMuteVolume = v; },
+      setPreMuteVolume: (v) => {
+        preMuteVolume = v;
+      },
       getFullscreen: () => isFullscreen,
-      setFullscreen: (v) => { isFullscreen = v; },
+      setFullscreen: (v) => {
+        isFullscreen = v;
+      },
     });
     document.addEventListener('keydown', shortcutHandler);
     cleanups.push(() => document.removeEventListener('keydown', shortcutHandler));
 
     (async () => {
       try {
-      // Load settings from backend.
-      const s = await getSettings();
-      settings.set(s);
-      localVolume = s.volume;
+        // Load settings from backend.
+        const s = await getSettings();
+        settings.set(s);
+        localVolume = s.volume;
 
-      // Apply the stored locale on mount.
-      setLocale(s.language);
-      await info(`[main] settings loaded, locale=${s.language}`);
+        // Apply the stored locale on mount.
+        setLocale(s.language);
+        await info(`[main] settings loaded, locale=${s.language}`);
 
-      // Load and apply the active theme using OS color scheme.
-      const themes = await getThemes();
-      const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const active = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
-      if (active) applyTheme(active);
-      await getCurrentWebviewWindow().show();
-      await info(`[main] initialized, theme=${active?.name ?? 'none'}`);
+        // Load and apply the active theme using OS color scheme.
+        const themes = await getThemes();
+        const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const active = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
+        if (active) applyTheme(active);
+        await getCurrentWebviewWindow().show();
+        await info(`[main] initialized, theme=${active?.name ?? 'none'}`);
       } catch (e) {
         await logError(`[main] initialization failed: ${e}`);
         throw e;
@@ -139,9 +145,10 @@
         // Re-apply theme when custom themes are hot-reloaded.
         await onThemesChanged((updated) => {
           const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          const current = updated.find((t) => t.name === resolveThemeName($settings, dark)) ?? updated[0];
+          const current =
+            updated.find((t) => t.name === resolveThemeName($settings, dark)) ?? updated[0];
           if (current) applyTheme(current);
-        }),
+        })
       );
     })();
 
@@ -213,14 +220,62 @@
   }
 
   /* Edge handles */
-  :global(.rh-n)  { top: 0; left: 6px; right: 6px; height: 5px; cursor: n-resize; }
-  :global(.rh-s)  { bottom: 0; left: 6px; right: 6px; height: 5px; cursor: s-resize; }
-  :global(.rh-e)  { right: 0; top: 6px; bottom: 6px; width: 5px; cursor: e-resize; }
-  :global(.rh-w)  { left: 0; top: 6px; bottom: 6px; width: 5px; cursor: w-resize; }
+  :global(.rh-n) {
+    top: 0;
+    left: 6px;
+    right: 6px;
+    height: 5px;
+    cursor: n-resize;
+  }
+  :global(.rh-s) {
+    bottom: 0;
+    left: 6px;
+    right: 6px;
+    height: 5px;
+    cursor: s-resize;
+  }
+  :global(.rh-e) {
+    right: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 5px;
+    cursor: e-resize;
+  }
+  :global(.rh-w) {
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 5px;
+    cursor: w-resize;
+  }
 
   /* Corner handles (larger for easier grabbing) */
-  :global(.rh-ne) { top: 0; right: 0; width: 10px; height: 10px; cursor: ne-resize; }
-  :global(.rh-nw) { top: 0; left: 0; width: 10px; height: 10px; cursor: nw-resize; }
-  :global(.rh-se) { bottom: 0; right: 0; width: 10px; height: 10px; cursor: se-resize; }
-  :global(.rh-sw) { bottom: 0; left: 0; width: 10px; height: 10px; cursor: sw-resize; }
+  :global(.rh-ne) {
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    cursor: ne-resize;
+  }
+  :global(.rh-nw) {
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    cursor: nw-resize;
+  }
+  :global(.rh-se) {
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    cursor: se-resize;
+  }
+  :global(.rh-sw) {
+    bottom: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    cursor: sw-resize;
+  }
 </style>

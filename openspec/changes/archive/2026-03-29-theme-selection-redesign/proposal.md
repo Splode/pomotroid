@@ -13,9 +13,11 @@ The Appearance section currently renders the full theme list twice — once for 
 ## Capabilities
 
 ### New Capabilities
+
 - `theme-selection-ui`: Tabbed theme picker component — tab strip with inline theme preview, single visible list, active-mode indicator on the relevant tab.
 
 ### Modified Capabilities
+
 - `theme-mode`: The "Independent light and dark theme pickers" requirement is unchanged in behavior but the UI mechanism changes from two simultaneous lists to a single tabbed list. No functional regression; deferred-preview and active-resolution logic are preserved.
 
 ## Impact

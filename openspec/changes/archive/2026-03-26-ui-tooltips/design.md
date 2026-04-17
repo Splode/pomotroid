@@ -5,6 +5,7 @@ Pomotroid uses icon-only buttons in the timer window and terse toggle labels in 
 ## Goals / Non-Goals
 
 **Goals**
+
 - Reusable `Tooltip.svelte` component usable anywhere in both windows.
 - Two interaction modes: delayed (buttons, toggles) and instant (info icons).
 - CSS-driven positioning with a JS fallback to flip above↔below when near a viewport edge.
@@ -12,6 +13,7 @@ Pomotroid uses icon-only buttons in the timer window and terse toggle labels in 
 - Replace the existing GNOME tray `.note` paragraph with an info icon + instant tooltip on Linux.
 
 **Non-Goals**
+
 - Rich content (HTML, images) inside tooltips — plain text only.
 - Touch/mobile support — Pomotroid is desktop-only.
 - Third-party tooltip library — keep the dependency footprint flat.

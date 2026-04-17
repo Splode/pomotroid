@@ -19,7 +19,7 @@ The About screen currently shows a hardcoded `VERSION = '1.0.0'` string that pro
 
 ### Modified Capabilities
 
-*(none — no existing spec-level requirements change)*
+_(none — no existing spec-level requirements change)_
 
 ## Impact
 

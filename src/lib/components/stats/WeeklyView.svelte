@@ -5,13 +5,13 @@
 
   let { week, streak }: { week: DayStat[] | null; streak: StreakInfo | null } = $props();
 
-  const CHART_H = 140;  // px, max bar height
-  const BAR_W   = 52;   // px per bar
-  const BAR_GAP = 16;   // px between bars
+  const CHART_H = 140; // px, max bar height
+  const BAR_W = 52; // px per bar
+  const BAR_GAP = 16; // px between bars
   const CHART_W = 7 * (BAR_W + BAR_GAP) - BAR_GAP; // 412px
 
   // Reactive to app language setting — updates when user changes language in Settings.
-  const shortFmt  = $derived(new Intl.DateTimeFormat(getLocale(), { weekday: 'short' }));
+  const shortFmt = $derived(new Intl.DateTimeFormat(getLocale(), { weekday: 'short' }));
   const narrowFmt = $derived(new Intl.DateTimeFormat(getLocale(), { weekday: 'narrow' }));
 
   // Build a 7-day array (today and the previous 6 days), oldest first.
@@ -40,8 +40,8 @@
   });
 
   const maxRounds = $derived(Math.max(1, ...days.map((d) => d.rounds)));
-  const totalWeek  = $derived(days.reduce((s, d) => s + d.rounds, 0));
-  const hasData    = $derived(totalWeek > 0);
+  const totalWeek = $derived(days.reduce((s, d) => s + d.rounds, 0));
+  const hasData = $derived(totalWeek > 0);
 </script>
 
 <div class="view">
@@ -81,7 +81,10 @@
           class="chart"
         >
           {#each days as day, i}
-            {@const barH = Math.max(day.rounds > 0 ? 4 : 0, Math.round((day.rounds / maxRounds) * CHART_H))}
+            {@const barH = Math.max(
+              day.rounds > 0 ? 4 : 0,
+              Math.round((day.rounds / maxRounds) * CHART_H)
+            )}
             {@const x = i * (BAR_W + BAR_GAP)}
             {@const y = CHART_H - barH}
 
@@ -100,12 +103,9 @@
 
             <!-- Round count label above bar -->
             {#if day.rounds > 0}
-              <text
-                x={x + BAR_W / 2}
-                y={y - 5}
-                text-anchor="middle"
-                class="count-label"
-              >{day.rounds}</text>
+              <text x={x + BAR_W / 2} y={y - 5} text-anchor="middle" class="count-label"
+                >{day.rounds}</text
+              >
             {/if}
 
             <!-- Day label -->
@@ -114,16 +114,12 @@
               y={CHART_H + 20}
               text-anchor="middle"
               class="day-label"
-              class:day-label-today={day.isToday}
-            >{day.short}</text>
+              class:day-label-today={day.isToday}>{day.short}</text
+            >
           {/each}
 
           <!-- Baseline -->
-          <line
-            x1="0" y1={CHART_H}
-            x2={CHART_W} y2={CHART_H}
-            class="baseline"
-          />
+          <line x1="0" y1={CHART_H} x2={CHART_W} y2={CHART_H} class="baseline" />
         </svg>
       </div>
     {/if}
@@ -200,8 +196,13 @@
     opacity: 0.7;
   }
 
-  .chart-wrap { overflow: visible; }
-  .chart { display: block; overflow: visible; }
+  .chart-wrap {
+    overflow: visible;
+  }
+  .chart {
+    display: block;
+    overflow: visible;
+  }
 
   .bar {
     fill: color-mix(in oklch, var(--color-focus-round) 55%, var(--color-background-light));
@@ -212,8 +213,14 @@
   }
 
   @keyframes bar-rise {
-    from { transform: scaleY(0); opacity: 0; }
-    to   { transform: scaleY(1); opacity: 1; }
+    from {
+      transform: scaleY(0);
+      opacity: 0;
+    }
+    to {
+      transform: scaleY(1);
+      opacity: 1;
+    }
   }
 
   .bar-today {

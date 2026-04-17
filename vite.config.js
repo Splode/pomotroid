@@ -1,6 +1,6 @@
-import { defineConfig } from "vite";
-import { sveltekit } from "@sveltejs/kit/vite";
-import { paraglideVitePlugin } from "@inlang/paraglide-js";
+import { defineConfig } from 'vite';
+import { sveltekit } from '@sveltejs/kit/vite';
+import { paraglideVitePlugin } from '@inlang/paraglide-js';
 
 const host = process.env.TAURI_DEV_HOST;
 
@@ -8,9 +8,9 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig(async () => ({
   plugins: [
     paraglideVitePlugin({
-      project: "./project.inlang",
-      outdir: "./src/paraglide",
-      strategy: ["globalVariable", "baseLocale"],
+      project: './project.inlang',
+      outdir: './src/paraglide',
+      strategy: ['globalVariable', 'baseLocale'],
       emitTsDeclarations: true,
     }),
     sveltekit(),
@@ -27,14 +27,14 @@ export default defineConfig(async () => ({
     host: host || false,
     hmr: host
       ? {
-          protocol: "ws",
+          protocol: 'ws',
           host,
           port: 1421,
         }
       : undefined,
     watch: {
       // 3. tell Vite to ignore watching `src-tauri`
-      ignored: ["**/src-tauri/**"],
+      ignored: ['**/src-tauri/**'],
     },
   },
 }));

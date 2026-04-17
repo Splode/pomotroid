@@ -44,6 +44,7 @@ The trigger element is passed via the default slot.
 The system SHALL provide a `TooltipInfo.svelte` component that renders a styled `ⓘ` icon which, when hovered, shows an instant tooltip (`delay={0}`).
 
 It SHALL accept:
+
 - `text: string` — the tooltip string
 
 It is intended for use alongside toggle labels in settings to surface contextual notes without cluttering the layout.
@@ -64,15 +65,15 @@ It is intended for use alongside toggle labels in settings to surface contextual
 
 The following controls in the timer window SHALL have tooltips with the specified i18n keys and delay:
 
-| Element | Location | i18n key | Delay |
-|---|---|---|---|
-| Settings button | Titlebar | `tooltip_settings` | 600 ms |
-| Statistics button | Titlebar | `tooltip_statistics` | 600 ms |
-| Restart Round button | Timer controls | `tooltip_restart_round` | 600 ms |
-| Skip button | Timer controls | `tooltip_skip` | 600 ms |
-| Reset button | Footer | `tooltip_reset` | 600 ms |
-| Mute/Unmute button | Footer | `tooltip_mute` / `tooltip_unmute` | 600 ms |
-| Round indicator | Footer | `tooltip_round_counter` / `tooltip_round_counter_session` | 600 ms |
+| Element              | Location       | i18n key                                                  | Delay  |
+| -------------------- | -------------- | --------------------------------------------------------- | ------ |
+| Settings button      | Titlebar       | `tooltip_settings`                                        | 600 ms |
+| Statistics button    | Titlebar       | `tooltip_statistics`                                      | 600 ms |
+| Restart Round button | Timer controls | `tooltip_restart_round`                                   | 600 ms |
+| Skip button          | Timer controls | `tooltip_skip`                                            | 600 ms |
+| Reset button         | Footer         | `tooltip_reset`                                           | 600 ms |
+| Mute/Unmute button   | Footer         | `tooltip_mute` / `tooltip_unmute`                         | 600 ms |
+| Round indicator      | Footer         | `tooltip_round_counter` / `tooltip_round_counter_session` | 600 ms |
 
 #### Scenario: Reset tooltip communicates consequence
 
@@ -104,14 +105,14 @@ The following controls in the timer window SHALL have tooltips with the specifie
 
 The following settings controls SHALL have a `TooltipInfo` icon (instant, no delay) with the specified i18n keys:
 
-| Setting | Section | i18n key |
-|---|---|---|
-| Show in System Tray (Linux only) | System | `system_tray_gnome_hint` (existing key) |
-| Verbose Logging | System | `tooltip_verbose_logging` |
-| Dial Countdown | Timer | `tooltip_dial_countdown` |
-| Auto-start Work | Timer | `tooltip_auto_start_work` |
-| Auto-start Break | Timer | `tooltip_auto_start_break` |
-| WebSocket Server | System / Advanced | `tooltip_websocket` |
+| Setting                          | Section           | i18n key                                |
+| -------------------------------- | ----------------- | --------------------------------------- |
+| Show in System Tray (Linux only) | System            | `system_tray_gnome_hint` (existing key) |
+| Verbose Logging                  | System            | `tooltip_verbose_logging`               |
+| Dial Countdown                   | Timer             | `tooltip_dial_countdown`                |
+| Auto-start Work                  | Timer             | `tooltip_auto_start_work`               |
+| Auto-start Break                 | Timer             | `tooltip_auto_start_break`              |
+| WebSocket Server                 | System / Advanced | `tooltip_websocket`                     |
 
 The `TooltipInfo` icon for "Show in System Tray" SHALL only be rendered on Linux (guard: `isLinux`). The existing `.note` paragraph that displayed the same text SHALL be removed.
 

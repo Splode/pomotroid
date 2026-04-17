@@ -1,68 +1,68 @@
 version: 2
 updates:
   # ── npm (frontend + Tauri JS plugins) ───────────────────────────────────────
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: 'weekly'
+      day: 'monday'
     groups:
       # All @tauri-apps/* packages must stay version-compatible with each other
       # and with the Rust side, so they always move together — including majors.
       tauri:
         patterns:
-          - "@tauri-apps/*"
+          - '@tauri-apps/*'
 
       # Svelte toolchain: svelte, @sveltejs/kit, adapters, vite plugin, svelte-check.
       # Major bumps are left as individual PRs for careful review.
       svelte:
         patterns:
-          - "svelte"
-          - "svelte-check"
-          - "@sveltejs/*"
-          - "vite"
+          - 'svelte'
+          - 'svelte-check'
+          - '@sveltejs/*'
+          - 'vite'
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
 
       # Inlang / Paraglide localization stack.
       inlang:
         patterns:
-          - "@inlang/*"
+          - '@inlang/*'
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
 
   # ── Cargo (Rust backend) ─────────────────────────────────────────────────────
-  - package-ecosystem: "cargo"
-    directory: "/src-tauri"
+  - package-ecosystem: 'cargo'
+    directory: '/src-tauri'
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: 'weekly'
+      day: 'monday'
     groups:
       # tauri core, tauri-build, and all tauri-plugin-* crates must be
       # version-compatible, so they always move together — including majors.
       tauri:
         patterns:
-          - "tauri"
-          - "tauri-*"
+          - 'tauri'
+          - 'tauri-*'
 
       # Async runtime stack: tokio, axum, futures-util tend to be updated
       # in tandem and rarely have cross-breaking changes at minor/patch level.
       async-runtime:
         patterns:
-          - "tokio"
-          - "axum"
-          - "futures-util"
+          - 'tokio'
+          - 'axum'
+          - 'futures-util'
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'
 
       # serde and serde_json are always updated together.
       serde:
         patterns:
-          - "serde"
-          - "serde_json"
+          - 'serde'
+          - 'serde_json'
         update-types:
-          - "minor"
-          - "patch"
+          - 'minor'
+          - 'patch'

@@ -7,6 +7,7 @@ There is currently no OS color-scheme detection in the codebase. The `applyTheme
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Replace the single `theme` setting with `theme_mode` + `theme_light` + `theme_dark`
 - Resolve the active theme at startup and on live OS change using a shared utility
 - Migrate existing users' `theme` value into both new picker fields automatically
@@ -14,6 +15,7 @@ There is currently no OS color-scheme detection in the codebase. The `applyTheme
 - Remove the `theme` field from settings entirely (no redundant derived state)
 
 **Non-Goals:**
+
 - Filtering or categorizing themes as "light" or "dark" in the UI or JSON
 - Adding new Pomotroid Light/Dark theme variants (separate future work)
 - Per-round-type theme overrides

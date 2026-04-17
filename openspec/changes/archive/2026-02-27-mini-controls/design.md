@@ -1,18 +1,20 @@
 ## Context
 
-The timer UI scales via CSS `zoom` applied to a `.timer` wrapper div in `Timer.svelte`. In compact mode the dial fills all available space calculated as `Math.min(w - 16, h - TITLEBAR_H - 16 - COMPACT_BOTTOM_PAD) / 220`. Adding controls *inside* the zoom wrapper would make them tiny at small window sizes (uiScale can be as low as 0.4). They must therefore live **outside** the zoom wrapper at a fixed rendered size.
+The timer UI scales via CSS `zoom` applied to a `.timer` wrapper div in `Timer.svelte`. In compact mode the dial fills all available space calculated as `Math.min(w - 16, h - TITLEBAR_H - 16 - COMPACT_BOTTOM_PAD) / 220`. Adding controls _inside_ the zoom wrapper would make them tiny at small window sizes (uiScale can be as low as 0.4). They must therefore live **outside** the zoom wrapper at a fixed rendered size.
 
 `Timer.svelte` currently renders one root element: the zoomed `.timer` div. The restructure adds a `.timer-outer` wrapper (flex column, centered) with the zoom div on top and the mini controls below — only in compact mode.
 
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Restart-round, play/pause, and skip buttons visible in compact mode
 - Controls render at a fixed size regardless of uiScale
 - Visual weight is low — does not compete with the dial
 - No new IPC commands, no new backend changes
 
 **Non-Goals:**
+
 - Round label or footer in compact mode
 - Configurable control visibility
 - Touch/swipe interactions

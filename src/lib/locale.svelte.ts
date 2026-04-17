@@ -20,7 +20,7 @@ overwriteGetLocale(() => currentLocale);
  * Accepts the raw DB value ('auto' | BCP-47 tag) and resolves it.
  */
 export function setLocale(language: string): void {
-	const resolved = resolveLocale(language) as SupportedLocale;
-	currentLocale = resolved;
-	info(`[locale] locale set to ${resolved}`).catch(() => {});
+  const resolved = resolveLocale(language) as SupportedLocale;
+  currentLocale = resolved;
+  info(`[locale] locale set to ${resolved}`).catch(() => {});
 }

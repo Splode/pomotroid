@@ -12,7 +12,7 @@ Turkish is a widely spoken language with a large desktop-software user base, and
 
 ### New Capabilities
 
-*(none — this change adds a locale within the existing localization system)*
+_(none — this change adds a locale within the existing localization system)_
 
 ### Modified Capabilities
 

@@ -5,6 +5,7 @@ Global shortcuts are registered unconditionally at startup via `shortcuts::regis
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Single boolean setting controls whether any global shortcuts are active.
 - Toggling off unregisters all shortcuts immediately (no restart required).
 - Toggling on registers shortcuts immediately using current key bindings.
@@ -12,6 +13,7 @@ Global shortcuts are registered unconditionally at startup via `shortcuts::regis
 - Individual shortcut fields remain editable while disabled (values persist, just not active).
 
 **Non-Goals:**
+
 - Per-shortcut enable/disable (all or nothing).
 - Changing the individual shortcut key defaults.
 - Any change to shortcut behaviour when enabled.
@@ -36,6 +38,7 @@ Global shortcuts are registered unconditionally at startup via `shortcuts::regis
 ## Migration Plan
 
 Add a new migration version in `db/migrations.rs`:
+
 ```sql
 INSERT OR IGNORE INTO settings (key, value) VALUES ('global_shortcuts_enabled', 'false');
 ```

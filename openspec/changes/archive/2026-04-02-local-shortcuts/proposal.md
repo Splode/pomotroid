@@ -13,9 +13,11 @@ Pomotroid already supports global shortcuts that work system-wide, but lacks any
 ## Capabilities
 
 ### New Capabilities
+
 - `local-shortcuts`: Keyboard shortcuts active while the application window is focused, covering pause/resume, round reset, round skip, volume up/down, mute, and fullscreen toggle — all re-mappable via Settings
 
 ### Modified Capabilities
+
 - `shortcuts`: The existing global shortcuts spec must be extended: Settings → Shortcuts section now displays both global and local shortcut bindings; "Reset All Settings" must also reset local shortcut bindings to defaults
 
 ## Impact

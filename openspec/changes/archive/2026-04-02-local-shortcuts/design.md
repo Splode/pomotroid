@@ -7,6 +7,7 @@ Local shortcuts are a different, complementary mechanism: they fire only while t
 ## Goals / Non-Goals
 
 **Goals:**
+
 - 7 default local shortcuts active whenever any Pomotroid window has focus
 - All 7 bindings are user-configurable via Settings → Shortcuts
 - Bindings persist in SQLite alongside global shortcut bindings
@@ -15,6 +16,7 @@ Local shortcuts are a different, complementary mechanism: they fire only while t
 - No separate enable/disable toggle (local shortcuts are always active while focused)
 
 **Non-Goals:**
+
 - Modifier-key chording for local shortcuts (single keys only, consistent with defaults like Space, Arrow keys, M, F11)
 - Per-window shortcut overrides (same bindings apply to both main and settings windows)
 - Local shortcut conflict detection with global shortcuts

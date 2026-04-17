@@ -31,11 +31,11 @@ Be kind and respectful to the members of the community. Take time to educate oth
 
 ### Prerequisites
 
-| Tool | Version |
-|------|---------|
-| Node.js | 22+ |
-| Rust | stable (via [rustup](https://rustup.rs)) |
-| npm | bundled with Node.js |
+| Tool    | Version                                  |
+| ------- | ---------------------------------------- |
+| Node.js | 22+                                      |
+| Rust    | stable (via [rustup](https://rustup.rs)) |
+| npm     | bundled with Node.js                     |
 
 **Linux** — install system dependencies:
 
@@ -60,6 +60,9 @@ npm run tauri dev
 ### Checks and tests
 
 ```bash
+# Format all frontend source files (Prettier)
+npm run format
+
 # TypeScript + Svelte type checking
 npm run check
 
@@ -70,7 +73,9 @@ cargo test --manifest-path src-tauri/Cargo.toml
 cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
 ```
 
-All three must pass before submitting a pull request. The CI pipeline runs them automatically.
+All must pass before submitting a pull request. The CI pipeline runs them automatically.
+
+If you use VS Code, formatting happens automatically on save — install the [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [Svelte for VS Code](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) extensions.
 
 ### Seeding test data
 
@@ -118,7 +123,7 @@ pomotroid/
 
 1. Fork the repository and create a feature branch from `main`.
 2. Make your changes. Keep commits focused and use conventional commit prefixes (`feat:`, `fix:`, `chore:`, etc.).
-3. Ensure all checks pass (`npm run check`, `cargo test`, `cargo clippy`).
+3. Ensure all checks pass (`npm run format`, `npm run check`, `cargo test`, `cargo clippy`).
 4. Open a pull request against `main` with a clear description of what changed and why.
 
 ### Adding a built-in theme
@@ -128,6 +133,7 @@ Built-in themes are embedded into the binary at compile time, so adding one requ
 1. **Create the theme JSON** in `static/themes/your-theme-name.json`. See `THEMES.md` for the required format and color keys.
 
 2. **Register it** in `src-tauri/src/themes/mod.rs` — add an `include_str!()` entry to the `BUNDLED_JSON` array:
+
    ```rust
    include_str!("../../../static/themes/your-theme-name.json"),
    ```
@@ -143,6 +149,7 @@ The app uses [Inlang + Paraglide](https://inlang.com) for translations. Adding a
 1. **Create the message file** at `src/messages/{locale}.json`. Copy `src/messages/en.json` as a starting point and translate all values — do not change any keys.
 
 2. **Register the locale** by adding it to the `locales` array in `project.inlang/settings.json`:
+
    ```json
    "locales": ["en", "zh", "pt", "your-locale"]
    ```
@@ -184,6 +191,7 @@ Open `CHANGELOG.md` and make sure `[Unreleased]` accurately describes everything
 ```
 
 This will:
+
 - Update the version in `tauri.conf.json`, `Cargo.toml`, and `package.json`
 - Rename `[Unreleased]` in `CHANGELOG.md` to `[v1.1.0] - YYYY-MM-DD`
 - Commit all changes and create an annotated `v1.1.0` tag
@@ -195,6 +203,7 @@ git push origin main --follow-tags
 ```
 
 Pushing the tag triggers the [release workflow](.github/workflows/release.yml), which:
+
 - Builds Linux (`.deb`, `.AppImage`), macOS (universal `.dmg`), and Windows (`.exe` installer) in parallel
 - Creates a **draft** GitHub Release with all artifacts attached and the changelog section as the release body
 - Commits `latest.json` (auto-updater manifest) and `pomotroid.json` (Scoop manifest) to `main`
@@ -218,8 +227,8 @@ This adds a fresh `[Unreleased]` block at the top of `CHANGELOG.md` and commits 
 
 Pomotroid follows [Semantic Versioning](https://semver.org):
 
-| Change | Version bump |
-|--------|-------------|
-| Breaking changes or major rewrites | `X.0.0` |
-| New features, backward-compatible | `X.Y.0` |
-| Bug fixes only | `X.Y.Z` |
+| Change                             | Version bump |
+| ---------------------------------- | ------------ |
+| Breaking changes or major rewrites | `X.0.0`      |
+| New features, backward-compatible  | `X.Y.0`      |
+| Bug fixes only                     | `X.Y.Z`      |

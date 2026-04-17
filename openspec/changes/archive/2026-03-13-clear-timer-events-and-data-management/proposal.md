@@ -11,9 +11,11 @@ The `sessions` table accumulates a row for every completed or skipped timer roun
 ## Capabilities
 
 ### New Capabilities
+
 - `session-history-management`: Clear all stored session history records from the `sessions` table via a confirmed destructive action in Settings → System.
 
 ### Modified Capabilities
+
 - `settings`: The "Reset All Settings" action relocates from Settings → About to Settings → System. No change to its behaviour or confirmation flow.
 
 ## Impact
