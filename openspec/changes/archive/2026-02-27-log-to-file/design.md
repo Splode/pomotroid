@@ -5,6 +5,7 @@ Pomotroid currently has no persistent diagnostic output. All error handling uses
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Rotating log file written to the OS-conventional application log directory
 - All existing `eprintln!` replaced with structured `log::` calls at the appropriate level
 - Every error path and major lifecycle event instrumented
@@ -14,6 +15,7 @@ Pomotroid currently has no persistent diagnostic output. All error handling uses
 - User can open the log directory from Settings → About
 
 **Non-Goals:**
+
 - Structured / machine-parseable log format (plain text is sufficient for bug reports)
 - Remote log shipping or crash reporting services
 - Log viewing UI within the app
@@ -56,11 +58,11 @@ When the setting is toggled at runtime, the `settings_set` command handler calls
 
 `tauri-plugin-log` resolves via `app.path().app_log_dir()` using the app identifier `com.splode.pomotroid`:
 
-| Platform | Path |
-|---|---|
-| Linux   | `~/.local/share/com.splode.pomotroid/logs/pomotroid.log` |
-| macOS   | `~/Library/Logs/com.splode.pomotroid/pomotroid.log` |
-| Windows | `%APPDATA%\com.splode.pomotroid\logs\pomotroid.log` |
+| Platform | Path                                                     |
+| -------- | -------------------------------------------------------- |
+| Linux    | `~/.local/share/com.splode.pomotroid/logs/pomotroid.log` |
+| macOS    | `~/Library/Logs/com.splode.pomotroid/pomotroid.log`      |
+| Windows  | `%APPDATA%\com.splode.pomotroid\logs\pomotroid.log`      |
 
 ---
 
@@ -91,6 +93,7 @@ A new Tauri command that calls `tauri_plugin_opener::open_path(app.path().app_lo
 ### JS-side logging
 
 `@tauri-apps/plugin-log` (the JS counterpart) forwards `info()`, `warn()`, `error()`, `debug()` calls from the Svelte webviews to the same file via IPC. Applied at:
+
 - `+page.svelte`: startup lifecycle, IPC errors, theme/locale initialization
 - `settings/+page.svelte`: same
 - `locale.svelte.ts`: locale changes

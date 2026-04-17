@@ -5,6 +5,7 @@ Pomotroid currently has no mechanism to notify users of new releases. Users must
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Detect available updates automatically when the user opens Settings
 - Let the user install with a single button click (no silent forced updates)
 - Provide an opt-out setting for users who prefer manual updates
@@ -12,6 +13,7 @@ Pomotroid currently has no mechanism to notify users of new releases. Users must
 - Keep the update manifest (`latest.json`) in the same repo, committed by CI alongside the Scoop manifest
 
 **Non-Goals:**
+
 - Silent/forced background updates without user interaction
 - Update support for `.deb` or `.rpm` packages (Tauri updater does not support them)
 - Delta/partial updates — full bundle replacement only
@@ -21,34 +23,41 @@ Pomotroid currently has no mechanism to notify users of new releases. Users must
 ## Decisions
 
 ### D1: Use `tauri-plugin-updater` rather than a custom HTTP check
+
 **Decision**: Use the official Tauri 2 updater plugin.
 **Rationale**: It handles Ed25519 signature verification, cross-platform bundle download and install, and the Tauri app relaunch flow out of the box. Writing equivalent logic from scratch would be higher risk and higher maintenance. The plugin is actively maintained by the Tauri team and is the documented approach for Tauri 2 apps.
 **Alternative considered**: A custom `reqwest`-based check that just reads `latest.json` and opens a browser link. Rejected because it provides no install-in-app path and requires duplicating version comparison logic.
 
 ### D2: Host `latest.json` committed to `main` (not a GitHub Release asset)
+
 **Decision**: CI generates and commits `latest.json` to the repo root on every release build.
 **Rationale**: Pomotroid already does this for `pomotroid.json` (Scoop manifest). Same CI pattern, same atomic commit, no extra GitHub Releases API calls needed from the updater. The raw GitHub URL for a file on `main` is stable and version-independent.
 **Alternative considered**: Attach `latest.json` as a GitHub Release asset. More semantically correct but requires the updater endpoint URL to change per release or use a permanent redirect, adding complexity.
 **Alternative considered**: Use `releases.tauri.app` (Tauri's hosted manifest service). Adds an external service dependency; Option A is simpler and self-contained.
 
 ### D3: Check on settings window open, not at app startup
+
 **Decision**: Trigger the update check when the settings window opens, specifically in `AboutSection.svelte`'s `onMount`.
 **Rationale**: The main timer window is the primary UX and should not be interrupted. Users who open Settings are already in a reflective/administrative mindset. Avoids startup latency for the common case (running a Pomodoro session with no intention to update).
 **Alternative considered**: Check at app startup (main window). Rejected — adds startup latency and distracts from the primary workflow.
 
 ### D4: Hybrid UX — silent check, explicit install action
+
 **Decision**: The check runs silently in the background. If an update is found, the About section shows an "Install vX.Y.Z" button. No toast, no blocking dialog.
 **Rationale**: Non-intrusive. The user is already in Settings → About when the result appears. They can act or ignore. Forced prompts are annoying in a focus app.
 
 ### D5: `check_for_updates` setting defaults to `true`
+
 **Decision**: Auto-checking is on by default, with an opt-out toggle in Settings → System.
 **Rationale**: Most users benefit from updates and won't configure this. Power users who prefer manual control can disable it. Defaulting to `false` would mean most users never see updates.
 
 ### D6: Update check and install are frontend-initiated via Tauri command
+
 **Decision**: A single `check_update` Tauri command returns a serialized update result (or null). The install step is a separate `install_update` command (or handled via a JS method on the returned update object).
 **Rationale**: The frontend owns the UX state machine (idle → checking → available/none → installing → relaunching). Keeping this logic on the frontend avoids adding background Rust threads and makes the state transitions easy to track with Svelte runes.
 
 ### D7: Ed25519 keypair — one-time generation, private key in GitHub Secrets
+
 **Decision**: Generate an Ed25519 keypair once using `tauri signer generate`. Store the private key as `TAURI_SIGNING_PRIVATE_KEY` in GitHub Secrets. Embed the public key in `tauri.conf.json`.
 **Rationale**: Standard Tauri signing workflow. Private key never leaves GitHub Secrets. Public key in config allows the runtime to verify bundle integrity before installing.
 

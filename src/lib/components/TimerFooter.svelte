@@ -1,10 +1,10 @@
 <script lang="ts">
   // Round counter, reset/skip buttons, and volume slider.
-  import type { TimerState } from "$lib/types";
-  import { timerReset, setSetting } from "$lib/ipc";
-  import { settings } from "$lib/stores/settings";
-  import * as m from "$paraglide/messages.js";
-  import Tooltip from "./Tooltip.svelte";
+  import type { TimerState } from '$lib/types';
+  import { timerReset, setSetting } from '$lib/ipc';
+  import { settings } from '$lib/stores/settings';
+  import * as m from '$paraglide/messages.js';
+  import Tooltip from './Tooltip.svelte';
 
   interface Props {
     snap: TimerState;
@@ -27,7 +27,7 @@
   function handleVolumeChange(e: Event) {
     const val = (e.target as HTMLInputElement).valueAsNumber;
     localVolume = val;
-    setSetting("volume", String(Math.round(val * 100)));
+    setSetting('volume', String(Math.round(val * 100)));
   }
 
   function toggleMute() {
@@ -35,11 +35,11 @@
       const restore = premuteVolume ?? 1.0;
       premuteVolume = null;
       localVolume = restore;
-      setSetting("volume", String(Math.round(restore * 100)));
+      setSetting('volume', String(Math.round(restore * 100)));
     } else {
       premuteVolume = localVolume;
       localVolume = 0;
-      setSetting("volume", "0");
+      setSetting('volume', '0');
     }
   }
 </script>
@@ -73,7 +73,7 @@
     <button
       class="btn-icon"
       onclick={toggleMute}
-      aria-label={localVolume === 0 ? "Unmute" : "Mute"}
+      aria-label={localVolume === 0 ? 'Unmute' : 'Mute'}
       onmouseenter={() => (showVolume = true)}
       onmouseleave={() => (showVolume = false)}
     >

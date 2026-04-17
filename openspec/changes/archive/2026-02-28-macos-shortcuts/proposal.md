@@ -12,9 +12,11 @@ Global keyboard shortcuts are silently non-functional on macOS due to two compou
 ## Capabilities
 
 ### New Capabilities
+
 - `macos-shortcuts`: macOS-specific shortcut defaults and Accessibility permission detection/guidance
 
 ### Modified Capabilities
+
 - `shortcuts`: Default shortcut values are now platform-aware (macOS gets `Command+Shift+1–4`)
 
 ## Impact

@@ -15,16 +15,19 @@ A theme is a single `.json` file with a name and a set of hex color values.
 The directory is not created automatically. Make it once:
 
 **Linux**
+
 ```sh
 mkdir -p ~/.local/share/com.splode.pomotroid/themes
 ```
 
 **macOS**
+
 ```sh
 mkdir -p ~/Library/Application\ Support/com.splode.pomotroid/themes
 ```
 
 **Windows** (PowerShell)
+
 ```powershell
 New-Item -ItemType Directory -Force "$env:APPDATA\com.splode.pomotroid\themes"
 ```
@@ -57,18 +60,18 @@ Open **Settings → Appearance**. Your theme appears in the picker with a **Cust
 
 ## Color reference
 
-| Key | Used for |
-|-----|----------|
-| `--color-focus-round` | Work round indicator — dial arc, round dot |
-| `--color-short-round` | Short break indicator |
-| `--color-long-round` | Long break indicator |
-| `--color-background` | Main window background |
-| `--color-background-light` | Sidebar, cards, elevated surfaces |
-| `--color-background-lightest` | Borders, dividers, subtler surfaces |
-| `--color-foreground` | Primary text |
-| `--color-foreground-darker` | Secondary text, labels |
-| `--color-foreground-darkest` | Tertiary text, placeholders |
-| `--color-accent` | Highlighted elements, active states |
+| Key                           | Used for                                   |
+| ----------------------------- | ------------------------------------------ |
+| `--color-focus-round`         | Work round indicator — dial arc, round dot |
+| `--color-short-round`         | Short break indicator                      |
+| `--color-long-round`          | Long break indicator                       |
+| `--color-background`          | Main window background                     |
+| `--color-background-light`    | Sidebar, cards, elevated surfaces          |
+| `--color-background-lightest` | Borders, dividers, subtler surfaces        |
+| `--color-foreground`          | Primary text                               |
+| `--color-foreground-darker`   | Secondary text, labels                     |
+| `--color-foreground-darkest`  | Tertiary text, placeholders                |
+| `--color-accent`              | Highlighted elements, active states        |
 
 All values must be CSS hex colors (`#rrggbb` or `#rrggbbaa`).
 

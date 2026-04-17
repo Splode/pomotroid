@@ -14,8 +14,24 @@
   {#if !isMac}
     <button class="btn-close" onclick={close} aria-label="Close">
       <svg width="12" height="12" viewBox="0 0 12 12">
-        <line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <line
+          x1="1"
+          y1="1"
+          x2="11"
+          y2="11"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
+        <line
+          x1="11"
+          y1="1"
+          x2="1"
+          y2="11"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
       </svg>
     </button>
   {/if}
@@ -60,7 +76,9 @@
     width: 28px;
     height: 28px;
     border-radius: 4px;
-    transition: color 0.15s, background 0.15s;
+    transition:
+      color 0.15s,
+      background 0.15s;
   }
 
   .btn-close:hover {

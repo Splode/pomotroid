@@ -24,12 +24,12 @@
   type Section = 'timer' | 'appearance' | 'notifications' | 'shortcuts' | 'system' | 'about';
 
   const SECTIONS: { id: Section; label: () => string }[] = [
-    { id: 'timer',         label: m.nav_timer },
-    { id: 'appearance',    label: m.nav_appearance },
+    { id: 'timer', label: m.nav_timer },
+    { id: 'appearance', label: m.nav_appearance },
     { id: 'notifications', label: m.nav_notifications },
-    { id: 'shortcuts',     label: m.nav_shortcuts },
-    { id: 'system',        label: m.nav_system },
-    { id: 'about',         label: m.nav_about },
+    { id: 'shortcuts', label: m.nav_shortcuts },
+    { id: 'system', label: m.nav_system },
+    { id: 'about', label: m.nav_about },
   ];
 
   let active = $state<Section>('timer');
@@ -46,33 +46,39 @@
     const shortcutHandler = createLocalShortcutHandler({
       getSettings: () => $settings,
       getVolume: () => localVolume,
-      setVolume: (v) => { localVolume = v; },
+      setVolume: (v) => {
+        localVolume = v;
+      },
       getPreMuteVolume: () => preMuteVolume,
-      setPreMuteVolume: (v) => { preMuteVolume = v; },
+      setPreMuteVolume: (v) => {
+        preMuteVolume = v;
+      },
       getFullscreen: () => isFullscreen,
-      setFullscreen: (v) => { isFullscreen = v; },
+      setFullscreen: (v) => {
+        isFullscreen = v;
+      },
     });
     document.addEventListener('keydown', shortcutHandler);
     cleanups.push(() => document.removeEventListener('keydown', shortcutHandler));
 
     (async () => {
       try {
-      const s = await getSettings();
-      settings.set(s);
-      localVolume = s.volume;
+        const s = await getSettings();
+        settings.set(s);
+        localVolume = s.volume;
 
-      // Apply the stored locale on mount.
-      setLocale(s.language);
-      await info(`[settings] settings loaded, locale=${s.language}`);
+        // Apply the stored locale on mount.
+        setLocale(s.language);
+        await info(`[settings] settings loaded, locale=${s.language}`);
 
-      const themes = await getThemes();
-      const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const activeTheme = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
-      if (activeTheme) applyTheme(activeTheme);
-      await info(`[settings] initialized, theme=${activeTheme?.name ?? 'none'}`);
+        const themes = await getThemes();
+        const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const activeTheme = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
+        if (activeTheme) applyTheme(activeTheme);
+        await info(`[settings] initialized, theme=${activeTheme?.name ?? 'none'}`);
 
-      // Show the window now that the theme is applied (avoids white flash)
-      await getCurrentWebviewWindow().show();
+        // Show the window now that the theme is applied (avoids white flash)
+        await getCurrentWebviewWindow().show();
       } catch (e) {
         await logError(`[settings] initialization failed: ${e}`);
         throw e;
@@ -113,13 +119,16 @@
         }),
         await onThemesChanged((updated) => {
           const dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          const current = updated.find((t) => t.name === resolveThemeName($settings, dark)) ?? updated[0];
+          const current =
+            updated.find((t) => t.name === resolveThemeName($settings, dark)) ?? updated[0];
           if (current) applyTheme(current);
-        }),
+        })
       );
     })();
 
-    return () => { for (const fn of cleanups) fn(); };
+    return () => {
+      for (const fn of cleanups) fn();
+    };
   });
 </script>
 
@@ -134,7 +143,9 @@
           <button
             class="nav-item"
             class:active={active === section.id}
-            onclick={() => { active = section.id; }}
+            onclick={() => {
+              active = section.id;
+            }}
           >
             {section.label()}
           </button>
@@ -201,7 +212,10 @@
     letter-spacing: 0.03em;
     color: var(--color-foreground-darker, var(--color-foreground));
     cursor: pointer;
-    transition: color 0.12s, background 0.12s, border-color 0.12s;
+    transition:
+      color 0.12s,
+      background 0.12s,
+      border-color 0.12s;
   }
 
   .nav-item:hover {

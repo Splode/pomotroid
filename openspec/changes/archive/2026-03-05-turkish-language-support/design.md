@@ -13,11 +13,13 @@ The English file (`src/messages/en.json`) is the source of truth. It currently c
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Ship a complete `tr.json` with all 109 keys translated to Turkish.
 - Register `"tr"` in `project.inlang/settings.json`.
 - Add Turkish to the language picker dropdown.
 
 **Non-Goals:**
+
 - Human review of translations (initial translations are machine-generated; community corrections can follow via the standard contribution workflow).
 - Right-to-left layout changes (Turkish is a left-to-right language).
 - Any changes to the Paraglide build pipeline.

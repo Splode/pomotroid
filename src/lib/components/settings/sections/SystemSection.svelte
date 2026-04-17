@@ -10,14 +10,14 @@
   // Language options: value stored in DB, label shown in native language.
   const LANGUAGES = [
     { value: 'auto', label: 'Auto' },
-    { value: 'en',   label: 'English' },
-    { value: 'es',   label: 'Español' },
-    { value: 'fr',   label: 'Français' },
-    { value: 'de',   label: 'Deutsch' },
-    { value: 'ja',   label: '日本語' },
-    { value: 'zh',   label: '中文' },
-    { value: 'pt',   label: 'Português' },
-    { value: 'tr',   label: 'Türkçe' },
+    { value: 'en', label: 'English' },
+    { value: 'es', label: 'Español' },
+    { value: 'fr', label: 'Français' },
+    { value: 'de', label: 'Deutsch' },
+    { value: 'ja', label: '日本語' },
+    { value: 'zh', label: '中文' },
+    { value: 'pt', label: 'Português' },
+    { value: 'tr', label: 'Türkçe' },
   ];
 
   // On Linux, probe for libayatana-appindicator3 at runtime.  The tray section
@@ -29,7 +29,9 @@
   });
 
   let localPort = $state(String($settings.websocket_port));
-  $effect(() => { localPort = String($settings.websocket_port); });
+  $effect(() => {
+    localPort = String($settings.websocket_port);
+  });
 
   let langOpen = $state(false);
   let langEl: HTMLElement | undefined;
@@ -108,9 +110,9 @@
       />
     </div>
     <p class="note">
-      Listens on <code>ws://127.0.0.1:{$settings.websocket_port}/ws</code>.
-      Send <code>{"{ \"type\": \"getState\" }"}</code> to query the current timer state.
-      Round changes are broadcast automatically.
+      Listens on <code>ws://127.0.0.1:{$settings.websocket_port}/ws</code>. Send
+      <code>{'{ "type": "getState" }'}</code> to query the current timer state. Round changes are broadcast
+      automatically.
     </p>
   {/if}
 
@@ -122,11 +124,27 @@
         class="lang-trigger"
         class:open={langOpen}
         onclick={() => (langOpen = !langOpen)}
-        onkeydown={(e) => { if (e.key === 'Escape') langOpen = false; }}
+        onkeydown={(e) => {
+          if (e.key === 'Escape') langOpen = false;
+        }}
       >
         <span>{selectedLabel}</span>
-        <svg class="chevron" class:open={langOpen} width="10" height="6" viewBox="0 0 10 6" aria-hidden="true">
-          <polyline points="0,0.5 5,5.5 10,0.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <svg
+          class="chevron"
+          class:open={langOpen}
+          width="10"
+          height="6"
+          viewBox="0 0 10 6"
+          aria-hidden="true"
+        >
+          <polyline
+            points="0,0.5 5,5.5 10,0.5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </button>
 
@@ -140,7 +158,9 @@
               role="option"
               aria-selected={$settings.language === lang.value}
               onmousedown={() => selectLanguage(lang.value)}
-            >{lang.label}</li>
+            >
+              {lang.label}
+            </li>
           {/each}
         </ul>
       {/if}
@@ -226,7 +246,9 @@
       </button>
     {:else}
       <div class="confirm-row">
-        <span class="confirm-label">This will permanently delete all session history. This cannot be undone.</span>
+        <span class="confirm-label"
+          >This will permanently delete all session history. This cannot be undone.</span
+        >
         <div class="confirm-actions">
           <button class="confirm-cancel" onclick={() => (confirmingClear = false)}>Cancel</button>
           <button class="confirm-destructive" onclick={handleClear}>Clear</button>
@@ -411,7 +433,9 @@
     font-size: 0.85rem;
     letter-spacing: 0.02em;
     text-align: left;
-    transition: background 0.12s, color 0.12s;
+    transition:
+      background 0.12s,
+      color 0.12s;
   }
 
   .data-row:last-child {
@@ -455,7 +479,9 @@
     font-size: 0.8rem;
     padding: 5px 14px;
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+    transition:
+      border-color 0.15s,
+      color 0.15s;
   }
 
   .confirm-cancel {

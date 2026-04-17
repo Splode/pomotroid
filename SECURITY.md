@@ -63,10 +63,10 @@ gpg --armor --export-secret-keys <FINGERPRINT>
 
 Add the following secrets to the GitHub repository (Settings → Secrets and variables → Actions):
 
-| Secret name | Value |
-|---|---|
+| Secret name       | Value                                                               |
+| ----------------- | ------------------------------------------------------------------- |
 | `GPG_PRIVATE_KEY` | The full output of `gpg --armor --export-secret-keys <FINGERPRINT>` |
-| `GPG_PASSPHRASE` | The passphrase chosen during key generation |
+| `GPG_PASSPHRASE`  | The passphrase chosen during key generation                         |
 
 ### Key rotation
 

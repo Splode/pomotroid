@@ -5,6 +5,7 @@ The sessions table (schema v1) already records every round with `started_at`, `e
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Dedicated statistics window with three tabs: Today, This Week, All Time
 - Today tab: stat cards (rounds, focus time, completion rate) + hourly session timeline
 - This Week tab: per-day bar chart (7 days) + current streak counter
@@ -15,6 +16,7 @@ The sessions table (schema v1) already records every round with `started_at`, `e
 - Heatmap uses a fixed 4-level intensity scale (0 / 1–3 / 4–7 / 8+) mapped to theme colors
 
 **Non-Goals:**
+
 - Editing or deleting session history
 - Export to CSV/JSON
 - Per-project or tag-based tracking
@@ -65,6 +67,7 @@ The sessions table (schema v1) already records every round with `started_at`, `e
 ### 6. IPC shape: two new commands
 
 **Decision**:
+
 - `stats_get_detailed` → `{ today: DailyStats, week: Vec<DayStat>, streak: StreakInfo }` — batched to minimize round-trips for the common case (Today + This Week tabs)
 - `stats_get_heatmap` → `Vec<HeatmapEntry>` — separate command since it queries a full year of data and is only needed for the All Time tab
 

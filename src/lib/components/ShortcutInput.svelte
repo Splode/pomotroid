@@ -12,9 +12,9 @@
   let listening = $state(false);
 
   function codeToKey(code: string): string | null {
-    if (code.startsWith('Key')) return code.slice(3);       // "KeyA" → "A"
-    if (code.startsWith('Digit')) return code.slice(5);     // "Digit1" → "1"
-    if (/^F([1-9]|1[0-2])$/.test(code)) return code;       // "F1"–"F12"
+    if (code.startsWith('Key')) return code.slice(3); // "KeyA" → "A"
+    if (code.startsWith('Digit')) return code.slice(5); // "Digit1" → "1"
+    if (/^F([1-9]|1[0-2])$/.test(code)) return code; // "F1"–"F12"
     if (code === 'Space') return 'Space';
     if (code === 'Enter') return 'Enter';
     if (code === 'Escape') return 'Escape';

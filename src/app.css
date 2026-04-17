@@ -39,7 +39,7 @@
      which creates subtle dark overlays on light themes and light overlays on
      dark themes without any hardcoded rgba(255,255,255,...) values. */
   --color-separator: color-mix(in oklch, var(--color-foreground) 8%, transparent);
-  --color-hover:     color-mix(in oklch, var(--color-foreground) 10%, transparent);
+  --color-hover: color-mix(in oklch, var(--color-foreground) 10%, transparent);
 
   /* Transition timing tokens — components reference these for consistency */
   --transition-default: 0.2s ease;
@@ -85,6 +85,12 @@ body {
 }
 
 @keyframes icon-fade-in {
-  from { opacity: 0; transform: scale(0.8); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

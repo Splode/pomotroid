@@ -11,9 +11,7 @@
   let remaining = $derived(state.total_secs - state.elapsed_secs);
   let minutes = $derived(Math.floor(remaining / 60));
   let seconds = $derived(remaining % 60);
-  let display = $derived(
-    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-  );
+  let display = $derived(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`);
 </script>
 
 <div class="display">

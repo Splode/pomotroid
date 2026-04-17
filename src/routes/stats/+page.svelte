@@ -2,9 +2,14 @@
   import '../../app.css';
   import { onMount } from 'svelte';
   import {
-    getSettings, getThemes,
-    onSettingsChanged, onThemesChanged, onRoundChange, onSessionsCleared,
-    statsGetDetailed, statsGetHeatmap,
+    getSettings,
+    getThemes,
+    onSettingsChanged,
+    onThemesChanged,
+    onRoundChange,
+    onSessionsCleared,
+    statsGetDetailed,
+    statsGetHeatmap,
   } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import { applyTheme } from '$lib/stores/theme';
@@ -58,7 +63,7 @@
         const osDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         const activeTheme = themes.find((t) => t.name === resolveThemeName(s, osDark)) ?? themes[0];
         if (activeTheme) applyTheme(activeTheme);
-        
+
         // Show window immediately after theme is applied
         await getCurrentWebviewWindow().show();
 
@@ -113,7 +118,7 @@
           const current =
             updated.find((t) => t.name === resolveThemeName($settings, dark)) ?? updated[0];
           if (current) applyTheme(current);
-        }),
+        })
       );
     })();
 
@@ -130,8 +135,24 @@
     {#if !isMac}
       <button class="btn-close" onclick={close} aria-label="Close">
         <svg width="12" height="12" viewBox="0 0 12 12">
-          <line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <line
+            x1="1"
+            y1="1"
+            x2="11"
+            y2="11"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+          <line
+            x1="11"
+            y1="1"
+            x2="1"
+            y2="11"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
         </svg>
       </button>
     {/if}
@@ -139,9 +160,15 @@
 
   <!-- Tab bar -->
   <div class="tabs">
-    <button class="tab" class:active={activeTab === 'today'}   onclick={() => switchTab('today')}>{m.stats_tab_today()}</button>
-    <button class="tab" class:active={activeTab === 'week'}    onclick={() => switchTab('week')}>{m.stats_tab_week()}</button>
-    <button class="tab" class:active={activeTab === 'alltime'} onclick={() => switchTab('alltime')}>{m.stats_tab_alltime()}</button>
+    <button class="tab" class:active={activeTab === 'today'} onclick={() => switchTab('today')}
+      >{m.stats_tab_today()}</button
+    >
+    <button class="tab" class:active={activeTab === 'week'} onclick={() => switchTab('week')}
+      >{m.stats_tab_week()}</button
+    >
+    <button class="tab" class:active={activeTab === 'alltime'} onclick={() => switchTab('alltime')}
+      >{m.stats_tab_alltime()}</button
+    >
   </div>
 
   <!-- Content -->
@@ -179,7 +206,9 @@
     border-bottom: 1px solid var(--color-separator);
   }
 
-  .macos { padding-left: 72px; }
+  .macos {
+    padding-left: 72px;
+  }
 
   .titlebar-label {
     font-size: 0.75rem;
@@ -203,7 +232,9 @@
     width: 28px;
     height: 28px;
     border-radius: 4px;
-    transition: color 0.15s, background 0.15s;
+    transition:
+      color 0.15s,
+      background 0.15s;
   }
 
   .btn-close:hover {
@@ -232,7 +263,9 @@
     text-transform: uppercase;
     color: var(--color-foreground-darker);
     cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
+    transition:
+      color 0.15s,
+      border-color 0.15s;
   }
 
   .tab:hover {

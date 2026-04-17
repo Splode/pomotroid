@@ -20,9 +20,17 @@
     onclick={(e) => e.stopPropagation()}
   >
     <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
-      <circle cx="6.5" cy="6.5" r="5.75" stroke="currentColor" stroke-width="1.5"/>
-      <circle cx="6.5" cy="4" r="0.9" fill="currentColor"/>
-      <line x1="6.5" y1="6" x2="6.5" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="6.5" cy="6.5" r="5.75" stroke="currentColor" stroke-width="1.5" />
+      <circle cx="6.5" cy="4" r="0.9" fill="currentColor" />
+      <line
+        x1="6.5"
+        y1="6"
+        x2="6.5"
+        y2="10"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+      />
     </svg>
   </span>
 </Tooltip>

@@ -23,7 +23,9 @@
     return v.split('-')[0].split('+')[0];
   }
 
-  let releaseUrl = $derived(`${REPO}/releases/tag/v${baseOnly(version === '...' ? BASE_VERSION : version)}`);
+  let releaseUrl = $derived(
+    `${REPO}/releases/tag/v${baseOnly(version === '...' ? BASE_VERSION : version)}`
+  );
 
   onMount(async () => {
     try {
@@ -77,7 +79,7 @@
       xmlns="http://www.w3.org/2000/svg"
       aria-label="Pomotroid logo"
     >
-      <circle fill="var(--color-background-light)" cx="128" cy="128" r="126.81"/>
+      <circle fill="var(--color-background-light)" cx="128" cy="128" r="126.81" />
       <circle
         fill="none"
         stroke="var(--color-focus-round)"
@@ -98,19 +100,36 @@
     <button class="link-row" onclick={() => openUrl(releaseUrl)}>
       <span>{m.about_release_notes()}</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path
+          d="M2 10L10 2M10 2H4M10 2V8"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </button>
     <button class="link-row" onclick={() => openUrl(REPO)}>
       <span>{m.about_source_code()}</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <path d="M2 10L10 2M10 2H4M10 2V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path
+          d="M2 10L10 2M10 2H4M10 2V8"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </button>
     <button class="link-row" onclick={openLogDir}>
       <span>{m.about_open_log_folder()}</span>
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-        <path d="M1 3.5C1 2.67 1.67 2 2.5 2H5l1 1.5H9.5C10.33 3.5 11 4.17 11 5v4.5C11 10.33 10.33 11 9.5 11h-7C1.67 11 1 10.33 1 9.5V3.5Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+        <path
+          d="M1 3.5C1 2.67 1.67 2 2.5 2H5l1 1.5H9.5C10.33 3.5 11 4.17 11 5v4.5C11 10.33 10.33 11 9.5 11h-7C1.67 11 1 10.33 1 9.5V3.5Z"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linejoin="round"
+        />
       </svg>
     </button>
   </div>
@@ -142,7 +161,7 @@
   {/if}
 
   <p class="credit">
-    Built with Tauri, Svelte, and Rust.<br/>
+    Built with Tauri, Svelte, and Rust.<br />
     MIT License — Copyright &copy; 2017–2026 Christopher Murphy.
   </p>
 </div>
@@ -248,5 +267,4 @@
     opacity: 0.5;
     line-height: 1.6;
   }
-
 </style>

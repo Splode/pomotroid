@@ -9,6 +9,7 @@ The CI workflow uses `actions/checkout@v4` with default depth 1 (shallow clone),
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Every compiled binary carries a unique, traceable version string baked in at compile time.
 - The string conforms to semver: `1.0.0-dev.{n}+{short-sha}` for dev builds, `1.0.0+{short-sha}` for release builds.
 - Short SHA (7 chars) is displayed in Settings → About for readability.
@@ -17,6 +18,7 @@ The CI workflow uses `actions/checkout@v4` with default depth 1 (shallow clone),
 - Zero runtime overhead — the string is a compile-time constant.
 
 **Non-Goals:**
+
 - Automatic version bumping or tag management.
 - Exposing branch name in the version string (too noisy, changes often).
 - A separate build number counter outside of git commit distance.
@@ -29,9 +31,10 @@ The CI workflow uses `actions/checkout@v4` with default depth 1 (shallow clone),
 **Decision**: Extend `src-tauri/build.rs` to run `git describe`, parse its output, and emit `cargo:rustc-env=APP_BUILD_VERSION=<string>`. The string is accessed in Rust via the compile-time macro `env!("APP_BUILD_VERSION")`.
 
 **Alternatives considered**:
-- *Vite `define` plugin*: Would work for the frontend, but the string would not be available in Rust (e.g., for startup logging). Split injection in two places introduces drift risk.
-- *Runtime environment variable*: Requires the launching environment to set the variable; doesn't work for distributed binaries.
-- *Patching `tauri.conf.json` before build*: Modifies a tracked file; requires cleanup; pollutes git diff.
+
+- _Vite `define` plugin_: Would work for the frontend, but the string would not be available in Rust (e.g., for startup logging). Split injection in two places introduces drift risk.
+- _Runtime environment variable_: Requires the launching environment to set the variable; doesn't work for distributed binaries.
+- _Patching `tauri.conf.json` before build_: Modifies a tracked file; requires cleanup; pollutes git diff.
 
 `build.rs` is the correct Rust idiom. `env!()` is zero-cost. One source, accessible everywhere.
 
@@ -49,10 +52,10 @@ Output format: `v1.0.0-80-g20b2d87[-dirty]`
 Parsed into semver:
 | count | dirty | result |
 |-------|-------|--------|
-| 0     | no    | `1.0.0+20b2d87` |
-| 0     | yes   | `1.0.0+20b2d87.dirty` |
-| N > 0 | no    | `1.0.0-dev.N+20b2d87` |
-| N > 0 | yes   | `1.0.0-dev.N+20b2d87.dirty` |
+| 0 | no | `1.0.0+20b2d87` |
+| 0 | yes | `1.0.0+20b2d87.dirty` |
+| N > 0 | no | `1.0.0-dev.N+20b2d87` |
+| N > 0 | yes | `1.0.0-dev.N+20b2d87.dirty` |
 
 The `g` prefix from git describe is stripped; build metadata contains a clean 7-char hex SHA.
 
@@ -61,6 +64,7 @@ The `g` prefix from git describe is stripped; build metadata contains a clean 7-
 ### D3: `cargo:rerun-if-changed` triggers
 
 **Decision**: Emit two rerun triggers:
+
 ```
 cargo:rerun-if-changed=.git/HEAD
 cargo:rerun-if-changed=.git/refs/

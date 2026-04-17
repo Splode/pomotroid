@@ -7,12 +7,14 @@ This design adds an editable MM:SS input in place of the static badge, and migra
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Allow entering any duration from 1:00 to 90:00 with second-level precision in Settings → Timer
 - Persist sub-minute values across restarts (requires DB schema change)
 - Keep the slider for coarse (whole-minute) adjustments; badge for precise entry
 - Migrate existing installations non-destructively
 
 **Non-Goals:**
+
 - Sub-minute slider precision (slider remains at 1-minute steps; keyboard entry covers fine-grained use)
 - Changing how the timer engine consumes seconds (already operates in seconds)
 - Localising the MM:SS format (fixed for now)
@@ -22,6 +24,7 @@ This design adds an editable MM:SS input in place of the static badge, and migra
 ### 1. DB keys: rename from `*_mins` to `*_secs`, storing total seconds
 
 **Alternatives considered:**
+
 - **Keep `*_mins` keys, store decimal minutes** (e.g. `"5.65"`) — confusing key name, floating-point parsing risk.
 - **New keys alongside old keys, load falls back** — load logic becomes ambiguous; two sources of truth.
 - **In-place update, same key names** — `time_work_mins` containing `"339"` is deeply confusing.
@@ -35,6 +38,7 @@ This design adds an editable MM:SS input in place of the static badge, and migra
 The `.slider-value` badge becomes an `<input type="text">` that is styled identically to the current badge when not focused. Clicking or tabbing into the badge activates edit mode (selects all text). The slider retains its 1-minute step and remains the primary interaction; the badge provides precision override.
 
 **Alternatives considered:**
+
 - **Replace slider with a pure text input** — loses the fast drag-to-adjust experience.
 - **Always-visible editable input next to the slider** — clutters the layout; most users never need sub-minute precision.
 - **Separate "advanced" toggle to reveal seconds field** — unnecessary complexity for a rare but legitimate use case.
@@ -42,6 +46,7 @@ The `.slider-value` badge becomes an `<input type="text">` that is styled identi
 ### 3. Input parsing
 
 Accepted formats on commit (Enter / Tab / blur):
+
 - `MM:SS` — canonical form (e.g. `5:39`, `25:00`, `1:05`)
 - Bare integer `M` or `MM` — interpreted as whole minutes (e.g. `25` → `25:00`)
 

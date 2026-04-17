@@ -11,12 +11,18 @@ const MODIFIER_KEYS = new Set(['Control', 'Shift', 'Alt', 'Meta', 'CapsLock']);
 /** Readable display labels for special KeyboardEvent.key values. */
 export function formatLocalKey(key: string): string {
   switch (key) {
-    case ' ':         return 'Space';
-    case 'ArrowLeft': return '←';
-    case 'ArrowRight': return '→';
-    case 'ArrowUp':   return '↑';
-    case 'ArrowDown': return '↓';
-    default:          return key;
+    case ' ':
+      return 'Space';
+    case 'ArrowLeft':
+      return '←';
+    case 'ArrowRight':
+      return '→';
+    case 'ArrowUp':
+      return '↑';
+    case 'ArrowDown':
+      return '↓';
+    default:
+      return key;
   }
 }
 

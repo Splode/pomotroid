@@ -7,12 +7,14 @@ All theme logic (mode resolution, active/highlighted card state, deferred-previe
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Reduce visible theme cards from two full lists to one at a time
 - Preserve all existing behavior: deferred preview, active-mode indicator, custom badge, checkmark
 - Default the visible tab to the currently active picker so the most relevant list is shown on open
 - Keep the change contained to `AppearanceSection.svelte` (and i18n messages if new keys are needed)
 
 **Non-Goals:**
+
 - Redesigning the card layout or swatch rendering
 - Changing how themes are stored, loaded, or resolved
 - Modifying the Auto / Light / Dark mode selector

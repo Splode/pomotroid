@@ -31,11 +31,11 @@ Be kind and respectful to the members of the community. Take time to educate oth
 
 ### Prerequisites
 
-| Tool | Version |
-|------|---------|
-| Node.js | 22+ |
-| Rust | stable (via [rustup](https://rustup.rs)) |
-| npm | bundled with Node.js |
+| Tool    | Version                                  |
+| ------- | ---------------------------------------- |
+| Node.js | 22+                                      |
+| Rust    | stable (via [rustup](https://rustup.rs)) |
+| npm     | bundled with Node.js                     |
 
 **Linux** — install system dependencies:
 
@@ -128,6 +128,7 @@ Built-in themes are embedded into the binary at compile time, so adding one requ
 1. **Create the theme JSON** in `static/themes/your-theme-name.json`. See `THEMES.md` for the required format and color keys.
 
 2. **Register it** in `src-tauri/src/themes/mod.rs` — add an `include_str!()` entry to the `BUNDLED_JSON` array:
+
    ```rust
    include_str!("../../../static/themes/your-theme-name.json"),
    ```
@@ -143,6 +144,7 @@ The app uses [Inlang + Paraglide](https://inlang.com) for translations. Adding a
 1. **Create the message file** at `src/messages/{locale}.json`. Copy `src/messages/en.json` as a starting point and translate all values — do not change any keys.
 
 2. **Register the locale** by adding it to the `locales` array in `project.inlang/settings.json`:
+
    ```json
    "locales": ["en", "zh", "pt", "your-locale"]
    ```
@@ -184,6 +186,7 @@ Open `CHANGELOG.md` and make sure `[Unreleased]` accurately describes everything
 ```
 
 This will:
+
 - Update the version in `tauri.conf.json`, `Cargo.toml`, and `package.json`
 - Rename `[Unreleased]` in `CHANGELOG.md` to `[v1.1.0] - YYYY-MM-DD`
 - Commit all changes and create an annotated `v1.1.0` tag
@@ -195,6 +198,7 @@ git push origin main --follow-tags
 ```
 
 Pushing the tag triggers the [release workflow](.github/workflows/release.yml), which:
+
 - Builds Linux (`.deb`, `.AppImage`), macOS (universal `.dmg`), and Windows (`.exe` installer) in parallel
 - Creates a **draft** GitHub Release with all artifacts attached and the changelog section as the release body
 - Commits `latest.json` (auto-updater manifest) and `pomotroid.json` (Scoop manifest) to `main`
@@ -218,8 +222,8 @@ This adds a fresh `[Unreleased]` block at the top of `CHANGELOG.md` and commits 
 
 Pomotroid follows [Semantic Versioning](https://semver.org):
 
-| Change | Version bump |
-|--------|-------------|
-| Breaking changes or major rewrites | `X.0.0` |
-| New features, backward-compatible | `X.Y.0` |
-| Bug fixes only | `X.Y.Z` |
+| Change                             | Version bump |
+| ---------------------------------- | ------------ |
+| Breaking changes or major rewrites | `X.0.0`      |
+| New features, backward-compatible  | `X.Y.0`      |
+| Bug fixes only                     | `X.Y.Z`      |

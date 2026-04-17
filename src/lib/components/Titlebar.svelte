@@ -11,11 +11,15 @@
 
   onMount(() => {
     const win = getCurrentWebviewWindow();
-    win.isMaximized().then((v) => { maximized = v; });
+    win.isMaximized().then((v) => {
+      maximized = v;
+    });
     const unlisten = win.onResized(async () => {
       maximized = await win.isMaximized();
     });
-    return () => { unlisten.then((fn) => fn()); };
+    return () => {
+      unlisten.then((fn) => fn());
+    };
   });
 
   async function openSettings() {
@@ -83,12 +87,57 @@
   <Tooltip text={m.tooltip_settings()}>
     <button class="btn-icon" onclick={openSettings} aria-label="Settings">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <line x1="2" y1="4"  x2="14" y2="4"  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-        <circle cx="5"  cy="4"  r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
-        <line x1="2" y1="8"  x2="14" y2="8"  stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-        <circle cx="11" cy="8"  r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
-        <line x1="2" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-        <circle cx="7"  cy="12" r="1.8" fill="var(--color-background)" stroke="currentColor" stroke-width="1.3"/>
+        <line
+          x1="2"
+          y1="4"
+          x2="14"
+          y2="4"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+        />
+        <circle
+          cx="5"
+          cy="4"
+          r="1.8"
+          fill="var(--color-background)"
+          stroke="currentColor"
+          stroke-width="1.3"
+        />
+        <line
+          x1="2"
+          y1="8"
+          x2="14"
+          y2="8"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+        />
+        <circle
+          cx="11"
+          cy="8"
+          r="1.8"
+          fill="var(--color-background)"
+          stroke="currentColor"
+          stroke-width="1.3"
+        />
+        <line
+          x1="2"
+          y1="12"
+          x2="14"
+          y2="12"
+          stroke="currentColor"
+          stroke-width="1.3"
+          stroke-linecap="round"
+        />
+        <circle
+          cx="7"
+          cy="12"
+          r="1.8"
+          fill="var(--color-background)"
+          stroke="currentColor"
+          stroke-width="1.3"
+        />
       </svg>
     </button>
   </Tooltip>
@@ -98,9 +147,9 @@
   <Tooltip text={m.tooltip_statistics()}>
     <button class="btn-icon" onclick={openStats} aria-label="Statistics">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <rect x="2"  y="9"  width="3" height="5" rx="0.5" fill="currentColor" opacity="0.6"/>
-        <rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" opacity="0.8"/>
-        <rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor"/>
+        <rect x="2" y="9" width="3" height="5" rx="0.5" fill="currentColor" opacity="0.6" />
+        <rect x="6.5" y="5" width="3" height="9" rx="0.5" fill="currentColor" opacity="0.8" />
+        <rect x="11" y="2" width="3" height="12" rx="0.5" fill="currentColor" />
       </svg>
     </button>
   </Tooltip>
@@ -122,25 +171,78 @@
     {:else}
       <button class="btn-icon" onclick={minimize} aria-label="Minimize">
         <svg width="12" height="12" viewBox="0 0 12 12">
-          <line x1="1" y1="6" x2="11" y2="6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <line
+            x1="1"
+            y1="6"
+            x2="11"
+            y2="6"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
         </svg>
       </button>
-      <button class="btn-icon" onclick={toggleMaximize} aria-label={maximized ? 'Restore' : 'Maximize'}>
+      <button
+        class="btn-icon"
+        onclick={toggleMaximize}
+        aria-label={maximized ? 'Restore' : 'Maximize'}
+      >
         {#if maximized}
           <svg width="12" height="12" viewBox="0 0 12 12">
-            <rect x="3" y="1" width="8" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M1 4 L1 11 L8 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect
+              x="3"
+              y="1"
+              width="8"
+              height="8"
+              rx="1"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
+            <path
+              d="M1 4 L1 11 L8 11"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         {:else}
           <svg width="12" height="12" viewBox="0 0 12 12">
-            <rect x="1" y="1" width="10" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <rect
+              x="1"
+              y="1"
+              width="10"
+              height="10"
+              rx="1"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            />
           </svg>
         {/if}
       </button>
       <button class="btn-icon close" onclick={close} aria-label="Close">
         <svg width="12" height="12" viewBox="0 0 12 12">
-          <line x1="1" y1="1" x2="11" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="11" y1="1" x2="1" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <line
+            x1="1"
+            y1="1"
+            x2="11"
+            y2="11"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+          <line
+            x1="11"
+            y1="1"
+            x2="1"
+            y2="11"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
         </svg>
       </button>
     {/if}
@@ -176,7 +278,9 @@
     width: 28px;
     height: 28px;
     border-radius: 4px;
-    transition: color 0.15s, background 0.15s;
+    transition:
+      color 0.15s,
+      background 0.15s;
   }
 
   .btn-icon:hover {

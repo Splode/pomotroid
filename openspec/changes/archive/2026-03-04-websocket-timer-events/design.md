@@ -7,11 +7,13 @@ The timer event loop in `src-tauri/src/timer/mod.rs` already handles `TimerEvent
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Add `paused`, `resumed`, and `reset` message types to the WebSocket broadcast protocol
 - Keep the existing `roundChange` behaviour unchanged
 - Expose a clean public API (`broadcast_paused`, `broadcast_resumed`, `broadcast_reset`) mirroring the existing `broadcast_round_change` function
 
 **Non-Goals:**
+
 - Changing the `getState` / `state` request-response flow
 - Adding new client-to-server message types
 - Changing the Tauri window event names or payloads

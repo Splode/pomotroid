@@ -18,7 +18,7 @@ The system tray is the app's primary interface when the main window is hidden, y
 
 ### Modified Capabilities
 
-*(none — no existing spec-level behavior changes)*
+_(none — no existing spec-level behavior changes)_
 
 ## Impact
 

@@ -4,20 +4,20 @@
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import * as m from '$paraglide/messages.js';
 
-  const MIN_SECS = 60;    // 1:00
-  const MAX_SECS = 5400;  // 90:00
+  const MIN_SECS = 60; // 1:00
+  const MAX_SECS = 5400; // 90:00
   const MAX_ROUNDS = 12;
 
   // Slider positions (whole minutes) derived from stored seconds.
-  let workMins  = $derived(Math.round($settings.time_work_secs / 60));
+  let workMins = $derived(Math.round($settings.time_work_secs / 60));
   let shortMins = $derived(Math.round($settings.time_short_break_secs / 60));
-  let longMins  = $derived(Math.round($settings.time_long_break_secs / 60));
-  let rounds    = $derived($settings.long_break_interval);
+  let longMins = $derived(Math.round($settings.time_long_break_secs / 60));
+  let rounds = $derived($settings.long_break_interval);
 
   // Per-row edit state: the raw text the user is currently typing.
-  let workEdit  = $state<string | null>(null);
+  let workEdit = $state<string | null>(null);
   let shortEdit = $state<string | null>(null);
-  let longEdit  = $state<string | null>(null);
+  let longEdit = $state<string | null>(null);
 
   /** Parse MM:SS or bare integer minutes. Returns total seconds, or null on failure. */
   function parseMMSS(input: string): number | null {
@@ -65,9 +65,15 @@
     dbKey: string,
     el: HTMLInputElement
   ): Promise<void> {
-    if (raw === null) { el.value = formatMMSS(currentSecs); return; }
+    if (raw === null) {
+      el.value = formatMMSS(currentSecs);
+      return;
+    }
     const parsed = parseMMSS(raw);
-    if (parsed === null) { el.value = formatMMSS(currentSecs); return; }
+    if (parsed === null) {
+      el.value = formatMMSS(currentSecs);
+      return;
+    }
     const clamped = Math.max(MIN_SECS, Math.min(MAX_SECS, parsed));
     await handleChange(dbKey, clamped);
     el.value = formatMMSS(clamped);
@@ -83,15 +89,30 @@
         class="slider-value"
         type="text"
         value={workEdit ?? formatMMSS($settings.time_work_secs)}
-        onfocus={(e) => { workEdit = (e.target as HTMLInputElement).value; (e.target as HTMLInputElement).select(); }}
-        oninput={(e) => { workEdit = (e.target as HTMLInputElement).value; }}
+        onfocus={(e) => {
+          workEdit = (e.target as HTMLInputElement).value;
+          (e.target as HTMLInputElement).select();
+        }}
+        oninput={(e) => {
+          workEdit = (e.target as HTMLInputElement).value;
+        }}
         onblur={async (e) => {
-          await commitBadge(workEdit, $settings.time_work_secs, 'time_work_secs', e.target as HTMLInputElement);
+          await commitBadge(
+            workEdit,
+            $settings.time_work_secs,
+            'time_work_secs',
+            e.target as HTMLInputElement
+          );
           workEdit = null;
         }}
         onkeydown={async (e) => {
           if (e.key === 'Enter') {
-            await commitBadge(workEdit, $settings.time_work_secs, 'time_work_secs', e.target as HTMLInputElement);
+            await commitBadge(
+              workEdit,
+              $settings.time_work_secs,
+              'time_work_secs',
+              e.target as HTMLInputElement
+            );
             workEdit = null;
             (e.target as HTMLInputElement).blur();
           } else if (e.key === 'Escape') {
@@ -104,10 +125,14 @@
     </div>
     <div class="slider-wrap">
       <input
-        type="range" min="1" max="90" step="1"
+        type="range"
+        min="1"
+        max="90"
+        step="1"
         value={workMins}
         class="slider"
-        oninput={(e) => handleChange('time_work_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
+        oninput={(e) =>
+          handleChange('time_work_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
       />
       <div class="bar bar--focus" style="width: {barWidth(workMins, 1, 90)}"></div>
     </div>
@@ -128,15 +153,30 @@
           class="slider-value"
           type="text"
           value={shortEdit ?? formatMMSS($settings.time_short_break_secs)}
-          onfocus={(e) => { shortEdit = (e.target as HTMLInputElement).value; (e.target as HTMLInputElement).select(); }}
-          oninput={(e) => { shortEdit = (e.target as HTMLInputElement).value; }}
+          onfocus={(e) => {
+            shortEdit = (e.target as HTMLInputElement).value;
+            (e.target as HTMLInputElement).select();
+          }}
+          oninput={(e) => {
+            shortEdit = (e.target as HTMLInputElement).value;
+          }}
           onblur={async (e) => {
-            await commitBadge(shortEdit, $settings.time_short_break_secs, 'time_short_break_secs', e.target as HTMLInputElement);
+            await commitBadge(
+              shortEdit,
+              $settings.time_short_break_secs,
+              'time_short_break_secs',
+              e.target as HTMLInputElement
+            );
             shortEdit = null;
           }}
           onkeydown={async (e) => {
             if (e.key === 'Enter') {
-              await commitBadge(shortEdit, $settings.time_short_break_secs, 'time_short_break_secs', e.target as HTMLInputElement);
+              await commitBadge(
+                shortEdit,
+                $settings.time_short_break_secs,
+                'time_short_break_secs',
+                e.target as HTMLInputElement
+              );
               shortEdit = null;
               (e.target as HTMLInputElement).blur();
             } else if (e.key === 'Escape') {
@@ -149,10 +189,17 @@
       </div>
       <div class="slider-wrap">
         <input
-          type="range" min="1" max="90" step="1"
+          type="range"
+          min="1"
+          max="90"
+          step="1"
           value={shortMins}
           class="slider"
-          oninput={(e) => handleChange('time_short_break_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
+          oninput={(e) =>
+            handleChange(
+              'time_short_break_secs',
+              (e.target as HTMLInputElement).valueAsNumber * 60
+            )}
         />
         <div class="bar bar--short" style="width: {barWidth(shortMins, 1, 90)}"></div>
       </div>
@@ -174,15 +221,30 @@
           class="slider-value"
           type="text"
           value={longEdit ?? formatMMSS($settings.time_long_break_secs)}
-          onfocus={(e) => { longEdit = (e.target as HTMLInputElement).value; (e.target as HTMLInputElement).select(); }}
-          oninput={(e) => { longEdit = (e.target as HTMLInputElement).value; }}
+          onfocus={(e) => {
+            longEdit = (e.target as HTMLInputElement).value;
+            (e.target as HTMLInputElement).select();
+          }}
+          oninput={(e) => {
+            longEdit = (e.target as HTMLInputElement).value;
+          }}
           onblur={async (e) => {
-            await commitBadge(longEdit, $settings.time_long_break_secs, 'time_long_break_secs', e.target as HTMLInputElement);
+            await commitBadge(
+              longEdit,
+              $settings.time_long_break_secs,
+              'time_long_break_secs',
+              e.target as HTMLInputElement
+            );
             longEdit = null;
           }}
           onkeydown={async (e) => {
             if (e.key === 'Enter') {
-              await commitBadge(longEdit, $settings.time_long_break_secs, 'time_long_break_secs', e.target as HTMLInputElement);
+              await commitBadge(
+                longEdit,
+                $settings.time_long_break_secs,
+                'time_long_break_secs',
+                e.target as HTMLInputElement
+              );
               longEdit = null;
               (e.target as HTMLInputElement).blur();
             } else if (e.key === 'Escape') {
@@ -195,10 +257,14 @@
       </div>
       <div class="slider-wrap">
         <input
-          type="range" min="1" max="90" step="1"
+          type="range"
+          min="1"
+          max="90"
+          step="1"
           value={longMins}
           class="slider"
-          oninput={(e) => handleChange('time_long_break_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
+          oninput={(e) =>
+            handleChange('time_long_break_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
         />
         <div class="bar bar--long" style="width: {barWidth(longMins, 1, 90)}"></div>
       </div>
@@ -212,7 +278,10 @@
       </div>
       <div class="slider-wrap">
         <input
-          type="range" min="1" max={MAX_ROUNDS} step="1"
+          type="range"
+          min="1"
+          max={MAX_ROUNDS}
+          step="1"
           value={rounds}
           class="slider"
           oninput={(e) => handleChange('work_rounds', (e.target as HTMLInputElement).valueAsNumber)}
@@ -240,7 +309,6 @@
     checked={$settings.dial_countdown}
     onclick={() => toggle('dial_countdown', $settings.dial_countdown)}
   />
-
 </div>
 
 <style>
@@ -282,7 +350,9 @@
     outline: none;
     text-align: right;
     cursor: text;
-    transition: border-color 0.15s, background 0.15s;
+    transition:
+      border-color 0.15s,
+      background 0.15s;
   }
 
   .slider-value:focus {
@@ -345,11 +415,24 @@
     transition: width 0.05s;
   }
 
-  .bar--focus  { background: var(--color-focus-round); }
-  .bar--short  { background: var(--color-short-round); }
-  .bar--long   { background: var(--color-long-round); }
-  .bar--rounds { background: var(--color-foreground-darker, var(--color-foreground)); }
+  .bar--focus {
+    background: var(--color-focus-round);
+  }
+  .bar--short {
+    background: var(--color-short-round);
+  }
+  .bar--long {
+    background: var(--color-long-round);
+  }
+  .bar--rounds {
+    background: var(--color-foreground-darker, var(--color-foreground));
+  }
 
-  .break-body { transition: opacity 0.15s; }
-  .break-body.disabled { opacity: 0.4; pointer-events: none; }
+  .break-body {
+    transition: opacity 0.15s;
+  }
+  .break-body.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
 </style>

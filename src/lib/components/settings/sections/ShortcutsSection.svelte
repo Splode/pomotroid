@@ -9,7 +9,8 @@
   import { isMac } from '$lib/utils/platform';
   import { openUrl } from '@tauri-apps/plugin-opener';
 
-  const ACCESSIBILITY_URL = 'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility';
+  const ACCESSIBILITY_URL =
+    'x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility';
 
   let trusted = $state(true);
 

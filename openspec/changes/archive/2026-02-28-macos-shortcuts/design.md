@@ -7,12 +7,14 @@ The settings shortcut defaults are seeded via `INSERT OR IGNORE` in `seed_defaul
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Seed `Command+Shift+1–4` as default shortcuts on macOS for new installs
 - Expose a Rust IPC command that returns macOS Accessibility trust status
 - Show a dismissing notice in ShortcutsSection when Accessibility is not granted
 - Re-check trust on settings window focus so the notice disappears automatically once access is granted
 
 **Non-Goals:**
+
 - Automatically requesting Accessibility permission (macOS doesn't allow programmatic prompts)
 - Changing shortcuts for existing macOS installs that have already saved preferences
 - Modifying shortcut behavior on Windows or Linux

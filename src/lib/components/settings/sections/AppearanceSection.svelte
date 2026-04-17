@@ -15,13 +15,11 @@
 
   // Light picker is active when mode='light', or mode='auto' and OS is light.
   let lightIsActive = $derived(
-    $settings.theme_mode === 'light' ||
-    ($settings.theme_mode === 'auto' && !osDark)
+    $settings.theme_mode === 'light' || ($settings.theme_mode === 'auto' && !osDark)
   );
   // Dark picker is active when mode='dark', or mode='auto' and OS is dark.
   let darkIsActive = $derived(
-    $settings.theme_mode === 'dark' ||
-    ($settings.theme_mode === 'auto' && osDark)
+    $settings.theme_mode === 'dark' || ($settings.theme_mode === 'auto' && osDark)
   );
 
   let selectedLightTheme = $derived(themes.find((t) => t.name === $settings.theme_light));
@@ -36,16 +34,24 @@
 
     // Track live OS color scheme changes to update picker highlights.
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const mqListener = (e: MediaQueryListEvent) => { osDark = e.matches; };
+    const mqListener = (e: MediaQueryListEvent) => {
+      osDark = e.matches;
+    };
     mq.addEventListener('change', mqListener);
     cleanups.push(() => mq.removeEventListener('change', mqListener));
 
     (async () => {
       themes = await getThemes();
-      cleanups.push(await onThemesChanged((updated) => { themes = updated; }));
+      cleanups.push(
+        await onThemesChanged((updated) => {
+          themes = updated;
+        })
+      );
     })();
 
-    return () => { for (const fn of cleanups) fn(); };
+    return () => {
+      for (const fn of cleanups) fn();
+    };
   });
 
   // Mode selector: save + immediately apply the resolved theme.
@@ -70,7 +76,6 @@
 </script>
 
 <div class="section">
-
   <!-- Mode selector -->
   <div class="group-label">{m.appearance_group_mode()}</div>
   <div class="mode-selector">
@@ -110,46 +115,58 @@
           </span>
         {/if}
       </span>
-      <svg class="chevron" class:rotated={openPicker === 'light'} width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M7 10l5 5 5-5z"/>
+      <svg
+        class="chevron"
+        class:rotated={openPicker === 'light'}
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M7 10l5 5 5-5z" />
       </svg>
     </button>
     {#if openPicker === 'light'}
-    <div class="theme-list">
-      {#each themes as theme (theme.name)}
-        {@const bg = theme.colors['--color-background'] ?? '#2f384b'}
-        {@const fg = theme.colors['--color-foreground'] ?? '#d7e1f4'}
-        {@const accent = theme.colors['--color-accent'] ?? '#e25d60'}
-        {@const focusRound = theme.colors['--color-focus-round'] ?? '#e25d60'}
-        {@const shortRound = theme.colors['--color-short-round'] ?? '#3baf82'}
-        {@const longRound = theme.colors['--color-long-round'] ?? '#3d85c8'}
-        {@const isSelected = theme.name === $settings.theme_light}
-        <button
-          class="card"
-          class:selected={isSelected}
-          class:highlighted={isSelected && lightIsActive}
-          style="--card-bg:{bg}; --card-fg:{fg}; --card-accent:{accent};"
-          onclick={() => selectLight(theme)}
-        >
-          <span class="swatches">
-            <span class="swatch" style="background:{focusRound}"></span>
-            <span class="swatch" style="background:{shortRound}"></span>
-            <span class="swatch" style="background:{longRound}"></span>
-          </span>
-          <span class="card-name" style="color:{fg}">{theme.name}</span>
-          <span class="card-right">
-            {#if theme.is_custom}
-              <span class="badge" style="color:{accent}">{m.appearance_badge_custom()}</span>
-            {/if}
-            {#if isSelected}
-              <svg width="16" height="16" viewBox="0 0 24 24" style="fill:{accent}; flex-shrink:0;">
-                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-              </svg>
-            {/if}
-          </span>
-        </button>
-      {/each}
-    </div>
+      <div class="theme-list">
+        {#each themes as theme (theme.name)}
+          {@const bg = theme.colors['--color-background'] ?? '#2f384b'}
+          {@const fg = theme.colors['--color-foreground'] ?? '#d7e1f4'}
+          {@const accent = theme.colors['--color-accent'] ?? '#e25d60'}
+          {@const focusRound = theme.colors['--color-focus-round'] ?? '#e25d60'}
+          {@const shortRound = theme.colors['--color-short-round'] ?? '#3baf82'}
+          {@const longRound = theme.colors['--color-long-round'] ?? '#3d85c8'}
+          {@const isSelected = theme.name === $settings.theme_light}
+          <button
+            class="card"
+            class:selected={isSelected}
+            class:highlighted={isSelected && lightIsActive}
+            style="--card-bg:{bg}; --card-fg:{fg}; --card-accent:{accent};"
+            onclick={() => selectLight(theme)}
+          >
+            <span class="swatches">
+              <span class="swatch" style="background:{focusRound}"></span>
+              <span class="swatch" style="background:{shortRound}"></span>
+              <span class="swatch" style="background:{longRound}"></span>
+            </span>
+            <span class="card-name" style="color:{fg}">{theme.name}</span>
+            <span class="card-right">
+              {#if theme.is_custom}
+                <span class="badge" style="color:{accent}">{m.appearance_badge_custom()}</span>
+              {/if}
+              {#if isSelected}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  style="fill:{accent}; flex-shrink:0;"
+                >
+                  <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+                </svg>
+              {/if}
+            </span>
+          </button>
+        {/each}
+      </div>
     {/if}
   </div>
 
@@ -178,49 +195,60 @@
           </span>
         {/if}
       </span>
-      <svg class="chevron" class:rotated={openPicker === 'dark'} width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M7 10l5 5 5-5z"/>
+      <svg
+        class="chevron"
+        class:rotated={openPicker === 'dark'}
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M7 10l5 5 5-5z" />
       </svg>
     </button>
     {#if openPicker === 'dark'}
-    <div class="theme-list">
-      {#each themes as theme (theme.name)}
-        {@const bg = theme.colors['--color-background'] ?? '#2f384b'}
-        {@const fg = theme.colors['--color-foreground'] ?? '#d7e1f4'}
-        {@const accent = theme.colors['--color-accent'] ?? '#e25d60'}
-        {@const focusRound = theme.colors['--color-focus-round'] ?? '#e25d60'}
-        {@const shortRound = theme.colors['--color-short-round'] ?? '#3baf82'}
-        {@const longRound = theme.colors['--color-long-round'] ?? '#3d85c8'}
-        {@const isSelected = theme.name === $settings.theme_dark}
-        <button
-          class="card"
-          class:selected={isSelected}
-          class:highlighted={isSelected && darkIsActive}
-          style="--card-bg:{bg}; --card-fg:{fg}; --card-accent:{accent};"
-          onclick={() => selectDark(theme)}
-        >
-          <span class="swatches">
-            <span class="swatch" style="background:{focusRound}"></span>
-            <span class="swatch" style="background:{shortRound}"></span>
-            <span class="swatch" style="background:{longRound}"></span>
-          </span>
-          <span class="card-name" style="color:{fg}">{theme.name}</span>
-          <span class="card-right">
-            {#if theme.is_custom}
-              <span class="badge" style="color:{accent}">{m.appearance_badge_custom()}</span>
-            {/if}
-            {#if isSelected}
-              <svg width="16" height="16" viewBox="0 0 24 24" style="fill:{accent}; flex-shrink:0;">
-                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
-              </svg>
-            {/if}
-          </span>
-        </button>
-      {/each}
-    </div>
+      <div class="theme-list">
+        {#each themes as theme (theme.name)}
+          {@const bg = theme.colors['--color-background'] ?? '#2f384b'}
+          {@const fg = theme.colors['--color-foreground'] ?? '#d7e1f4'}
+          {@const accent = theme.colors['--color-accent'] ?? '#e25d60'}
+          {@const focusRound = theme.colors['--color-focus-round'] ?? '#e25d60'}
+          {@const shortRound = theme.colors['--color-short-round'] ?? '#3baf82'}
+          {@const longRound = theme.colors['--color-long-round'] ?? '#3d85c8'}
+          {@const isSelected = theme.name === $settings.theme_dark}
+          <button
+            class="card"
+            class:selected={isSelected}
+            class:highlighted={isSelected && darkIsActive}
+            style="--card-bg:{bg}; --card-fg:{fg}; --card-accent:{accent};"
+            onclick={() => selectDark(theme)}
+          >
+            <span class="swatches">
+              <span class="swatch" style="background:{focusRound}"></span>
+              <span class="swatch" style="background:{shortRound}"></span>
+              <span class="swatch" style="background:{longRound}"></span>
+            </span>
+            <span class="card-name" style="color:{fg}">{theme.name}</span>
+            <span class="card-right">
+              {#if theme.is_custom}
+                <span class="badge" style="color:{accent}">{m.appearance_badge_custom()}</span>
+              {/if}
+              {#if isSelected}
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  style="fill:{accent}; flex-shrink:0;"
+                >
+                  <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+                </svg>
+              {/if}
+            </span>
+          </button>
+        {/each}
+      </div>
     {/if}
   </div>
-
 </div>
 
 <style>
@@ -273,7 +301,9 @@
     letter-spacing: 0.03em;
     color: var(--color-foreground-darker, var(--color-foreground));
     cursor: pointer;
-    transition: background 0.12s, color 0.12s;
+    transition:
+      background 0.12s,
+      color 0.12s;
   }
 
   .mode-btn:last-child {
@@ -392,7 +422,9 @@
     cursor: pointer;
     width: 100%;
     text-align: left;
-    transition: border-color 0.15s, background 0.15s;
+    transition:
+      border-color 0.15s,
+      background 0.15s;
   }
 
   .card:hover {
