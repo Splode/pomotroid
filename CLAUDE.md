@@ -18,6 +18,9 @@ npm run tauri build
 # Frontend-only Vite dev (no Tauri IPC available)
 npm run dev
 
+# Format all frontend source files
+npm run format
+
 # Type-check Svelte + TypeScript
 npm run check
 

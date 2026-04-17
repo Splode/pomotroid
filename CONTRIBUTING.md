@@ -60,6 +60,9 @@ npm run tauri dev
 ### Checks and tests
 
 ```bash
+# Format all frontend source files (Prettier)
+npm run format
+
 # TypeScript + Svelte type checking
 npm run check
 
@@ -70,7 +73,9 @@ cargo test --manifest-path src-tauri/Cargo.toml
 cargo clippy --manifest-path src-tauri/Cargo.toml -- -D warnings
 ```
 
-All three must pass before submitting a pull request. The CI pipeline runs them automatically.
+All must pass before submitting a pull request. The CI pipeline runs them automatically.
+
+If you use VS Code, formatting happens automatically on save — install the [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [Svelte for VS Code](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) extensions.
 
 ### Seeding test data
 
@@ -118,7 +123,7 @@ pomotroid/
 
 1. Fork the repository and create a feature branch from `main`.
 2. Make your changes. Keep commits focused and use conventional commit prefixes (`feat:`, `fix:`, `chore:`, etc.).
-3. Ensure all checks pass (`npm run check`, `cargo test`, `cargo clippy`).
+3. Ensure all checks pass (`npm run format`, `npm run check`, `cargo test`, `cargo clippy`).
 4. Open a pull request against `main` with a clear description of what changed and why.
 
 ### Adding a built-in theme
