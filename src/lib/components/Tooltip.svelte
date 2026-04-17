@@ -1,21 +1,21 @@
 <script lang="ts">
-  import { tick, type Snippet } from 'svelte';
+  import { tick, type Snippet } from "svelte";
 
   interface Props {
     text: string;
     delay?: number;
-    placement?: 'above' | 'below';
+    placement?: "above" | "below";
     children: Snippet;
   }
 
-  let { text, delay = 600, placement = 'above', children }: Props = $props();
+  let { text, delay = 600, placement = "above", children }: Props = $props();
 
   let visible = $state(false);
   let positioned = $state(false);
   // Computed during updatePosition(); falls back to the placement prop when hidden.
   let flipped = $state(false);
-  let actualPlacement = $derived(flipped ? 'below' : placement);
-  let tooltipStyle = $state('');
+  let actualPlacement = $derived(flipped ? "below" : placement);
+  let tooltipStyle = $state("");
   let timer: ReturnType<typeof setTimeout> | undefined;
   let wrapper = $state<HTMLSpanElement | undefined>(undefined);
   let tooltipEl = $state<HTMLSpanElement | undefined>(undefined);
@@ -30,7 +30,11 @@
       await tick();
       updatePosition();
     };
-    if (delay === 0) { await run(); } else { timer = setTimeout(run, delay); }
+    if (delay === 0) {
+      await run();
+    } else {
+      timer = setTimeout(run, delay);
+    }
   }
 
   function hide() {
@@ -39,7 +43,7 @@
     visible = false;
     positioned = false;
     flipped = false;
-    tooltipStyle = '';
+    tooltipStyle = "";
   }
 
   function updatePosition() {
@@ -50,10 +54,10 @@
     const pad = 8;
 
     // Vertical: flip if too close to top edge.
-    flipped = wRect.top < 70 && placement === 'above';
+    flipped = wRect.top < 70 && placement === "above";
 
     let top: number;
-    if (actualPlacement === 'below') {
+    if (actualPlacement === "below") {
       top = wRect.bottom + 8;
     } else {
       top = wRect.top - 8 - tRect.height;
@@ -87,12 +91,12 @@
     <span
       bind:this={tooltipEl}
       class="tooltip"
-      class:below={actualPlacement === 'below'}
+      class:below={actualPlacement === "below"}
       class:positioned
       style={tooltipStyle}
       id={tooltipId}
-      role="tooltip"
-    >{text}</span>
+      role="tooltip">{text}</span
+    >
   {/if}
 </span>
 
@@ -101,10 +105,14 @@
     position: relative;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
   }
 
   .tooltip {
-    --tooltip-bg: var(--color-background-light, color-mix(in oklch, var(--color-foreground) 10%, var(--color-background)));
+    --tooltip-bg: var(
+      --color-background-light,
+      color-mix(in oklch, var(--color-foreground) 10%, var(--color-background))
+    );
     position: fixed;
     background: var(--tooltip-bg);
     color: var(--color-foreground);
@@ -119,7 +127,8 @@
     pointer-events: none;
     z-index: 9999;
     box-shadow: 0 2px 8px color-mix(in oklch, black 30%, transparent);
-    border: 1px solid color-mix(in oklch, var(--color-foreground) 12%, transparent);
+    border: 1px solid
+      color-mix(in oklch, var(--color-foreground) 12%, transparent);
     /* Hidden until JS positions it to avoid a 1-frame flash at top-left. */
     visibility: hidden;
   }
@@ -130,7 +139,7 @@
 
   /* Arrow pointing down — tooltip is above the trigger */
   .tooltip::after {
-    content: '';
+    content: "";
     position: absolute;
     top: 100%;
     left: var(--arrow-left, 50%);
