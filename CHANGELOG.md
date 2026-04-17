@@ -1,6 +1,10 @@
 [Unreleased]
 -----------
 
+### UI
+
+* **Controls layout alignment** — the play/pause button icon is better centered at all UI scale sizes, and the controls row uses a grid layout for more consistent spacing. Contributed by [@username-011](https://github.com/username-011).
+
 [v1.5.1] - 2026-04-13
 -----------
 
