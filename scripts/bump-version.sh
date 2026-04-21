@@ -46,7 +46,7 @@ fi
 
 # ── Check [Unreleased] exists ─────────────────────────────────────────────────
 
-if ! grep -q '^\[Unreleased\]' CHANGELOG.md; then
+if ! grep -q '^## \[Unreleased\]' CHANGELOG.md; then
   echo "Error: CHANGELOG.md has no [Unreleased] section."
   echo "Add one with the changes for this release before bumping."
   exit 1
@@ -84,7 +84,7 @@ echo "  ✓ src-tauri/Cargo.lock (refreshed)"
 
 CHANGELOG="CHANGELOG.md"
 # Replace the [Unreleased] header with [vX.Y.Z] - YYYY-MM-DD
-sed -i "s/^\[Unreleased\]/[v${VERSION}] - ${DATE}/" "$CHANGELOG"
+sed -i "s/^## \[Unreleased\]/## [v${VERSION}] - ${DATE}/" "$CHANGELOG"
 echo "  ✓ ${CHANGELOG} ([Unreleased] → [v${VERSION}] - ${DATE})"
 
 # ── Git commit + tag ──────────────────────────────────────────────────────────

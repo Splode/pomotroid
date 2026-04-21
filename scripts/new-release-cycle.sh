@@ -22,7 +22,7 @@ CHANGELOG="CHANGELOG.md"
 
 # ── Guard: [Unreleased] must not already exist ────────────────────────────────
 
-if grep -q '^\[Unreleased\]' "$CHANGELOG"; then
+if grep -q '^## \[Unreleased\]' "$CHANGELOG"; then
   echo "Error: CHANGELOG.md already has an [Unreleased] section."
   echo "This script is intended to be run after bump-version.sh has renamed it."
   exit 1
@@ -39,7 +39,7 @@ fi
 
 # Write the new header to a temp file, then append the existing content.
 TMP="$(mktemp)"
-printf '[Unreleased]\n-----------\n\n' > "$TMP"
+printf '## [Unreleased]\n\n' > "$TMP"
 cat "$CHANGELOG" >> "$TMP"
 mv "$TMP" "$CHANGELOG"
 
