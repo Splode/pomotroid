@@ -128,6 +128,20 @@ impl TrayState {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum TrayWindowAction {
+    Hide,
+    Restore,
+}
+
+fn tray_window_action(is_visible: bool, is_minimized: bool) -> TrayWindowAction {
+    if is_visible && !is_minimized {
+        TrayWindowAction::Hide
+    } else {
+        TrayWindowAction::Restore
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Tray lifecycle
 // ---------------------------------------------------------------------------
@@ -268,14 +282,17 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
             {
                 let app = tray_icon.app_handle();
                 if let Some(window) = app.get_webview_window("main") {
-                    match window.is_visible() {
-                        Ok(true) => {
+                    let visible = window.is_visible().unwrap_or(false);
+                    let minimized = window.is_minimized().unwrap_or(false);
+                    match tray_window_action(visible, minimized) {
+                        TrayWindowAction::Hide => {
                             log::debug!("[tray] left-click → hide");
                             let _ = window.hide();
                         }
-                        _ => {
+                        TrayWindowAction::Restore => {
                             log::debug!("[tray] left-click → show");
                             let _ = window.show();
+                            let _ = window.unminimize();
                             let _ = window.set_focus();
                         }
                     }
@@ -303,6 +320,7 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
                     log::info!("[tray] show");
                     if let Some(window) = app.get_webview_window("main") {
                         let _ = window.show();
+                        let _ = window.unminimize();
                         let _ = window.set_focus();
                     }
                 }
@@ -552,5 +570,20 @@ mod tests {
         assert_eq!(parse_hex_color("not-a-color"), None);
         assert_eq!(parse_hex_color("#ZZZ"), None);
         assert_eq!(parse_hex_color(""), None);
+    }
+
+    #[test]
+    fn tray_click_hides_visible_unminimized_window() {
+        assert_eq!(tray_window_action(true, false), TrayWindowAction::Hide);
+    }
+
+    #[test]
+    fn tray_click_restores_minimized_window() {
+        assert_eq!(tray_window_action(true, true), TrayWindowAction::Restore);
+    }
+
+    #[test]
+    fn tray_click_restores_hidden_window() {
+        assert_eq!(tray_window_action(false, false), TrayWindowAction::Restore);
     }
 }

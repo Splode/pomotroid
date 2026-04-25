@@ -8,6 +8,17 @@
   import * as m from '$paraglide/messages.js';
 
   let maximized = $state(false);
+  let suppressTitlebarHover = $state(false);
+
+  function blurTitlebarControl() {
+    const active = document.activeElement;
+    if (active instanceof HTMLElement && active.closest('.titlebar')) active.blur();
+  }
+
+  function suppressRestoredTitlebarState() {
+    suppressTitlebarHover = true;
+    blurTitlebarControl();
+  }
 
   onMount(() => {
     const win = getCurrentWebviewWindow();
@@ -17,8 +28,18 @@
     const unlisten = win.onResized(async () => {
       maximized = await win.isMaximized();
     });
+    const clearRestoredTitlebarFocus = () => {
+      if (suppressTitlebarHover) requestAnimationFrame(blurTitlebarControl);
+    };
+    const clearSuppressedTitlebarHover = () => {
+      suppressTitlebarHover = false;
+    };
+    window.addEventListener('focus', clearRestoredTitlebarFocus);
+    document.addEventListener('pointermove', clearSuppressedTitlebarHover);
     return () => {
       unlisten.then((fn) => fn());
+      window.removeEventListener('focus', clearRestoredTitlebarFocus);
+      document.removeEventListener('pointermove', clearSuppressedTitlebarHover);
     };
   });
 
@@ -67,6 +88,7 @@
   }
 
   async function minimize() {
+    suppressRestoredTitlebarState();
     if ($settings.min_to_tray) {
       await setWindowVisibility(false);
     } else {
@@ -78,8 +100,9 @@
     getCurrentWebviewWindow().toggleMaximize();
   }
 
-  function close() {
-    getCurrentWebviewWindow().close();
+  async function close() {
+    suppressRestoredTitlebarState();
+    await getCurrentWebviewWindow().close();
   }
 </script>
 
@@ -155,7 +178,7 @@
   </Tooltip>
 {/snippet}
 
-<nav class="titlebar" data-tauri-drag-region>
+<nav class="titlebar" class:suppress-hover={suppressTitlebarHover} data-tauri-drag-region>
   <!-- Left: settings + stats buttons on Linux/Windows. On macOS the traffic
        lights live here; the action buttons move to the right side instead. -->
   {#if !isMac}
@@ -223,7 +246,11 @@
           </svg>
         {/if}
       </button>
-      <button class="btn-icon close" onclick={close} aria-label="Close">
+      <button
+        class="btn-icon close"
+        onclick={close}
+        aria-label="Close"
+      >
         <svg width="12" height="12" viewBox="0 0 12 12">
           <line
             x1="1"
@@ -283,12 +310,21 @@
       background 0.15s;
   }
 
-  .btn-icon:hover {
+  .btn-icon:focus {
+    outline: none;
+  }
+
+  .btn-icon:focus-visible {
+    outline: 2px solid color-mix(in oklch, var(--color-foreground) 45%, transparent);
+    outline-offset: 2px;
+  }
+
+  .titlebar:not(.suppress-hover) .btn-icon:hover {
     color: var(--color-foreground);
     background: var(--color-hover);
   }
 
-  .btn-icon.close:hover {
+  .titlebar:not(.suppress-hover) .btn-icon.close:hover {
     color: var(--color-background);
     background: var(--color-focus-round);
   }
