@@ -258,6 +258,7 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
         .icon(image)
         .tooltip("Pomotroid")
         .menu(&menu)
+        .show_menu_on_left_click(false)
         .on_tray_icon_event(|tray_icon, event| {
             // Left-click: toggle window visibility.
             if let TrayIconEvent::Click {
