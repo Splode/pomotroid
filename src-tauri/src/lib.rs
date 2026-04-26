@@ -283,31 +283,84 @@ pub fn run() {
                 let _ = main_window.set_always_on_top(true);
             }
 
-            // CloseRequested: hide to tray instead of quitting if min_to_tray_on_close.
-            // When actually closing (not hiding), also close any child windows so they
-            // cannot be left orphaned with no way to reopen the main window.
+            // Restore saved window position/size if all four values are present and
+            // the saved rectangle still intersects at least one connected monitor.
+            if let (Some(wx), Some(wy), Some(ww), Some(wh)) = (
+                initial_settings.window_x,
+                initial_settings.window_y,
+                initial_settings.window_width,
+                initial_settings.window_height,
+            ) {
+                let on_screen = app
+                    .available_monitors()
+                    .unwrap_or_default()
+                    .into_iter()
+                    .any(|m| {
+                        let mp = m.position();
+                        let ms = m.size();
+                        let mx0 = mp.x as i64;
+                        let my0 = mp.y as i64;
+                        let mx1 = mx0 + ms.width as i64;
+                        let my1 = my0 + ms.height as i64;
+                        let wx0 = wx as i64;
+                        let wy0 = wy as i64;
+                        let wx1 = wx0 + ww as i64;
+                        let wy1 = wy0 + wh as i64;
+                        wx0 < mx1 && wx1 > mx0 && wy0 < my1 && wy1 > my0
+                    });
+                if on_screen {
+                    let _ = main_window.set_position(tauri::PhysicalPosition::new(wx, wy));
+                    let _ = main_window.set_size(tauri::PhysicalSize::new(ww, wh));
+                }
+            }
+
+            // Persist window position/size on move and resize, and close child windows
+            // when the main window is truly closed (not hidden to tray).
             let db_for_close = db.clone();
             let win_for_close = main_window.clone();
             let app_for_close = app.handle().clone();
+            let db_for_pos = db.clone();
+            let win_for_pos = main_window.clone();
             main_window.on_window_event(move |event| {
-                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                    let hide = db_for_close
-                        .lock()
-                        .ok()
-                        .and_then(|conn| settings::load(&conn).ok())
-                        .map(|s| s.min_to_tray_on_close)
-                        .unwrap_or(false);
-                    if hide {
-                        api.prevent_close();
-                        let _ = win_for_close.hide();
-                    } else {
-                        // Main window is truly closing — close child windows if open.
-                        for label in ["settings", "stats"] {
-                            if let Some(win) = app_for_close.get_webview_window(label) {
-                                let _ = win.close();
+                match event {
+                    tauri::WindowEvent::CloseRequested { api, .. } => {
+                        let hide = db_for_close
+                            .lock()
+                            .ok()
+                            .and_then(|conn| settings::load(&conn).ok())
+                            .map(|s| s.min_to_tray_on_close)
+                            .unwrap_or(false);
+                        if hide {
+                            api.prevent_close();
+                            let _ = win_for_close.hide();
+                        } else {
+                            // Main window is truly closing — close child windows if open.
+                            for label in ["settings", "stats"] {
+                                if let Some(win) = app_for_close.get_webview_window(label) {
+                                    let _ = win.close();
+                                }
                             }
                         }
                     }
+                    tauri::WindowEvent::Moved(pos) => {
+                        if let Ok(conn) = db_for_pos.lock() {
+                            let _ = settings::save_setting(&conn, "window_x", &pos.x.to_string());
+                            let _ = settings::save_setting(&conn, "window_y", &pos.y.to_string());
+                        }
+                    }
+                    tauri::WindowEvent::Resized(size) => {
+                        if let Ok(conn) = db_for_pos.lock() {
+                            let _ = settings::save_setting(&conn, "window_width", &size.width.to_string());
+                            let _ = settings::save_setting(&conn, "window_height", &size.height.to_string());
+                            // Also capture position, since some window managers shift the
+                            // window origin when resizing.
+                            if let Ok(pos) = win_for_pos.outer_position() {
+                                let _ = settings::save_setting(&conn, "window_x", &pos.x.to_string());
+                                let _ = settings::save_setting(&conn, "window_y", &pos.y.to_string());
+                            }
+                        }
+                    }
+                    _ => {}
                 }
             });
 

@@ -5,6 +5,10 @@
 - **Minimized window not restoring from tray** — clicking the tray icon while the main window was minimized could leave it hidden or minimized on some platforms, because the restore logic only checked `is_visible()`. A minimized window can still be reported as visible, so the handler would choose hide instead of restore. The tray click handler and the tray menu Show action now both check `is_minimized()` in addition to `is_visible()`, and call `unminimize()` alongside `show()` and `set_focus()`. Contributed by [@SeanTong11](https://github.com/SeanTong11).
 - **Titlebar close button remaining highlighted after tray restore** — restoring the window from the tray after clicking Close (with close-to-tray enabled) could leave the close button visually highlighted and focused, allowing Enter to re-trigger it. Titlebar focus and hover state are now suppressed when the window hides and cleared on the next pointer move after restore. Keyboard focus outlines use `:focus-visible` so they appear only during keyboard navigation. Contributed by [@SeanTong11](https://github.com/SeanTong11).
 
+### Window
+
+- **Window remembers its position and size across restarts** — Pomotroid now saves its position and size when moved or resized and restores them on the next launch. On multi-monitor setups the window reopens on the same display where it was last closed. If the saved position falls entirely outside all connected monitors (e.g. a previously connected display is no longer available), the window falls back to its default position so it is never unreachable. Resetting all settings clears the saved geometry, so the next launch returns to the default size and position.
+
 ## [v1.5.2] - 2026-04-20
 
 ### UI
