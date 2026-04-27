@@ -1,3 +1,5 @@
+## [Unreleased]
+
 ## [v1.6.0] - 2026-04-27
 
 ### System Tray
