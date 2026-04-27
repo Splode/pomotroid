@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### System Tray
+
+- **Tray left click no longer opens the context menu** — left-clicking the tray icon now exclusively toggles main window visibility; the context menu is reserved for right click. This matches the more common Windows tray convention. On macOS, left and right click behave as expected. On Linux (GNOME), AppIndicator does not distinguish between left and right click, so both continue to open the menu. Contributed by [@SeanTong11](https://github.com/SeanTong11).
+
 ### Bug Fixes
 
 - **Minimized window not restoring from tray** — clicking the tray icon while the main window was minimized could leave it hidden or minimized on some platforms, because the restore logic only checked `is_visible()`. A minimized window can still be reported as visible, so the handler would choose hide instead of restore. The tray click handler and the tray menu Show action now both check `is_minimized()` in addition to `is_visible()`, and call `unminimize()` alongside `show()` and `set_focus()`. Contributed by [@SeanTong11](https://github.com/SeanTong11).
