@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+### Bug Fixes
+
+- **Timer not restarting correctly after quickly starting the next round** — when a round completed and the user clicked Start before the engine's follow-up duration update arrived, the update (a `Reconfigure` command) would force the engine back to Idle, cancelling the freshly started timer. The follow-up is now sent as a lighter-weight `Prime` command that updates the stored duration in place without affecting the running phase. Contributed by [@SeanTong11](https://github.com/SeanTong11).
+- **Timer completing instantly when a stale duration update arrives mid-round** — in a rare race, the engine could receive a `Prime` command carrying a duration shorter than the already-elapsed time (e.g. if the round duration was shortened in settings while a timer was running). Without a guard this caused the timer to complete on the very next tick. The `Prime` handler now clamps the new duration to at least one tick beyond the current elapsed position so the timer always advances at least once before completing.
+
 ## [v1.6.0] - 2026-04-27
 
 ### System Tray
