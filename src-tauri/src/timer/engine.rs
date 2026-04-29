@@ -174,7 +174,9 @@ fn run_loop(
                     Transition::To(Phase::Idle)
                 }
                 Ok(TimerCommand::Prime { duration_secs: d }) => {
-                    total_secs = d;
+                    // Clamp so a stale Prime never causes immediate completion
+                    // on the next Resume tick.
+                    total_secs = d.max(elapsed_secs.saturating_add(1));
                     Transition::Stay
                 }
                 Ok(TimerCommand::Shutdown) | Err(_) => Transition::Break,
@@ -230,7 +232,10 @@ fn run_loop(
                         Transition::To(Phase::Idle)
                     }
                     Ok(TimerCommand::Prime { duration_secs: d }) => {
-                        total_secs = d;
+                        // Clamp so a stale Prime arriving while the timer is
+                        // running never causes an immediate spurious completion
+                        // on the next tick.
+                        total_secs = d.max(elapsed_secs.saturating_add(1));
                         Transition::Stay
                     }
                     Ok(TimerCommand::Shutdown) => Transition::Break,
@@ -521,6 +526,65 @@ mod tests {
         assert!(
             matches!(events.last(), Some(TimerEvent::Complete { .. })),
             "last event must be Complete after priming a fresh start"
+        );
+    }
+
+    #[test]
+    fn prime_below_elapsed_while_running_does_not_complete_immediately() {
+        // If Prime fires with duration_secs < elapsed_secs while the timer is
+        // running, the engine must not complete on the very next tick — it
+        // should run at least one more tick first.
+        let (handle, rx) = spawn(10, TICK);
+        handle.send(TimerCommand::Start);
+        // Let 5 ticks fire so elapsed_secs = 5.
+        std::thread::sleep(TICK * 5 + TICK / 2);
+        // Prime with duration below elapsed — without the clamp this would fire
+        // Complete on the very next tick.
+        handle.send(TimerCommand::Prime { duration_secs: 2 });
+
+        let events = collect_until_complete(&rx, Duration::from_secs(2));
+        let ticks_after_prime: Vec<_> = events
+            .iter()
+            .filter(|e| matches!(e, TimerEvent::Tick { elapsed_secs, .. } if *elapsed_secs > 5))
+            .collect();
+        assert!(
+            !ticks_after_prime.is_empty(),
+            "at least one tick must fire after Prime before Complete"
+        );
+        assert!(
+            matches!(events.last(), Some(TimerEvent::Complete { .. })),
+            "timer must still complete after clamped Prime"
+        );
+    }
+
+    #[test]
+    fn prime_below_elapsed_while_paused_does_not_complete_immediately_on_resume() {
+        // Same edge case in Paused phase: Prime with duration_secs < elapsed_secs
+        // must not cause immediate completion on the first tick after Resume.
+        let (handle, rx) = spawn(10, TICK);
+        handle.send(TimerCommand::Start);
+        // Let 5 ticks fire, then pause.
+        std::thread::sleep(TICK * 5 + TICK / 2);
+        handle.send(TimerCommand::Pause);
+        std::thread::sleep(TICK); // let Paused event arrive
+        drain(&rx);
+
+        // Prime with duration below elapsed.
+        handle.send(TimerCommand::Prime { duration_secs: 2 });
+        handle.send(TimerCommand::Resume);
+
+        let events = collect_until_complete(&rx, Duration::from_secs(2));
+        let ticks_after_resume: Vec<_> = events
+            .iter()
+            .filter(|e| matches!(e, TimerEvent::Tick { elapsed_secs, .. } if *elapsed_secs > 5))
+            .collect();
+        assert!(
+            !ticks_after_resume.is_empty(),
+            "at least one tick must fire after Resume before Complete"
+        );
+        assert!(
+            matches!(events.last(), Some(TimerEvent::Complete { .. })),
+            "timer must still complete after clamped Prime in Paused phase"
         );
     }
 
