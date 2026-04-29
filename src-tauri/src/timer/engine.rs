@@ -23,6 +23,9 @@ pub enum TimerCommand {
     Skip,
     /// Change the total duration; moves engine to Idle so caller must Start.
     Reconfigure { duration_secs: u32 },
+    /// Update the stored duration without altering phase or elapsed time.
+    /// Used to arm the next round/reset path without clobbering a fresh Start.
+    Prime { duration_secs: u32 },
     /// OS sleep detected: freeze elapsed position, block until WakeResume.
     Suspend,
     /// OS wake detected: resume from the saved elapsed position.
@@ -123,10 +126,14 @@ fn run_loop(
                     total_secs = d;
                     Transition::Stay
                 }
+                Ok(TimerCommand::Prime { duration_secs: d }) => {
+                    total_secs = d;
+                    Transition::Stay
+                }
                 // Reset while Idle: emit the event so the listener can update
-                // the frontend and send a follow-up Reconfigure.  Without this
-                // handler the command would be silently swallowed, leaving the
-                // listener blocked in recv() and the UI stale.
+                // the frontend and then sync the next-round duration. Without
+                // this handler the command would be silently swallowed,
+                // leaving the listener blocked in recv() and the UI stale.
                 Ok(TimerCommand::Reset) => {
                     elapsed_secs = 0;
                     let _ = event_tx.send(TimerEvent::Reset);
@@ -165,6 +172,10 @@ fn run_loop(
                     total_secs = d;
                     elapsed_secs = 0;
                     Transition::To(Phase::Idle)
+                }
+                Ok(TimerCommand::Prime { duration_secs: d }) => {
+                    total_secs = d;
+                    Transition::Stay
                 }
                 Ok(TimerCommand::Shutdown) | Err(_) => Transition::Break,
                 _ => Transition::Stay,
@@ -217,6 +228,10 @@ fn run_loop(
                         total_secs = d;
                         elapsed_secs = 0;
                         Transition::To(Phase::Idle)
+                    }
+                    Ok(TimerCommand::Prime { duration_secs: d }) => {
+                        total_secs = d;
+                        Transition::Stay
                     }
                     Ok(TimerCommand::Shutdown) => Transition::Break,
                     _ => Transition::Stay,
@@ -485,6 +500,27 @@ mod tests {
         assert!(
             matches!(events.last(), Some(TimerEvent::Complete { .. })),
             "last event must be Complete after reconfigured timer"
+        );
+    }
+
+    #[test]
+    fn prime_updates_duration_without_cancelling_fresh_start() {
+        // Models the skip/reset race: the UI sends Start for the next round
+        // before the listener's follow-up duration update reaches the engine.
+        let (handle, rx) = spawn(10, TICK);
+        handle.send(TimerCommand::Start);
+        std::thread::sleep(TICK / 2);
+        handle.send(TimerCommand::Prime { duration_secs: 3 });
+
+        let events = collect_until_complete(&rx, Duration::from_secs(2));
+        let ticks = events
+            .iter()
+            .filter(|e| matches!(e, TimerEvent::Tick { .. }))
+            .count();
+        assert_eq!(ticks, 3, "Prime to 3s should keep the timer running and yield 3 ticks, got {ticks}");
+        assert!(
+            matches!(events.last(), Some(TimerEvent::Complete { .. })),
+            "last event must be Complete after priming a fresh start"
         );
     }
 
