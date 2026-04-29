@@ -139,9 +139,8 @@ impl TimerController {
         log::info!("[timer] reset");
         self.sequence.lock().unwrap().reset();
         // Send only Reset — the event listener's Reset handler will follow up
-        // with Reconfigure once the engine is confirmed Idle.  Sending
-        // Reconfigure here first would push the engine into Idle before Reset
-        // arrives, causing Reset to be silently dropped and the UI to freeze.
+        // with Prime once the engine is confirmed Idle. Sending a duration
+        // update here first would race the Reset and can leave the UI stale.
         self.engine.send(TimerCommand::Reset);
     }
 
@@ -330,8 +329,9 @@ fn listen_events(
                     s.is_running = false;
                 }
 
-                // Prepare the engine for the next round.
-                engine.send(TimerCommand::Reconfigure {
+                // Arm the next round's duration without risking a late
+                // reconfigure that kicks a freshly-started timer back to Idle.
+                engine.send(TimerCommand::Prime {
                     duration_secs: next_duration,
                 });
 
@@ -455,18 +455,17 @@ fn listen_events(
                     websocket::broadcast_reset(&ws);
                 }
 
-                // Reconfigure the engine with the current round's duration so
-                // the next Start uses the correct (possibly settings-updated)
-                // total.  This is safe here because the engine is guaranteed
-                // to be in Idle when it emits Reset (all three phases —
-                // Running, Paused, and now Idle — transition to/stay Idle
-                // before sending the event).
+                // Prime the engine with the current round's duration so the
+                // next Start uses the correct (possibly settings-updated)
+                // total. Using the lighter-weight command here avoids a race
+                // where a fast user click on Start is immediately clobbered by
+                // a late follow-up duration update.
                 let duration = {
                     let seq = sequence.lock().unwrap();
                     let s = settings.lock().unwrap();
                     seq.current_duration_secs(&s)
                 };
-                engine.send(TimerCommand::Reconfigure { duration_secs: duration });
+                engine.send(TimerCommand::Prime { duration_secs: duration });
 
                 // Reset tray to idle (empty arc).
                 let rt = sequence.lock().unwrap().current_round.as_str().to_string();
