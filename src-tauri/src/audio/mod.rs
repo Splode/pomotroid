@@ -209,6 +209,18 @@ pub fn find_custom_files(audio_dir: &Path) -> CustomAudioPaths {
     }
 }
 
+/// Probe `path` by attempting to construct a `rodio::Decoder`.
+/// Returns `Ok(())` if the format and codec are recognised, or an error
+/// string suitable for returning to the frontend.
+pub fn probe_audio_file(path: &Path) -> Result<(), String> {
+    let reader = std::fs::File::open(path)
+        .map(std::io::BufReader::new)
+        .map_err(|e| format!("cannot open file: {e}"))?;
+    Decoder::new(reader)
+        .map(|_| ())
+        .map_err(|e| format!("audio format not supported: {e}"))
+}
+
 // ---------------------------------------------------------------------------
 // Audio thread
 // ---------------------------------------------------------------------------

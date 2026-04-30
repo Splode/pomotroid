@@ -43,6 +43,22 @@
     else longBreakAlert = val;
   }
 
+  let workAlertError = $state<string | null>(null);
+  let shortBreakAlertError = $state<string | null>(null);
+  let longBreakAlertError = $state<string | null>(null);
+
+  function getError(id: CueKey): string | null {
+    if (id === 'work_alert') return workAlertError;
+    if (id === 'short_break_alert') return shortBreakAlertError;
+    return longBreakAlertError;
+  }
+
+  function setError(id: CueKey, val: string | null) {
+    if (id === 'work_alert') workAlertError = val;
+    else if (id === 'short_break_alert') shortBreakAlertError = val;
+    else longBreakAlertError = val;
+  }
+
   async function refreshAudioInfo() {
     try {
       const info: CustomAudioInfo = await getCustomAudioInfo();
@@ -76,6 +92,7 @@
   }
 
   async function pickAudio(id: CueKey) {
+    setError(id, null);
     let path: string | null = null;
     try {
       path = await openAudioFilePicker();
@@ -87,8 +104,10 @@
     try {
       const displayName = await setCustomAudio(id, path);
       setFileName(id, displayName);
+      setError(id, null);
     } catch (err) {
       await logError(`[audio] setCustomAudio failed: ${err}`);
+      setError(id, String(err));
     }
   }
 
@@ -96,6 +115,7 @@
     try {
       await clearCustomAudio(id);
       setFileName(id, null);
+      setError(id, null);
     } catch (err) {
       await logError(`[audio] clearCustomAudio failed: ${err}`);
     }
@@ -122,6 +142,9 @@
         <button class="btn-choose" onclick={() => pickAudio(id)}>{m.notif_btn_choose()}</button>
       </div>
     </div>
+    {#if getError(id)}
+      <p class="audio-error">{getError(id)}</p>
+    {/if}
   {/each}
 
   <div class="group-heading">{m.notif_group_desktop()}</div>
@@ -323,5 +346,13 @@
   .btn-restore:hover {
     background: color-mix(in oklch, var(--color-foreground) 14%, transparent);
     color: var(--color-foreground);
+  }
+
+  .audio-error {
+    margin: 0;
+    padding: 2px 20px 8px;
+    font-size: 0.72rem;
+    color: var(--color-danger, #e05252);
+    font-family: monospace;
   }
 </style>
