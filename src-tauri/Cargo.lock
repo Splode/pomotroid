@@ -3394,6 +3394,7 @@ dependencies = [
  "tauri-plugin-updater",
  "tiny-skia",
  "tokio",
+ "tokio-tungstenite",
 ]
 
 [[package]]
