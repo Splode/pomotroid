@@ -37,6 +37,7 @@ axum = { version = "0.8", features = ["ws"] }
 futures-util = "0.3"
 
 rodio = { version = "0.22", default-features = false, features = ["playback", "wav", "mp3", "vorbis"] }
+symphonia-codec-adpcm = "0.5.5"
 tiny-skia = "0.12"
 notify = "8"
 

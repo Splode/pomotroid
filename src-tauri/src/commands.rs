@@ -451,6 +451,15 @@ pub fn audio_set_custom(
     let dest = audio_dir.join(format!("{stem}.{ext}"));
     std::fs::copy(src, &dest).map_err(|e| e.to_string())?;
 
+    // Verify the copied file is decodable before committing. If it fails,
+    // clean up the orphan and sync in-memory state to default (the old file
+    // was already deleted above).
+    if let Err(e) = audio::probe_audio_file(&dest) {
+        let _ = std::fs::remove_file(&dest);
+        audio_state.clear_custom_path(&cue);
+        return Err(e);
+    }
+
     audio_state.set_custom_path(&cue, dest);
 
     let display_name = src

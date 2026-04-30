@@ -3383,6 +3383,7 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
+ "symphonia-codec-adpcm",
  "tauri",
  "tauri-build",
  "tauri-plugin-dialog",
@@ -4640,6 +4641,16 @@ dependencies = [
  "log",
  "symphonia-core",
  "symphonia-metadata",
+]
+
+[[package]]
+name = "symphonia-codec-adpcm"
+version = "0.5.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2dddc50e2bbea4cfe027441eece77c46b9f319748605ab8f3443350129ddd07f"
+dependencies = [
+ "log",
+ "symphonia-core",
 ]
 
 [[package]]
