@@ -60,7 +60,7 @@ export const clearCustomAudio = (cue: string) => invoke<void>('audio_clear_custo
 export const openAudioFilePicker = (): Promise<string | null> =>
   dialogOpen({
     multiple: false,
-    filters: [{ name: 'Audio', extensions: ['mp3', 'wav', 'ogg', 'flac'] }],
+    filters: [{ name: 'Audio', extensions: ['mp3', 'wav', 'ogg'] }],
   }) as Promise<string | null>;
 
 // --- Diagnostic log commands ---
