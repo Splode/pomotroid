@@ -1,10 +1,10 @@
 {
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "🍅 Simple and visually-pleasing Pomodoro timer. Pomotroid is a simple and configurable Pomodoro timer. It aims to provide a visually-pleasing and reliable way to track productivity using the Pomodoro Technique.",
   "homepage": "https://github.com/Splode/pomotroid",
   "license": "MIT",
-  "url": "https://github.com/Splode/pomotroid/releases/download/v1.6.0/Pomotroid_1.6.0_x64-setup.exe#/dl.exe",
-  "hash": "2eaad8f8e728d07025c7b7a9d162958f807e4f34d26479710b1e50166af4ac6c",
+  "url": "https://github.com/Splode/pomotroid/releases/download/v1.7.0/Pomotroid_1.7.0_x64-setup.exe#/dl.exe",
+  "hash": "e7d9acb2e5097924f0020b5772b8e3da87edaec7081009bc09dba0e84e650631",
   "installer": {
     "script": "Start-Process \"$dir\\dl.exe\" -ArgumentList '/S', \"/D=$dir\" -Wait"
   },
