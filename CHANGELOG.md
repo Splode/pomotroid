@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### System Tray
+
+- **Tray icon preserves progress arc while paused** — pausing the timer previously replaced the progress arc with only the pause bars, losing visibility of how far through the session you were. The tray icon now keeps the progress arc visible and overlays the pause bars on top, so both the paused state and current session progress are visible at a glance. Contributed by [@SeanTong11](https://github.com/SeanTong11).
+
 ### Bug Fixes
 
 - **WebSocket `getState` returns no response** — sending `{"type":"getState"}` over the WebSocket API would receive no reply. The handler was routing the response to a Tauri frontend IPC event (`timer:state-query`) instead of writing it back through the WebSocket connection. The fix introduces a per-connection `tokio::sync::mpsc` channel so the receive task can deliver direct replies through the send task, which holds the WebSocket sender. `getState` now correctly responds with `{"type":"state","payload":{...}}` to the requesting client only.
