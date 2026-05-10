@@ -1,6 +1,6 @@
 {
   "name": "pomotroid",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "A simple and visually-pleasing Pomodoro timer",
   "author": {
     "email": "flyweight@pm.me",
@@ -22,24 +22,24 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@inlang/paraglide-js": "^2.16.1",
-    "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-dialog": "^2.7.0",
+    "@inlang/paraglide-js": "^2.18.0",
+    "@tauri-apps/api": "^2.11.0",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-log": "^2.8.0",
     "@tauri-apps/plugin-notification": "^2.3.3",
     "@tauri-apps/plugin-opener": "^2"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.6",
-    "@sveltejs/kit": "^2.58.0",
-    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@sveltejs/kit": "^2.59.1",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tauri-apps/cli": "^2",
     "@types/node": "^25.6.0",
     "prettier": "^3.8.3",
     "prettier-plugin-svelte": "^3.5.1",
     "svelte": "^5.55.5",
-    "svelte-check": "^4.4.6",
+    "svelte-check": "^4.4.8",
     "typescript": "~6.0.3",
-    "vite": "^8.0.10"
+    "vite": "^8.0.11"
   }
 }

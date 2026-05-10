@@ -3,7 +3,7 @@
 /// The tray icon is a 32×32 RGBA image:
 ///   - Solid filled background circle in the theme's background color.
 ///   - Progress arc from 12 o'clock sweeping clockwise, colored by round type.
-///   - While paused: two vertical bars drawn over the background (no arc).
+///   - While paused: two vertical bars drawn over the progress arc.
 ///
 /// Colors come from the active theme, updated when theme changes.
 /// The tray is created/destroyed when `min_to_tray` setting changes.
@@ -368,7 +368,7 @@ pub fn destroy_tray(state: &Arc<TrayState>) {
 /// Re-render and push a new RGBA icon to the tray.
 ///
 /// - `round_type`: "work" | "short-break" | "long-break"
-/// - `paused`: show pause bars instead of an arc
+/// - `paused`: show pause bars over the progress arc
 /// - `progress`: 0.0 (empty) to 1.0 (full, i.e. elapsed/total)
 pub fn update_icon(state: &Arc<TrayState>, round_type: &str, paused: bool, progress: f32) {
     let guard = state.icon.lock().unwrap();
@@ -464,6 +464,19 @@ pub fn render_tray_icon_rgba(
         _             => rgba_color(colors.focus_round),
     };
 
+    // Progress arc from 12 o'clock, clockwise, in the round-type colour.
+    paint.set_color(round_color);
+
+    // In elapsed mode the arc grows as time passes; in countdown mode it shrinks.
+    let effective = if countdown { 1.0 - progress } else { progress };
+    let sweep = effective.clamp(0.0, 1.0) * TAU;
+    if sweep > 0.001 {
+        let start = -FRAC_PI_2;
+        let end   = start + sweep;
+        let path  = build_arc_path(CENTER, CENTER, RADIUS, start, end);
+        pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
+    }
+
     if paused {
         // Two vertical bars centred in the ring, in the round-type colour so
         // they read clearly on any panel colour regardless of theme foreground.
@@ -480,19 +493,6 @@ pub fn render_tray_icon_rgba(
                     Transform::identity(), None,
                 );
             }
-        }
-    } else {
-        // Progress arc from 12 o'clock, clockwise, in the round-type colour.
-        paint.set_color(round_color);
-
-        // In elapsed mode the arc grows as time passes; in countdown mode it shrinks.
-        let effective = if countdown { 1.0 - progress } else { progress };
-        let sweep = effective.clamp(0.0, 1.0) * TAU;
-        if sweep > 0.001 {
-            let start = -FRAC_PI_2;
-            let end   = start + sweep;
-            let path  = build_arc_path(CENTER, CENTER, RADIUS, start, end);
-            pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
         }
     }
 
@@ -548,6 +548,20 @@ mod tests {
     fn render_paused_returns_correct_byte_count() {
         let bytes = render_tray_icon_rgba(&TrayColors::default(), true, 0.0, "work", false);
         assert_eq!(bytes.len(), (SIZE * SIZE * 4) as usize);
+    }
+
+    #[test]
+    fn render_paused_preserves_progress_arc() {
+        let empty = render_tray_icon_rgba(&TrayColors::default(), true, 0.0, "work", false);
+        let half = render_tray_icon_rgba(&TrayColors::default(), true, 0.5, "work", false);
+        assert!(empty != half);
+    }
+
+    #[test]
+    fn render_paused_still_shows_pause_indicator() {
+        let running = render_tray_icon_rgba(&TrayColors::default(), false, 0.5, "work", false);
+        let paused = render_tray_icon_rgba(&TrayColors::default(), true, 0.5, "work", false);
+        assert!(running != paused);
     }
 
     #[test]
