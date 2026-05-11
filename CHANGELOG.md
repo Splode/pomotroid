@@ -1,4 +1,4 @@
-## [Unreleased]
+## [v1.7.1] - 2026-05-11
 
 ### Bug Fixes
 
