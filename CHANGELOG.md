@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Bug Fixes
+
+- **Right-click shows browser context menu in app window** — right-clicking anywhere in the Pomotroid window would surface the Chromium/WebKit developer context menu, which is out of place in a desktop app. A root-level Svelte layout now intercepts all `contextmenu` events and suppresses the default browser menu. Contributed by [@SeanTong11](https://github.com/SeanTong11).
+
 ## [v1.7.0] - 2026-05-04
 
 ### System Tray
