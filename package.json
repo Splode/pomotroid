@@ -37,7 +37,7 @@
     "@types/node": "^25.7.0",
     "prettier": "^3.8.3",
     "prettier-plugin-svelte": "^3.5.2",
-    "svelte": "^5.55.5",
+    "svelte": "^5.55.7",
     "svelte-check": "^4.4.8",
     "typescript": "~6.0.3",
     "vite": "^8.0.12"
