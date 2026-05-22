@@ -39,6 +39,10 @@ futures-util = "0.3"
 rodio = { version = "0.22", default-features = false, features = ["playback", "wav", "mp3", "vorbis"] }
 symphonia-codec-adpcm = "0.5.5"
 tiny-skia = "0.12"
+[target.'cfg(target_os = "windows")'.dependencies]
+windows = { version = "0.61", features = [
+    "Win32_System_Power",
+] }
 notify = "8"
 
 [dev-dependencies]
