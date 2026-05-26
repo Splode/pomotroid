@@ -303,7 +303,7 @@ pub fn settings_reset_defaults(
 // CMD-03 — Theme commands
 // ---------------------------------------------------------------------------
 
-/// List all available themes (17 bundled + any user-created ones).
+/// List all available themes (38 bundled + any user-created ones).
 #[tauri::command]
 pub fn themes_list(app: AppHandle) -> Result<Vec<Theme>, String> {
     let data_dir = app
