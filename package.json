@@ -31,14 +31,14 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.6",
-    "@sveltejs/kit": "^2.62.0",
+    "@sveltejs/kit": "^2.64.0",
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tauri-apps/cli": "^2",
     "@types/node": "^25.9.1",
     "prettier": "^3.8.3",
     "prettier-plugin-svelte": "^4.1.0",
-    "svelte": "^5.56.1",
-    "svelte-check": "^4.5.0",
+    "svelte": "^5.56.3",
+    "svelte-check": "^4.6.0",
     "typescript": "~6.0.3",
     "vite": "^8.0.16"
   }
