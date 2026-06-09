@@ -36,7 +36,7 @@
     "@tauri-apps/cli": "^2",
     "@types/node": "^25.9.1",
     "prettier": "^3.8.3",
-    "prettier-plugin-svelte": "^4.0.1",
+    "prettier-plugin-svelte": "^4.1.0",
     "svelte": "^5.56.1",
     "svelte-check": "^4.5.0",
     "typescript": "~6.0.3",
