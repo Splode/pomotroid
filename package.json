@@ -34,7 +34,7 @@
     "@sveltejs/kit": "^2.64.0",
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tauri-apps/cli": "^2",
-    "@types/node": "^25.9.1",
+    "@types/node": "^25.9.2",
     "prettier": "^3.8.3",
     "prettier-plugin-svelte": "^4.1.0",
     "svelte": "^5.56.3",
