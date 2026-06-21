@@ -18,6 +18,7 @@
     { value: 'zh', label: '中文' },
     { value: 'pt', label: 'Português' },
     { value: 'tr', label: 'Türkçe' },
+    { value: 'ru', label: 'Русский' },
   ];
 
   // On Linux, probe for libayatana-appindicator3 at runtime.  The tray section
