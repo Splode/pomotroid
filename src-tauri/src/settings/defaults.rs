@@ -20,6 +20,8 @@ pub const DEFAULTS: &[(&str, &str)] = &[
     ("theme_dark", "Pomotroid"),
     ("tick_sounds_work", "false"),
     ("tick_sounds_break", "false"),
+    ("prevent_sleep", "false"),
+    ("keep_screen_on", "false"),
     ("time_work_secs", "1500"),
     ("time_short_break_secs", "300"),
     ("time_long_break_secs", "900"),

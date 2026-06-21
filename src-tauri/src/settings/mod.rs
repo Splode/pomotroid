@@ -65,6 +65,8 @@ pub struct Settings {
     pub window_width: Option<u32>,
     /// Last known window height (physical pixels). `None` = use OS default.
     pub window_height: Option<u32>,
+    pub prevent_sleep: bool,
+    pub keep_screen_on: bool,
 }
 
 impl Default for Settings {
@@ -124,6 +126,8 @@ impl Default for Settings {
             window_y: None,
             window_width: None,
             window_height: None,
+            prevent_sleep: false,
+            keep_screen_on: false,
         }
     }
 }
@@ -249,6 +253,8 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         window_y: parse_opt_i32(&map, "window_y"),
         window_width: parse_opt_u32(&map, "window_width"),
         window_height: parse_opt_u32(&map, "window_height"),
+        prevent_sleep: parse_bool(&map, "prevent_sleep", d.prevent_sleep),
+        keep_screen_on: parse_bool(&map, "keep_screen_on", d.keep_screen_on),
     })
 }
 

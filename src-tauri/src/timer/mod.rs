@@ -12,6 +12,7 @@ use crate::db::{queries, DbState};
 use crate::settings::Settings;
 use crate::tray::{self, TrayState};
 use crate::websocket::{self, WsState};
+use crate::power;
 
 use engine::{EngineHandle, TimerCommand, TimerEvent};
 use sequence::{RoundType, SequenceState};
@@ -252,6 +253,13 @@ fn listen_events(
                     websocket::broadcast_started(&ws, total_secs);
                 }
                 tray::update_menu_items(&tray, true, false);
+
+                {
+                    let s = settings.lock().unwrap();
+                    if s.prevent_sleep {
+                        power::acquire_wakelock(s.keep_screen_on);
+                    }
+                }
             }
 
             TimerEvent::Tick { elapsed_secs, total_secs } => {
@@ -387,6 +395,13 @@ fn listen_events(
                     RoundType::Work => auto_start_work,
                     _ => auto_start_break,
                 };
+                // Release wakelock when idle (auto-start will re-acquire via Started event).
+                if !should_auto {
+                    let s = settings.lock().unwrap();
+                    if s.prevent_sleep {
+                        power::release_wakelock();
+                    }
+                }
                 if should_auto {
                     log::debug!("[timer] auto-starting {}", next_round.as_str());
                     engine.send(TimerCommand::Start);
@@ -416,6 +431,12 @@ fn listen_events(
                 let progress = if total > 0 { elapsed_secs as f32 / total as f32 } else { 0.0 };
                 tray::update_icon(&tray, &rt, true, progress);
                 tray::update_menu_items(&tray, false, true);
+                {
+                    let s = settings.lock().unwrap();
+                    if s.prevent_sleep {
+                        power::release_wakelock();
+                    }
+                }
             }
 
             TimerEvent::Resumed { elapsed_secs } => {
@@ -437,6 +458,12 @@ fn listen_events(
                 tray::update_icon(&tray, &rt, false, progress);
                 last_tray_progress = progress;
                 tray::update_menu_items(&tray, true, false);
+                {
+                    let s = settings.lock().unwrap();
+                    if s.prevent_sleep {
+                        power::acquire_wakelock(s.keep_screen_on);
+                    }
+                }
             }
 
             TimerEvent::Reset => {
@@ -472,6 +499,12 @@ fn listen_events(
                 tray::update_icon(&tray, &rt, false, 0.0);
                 last_tray_progress = -1.0;
                 tray::update_menu_items(&tray, false, false);
+                {
+                    let s = settings.lock().unwrap();
+                    if s.prevent_sleep {
+                        power::release_wakelock();
+                    }
+                }
             }
 
             TimerEvent::Suspended { elapsed_secs } => {
