@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.6",
-    "@sveltejs/kit": "^2.65.1",
+    "@sveltejs/kit": "^2.67.0",
     "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@tauri-apps/cli": "^2",
     "@types/node": "^25.9.3",
