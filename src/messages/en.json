@@ -57,6 +57,8 @@
   "system_toggle_aot_desc": "Keep the timer window above all other windows.",
   "system_toggle_break_aot": "Lower Priority During Breaks",
   "system_toggle_break_aot_desc": "Disable always-on-top while a break is running.",
+  "system_toggle_remember_window": "Remember Size and Position",
+  "system_toggle_remember_window_desc": "Restore the window to its last size and position when the app launches.",
   "system_group_tray": "System Tray",
   "system_toggle_show_tray": "Show in System Tray",
   "system_toggle_show_tray_desc": "Display a persistent icon in the system tray.",
