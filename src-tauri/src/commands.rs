@@ -151,7 +151,8 @@ pub fn settings_set(
         } else {
             0.0
         };
-        tray::update_icon(&tray_state, &snap.round_type, snap.is_paused, progress);
+        let remaining = snap.total_secs.saturating_sub(snap.elapsed_secs);
+        tray::update_icon(&tray_state, &snap.round_type, snap.is_paused, progress, remaining);
     }
 
     // Update tray icon colors when the active theme changes.
@@ -169,7 +170,8 @@ pub fn settings_set(
             } else {
                 0.0
             };
-            tray::update_icon(&tray_state, &snap.round_type, snap.is_paused, progress);
+            let remaining = snap.total_secs.saturating_sub(snap.elapsed_secs);
+            tray::update_icon(&tray_state, &snap.round_type, snap.is_paused, progress, remaining);
         }
     }
 

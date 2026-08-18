@@ -40,6 +40,9 @@ rodio = { version = "0.22", default-features = false, features = ["playback", "w
 symphonia-codec-adpcm = "0.6.0"
 tiny-skia = "0.12"
 notify = "8"
+image = "0.25"
+imageproc = "0.25"
+ab_glyph = "0.2"
 
 [dev-dependencies]
 tokio-tungstenite = "0.29"

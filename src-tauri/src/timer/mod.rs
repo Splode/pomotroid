@@ -296,7 +296,8 @@ fn listen_events(
                     0.0
                 };
                 if (progress - last_tray_progress).abs() >= 0.01 {
-                    tray::update_icon(&tray, &rt, false, progress);
+                    let remaining = total_secs.saturating_sub(elapsed_secs);
+                    tray::update_icon(&tray, &rt, false, progress, remaining);
                     last_tray_progress = progress;
                 }
             }
@@ -373,7 +374,12 @@ fn listen_events(
                 // regardless of how long the round is.  Using 0.0 here caused
                 // a ≥15-second blank period before the arc started animating.
                 let rt = sequence.lock().unwrap().current_round.as_str().to_string();
-                tray::update_icon(&tray, &rt, false, 0.0);
+                let total = {
+                    let seq = sequence.lock().unwrap();
+                    let s = settings.lock().unwrap();
+                    seq.current_duration_secs(&s)
+                };
+                tray::update_icon(&tray, &rt, false, 0.0, total);
                 last_tray_progress = -1.0;
 
                 // Broadcast round-change to any connected WebSocket clients.
@@ -414,7 +420,8 @@ fn listen_events(
                     seq.current_duration_secs(&s)
                 };
                 let progress = if total > 0 { elapsed_secs as f32 / total as f32 } else { 0.0 };
-                tray::update_icon(&tray, &rt, true, progress);
+                let remaining = total.saturating_sub(elapsed_secs);
+                tray::update_icon(&tray, &rt, true, progress, remaining);
                 tray::update_menu_items(&tray, false, true);
             }
 
@@ -434,7 +441,8 @@ fn listen_events(
                     seq.current_duration_secs(&s)
                 };
                 let progress = if total > 0 { elapsed_secs as f32 / total as f32 } else { 0.0 };
-                tray::update_icon(&tray, &rt, false, progress);
+                let remaining = total.saturating_sub(elapsed_secs);
+                tray::update_icon(&tray, &rt, false, progress, remaining);
                 last_tray_progress = progress;
                 tray::update_menu_items(&tray, true, false);
             }
@@ -469,7 +477,12 @@ fn listen_events(
 
                 // Reset tray to idle (empty arc).
                 let rt = sequence.lock().unwrap().current_round.as_str().to_string();
-                tray::update_icon(&tray, &rt, false, 0.0);
+                let total = {
+                    let seq = sequence.lock().unwrap();
+                    let s = settings.lock().unwrap();
+                    seq.current_duration_secs(&s)
+                };
+                tray::update_icon(&tray, &rt, false, 0.0, total);
                 last_tray_progress = -1.0;
                 tray::update_menu_items(&tray, false, false);
             }
@@ -490,7 +503,8 @@ fn listen_events(
                     seq.current_duration_secs(&s)
                 };
                 let progress = if total > 0 { elapsed_secs as f32 / total as f32 } else { 0.0 };
-                tray::update_icon(&tray, &rt, true, progress);
+                let remaining = total.saturating_sub(elapsed_secs);
+                tray::update_icon(&tray, &rt, true, progress, remaining);
             }
         }
     }
