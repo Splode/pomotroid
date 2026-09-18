@@ -309,6 +309,12 @@
     checked={$settings.dial_countdown}
     onclick={() => toggle('dial_countdown', $settings.dial_countdown)}
   />
+  <SettingsToggle
+    label={m.timer_toggle_break_shield()}
+    description={m.timer_toggle_break_shield_desc()}
+    checked={$settings.fullscreen_break_shield}
+    onclick={() => toggle('fullscreen_break_shield', $settings.fullscreen_break_shield)}
+  />
 </div>
 
 <style>
