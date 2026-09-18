@@ -1,3 +1,9 @@
+## [Unreleased]
+
+### Features
+
+- **Full-screen break screen overlay** — adds an opt-in full-screen ambient break screen (screen shield) that covers the display during short and long breaks with a large countdown dial, relaxation prompt, and quick unlock/skip controls. Contributed by [@ArashZich](https://github.com/ArashZich).
+
 ## [v1.7.1] - 2026-05-11
 
 ### Bug Fixes
