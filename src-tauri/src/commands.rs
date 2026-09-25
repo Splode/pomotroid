@@ -9,6 +9,7 @@ use std::sync::Arc;
 
 use crate::audio::{self, AudioManager};
 use crate::notifications;
+use crate::db::queries::{Category, StatsFilter};
 use crate::db::{queries, DbState};
 use crate::settings::{self, Settings};
 use crate::shortcuts;
@@ -336,18 +337,25 @@ pub fn sessions_clear(db: State<'_, DbState>, app: AppHandle) -> Result<(), Stri
 // ---------------------------------------------------------------------------
 
 /// Batched stats for Today + This Week tabs (minimises IPC round-trips).
+///
+/// `filter` hides categories from the results; `None` means no filtering
+/// (the categories feature is off).
 #[tauri::command]
-pub fn stats_get_detailed(db: State<'_, DbState>) -> Result<DetailedStats, String> {
+pub fn stats_get_detailed(
+    filter: Option<StatsFilter>,
+    db: State<'_, DbState>,
+) -> Result<DetailedStats, String> {
     let conn = db.lock().map_err(|e| e.to_string())?;
-    let today = queries::get_daily_stats(&conn).map_err(|e| {
+    let filter = filter.as_ref();
+    let today = queries::get_daily_stats(&conn, filter).map_err(|e| {
         log::error!("[stats] failed to query daily stats: {e}");
         e.to_string()
     })?;
-    let week = queries::get_weekly_stats(&conn).map_err(|e| {
+    let week = queries::get_weekly_stats(&conn, filter).map_err(|e| {
         log::error!("[stats] failed to query weekly stats: {e}");
         e.to_string()
     })?;
-    let streak = queries::get_streak(&conn).map_err(|e| {
+    let streak = queries::get_streak(&conn, filter).map_err(|e| {
         log::error!("[stats] failed to query streak: {e}");
         e.to_string()
     })?;
@@ -356,17 +364,21 @@ pub fn stats_get_detailed(db: State<'_, DbState>) -> Result<DetailedStats, Strin
 
 /// Heatmap data + lifetime totals for the All Time tab.
 #[tauri::command]
-pub fn stats_get_heatmap(db: State<'_, DbState>) -> Result<HeatmapStats, String> {
+pub fn stats_get_heatmap(
+    filter: Option<StatsFilter>,
+    db: State<'_, DbState>,
+) -> Result<HeatmapStats, String> {
     let conn = db.lock().map_err(|e| e.to_string())?;
-    let entries = queries::get_heatmap_data(&conn).map_err(|e| {
+    let filter = filter.as_ref();
+    let entries = queries::get_heatmap_data(&conn, filter).map_err(|e| {
         log::error!("[stats] failed to query heatmap data: {e}");
         e.to_string()
     })?;
-    let raw = queries::get_all_time_stats(&conn).map_err(|e| {
+    let raw = queries::get_all_time_stats(&conn, filter).map_err(|e| {
         log::error!("[stats] failed to query all-time stats: {e}");
         e.to_string()
     })?;
-    let streak = queries::get_streak(&conn).map_err(|e| {
+    let streak = queries::get_streak(&conn, filter).map_err(|e| {
         log::error!("[stats] failed to query streak for heatmap: {e}");
         e.to_string()
     })?;
@@ -376,6 +388,111 @@ pub fn stats_get_heatmap(db: State<'_, DbState>) -> Result<HeatmapStats, String>
         total_hours: (raw.total_work_secs / 3600) as u32,
         longest_streak: streak.longest,
     })
+}
+
+/// Number of completed focus rounds without a category. The stats window
+/// only offers an "Uncategorized" filter when this is non-zero.
+#[tauri::command]
+pub fn stats_uncategorized_count(db: State<'_, DbState>) -> Result<i64, String> {
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    queries::count_uncategorized_rounds(&conn).map_err(|e| e.to_string())
+}
+
+// ---------------------------------------------------------------------------
+// CMD-12 — Category commands
+// ---------------------------------------------------------------------------
+//
+// Every mutation returns the full, updated list and emits `categories:changed`
+// with it so the timer, settings and stats windows stay in sync.
+
+/// List all categories in display order.
+#[tauri::command]
+pub fn categories_list(db: State<'_, DbState>) -> Result<Vec<Category>, String> {
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    queries::list_categories(&conn).map_err(|e| e.to_string())
+}
+
+/// Create a category at the end of the list.
+#[tauri::command]
+pub fn categories_create(
+    name: String,
+    color: String,
+    db: State<'_, DbState>,
+    app: AppHandle,
+) -> Result<Vec<Category>, String> {
+    let name = queries::validate_category_name(&name)?;
+    queries::validate_category_color(&color)?;
+    let categories = {
+        let conn = db.lock().map_err(|e| e.to_string())?;
+        if queries::count_categories(&conn).map_err(|e| e.to_string())? >= queries::MAX_CATEGORIES {
+            return Err(format!("at most {} categories are allowed", queries::MAX_CATEGORIES));
+        }
+        queries::create_category(&conn, &name, &color).map_err(|e| {
+            log::error!("[categories] failed to create category: {e}");
+            e.to_string()
+        })?;
+        queries::list_categories(&conn).map_err(|e| e.to_string())?
+    };
+    log::info!("[categories] created '{name}'");
+    app.emit("categories:changed", &categories).ok();
+    Ok(categories)
+}
+
+/// Rename and recolor a category. For a built-in category, an empty or
+/// missing `name` restores its localized default name; user-created
+/// categories always need a name.
+#[tauri::command]
+pub fn categories_update(
+    id: i64,
+    name: Option<String>,
+    color: String,
+    db: State<'_, DbState>,
+    app: AppHandle,
+) -> Result<Vec<Category>, String> {
+    queries::validate_category_color(&color)?;
+    let categories = {
+        let conn = db.lock().map_err(|e| e.to_string())?;
+        let builtin = queries::is_builtin_category(&conn, id).map_err(|e| e.to_string())?;
+        let name = match name.as_deref().map(str::trim) {
+            Some(n) if !n.is_empty() => Some(queries::validate_category_name(n)?),
+            _ if builtin => None,
+            _ => return Err("category name must not be empty".to_string()),
+        };
+        queries::update_category(&conn, id, name.as_deref(), &color).map_err(|e| {
+            log::error!("[categories] failed to update category {id}: {e}");
+            e.to_string()
+        })?;
+        queries::list_categories(&conn).map_err(|e| e.to_string())?
+    };
+    app.emit("categories:changed", &categories).ok();
+    Ok(categories)
+}
+
+/// Delete a category. Its rounds move to uncategorized; nothing is lost.
+#[tauri::command]
+pub fn categories_delete(
+    id: i64,
+    db: State<'_, DbState>,
+    app: AppHandle,
+) -> Result<Vec<Category>, String> {
+    let categories = {
+        let conn = db.lock().map_err(|e| e.to_string())?;
+        let moved = queries::delete_category(&conn, id).map_err(|e| {
+            log::error!("[categories] failed to delete category {id}: {e}");
+            e.to_string()
+        })?;
+        log::info!("[categories] deleted category {id}, {moved} sessions now uncategorized");
+        queries::list_categories(&conn).map_err(|e| e.to_string())?
+    };
+    app.emit("categories:changed", &categories).ok();
+    Ok(categories)
+}
+
+/// Completed focus rounds in a category — shown when confirming a delete.
+#[tauri::command]
+pub fn categories_round_count(id: i64, db: State<'_, DbState>) -> Result<i64, String> {
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    queries::count_category_rounds(&conn, id).map_err(|e| e.to_string())
 }
 
 // ---------------------------------------------------------------------------

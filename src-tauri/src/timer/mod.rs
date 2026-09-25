@@ -310,7 +310,27 @@ fn listen_events(
                 // --- Session recording: mark the completed round ---
                 if let Some(session_id) = current_session_id.take() {
                     if let Ok(conn) = db.lock() {
-                        let _ = queries::complete_session(&conn, session_id, !was_skipped);
+                        // Focus rounds are filed under the active category when
+                        // categories are enabled; breaks are never categorized.
+                        let (categories_enabled, active_category_id) = {
+                            let s = settings.lock().unwrap();
+                            (s.categories_enabled, s.active_category_id)
+                        };
+                        let category_id = if categories_enabled && completed_round == "work" {
+                            queries::resolve_active_category(&conn, active_category_id)
+                                .unwrap_or_else(|e| {
+                                    log::error!("[timer] failed to resolve category: {e}");
+                                    None
+                                })
+                        } else {
+                            None
+                        };
+                        let _ = queries::complete_session(
+                            &conn,
+                            session_id,
+                            !was_skipped,
+                            category_id,
+                        );
                     }
                 }
 

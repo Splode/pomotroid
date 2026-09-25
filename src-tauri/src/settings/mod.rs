@@ -65,6 +65,14 @@ pub struct Settings {
     pub window_width: Option<u32>,
     /// Last known window height (physical pixels). `None` = use OS default.
     pub window_height: Option<u32>,
+    /// When true, completed focus rounds are recorded under the active
+    /// category and the category switcher and stats filter are shown.
+    pub categories_enabled: bool,
+    /// Category chosen in the titlebar switcher. 0 means none chosen yet;
+    /// the first category is used instead (see `queries::resolve_active_category`).
+    pub active_category_id: i64,
+    /// JSON array of category ids hidden in the stats window (0 = uncategorized).
+    pub stats_hidden_categories: String,
 }
 
 impl Default for Settings {
@@ -124,6 +132,9 @@ impl Default for Settings {
             window_y: None,
             window_width: None,
             window_height: None,
+            categories_enabled: false,
+            active_category_id: 0,
+            stats_hidden_categories: "[]".to_string(),
         }
     }
 }
@@ -249,6 +260,12 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         window_y: parse_opt_i32(&map, "window_y"),
         window_width: parse_opt_u32(&map, "window_width"),
         window_height: parse_opt_u32(&map, "window_height"),
+        categories_enabled: parse_bool(&map, "categories_enabled", d.categories_enabled),
+        active_category_id: parse_i64(&map, "active_category_id", d.active_category_id),
+        stats_hidden_categories: map
+            .get("stats_hidden_categories")
+            .cloned()
+            .unwrap_or(d.stats_hidden_categories),
     })
 }
 
@@ -281,6 +298,12 @@ fn parse_bool(map: &HashMap<String, String>, key: &str, default: bool) -> bool {
 }
 
 fn parse_u32(map: &HashMap<String, String>, key: &str, default: u32) -> u32 {
+    map.get(key)
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(default)
+}
+
+fn parse_i64(map: &HashMap<String, String>, key: &str, default: i64) -> i64 {
     map.get(key)
         .and_then(|v| v.parse().ok())
         .unwrap_or(default)
@@ -342,6 +365,9 @@ mod tests {
         assert_eq!(s.theme_dark, "Pomotroid");
         assert_eq!(s.language, "auto");
         assert!(!s.verbose_logging);
+        assert!(!s.categories_enabled, "categories must be opt-in");
+        assert_eq!(s.active_category_id, 0);
+        assert_eq!(s.stats_hidden_categories, "[]");
     }
 
     #[test]
@@ -426,8 +452,9 @@ mod tests {
     fn migration_2_converts_mins_to_secs_and_removes_old_keys() {
         // Simulate a pre-migration DB: schema version 1, `*_mins` keys present.
         let conn = Connection::open_in_memory().unwrap();
-        // Run only migration 1 manually to get v1 state.
-        conn.execute_batch("BEGIN; CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL); INSERT INTO schema_version VALUES (1); COMMIT;").unwrap();
+        // Run only migration 1 manually to get v1 state. The sessions table is
+        // part of v1 too; later migrations (MIGRATION_7) alter it.
+        conn.execute_batch("BEGIN; CREATE TABLE IF NOT EXISTS schema_version (version INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL); CREATE TABLE IF NOT EXISTS sessions (id INTEGER PRIMARY KEY AUTOINCREMENT, started_at INTEGER NOT NULL, ended_at INTEGER, round_type TEXT NOT NULL CHECK(round_type IN ('work', 'short-break', 'long-break')), duration_secs INTEGER NOT NULL CHECK(duration_secs > 0), completed INTEGER NOT NULL DEFAULT 0 CHECK(completed IN (0, 1))); INSERT INTO schema_version VALUES (1); COMMIT;").unwrap();
         conn.execute("INSERT INTO settings (key, value) VALUES ('time_work_mins', '30')", []).unwrap();
         conn.execute("INSERT INTO settings (key, value) VALUES ('time_short_break_mins', '7')", []).unwrap();
         conn.execute("INSERT INTO settings (key, value) VALUES ('time_long_break_mins', '20')", []).unwrap();

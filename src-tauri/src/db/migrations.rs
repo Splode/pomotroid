@@ -90,6 +90,36 @@ const MIGRATION_6: &str = "
     INSERT INTO schema_version VALUES (6);
 ";
 
+/// Adds session categories: a `categories` table seeded with three built-in
+/// categories (work, study, leisure) and a nullable `sessions.category_id`.
+/// Existing sessions stay uncategorized (NULL). Built-in categories keep
+/// `name` NULL until the user renames them, so the frontend can show a
+/// localized name for `builtin_key` instead. The feature is opt-in and
+/// seeded as disabled.
+const MIGRATION_7: &str = "
+    CREATE TABLE IF NOT EXISTS categories (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        name        TEXT,
+        builtin_key TEXT UNIQUE,
+        color       TEXT NOT NULL,
+        position    INTEGER NOT NULL DEFAULT 0
+    );
+
+    INSERT OR IGNORE INTO categories (name, builtin_key, color, position) VALUES
+        (NULL, 'work',    '#4A9FF5', 0),
+        (NULL, 'study',   '#F5A623', 1),
+        (NULL, 'leisure', '#B57EDC', 2);
+
+    ALTER TABLE sessions ADD COLUMN category_id INTEGER
+        REFERENCES categories(id) ON DELETE SET NULL;
+    CREATE INDEX IF NOT EXISTS idx_sessions_category_id ON sessions(category_id);
+
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('categories_enabled', 'false');
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('active_category_id', '0');
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('stats_hidden_categories', '[]');
+    INSERT INTO schema_version VALUES (7);
+";
+
 /// Apply any pending migrations. Each migration is wrapped in a transaction
 /// so a partial failure leaves the database unchanged.
 pub fn run(conn: &Connection) -> Result<()> {
@@ -131,6 +161,12 @@ pub fn run(conn: &Connection) -> Result<()> {
         log::info!("[db/migrations] MIGRATION_6 complete");
     }
 
+    if version < 7 {
+        log::info!("[db/migrations] applying MIGRATION_7: session categories");
+        conn.execute_batch(&format!("BEGIN; {MIGRATION_7} COMMIT;"))?;
+        log::info!("[db/migrations] MIGRATION_7 complete");
+    }
+
     Ok(())
 }
 
@@ -166,14 +202,14 @@ mod tests {
         let v: i64 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(v, 6);
+        assert_eq!(v, 7);
     }
 
     #[test]
     fn all_tables_created() {
         let conn = Connection::open_in_memory().unwrap();
         run(&conn).unwrap();
-        for table in &["settings", "sessions", "custom_themes", "schema_version"] {
+        for table in &["settings", "sessions", "custom_themes", "schema_version", "categories"] {
             let count: i64 = conn
                 .query_row(
                     "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?1",
@@ -183,5 +219,43 @@ mod tests {
                 .unwrap();
             assert_eq!(count, 1, "table '{table}' was not created");
         }
+    }
+
+    #[test]
+    fn migration_7_keeps_existing_sessions_uncategorized() {
+        // Simulate an upgrade: a v6 database that already holds session history.
+        let conn = Connection::open_in_memory().unwrap();
+        conn.execute_batch(&format!(
+            "BEGIN; {MIGRATION_1} {MIGRATION_2} {MIGRATION_3} {MIGRATION_4} {MIGRATION_5} {MIGRATION_6} COMMIT;"
+        ))
+        .unwrap();
+        conn.execute(
+            "INSERT INTO sessions (started_at, round_type, duration_secs, completed)
+             VALUES (1000, 'work', 1500, 1)",
+            [],
+        )
+        .unwrap();
+
+        // Only MIGRATION_7 should fire.
+        run(&conn).unwrap();
+
+        let category: Option<i64> = conn
+            .query_row("SELECT category_id FROM sessions", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(category, None, "existing sessions must stay uncategorized");
+
+        let builtins: Vec<String> = conn
+            .prepare("SELECT builtin_key FROM categories ORDER BY position")
+            .unwrap()
+            .query_map([], |r| r.get(0))
+            .unwrap()
+            .map(|r| r.unwrap())
+            .collect();
+        assert_eq!(builtins, ["work", "study", "leisure"]);
+
+        let enabled: String = conn
+            .query_row("SELECT value FROM settings WHERE key = 'categories_enabled'", [], |r| r.get(0))
+            .unwrap();
+        assert_eq!(enabled, "false", "categories must be opt-in");
     }
 }
