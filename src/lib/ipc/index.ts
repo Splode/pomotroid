@@ -12,6 +12,8 @@ import type {
   DetailedStats,
   HeatmapStats,
   UpdateInfo,
+  Category,
+  StatsFilter,
 } from '$lib/types';
 
 // --- Timer commands ---
@@ -80,11 +82,35 @@ export const clearSessionHistory = () => invoke<void>('sessions_clear');
 
 // --- Stats commands ---
 
-/** Daily + weekly data + streak in one call (Today and This Week tabs). */
-export const statsGetDetailed = () => invoke<DetailedStats>('stats_get_detailed');
+/** Daily + weekly data + streak in one call (Today and This Week tabs).
+ *  `filter` hides categories; null means no filtering (categories off). */
+export const statsGetDetailed = (filter: StatsFilter | null = null) =>
+  invoke<DetailedStats>('stats_get_detailed', { filter });
 
 /** Heatmap entries + lifetime totals (All Time tab). */
-export const statsGetHeatmap = () => invoke<HeatmapStats>('stats_get_heatmap');
+export const statsGetHeatmap = (filter: StatsFilter | null = null) =>
+  invoke<HeatmapStats>('stats_get_heatmap', { filter });
+
+/** Number of completed focus rounds that have no category. */
+export const statsUncategorizedCount = () => invoke<number>('stats_uncategorized_count');
+
+// --- Category commands (each mutation returns the full updated list) ---
+
+export const categoriesList = () => invoke<Category[]>('categories_list');
+
+export const categoriesCreate = (name: string, color: string) =>
+  invoke<Category[]>('categories_create', { name, color });
+
+/** A null `name` on a built-in category restores its localized default name. */
+export const categoriesUpdate = (id: number, name: string | null, color: string) =>
+  invoke<Category[]>('categories_update', { id, name, color });
+
+/** Deletes a category; its rounds become uncategorized. */
+export const categoriesDelete = (id: number) => invoke<Category[]>('categories_delete', { id });
+
+/** Completed focus rounds recorded under a category. */
+export const categoriesRoundCount = (id: number) =>
+  invoke<number>('categories_round_count', { id });
 
 // --- Platform commands ---
 
@@ -132,3 +158,6 @@ export const onThemesChanged = (cb: (themes: Theme[]) => void): Promise<Unlisten
 
 export const onSessionsCleared = (cb: () => void): Promise<UnlistenFn> =>
   listen<void>('sessions:cleared', () => cb());
+
+export const onCategoriesChanged = (cb: (categories: Category[]) => void): Promise<UnlistenFn> =>
+  listen<Category[]>('categories:changed', (e) => cb(e.payload));
