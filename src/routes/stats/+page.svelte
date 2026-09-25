@@ -4,14 +4,19 @@
   import {
     getSettings,
     getThemes,
+    onCategoriesChanged,
     onSettingsChanged,
     onThemesChanged,
     onRoundChange,
     onSessionsCleared,
+    setSetting,
     statsGetDetailed,
     statsGetHeatmap,
+    statsUncategorizedCount,
   } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
+  import { categories, syncCategories } from '$lib/stores/categories';
+  import { parseHiddenCategories, statsFilterFor } from '$lib/utils/categories';
   import { applyTheme } from '$lib/stores/theme';
   import { setLocale } from '$lib/locale.svelte.js';
   import { resolveThemeName } from '$lib/utils/theme';
@@ -25,6 +30,7 @@
   import DailyView from '$lib/components/stats/DailyView.svelte';
   import WeeklyView from '$lib/components/stats/WeeklyView.svelte';
   import YearlyView from '$lib/components/stats/YearlyView.svelte';
+  import CategoryFilter from '$lib/components/stats/CategoryFilter.svelte';
 
   type Tab = 'today' | 'week' | 'alltime';
 
@@ -32,17 +38,41 @@
   let detailed = $state<DetailedStats | null>(null);
   let heatmap = $state<HeatmapStats | null>(null);
   let heatmapLoaded = $state(false);
+  let uncategorizedCount = $state(0);
+
+  const hiddenCategories = $derived(parseHiddenCategories($settings.stats_hidden_categories));
 
   async function switchTab(tab: Tab) {
     activeTab = tab;
     if (tab === 'alltime' && !heatmapLoaded) {
       try {
-        heatmap = await statsGetHeatmap();
+        heatmap = await statsGetHeatmap(statsFilterFor($settings));
         heatmapLoaded = true;
       } catch (e) {
         await logError(`[stats] failed to load heatmap: ${e}`);
       }
     }
+  }
+
+  /** Reload every loaded view with the current category filter. */
+  async function refresh(reason: string) {
+    try {
+      const filter = statsFilterFor($settings);
+      detailed = await statsGetDetailed(filter);
+      if (heatmapLoaded) heatmap = await statsGetHeatmap(filter);
+      if ($settings.categories_enabled) uncategorizedCount = await statsUncategorizedCount();
+    } catch (e) {
+      await logError(`[stats] failed to refresh stats after ${reason}: ${e}`);
+    }
+  }
+
+  /** Show or hide one category (or uncategorized rounds) in the stats. */
+  async function toggleCategory(id: number) {
+    const next = hiddenCategories.includes(id)
+      ? hiddenCategories.filter((h) => h !== id)
+      : [...hiddenCategories, id];
+    settings.set(await setSetting('stats_hidden_categories', JSON.stringify(next)));
+    await refresh('filter change');
   }
 
   function close() {
@@ -67,7 +97,8 @@
         // Show window immediately after theme is applied
         await getCurrentWebviewWindow().show();
 
-        detailed = await statsGetDetailed();
+        cleanups.push(await syncCategories());
+        await refresh('initial load');
         await info(`[stats] initialized, theme=${activeTheme?.name ?? 'none'}`);
       } catch (e) {
         await logError(`[stats] initialization failed: ${e}`);
@@ -75,32 +106,28 @@
       }
 
       cleanups.push(
-        await onRoundChange(async () => {
-          try {
-            detailed = await statsGetDetailed();
-            if (heatmapLoaded) heatmap = await statsGetHeatmap();
-          } catch (e) {
-            await logError(`[stats] failed to refresh stats after round change: ${e}`);
-          }
-        }),
-        await onSessionsCleared(async () => {
-          try {
-            detailed = await statsGetDetailed();
-            if (heatmapLoaded) heatmap = await statsGetHeatmap();
-          } catch (e) {
-            await logError(`[stats] failed to refresh stats after session clear: ${e}`);
-          }
-        }),
+        await onRoundChange(() => refresh('round change')),
+        await onSessionsCleared(() => refresh('session clear')),
+        // Deleting a category moves its rounds to uncategorized.
+        await onCategoriesChanged(() => refresh('category change')),
         await onSettingsChanged(async (updated) => {
           const prev = {
             mode: $settings.theme_mode,
             light: $settings.theme_light,
             dark: $settings.theme_dark,
             language: $settings.language,
+            categoriesEnabled: $settings.categories_enabled,
+            hiddenCategories: $settings.stats_hidden_categories,
           };
           settings.set(updated);
           if (updated.language !== prev.language) {
             setLocale(updated.language);
+          }
+          if (
+            updated.categories_enabled !== prev.categoriesEnabled ||
+            updated.stats_hidden_categories !== prev.hiddenCategories
+          ) {
+            await refresh('settings change');
           }
           if (
             updated.theme_mode !== prev.mode ||
@@ -170,6 +197,15 @@
       >{m.stats_tab_alltime()}</button
     >
   </div>
+
+  {#if $settings.categories_enabled && ($categories.length > 0 || uncategorizedCount > 0)}
+    <CategoryFilter
+      categories={$categories}
+      hidden={hiddenCategories}
+      showUncategorized={uncategorizedCount > 0}
+      ontoggle={toggleCategory}
+    />
+  {/if}
 
   <!-- Content -->
   <div class="content">
