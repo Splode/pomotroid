@@ -46,6 +46,16 @@
     return m.round_label_long_break();
   }
 
+  /** Compact "base +N" caption shown while the incremental ladder is climbing. */
+  let incrementCaption = $derived.by(() => {
+    if (!state.incremental_work_enabled || state.round_type !== 'work') return null;
+    const baseMins = Math.round(state.base_work_secs / 60);
+    if (state.increment_steps <= 0) return `${baseMins}m · ${m.timer_increment_step_1()}`;
+    const gainedMins = Math.round((state.increment_steps * state.work_increment_secs) / 60);
+    const suffix = state.at_increment_cap ? ` · ${m.timer_increment_cap_short()}` : '';
+    return `${baseMins}m +${gainedMins}m · ${m.timer_increment_step({ n: state.increment_steps + 1 })}${suffix}`;
+  });
+
   onMount(() => {
     const cleanups: UnlistenFn[] = [];
 
@@ -127,6 +137,14 @@
       <div class="round-label" style="color: {roundColor(state.round_type)}">
         {roundLabel(state.round_type)}
       </div>
+
+      {#if incrementCaption}
+        <Tooltip text={m.tooltip_incremental_focus()}>
+          <div class="increment-caption" style="color: {roundColor(state.round_type)}">
+            {incrementCaption}
+          </div>
+        </Tooltip>
+      {/if}
 
       <div class="controls-wrapper">
         <!-- Back: restart current round -->
@@ -271,5 +289,16 @@
     text-transform: uppercase;
     /* Collapse the gap above: the flex gap already provides spacing from the dial. */
     margin-top: -8px;
+  }
+
+  /* Incremental ladder caption — sits under the round label, deliberately
+     quieter than it. Only rendered while a work round is in progress. */
+  .increment-caption {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.72;
+    margin-top: -4px;
   }
 </style>

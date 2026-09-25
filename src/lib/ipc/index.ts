@@ -11,6 +11,7 @@ import type {
   CustomAudioInfo,
   DetailedStats,
   HeatmapStats,
+  Insights,
   UpdateInfo,
 } from '$lib/types';
 
@@ -18,6 +19,8 @@ import type {
 
 export const timerToggle = () => invoke<void>('timer_toggle');
 export const timerReset = () => invoke<void>('timer_reset');
+/** Restart the incremental-focus ladder without touching the round counters. */
+export const timerResetIncrement = () => invoke<void>('timer_reset_increment');
 export const timerRestartRound = () => invoke<void>('timer_restart_round');
 export const timerSkip = () => invoke<void>('timer_skip');
 export const getTimerState = () => invoke<TimerState>('timer_get_state');
@@ -85,6 +88,9 @@ export const statsGetDetailed = () => invoke<DetailedStats>('stats_get_detailed'
 
 /** Heatmap entries + lifetime totals (All Time tab). */
 export const statsGetHeatmap = () => invoke<HeatmapStats>('stats_get_heatmap');
+
+/** Full analytics payload for the "Better Stats" window. */
+export const statsGetInsights = () => invoke<Insights>('stats_get_insights');
 
 // --- Platform commands ---
 

@@ -270,6 +270,12 @@ mod tests {
             work_round_number: 1,
             work_rounds_total: 4,
             session_work_count: 1,
+            incremental_work_enabled: true,
+            base_work_secs: 1500,
+            work_increment_secs: 300,
+            work_max_secs: 3600,
+            increment_steps: 2,
+            at_increment_cap: false,
         }
     }
 

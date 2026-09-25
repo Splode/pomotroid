@@ -14,6 +14,12 @@ const initial: TimerState = {
   work_round_number: 1,
   work_rounds_total: 4,
   session_work_count: 1,
+  incremental_work_enabled: false,
+  base_work_secs: 25 * 60,
+  work_increment_secs: 5 * 60,
+  work_max_secs: 90 * 60,
+  increment_steps: 0,
+  at_increment_cap: false,
 };
 
 export const timerState = writable<TimerState>(initial);

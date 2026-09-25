@@ -34,6 +34,19 @@ pub fn timer_reset(timer: State<'_, TimerController>) {
     timer.reset();
 }
 
+/// Restart the incremental-focus ladder from the base work duration.
+///
+/// This is the manual reset trigger for the ladder: the round, cycle and session
+/// counters are untouched, so it can be used mid-session when the ladder has
+/// climbed past a comfortable focus length.
+#[tauri::command]
+pub fn timer_reset_increment(timer: State<'_, TimerController>, app: AppHandle) {
+    timer.reset_increment_ladder();
+    // Broadcast the new snapshot so every window re-renders the ladder caption
+    // without waiting for the next tick or round change.
+    app.emit("timer:reset", &timer.get_snapshot()).ok();
+}
+
 /// Skip the current round: fires Complete immediately and advances to the next.
 #[tauri::command]
 pub fn timer_skip(timer: State<'_, TimerController>) {
@@ -251,6 +264,9 @@ pub fn settings_reset_defaults(
     };
 
     timer.apply_settings(new_settings.clone());
+    // A factory reset also drops the incremental ladder back to the base
+    // duration, matching the slate the reseeded settings describe.
+    timer.reset_increment_ladder();
     *tray_state.countdown_mode.lock().unwrap() = new_settings.dial_countdown;
 
     // Broadcast a reset snapshot so the frontend dial and display reflect the
@@ -375,6 +391,20 @@ pub fn stats_get_heatmap(db: State<'_, DbState>) -> Result<HeatmapStats, String>
         total_rounds: raw.completed_work_sessions as u32,
         total_hours: (raw.total_work_secs / 3600) as u32,
         longest_streak: streak.longest,
+    })
+}
+
+/// Full analytics payload for the "Better Stats" window.
+///
+/// Returns today's activity, rolling 7/28-day summaries, week-over-week and
+/// day-over-day momentum, a 28-day trend, a 12-week rollup, all-time totals,
+/// streaks, and hourly/weekday focus profiles — all in one round-trip.
+#[tauri::command]
+pub fn stats_get_insights(db: State<'_, DbState>) -> Result<queries::Insights, String> {
+    let conn = db.lock().map_err(|e| e.to_string())?;
+    queries::get_insights(&conn).map_err(|e| {
+        log::error!("[stats] failed to build insights: {e}");
+        e.to_string()
     })
 }
 

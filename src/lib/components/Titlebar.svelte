@@ -87,6 +87,29 @@
     });
   }
 
+  async function openBetterStats() {
+    const existing = await WebviewWindow.getByLabel('better-stats');
+    if (existing) {
+      await existing.show();
+      await existing.setFocus();
+      return;
+    }
+    new WebviewWindow('better-stats', {
+      url: '/better-stats',
+      title: 'Pomotroid — Better Stats',
+      width: 1000,
+      height: 720,
+      minWidth: 660,
+      minHeight: 460,
+      decorations: isMac,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      titleBarStyle: isMac ? ('Overlay' as any) : undefined,
+      hiddenTitle: isMac ? true : undefined,
+      resizable: true,
+      visible: false,
+    });
+  }
+
   async function minimize() {
     suppressRestoredTitlebarState();
     if ($settings.min_to_tray) {
@@ -178,17 +201,51 @@
   </Tooltip>
 {/snippet}
 
+{#snippet betterStatsBtn()}
+  <Tooltip text={m.tooltip_better_stats()}>
+    <button class="btn-icon" onclick={openBetterStats} aria-label="Better Stats">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <!-- trend line rising across the icon -->
+        <path
+          d="M1.5 12.5 L5.5 8.2 L8.5 10.4 L14 3.6"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+        />
+        <!-- data points -->
+        <circle cx="5.5" cy="8.2" r="1.35" fill="currentColor" />
+        <circle cx="8.5" cy="10.4" r="1.35" fill="currentColor" opacity="0.75" />
+        <circle cx="14" cy="3.6" r="1.5" fill="currentColor" />
+        <line
+          x1="1.5"
+          y1="14"
+          x2="14.5"
+          y2="14"
+          stroke="currentColor"
+          stroke-width="1.2"
+          stroke-linecap="round"
+          opacity="0.55"
+        />
+      </svg>
+    </button>
+  </Tooltip>
+{/snippet}
+
 <nav class="titlebar" class:suppress-hover={suppressTitlebarHover} data-tauri-drag-region>
   <!-- Left: settings + stats buttons on Linux/Windows. On macOS the traffic
        lights live here; the action buttons move to the right side instead. -->
   {#if !isMac}
     {@render settingsBtn()}
     {@render statsBtn()}
+    {@render betterStatsBtn()}
   {/if}
 
   <!-- Right: settings + stats buttons on macOS, window controls on Linux/Windows. -->
   <div class="controls">
     {#if isMac}
+      {@render betterStatsBtn()}
       {@render statsBtn()}
       {@render settingsBtn()}
     {:else}
