@@ -1,4 +1,4 @@
-use rusqlite::{named_params, params, Connection, Result};
+use rusqlite::{named_params, params, Connection, OptionalExtension, Result};
 use serde::{Deserialize, Serialize};
 
 // ---------------------------------------------------------------------------
@@ -11,15 +11,18 @@ pub fn insert_session(
     conn: &Connection,
     round_type: &str,
     duration_secs: u32,
+    category_id: Option<i64>,
 ) -> Result<i64> {
     let started_at = unix_now();
     conn.execute(
-        "INSERT INTO sessions (started_at, round_type, duration_secs, completed)
-         VALUES (?1, ?2, ?3, 0)",
-        params![started_at, round_type, duration_secs],
+        "INSERT INTO sessions (started_at, round_type, duration_secs, completed, category_id)
+         VALUES (?1, ?2, ?3, 0, ?4)",
+        params![started_at, round_type, duration_secs, category_id],
     )?;
     let id = conn.last_insert_rowid();
-    log::debug!("[db] session started: id={id} type={round_type} duration={duration_secs}s");
+    log::debug!(
+        "[db] session started: id={id} type={round_type} duration={duration_secs}s category={category_id:?}"
+    );
     Ok(id)
 }
 
@@ -160,17 +163,26 @@ pub fn count_uncategorized_rounds(conn: &Connection) -> Result<i64> {
 pub fn resolve_active_category(conn: &Connection, stored_id: i64) -> Result<Option<i64>> {
     let stored: Option<i64> = conn
         .query_row("SELECT id FROM categories WHERE id = ?1", [stored_id], |r| r.get(0))
-        .ok();
+        .optional()?;
     if stored.is_some() {
         return Ok(stored);
     }
-    Ok(conn
-        .query_row(
-            "SELECT id FROM categories ORDER BY position, id LIMIT 1",
-            [],
-            |r| r.get(0),
-        )
-        .ok())
+    conn.query_row("SELECT id FROM categories ORDER BY position, id LIMIT 1", [], |r| r.get(0))
+        .optional()
+}
+
+/// The category a round of `round_type` is recorded under: the active
+/// category for focus rounds while categories are enabled, otherwise none.
+pub fn round_category(
+    conn: &Connection,
+    categories_enabled: bool,
+    active_category_id: i64,
+    round_type: &str,
+) -> Result<Option<i64>> {
+    if !categories_enabled || round_type != "work" {
+        return Ok(None);
+    }
+    resolve_active_category(conn, active_category_id)
 }
 
 /// Trims a category name and checks it is non-empty and short enough.
@@ -576,7 +588,7 @@ mod tests {
     #[test]
     fn insert_and_complete_session() {
         let conn = setup();
-        let id = insert_session(&conn, "work", 1500).unwrap();
+        let id = insert_session(&conn, "work", 1500, None).unwrap();
         assert!(id > 0);
 
         complete_session(&conn, id, true, None).unwrap();
@@ -671,21 +683,21 @@ mod tests {
         let conn = setup();
 
         // 339 s = 5:39 → rounds up to 6 min (remainder 39 ≥ 30).
-        let id1 = insert_session(&conn, "work", 339).unwrap();
+        let id1 = insert_session(&conn, "work", 339, None).unwrap();
         complete_session(&conn, id1, true, None).unwrap();
         let stats = get_daily_stats(&conn, None).unwrap();
         assert_eq!(stats.focus_mins, 6, "339 s should round to 6 min");
 
         // Reset and test round-down: 324 s = 5:24 → rounds down to 5 min (remainder 24 < 30).
         let conn2 = setup();
-        let id2 = insert_session(&conn2, "work", 324).unwrap();
+        let id2 = insert_session(&conn2, "work", 324, None).unwrap();
         complete_session(&conn2, id2, true, None).unwrap();
         let stats2 = get_daily_stats(&conn2, None).unwrap();
         assert_eq!(stats2.focus_mins, 5, "324 s should round to 5 min");
 
         // Exact minute boundary: 1500 s = 25:00 → stays 25 min.
         let conn3 = setup();
-        let id3 = insert_session(&conn3, "work", 1500).unwrap();
+        let id3 = insert_session(&conn3, "work", 1500, None).unwrap();
         complete_session(&conn3, id3, true, None).unwrap();
         let stats3 = get_daily_stats(&conn3, None).unwrap();
         assert_eq!(stats3.focus_mins, 25, "1500 s should be exactly 25 min");
@@ -695,13 +707,13 @@ mod tests {
     fn stats_counts_correctly() {
         let conn = setup();
 
-        let id1 = insert_session(&conn, "work", 1500).unwrap();
+        let id1 = insert_session(&conn, "work", 1500, None).unwrap();
         complete_session(&conn, id1, true, None).unwrap();
 
-        let id2 = insert_session(&conn, "work", 1500).unwrap();
+        let id2 = insert_session(&conn, "work", 1500, None).unwrap();
         complete_session(&conn, id2, false, None).unwrap(); // skipped
 
-        let _id3 = insert_session(&conn, "short-break", 300).unwrap();
+        let _id3 = insert_session(&conn, "short-break", 300, None).unwrap();
 
         let stats = get_all_time_stats(&conn, None).unwrap();
         assert_eq!(stats.total_work_sessions, 2);
@@ -718,7 +730,7 @@ mod tests {
 
     /// Records one completed focus round of `secs` seconds in `category`.
     fn record_round(conn: &Connection, secs: u32, category: Option<i64>) {
-        let id = insert_session(conn, "work", secs).unwrap();
+        let id = insert_session(conn, "work", secs, category).unwrap();
         complete_session(conn, id, true, category).unwrap();
     }
 
@@ -820,6 +832,40 @@ mod tests {
         let hide_all = StatsFilter { hidden_ids: vec![work, leisure], hide_uncategorized: true };
         assert_eq!(rounds(Some(&hide_all)), 0);
         assert_eq!(get_streak(&conn, Some(&hide_all)).unwrap().current, 0);
+    }
+
+    #[test]
+    fn round_category_covers_focus_rounds_only_while_enabled() {
+        let conn = setup();
+        let work = builtin_id(&conn, "work");
+        let study = builtin_id(&conn, "study");
+
+        assert_eq!(round_category(&conn, true, study, "work").unwrap(), Some(study));
+        assert_eq!(round_category(&conn, false, study, "work").unwrap(), None);
+        assert_eq!(round_category(&conn, true, study, "short-break").unwrap(), None);
+        assert_eq!(round_category(&conn, true, study, "long-break").unwrap(), None);
+        // A deleted active category falls back to the first one.
+        delete_category(&conn, study).unwrap();
+        assert_eq!(round_category(&conn, true, study, "work").unwrap(), Some(work));
+    }
+
+    #[test]
+    fn unfinished_rounds_keep_their_category_in_daily_stats() {
+        let conn = setup();
+        let work = builtin_id(&conn, "work");
+        let leisure = builtin_id(&conn, "leisure");
+        record_round(&conn, 1500, Some(work));
+        record_round(&conn, 1500, Some(leisure));
+        // A focus round that was reset before it finished.
+        insert_session(&conn, "work", 1500, Some(work)).unwrap();
+
+        let completion_with_hidden = |hidden: i64| {
+            let filter = StatsFilter { hidden_ids: vec![hidden], hide_uncategorized: true };
+            get_daily_stats(&conn, Some(&filter)).unwrap().completion_rate
+        };
+        // The unfinished round lowers Work's completion rate, not Leisure's.
+        assert_eq!(completion_with_hidden(leisure), Some(0.5));
+        assert_eq!(completion_with_hidden(work), Some(1.0));
     }
 
     #[test]

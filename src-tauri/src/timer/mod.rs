@@ -273,8 +273,15 @@ fn listen_events(
                         let s = settings.lock().unwrap();
                         seq.current_duration_secs(&s)
                     };
+                    let category_settings = {
+                        let s = settings.lock().unwrap();
+                        (s.categories_enabled, s.active_category_id)
+                    };
                     if let Ok(conn) = db.lock() {
-                        match queries::insert_session(&conn, &rt, total) {
+                        // Focus rounds are filed under a category from the start, so a
+                        // round that is reset before it finishes still counts there.
+                        let category_id = round_category(&conn, category_settings, &rt);
+                        match queries::insert_session(&conn, &rt, total, category_id) {
                             Ok(id) => current_session_id = Some(id),
                             Err(e) => log::error!("[timer] failed to record session: {e}"),
                         }
@@ -309,28 +316,17 @@ fn listen_events(
 
                 // --- Session recording: mark the completed round ---
                 if let Some(session_id) = current_session_id.take() {
+                    let category_settings = {
+                        let s = settings.lock().unwrap();
+                        (s.categories_enabled, s.active_category_id)
+                    };
                     if let Ok(conn) = db.lock() {
-                        // Focus rounds are filed under the active category when
-                        // categories are enabled; breaks are never categorized.
-                        let (categories_enabled, active_category_id) = {
-                            let s = settings.lock().unwrap();
-                            (s.categories_enabled, s.active_category_id)
-                        };
-                        let category_id = if categories_enabled && completed_round == "work" {
-                            queries::resolve_active_category(&conn, active_category_id)
-                                .unwrap_or_else(|e| {
-                                    log::error!("[timer] failed to resolve category: {e}");
-                                    None
-                                })
-                        } else {
-                            None
-                        };
-                        let _ = queries::complete_session(
-                            &conn,
-                            session_id,
-                            !was_skipped,
-                            category_id,
-                        );
+                        // The category active when the round ends wins, so a round
+                        // that was switched midway is filed under the new category.
+                        let category_id =
+                            round_category(&conn, category_settings, &completed_round);
+                        let _ =
+                            queries::complete_session(&conn, session_id, !was_skipped, category_id);
                     }
                 }
 
@@ -514,6 +510,20 @@ fn listen_events(
             }
         }
     }
+}
+
+/// The category a round is recorded under, given the `(categories_enabled,
+/// active_category_id)` settings. A failed lookup is logged and leaves the
+/// round uncategorized.
+fn round_category(
+    conn: &rusqlite::Connection,
+    (enabled, active_id): (bool, i64),
+    round_type: &str,
+) -> Option<i64> {
+    queries::round_category(conn, enabled, active_id, round_type).unwrap_or_else(|e| {
+        log::error!("[timer] failed to resolve category: {e}");
+        None
+    })
 }
 
 fn build_snapshot(
