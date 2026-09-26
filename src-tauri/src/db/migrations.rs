@@ -239,9 +239,8 @@ mod tests {
         // Only MIGRATION_7 should fire.
         run(&conn).unwrap();
 
-        let category: Option<i64> = conn
-            .query_row("SELECT category_id FROM sessions", [], |r| r.get(0))
-            .unwrap();
+        let category: Option<i64> =
+            conn.query_row("SELECT category_id FROM sessions", [], |r| r.get(0)).unwrap();
         assert_eq!(category, None, "existing sessions must stay uncategorized");
 
         let builtins: Vec<String> = conn
@@ -254,7 +253,9 @@ mod tests {
         assert_eq!(builtins, ["work", "study", "leisure"]);
 
         let enabled: String = conn
-            .query_row("SELECT value FROM settings WHERE key = 'categories_enabled'", [], |r| r.get(0))
+            .query_row("SELECT value FROM settings WHERE key = 'categories_enabled'", [], |r| {
+                r.get(0)
+            })
             .unwrap();
         assert_eq!(enabled, "false", "categories must be opt-in");
     }

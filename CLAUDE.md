@@ -54,6 +54,7 @@ Rust commands live in `src-tauri/src/commands.rs`. All commands return `Result<T
 - `settings:changed` — full `Settings` object
 - `themes:changed` — `Theme[]`
 - `sessions:cleared`
+- `categories:changed` — `Category[]` (after any category is added, renamed, recolored or deleted)
 
 ### TypeScript ↔ Rust type contract
 

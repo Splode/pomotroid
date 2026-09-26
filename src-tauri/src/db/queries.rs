@@ -118,10 +118,8 @@ pub fn update_category(conn: &Connection, id: i64, name: Option<&str>, color: &s
 /// deleted, so no history is lost. Returns the number of sessions moved.
 pub fn delete_category(conn: &Connection, id: i64) -> Result<usize> {
     let tx = conn.unchecked_transaction()?;
-    let moved = tx.execute(
-        "UPDATE sessions SET category_id = NULL WHERE category_id = ?1",
-        [id],
-    )?;
+    let moved =
+        tx.execute("UPDATE sessions SET category_id = NULL WHERE category_id = ?1", [id])?;
     tx.execute("DELETE FROM categories WHERE id = ?1", [id])?;
     tx.commit()?;
     log::debug!("[db] category deleted: id={id} sessions_moved={moved}");
@@ -130,11 +128,9 @@ pub fn delete_category(conn: &Connection, id: i64) -> Result<usize> {
 
 /// Returns true for the built-in categories (work, study, leisure).
 pub fn is_builtin_category(conn: &Connection, id: i64) -> Result<bool> {
-    conn.query_row(
-        "SELECT builtin_key IS NOT NULL FROM categories WHERE id = ?1",
-        [id],
-        |r| r.get(0),
-    )
+    conn.query_row("SELECT builtin_key IS NOT NULL FROM categories WHERE id = ?1", [id], |r| {
+        r.get(0)
+    })
 }
 
 /// Completed focus rounds recorded under a category.
@@ -192,9 +188,7 @@ pub fn validate_category_name(name: &str) -> std::result::Result<String, String>
         return Err("category name must not be empty".to_string());
     }
     if trimmed.chars().count() > MAX_CATEGORY_NAME_CHARS {
-        return Err(format!(
-            "category name must be at most {MAX_CATEGORY_NAME_CHARS} characters"
-        ));
+        return Err(format!("category name must be at most {MAX_CATEGORY_NAME_CHARS} characters"));
     }
     Ok(trimmed.to_string())
 }
@@ -446,7 +440,10 @@ pub fn get_weekly_stats(conn: &Connection, filter: Option<&StatsFilter>) -> Resu
 
 /// Completed work rounds per local calendar day, all time (no date limit).
 /// The frontend slices this into per-year views for navigation.
-pub fn get_heatmap_data(conn: &Connection, filter: Option<&StatsFilter>) -> Result<Vec<HeatmapEntry>> {
+pub fn get_heatmap_data(
+    conn: &Connection,
+    filter: Option<&StatsFilter>,
+) -> Result<Vec<HeatmapEntry>> {
     let f = FilterParams::new(filter);
     let mut stmt = conn.prepare(concat!(
         "SELECT date(started_at, 'unixepoch', 'localtime') as day,
