@@ -52,14 +52,14 @@
   async function rename(category: Category, input: HTMLInputElement) {
     const current = categoryLabel(category);
     const value = input.value.trim();
-    if (value === current) return;
-    if (!value && !category.builtin_key) {
-      // User-created categories always need a name — put the old one back.
+    // Clearing a built-in category's name restores its localized default.
+    const name = value && value !== defaultLabel(category) ? value : null;
+    // Nothing to save, or a user-created category left without a name:
+    // show the current name again.
+    if (value === current || name === category.name || (!value && !category.builtin_key)) {
       input.value = current;
       return;
     }
-    // Clearing a built-in category's name restores its localized default.
-    const name = value && value !== defaultLabel(category) ? value : null;
     await mutate(() => categoriesUpdate(category.id, name, category.color));
   }
 

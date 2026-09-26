@@ -21,11 +21,10 @@
 
   const active = $derived(resolveActiveCategory($categories, $settings.active_category_id));
 
-  // The compact window hides the name next to the dot, so the tooltip names it too.
+  // The compact window hides the name next to the dot, so the tooltip (also
+  // the button's accessible name) names it too.
   const tooltip = $derived(
-    active
-      ? `${categoryLabel(active)} · ${m.tooltip_category_switcher()}`
-      : m.tooltip_category_switcher()
+    `${active ? categoryLabel(active) : m.categories_none()} · ${m.tooltip_category_switcher()}`
   );
 
   onMount(() => {
@@ -51,6 +50,12 @@
     };
   });
 
+  function toggle() {
+    // With every category deleted there is nothing to pick from.
+    if (!open && $categories.length === 0) return;
+    open = !open;
+  }
+
   async function select(id: number) {
     open = false;
     if (id === active?.id) return;
@@ -58,33 +63,25 @@
   }
 </script>
 
-{#snippet trigger()}
-  <button
-    class="trigger"
-    class:open
-    onclick={() => (open = !open)}
-    aria-haspopup="listbox"
-    aria-expanded={open}
-  >
-    {#if active}
-      <span class="dot" style="background: {active.color}"></span>
-      <span class="name">{categoryLabel(active)}</span>
-    {:else}
-      <span class="dot none"></span>
-      <span class="name">{m.categories_none()}</span>
-    {/if}
-  </button>
-{/snippet}
-
-<div class="switcher" bind:this={rootEl}>
-  <!-- The tooltip is dropped while the menu is open so it cannot cover it. -->
-  {#if open}
-    {@render trigger()}
-  {:else}
-    <Tooltip text={tooltip}>
-      {@render trigger()}
-    </Tooltip>
-  {/if}
+<div class="switcher" class:open bind:this={rootEl}>
+  <Tooltip text={tooltip}>
+    <button
+      class="trigger"
+      class:open
+      onclick={toggle}
+      aria-label={tooltip}
+      aria-haspopup="listbox"
+      aria-expanded={open}
+    >
+      {#if active}
+        <span class="dot" style="background: {active.color}"></span>
+        <span class="name">{categoryLabel(active)}</span>
+      {:else}
+        <span class="dot none"></span>
+        <span class="name">{m.categories_none()}</span>
+      {/if}
+    </button>
+  </Tooltip>
 
   {#if open}
     <ul class="menu" class:right={align === 'right'} role="listbox">
@@ -122,6 +119,11 @@
     position: relative;
     min-width: 0;
     margin: 0 4px;
+  }
+
+  /* Keep the tooltip from covering the open menu. */
+  .switcher.open :global(.tooltip) {
+    display: none;
   }
 
   .trigger {
