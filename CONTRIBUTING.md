@@ -39,11 +39,24 @@ Be kind and respectful to the members of the community. Take time to educate oth
 
 **Linux** — install system dependencies:
 
+***Ubuntu/Debian based***
+
 ```bash
 sudo apt-get install -y \
   libwebkit2gtk-4.1-dev libssl-dev \
   libayatana-appindicator3-dev librsvg2-dev \
   patchelf libasound2-dev
+```
+***Fedora/Redhat based***
+
+```bash
+sudo dnf install -y \
+  webkit2gtk4.1-devel \
+  openssl-devel \
+  libayatana-appindicator-gtk3-devel \
+  librsvg2-devel \
+  patchelf \
+  alsa-lib-devel
 ```
 
 **macOS / Windows** — no extra system dependencies required.
