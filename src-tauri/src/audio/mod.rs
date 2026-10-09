@@ -17,6 +17,7 @@ use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc;
+use std::time::{Duration, Instant};
 
 use rodio::{Decoder, DeviceSinkBuilder, Player};
 
@@ -65,6 +66,8 @@ struct PlayRequest {
     /// Resolved custom file path, if one is configured for this cue.
     custom_path: Option<PathBuf>,
     volume: f32,
+    /// When the request was made; used to skip ticks that are already late.
+    requested_at: Instant,
 }
 
 /// Settings subset relevant to the audio engine.
@@ -133,7 +136,7 @@ impl AudioManager {
                 AudioCue::Tick => None,
             }
         };
-        let _ = self.tx.try_send(PlayRequest { cue, custom_path, volume });
+        let _ = self.tx.try_send(PlayRequest { cue, custom_path, volume, requested_at: Instant::now() });
     }
 
     /// Returns true if tick sounds are enabled for the given round type string.
@@ -231,6 +234,12 @@ fn audio_thread(rx: mpsc::Receiver<PlayRequest>) {
     // automatically after a sleep/wake cycle that resets the OS audio
     // subsystem, avoiding a flood of "buffer underrun/overrun" errors.
     while let Ok(req) = rx.recv() {
+        // Sounds play one at a time, so ticks requested during a long alert
+        // wait behind it and would then play back-to-back. Skip late ticks.
+        if matches!(req.cue, AudioCue::Tick) && req.requested_at.elapsed() > Duration::from_millis(500) {
+            continue;
+        }
+
         let mut device_sink = match DeviceSinkBuilder::open_default_sink() {
             Ok(s) => s,
             Err(e) => {
