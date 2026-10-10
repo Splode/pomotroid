@@ -1,9 +1,8 @@
 /// System tray management with dynamic arc icon via tiny-skia.
 ///
-/// The tray icon is a 32×32 RGBA image:
-///   - Solid filled background circle in the theme's background color.
-///   - Progress arc from 12 o'clock sweeping clockwise, colored by round type.
-///   - While paused: two vertical bars drawn over the progress arc.
+/// The tray icon is a 64×64 RGBA image displaying remaining time as "MM:SS"
+/// text on a colored background matching the round type (work/short-break/long-break).
+/// While paused: two semi-transparent bars drawn over the time display.
 ///
 /// Colors come from the active theme, updated when theme changes.
 /// The tray is created/destroyed when `min_to_tray` setting changes.
@@ -15,7 +14,6 @@
 /// typically does not ship these libraries.  `create_tray` probes for them
 /// before calling `TrayIconBuilder::build()` and returns early with a warning
 /// when they are absent, preventing the abort.
-use std::f32::consts::{FRAC_PI_2, PI, TAU};
 use std::sync::{Arc, Mutex};
 
 use tauri::{
@@ -26,7 +24,9 @@ use tauri::{
 };
 
 use crate::timer::TimerController;
-use tiny_skia::{Color, Paint, PathBuilder, Pixmap, Stroke, Transform};
+use image::{ImageBuffer, Rgba, RgbaImage};
+use imageproc::drawing::draw_text_mut;
+use ab_glyph::{FontRef, PxScale};
 
 // ---------------------------------------------------------------------------
 // Theme colors for tray rendering
@@ -264,7 +264,7 @@ pub fn create_tray(app: &AppHandle, state: &Arc<TrayState>) {
     let image = {
         let colors = state.colors.lock().unwrap().clone();
         let countdown = *state.countdown_mode.lock().unwrap();
-        let bytes = render_tray_icon_rgba(&colors, false, 0.0, "work", countdown);
+        let bytes = render_tray_icon_rgba(&colors, false, 0.0, "work", countdown, 0);
         Image::new_owned(bytes, SIZE, SIZE)
     };
 
@@ -370,13 +370,14 @@ pub fn destroy_tray(state: &Arc<TrayState>) {
 /// - `round_type`: "work" | "short-break" | "long-break"
 /// - `paused`: show pause bars over the progress arc
 /// - `progress`: 0.0 (empty) to 1.0 (full, i.e. elapsed/total)
-pub fn update_icon(state: &Arc<TrayState>, round_type: &str, paused: bool, progress: f32) {
+/// - `remaining_secs`: remaining seconds to display as text
+pub fn update_icon(state: &Arc<TrayState>, round_type: &str, paused: bool, progress: f32, remaining_secs: u32) {
     let guard = state.icon.lock().unwrap();
     let Some(tray) = guard.as_ref() else { return };
 
     let colors = state.colors.lock().unwrap().clone();
     let countdown = *state.countdown_mode.lock().unwrap();
-    let bytes = render_tray_icon_rgba(&colors, paused, progress, round_type, countdown);
+    let bytes = render_tray_icon_rgba(&colors, paused, progress, round_type, countdown, remaining_secs);
 
     let image = Image::new_owned(bytes, SIZE, SIZE);
     let _ = tray.set_icon(Some(image));
@@ -405,129 +406,103 @@ pub fn update_menu_items(state: &Arc<TrayState>, is_running: bool, is_paused: bo
 }
 
 // ---------------------------------------------------------------------------
-// Icon rendering (tiny-skia)
+// Icon rendering
 // ---------------------------------------------------------------------------
 
 // Render at 64×64 so the icon looks sharp on HiDPI displays (Ubuntu often
 // runs at 1.5× or 2× scale).  The tray host scales it down on standard
-// density displays; the larger source means the circle stays clean either way.
+// density displays; the larger source means the text stays clean either way.
 const SIZE: u32 = 64;
-const CENTER: f32 = SIZE as f32 / 2.0;
-const RADIUS: f32 = CENTER - 5.0; // 5 px margin keeps the stroke inside the canvas
-const STROKE_WIDTH: f32 = 6.0;
-// Track opacity: the "empty" part of the ring at this brightness on a dark panel.
-// 22% white on #1a1a1a ≈ #383838 — invisible. 65% ≈ #a6a6a6 — clearly visible.
-const TRACK_ALPHA: u8 = 165; // ≈ 65 %
 
-fn rgba_color(c: [u8; 4]) -> Color {
-    Color::from_rgba8(c[0], c[1], c[2], c[3])
-}
-
-/// Render a 64×64 RGBA tray icon as a **ring** with a progress arc.
+/// Render a 64×64 RGBA tray icon with remaining time text.
 ///
-/// Using a ring (stroke-only circle) on a transparent background means the
-/// icon reads as a clear circle regardless of panel colour or scale factor,
-/// unlike a solid filled disc which looks like a dark blob at small sizes.
+/// Instead of the ring progress, this displays the remaining time as "MM:SS"
+/// in the center of the icon with a colored background based on round type.
 pub fn render_tray_icon_rgba(
     colors: &TrayColors,
     paused: bool,
-    progress: f32,
+    _progress: f32,
     round_type: &str,
-    countdown: bool,
+    _countdown: bool,
+    remaining_secs: u32,
 ) -> Vec<u8> {
-    let mut pixmap = Pixmap::new(SIZE, SIZE).expect("pixmap alloc");
+    // Create a transparent background
+    let mut img: RgbaImage = ImageBuffer::new(SIZE, SIZE);
 
-    let mut paint = Paint { anti_alias: true, ..Default::default() };
-
-    let stroke = Stroke {
-        width: STROKE_WIDTH,
-        line_cap: tiny_skia::LineCap::Round,
-        ..Default::default()
+    // Round-type color for background circle
+    let bg_color = match round_type {
+        "short-break" => colors.short_round,
+        "long-break"  => colors.long_round,
+        _             => colors.focus_round,
     };
 
-    // Track ring: full circle at low opacity — defines the circular shape.
-    {
-        let [r, g, b, _] = colors.foreground;
-        paint.set_color(Color::from_rgba8(r, g, b, TRACK_ALPHA));
-    }
-    let ring = {
-        let mut pb = PathBuilder::new();
-        pb.push_circle(CENTER, CENTER, RADIUS);
-        pb.finish().expect("ring path")
-    };
-    pixmap.stroke_path(&ring, &paint, &stroke, Transform::identity(), None);
+    // Draw filled circle background
+    let center_x = (SIZE / 2) as i32;
+    let center_y = (SIZE / 2) as i32;
+    let radius = (SIZE / 2 - 2) as i32; // Leave 2px margin
 
-    // Round-type color: used for both the progress arc and the pause bars.
-    let round_color = match round_type {
-        "short-break" => rgba_color(colors.short_round),
-        "long-break"  => rgba_color(colors.long_round),
-        _             => rgba_color(colors.focus_round),
-    };
+    for y in 0..SIZE {
+        for x in 0..SIZE {
+            let dx = x as i32 - center_x;
+            let dy = y as i32 - center_y;
+            let distance_squared = dx * dx + dy * dy;
 
-    // Progress arc from 12 o'clock, clockwise, in the round-type colour.
-    paint.set_color(round_color);
-
-    // In elapsed mode the arc grows as time passes; in countdown mode it shrinks.
-    let effective = if countdown { 1.0 - progress } else { progress };
-    let sweep = effective.clamp(0.0, 1.0) * TAU;
-    if sweep > 0.001 {
-        let start = -FRAC_PI_2;
-        let end   = start + sweep;
-        let path  = build_arc_path(CENTER, CENTER, RADIUS, start, end);
-        pixmap.stroke_path(&path, &paint, &stroke, Transform::identity(), None);
-    }
-
-    if paused {
-        // Two vertical bars centred in the ring, in the round-type colour so
-        // they read clearly on any panel colour regardless of theme foreground.
-        paint.set_color(round_color);
-        let bar_h = RADIUS * 0.75;
-        let bar_w = STROKE_WIDTH * 1.2;
-        let bar_gap = STROKE_WIDTH * 1.1;
-        let bar_y = CENTER - bar_h / 2.0;
-        for x in [CENTER - bar_gap / 2.0 - bar_w, CENTER + bar_gap / 2.0] {
-            if let Some(rect) = tiny_skia::Rect::from_xywh(x, bar_y, bar_w, bar_h) {
-                let p = PathBuilder::from_rect(rect);
-                pixmap.fill_path(
-                    &p, &paint, tiny_skia::FillRule::Winding,
-                    Transform::identity(), None,
-                );
+            if distance_squared <= radius * radius {
+                img.put_pixel(x, y, Rgba([bg_color[0], bg_color[1], bg_color[2], bg_color[3]]));
+            } else {
+                img.put_pixel(x, y, Rgba([0, 0, 0, 0])); // Transparent outside circle
             }
         }
     }
 
-    pixmap.take()
-}
+    // Format time - only show minutes
+    let minutes = remaining_secs / 60;
+    let time_text = format!("{:02}", minutes);
 
-/// Approximate a circular arc with cubic Bézier segments (max π/2 per segment).
-fn build_arc_path(cx: f32, cy: f32, r: f32, start: f32, end: f32) -> tiny_skia::Path {
-    let total = end - start;
-    let n = ((total / (PI / 2.0)).ceil() as usize).max(1);
-    let step = total / n as f32;
-    let mut pb = PathBuilder::new();
+    // Use embedded font data
+    let font_data = include_bytes!("../../fonts/DejaVuSansMono-Bold.ttf");
+    let font = FontRef::try_from_slice(font_data).expect("Error loading font");
 
-    for i in 0..n {
-        let a0 = start + step * i as f32;
-        let a1 = a0 + step;
-        arc_segment(&mut pb, cx, cy, r, a0, a1, i == 0);
+    // Use larger font scale for better visibility (48.0 instead of 24.0)
+    let scale = PxScale::from(48.0);
+
+    // Text color (white for visibility)
+    let text_color = Rgba([colors.foreground[0], colors.foreground[1], colors.foreground[2], 255]);
+
+    // Draw text centered (adjusted position for larger font and 2-digit display)
+    draw_text_mut(&mut img, text_color, 8, 8, scale, &font, &time_text);
+
+    // If paused, draw pause bars overlay
+    if paused {
+        let bar_color = Rgba([colors.foreground[0], colors.foreground[1], colors.foreground[2], 180]);
+        let bar_width = 4;
+        let bar_height = 16;
+        let bar_gap = 6;
+        let bar_y = (SIZE / 2 - bar_height / 2) as i32;
+
+        // Left bar
+        let bar_x1 = (SIZE / 2 - bar_gap / 2 - bar_width) as i32;
+        for dy in 0..bar_height {
+            for dx in 0..bar_width {
+                if let Some(pixel) = img.get_pixel_mut_checked((bar_x1 + dx as i32) as u32, (bar_y + dy as i32) as u32) {
+                    *pixel = bar_color;
+                }
+            }
+        }
+
+        // Right bar
+        let bar_x2 = (SIZE / 2 + bar_gap / 2) as i32;
+        for dy in 0..bar_height {
+            for dx in 0..bar_width {
+                if let Some(pixel) = img.get_pixel_mut_checked((bar_x2 + dx as i32) as u32, (bar_y + dy as i32) as u32) {
+                    *pixel = bar_color;
+                }
+            }
+        }
     }
 
-    pb.finish().unwrap_or_else(|| {
-        PathBuilder::from_rect(tiny_skia::Rect::from_xywh(cx, cy, 1.0, 1.0).unwrap())
-    })
-}
-
-/// Append one arc segment (≤ π/2) as a cubic Bézier.
-fn arc_segment(pb: &mut PathBuilder, cx: f32, cy: f32, r: f32, a0: f32, a1: f32, first: bool) {
-    let alpha = ((a1 - a0) / 4.0).tan() * 4.0 / 3.0;
-    let (s0, c0) = a0.sin_cos();
-    let (s1, c1) = a1.sin_cos();
-    let x0 = cx + r * c0; let y0 = cy + r * s0;
-    let x3 = cx + r * c1; let y3 = cy + r * s1;
-    let x1 = x0 - alpha * r * s0; let y1 = y0 + alpha * r * c0;
-    let x2 = x3 + alpha * r * s1; let y2 = y3 - alpha * r * c1;
-    if first { pb.move_to(x0, y0); }
-    pb.cubic_to(x1, y1, x2, y2, x3, y3);
+    // Convert ImageBuffer to Vec<u8>
+    img.into_raw()
 }
 
 // ---------------------------------------------------------------------------
@@ -540,33 +515,33 @@ mod tests {
 
     #[test]
     fn render_returns_correct_byte_count() {
-        let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.5, "work", false);
+        let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.5, "work", false, 1500);
         assert_eq!(bytes.len(), (SIZE * SIZE * 4) as usize);
     }
 
     #[test]
     fn render_paused_returns_correct_byte_count() {
-        let bytes = render_tray_icon_rgba(&TrayColors::default(), true, 0.0, "work", false);
+        let bytes = render_tray_icon_rgba(&TrayColors::default(), true, 0.0, "work", false, 1500);
         assert_eq!(bytes.len(), (SIZE * SIZE * 4) as usize);
     }
 
     #[test]
     fn render_paused_preserves_progress_arc() {
-        let empty = render_tray_icon_rgba(&TrayColors::default(), true, 0.0, "work", false);
-        let half = render_tray_icon_rgba(&TrayColors::default(), true, 0.5, "work", false);
+        let empty = render_tray_icon_rgba(&TrayColors::default(), true, 0.0, "work", false, 0);
+        let half = render_tray_icon_rgba(&TrayColors::default(), true, 0.5, "work", false, 750);
         assert!(empty != half);
     }
 
     #[test]
     fn render_paused_still_shows_pause_indicator() {
-        let running = render_tray_icon_rgba(&TrayColors::default(), false, 0.5, "work", false);
-        let paused = render_tray_icon_rgba(&TrayColors::default(), true, 0.5, "work", false);
+        let running = render_tray_icon_rgba(&TrayColors::default(), false, 0.5, "work", false, 750);
+        let paused = render_tray_icon_rgba(&TrayColors::default(), true, 0.5, "work", false, 750);
         assert!(running != paused);
     }
 
     #[test]
     fn render_zero_progress_returns_correct_byte_count() {
-        let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.0, "work", false);
+        let bytes = render_tray_icon_rgba(&TrayColors::default(), false, 0.0, "work", false, 0);
         assert_eq!(bytes.len(), (SIZE * SIZE * 4) as usize);
     }
 
