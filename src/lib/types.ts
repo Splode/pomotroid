@@ -56,6 +56,27 @@ export interface Settings {
   local_shortcut_volume_up: string;
   local_shortcut_mute: string;
   local_shortcut_fullscreen: string;
+  categories_enabled: boolean;
+  active_category_id: number; // 0 = none chosen yet; the first category is used
+  stats_hidden_categories: string; // JSON array of hidden category ids; 0 = uncategorized
+}
+
+export type BuiltinCategoryKey = 'work' | 'study' | 'leisure';
+
+/** Mirrors Rust `Category`. `name` is null for a built-in category that has
+ *  not been renamed; show its localized name instead (see `categoryLabel`). */
+export interface Category {
+  id: number;
+  name: string | null;
+  builtin_key: BuiltinCategoryKey | null;
+  color: string; // "#RRGGBB"
+  position: number;
+}
+
+/** Mirrors Rust `StatsFilter` — categories to leave out of the stats. */
+export interface StatsFilter {
+  hidden_ids: number[];
+  hide_uncategorized: boolean;
 }
 
 /** Returned by `check_update` — describes an available update. */

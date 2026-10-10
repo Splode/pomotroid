@@ -43,6 +43,9 @@ const defaults: Settings = {
   local_shortcut_volume_up: 'ArrowUp',
   local_shortcut_mute: 'm',
   local_shortcut_fullscreen: 'F11',
+  categories_enabled: false,
+  active_category_id: 0,
+  stats_hidden_categories: '[]',
 };
 
 export const settings = writable<Settings>(defaults);

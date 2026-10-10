@@ -22,12 +22,14 @@ use commands::{
     check_update,
     install_update,
     audio_clear_custom, audio_get_custom_info, audio_set_custom,
+    categories_create, categories_delete, categories_list, categories_round_count,
+    categories_update,
     get_log_dir, open_log_dir,
     notification_show,
     settings_get, settings_reset_defaults, settings_set,
     shortcuts_reload,
     sessions_clear,
-    stats_get_detailed, stats_get_heatmap,
+    stats_get_detailed, stats_get_heatmap, stats_uncategorized_count,
     themes_list,
     timer_get_state, timer_reset, timer_restart_round, timer_skip, timer_toggle,
     window_set_visibility,
@@ -384,6 +386,13 @@ pub fn run() {
             // Stats
             stats_get_detailed,
             stats_get_heatmap,
+            stats_uncategorized_count,
+            // Categories
+            categories_list,
+            categories_create,
+            categories_update,
+            categories_delete,
+            categories_round_count,
             // Window
             window_set_visibility,
             // Shortcuts

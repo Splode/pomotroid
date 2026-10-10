@@ -13,6 +13,7 @@
 
   import SettingsTitlebar from '$lib/components/settings/SettingsTitlebar.svelte';
   import TimerSection from '$lib/components/settings/sections/TimerSection.svelte';
+  import CategoriesSection from '$lib/components/settings/sections/CategoriesSection.svelte';
   import AppearanceSection from '$lib/components/settings/sections/AppearanceSection.svelte';
   import NotificationsSection from '$lib/components/settings/sections/NotificationsSection.svelte';
   import ShortcutsSection from '$lib/components/settings/sections/ShortcutsSection.svelte';
@@ -21,10 +22,18 @@
 
   import * as m from '$paraglide/messages.js';
 
-  type Section = 'timer' | 'appearance' | 'notifications' | 'shortcuts' | 'system' | 'about';
+  type Section =
+    | 'timer'
+    | 'categories'
+    | 'appearance'
+    | 'notifications'
+    | 'shortcuts'
+    | 'system'
+    | 'about';
 
   const SECTIONS: { id: Section; label: () => string }[] = [
     { id: 'timer', label: m.nav_timer },
+    { id: 'categories', label: m.nav_categories },
     { id: 'appearance', label: m.nav_appearance },
     { id: 'notifications', label: m.nav_notifications },
     { id: 'shortcuts', label: m.nav_shortcuts },
@@ -157,6 +166,8 @@
     <main class="content">
       {#if active === 'timer'}
         <TimerSection />
+      {:else if active === 'categories'}
+        <CategoriesSection />
       {:else if active === 'appearance'}
         <AppearanceSection />
       {:else if active === 'notifications'}

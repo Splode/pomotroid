@@ -4,6 +4,7 @@
   import { setWindowVisibility } from '$lib/ipc';
   import { settings } from '$lib/stores/settings';
   import { isMac } from '$lib/utils/platform';
+  import CategorySwitcher from './CategorySwitcher.svelte';
   import Tooltip from './Tooltip.svelte';
   import * as m from '$paraglide/messages.js';
 
@@ -184,11 +185,17 @@
   {#if !isMac}
     {@render settingsBtn()}
     {@render statsBtn()}
+    {#if $settings.categories_enabled}
+      <CategorySwitcher />
+    {/if}
   {/if}
 
   <!-- Right: settings + stats buttons on macOS, window controls on Linux/Windows. -->
   <div class="controls">
     {#if isMac}
+      {#if $settings.categories_enabled}
+        <CategorySwitcher align="right" />
+      {/if}
       {@render statsBtn()}
       {@render settingsBtn()}
     {:else}
@@ -246,11 +253,7 @@
           </svg>
         {/if}
       </button>
-      <button
-        class="btn-icon close"
-        onclick={close}
-        aria-label="Close"
-      >
+      <button class="btn-icon close" onclick={close} aria-label="Close">
         <svg width="12" height="12" viewBox="0 0 12 12">
           <line
             x1="1"
