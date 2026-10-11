@@ -47,10 +47,13 @@
         // Scale so the dial fills the available space, reserving
         // COMPACT_BOTTOM_PAD px for the intentional bottom whitespace.
         const available = Math.min(w - 16, h - TITLEBAR_H - 16 - COMPACT_BOTTOM_PAD);
-        uiScale = Math.max(0.4, Math.min(available / 220, 4));
+        uiScale = Math.max(0.35, Math.min((w - 16) / 220, available / 290, 4));
       } else {
         // Scale proportionally to the base window dimensions.
-        uiScale = Math.max(0.5, Math.min(w / BASE_W, (h - TITLEBAR_H) / (BASE_H - TITLEBAR_H), 4));
+        uiScale = Math.max(
+          0.5,
+          Math.min(w / BASE_W, (h - TITLEBAR_H - 16) / (BASE_H - TITLEBAR_H), 4)
+        );
       }
     }
     update();

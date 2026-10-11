@@ -3,6 +3,7 @@
   import { setSetting } from '$lib/ipc';
   import SettingsToggle from '$lib/components/settings/SettingsToggle.svelte';
   import * as m from '$paraglide/messages.js';
+  import { parseDuration, formatDuration as formatMMSS } from '$lib/utils/duration';
 
   const MIN_SECS = 60; // 1:00
   const MAX_SECS = 5400; // 90:00
@@ -10,36 +11,12 @@
 
   // Slider positions (whole minutes) derived from stored seconds.
   let workMins = $derived(Math.round($settings.time_work_secs / 60));
-  let shortMins = $derived(Math.round($settings.time_short_break_secs / 60));
-  let longMins = $derived(Math.round($settings.time_long_break_secs / 60));
   let rounds = $derived($settings.long_break_interval);
 
   // Per-row edit state: the raw text the user is currently typing.
   let workEdit = $state<string | null>(null);
   let shortEdit = $state<string | null>(null);
   let longEdit = $state<string | null>(null);
-
-  /** Parse MM:SS or bare integer minutes. Returns total seconds, or null on failure. */
-  function parseMMSS(input: string): number | null {
-    const trimmed = input.trim();
-    const colonIdx = trimmed.indexOf(':');
-    if (colonIdx === -1) {
-      const mins = parseInt(trimmed, 10);
-      if (isNaN(mins) || trimmed === '') return null;
-      return mins * 60;
-    }
-    const mm = parseInt(trimmed.slice(0, colonIdx), 10);
-    const ss = parseInt(trimmed.slice(colonIdx + 1), 10);
-    if (isNaN(mm) || isNaN(ss) || ss < 0 || ss > 59) return null;
-    return mm * 60 + ss;
-  }
-
-  /** Format total seconds as M:SS or MM:SS. */
-  function formatMMSS(totalSecs: number): string {
-    const mins = Math.floor(totalSecs / 60);
-    const secs = totalSecs % 60;
-    return `${mins}:${String(secs).padStart(2, '0')}`;
-  }
 
   // Returns a CSS width value that matches the browser's native thumb center
   // position for a range input with the given min/max and a 14 px thumb.
@@ -69,12 +46,13 @@
       el.value = formatMMSS(currentSecs);
       return;
     }
-    const parsed = parseMMSS(raw);
+    const parsed = parseDuration(raw);
     if (parsed === null) {
       el.value = formatMMSS(currentSecs);
       return;
     }
-    const clamped = Math.max(MIN_SECS, Math.min(MAX_SECS, parsed));
+    const minimum = dbKey === 'time_work_secs' ? MIN_SECS : 0;
+    const clamped = Math.max(minimum, Math.min(MAX_SECS, parsed));
     await handleChange(dbKey, clamped);
     el.value = formatMMSS(clamped);
   }
@@ -88,6 +66,7 @@
       <input
         class="slider-value"
         type="text"
+        aria-label={m.timer_slider_focus()}
         value={workEdit ?? formatMMSS($settings.time_work_secs)}
         onfocus={(e) => {
           workEdit = (e.target as HTMLInputElement).value;
@@ -152,6 +131,8 @@
         <input
           class="slider-value"
           type="text"
+          aria-label={m.timer_slider_short_break()}
+          title={m.timer_break_duration_hint()}
           value={shortEdit ?? formatMMSS($settings.time_short_break_secs)}
           onfocus={(e) => {
             shortEdit = (e.target as HTMLInputElement).value;
@@ -190,19 +171,21 @@
       <div class="slider-wrap">
         <input
           type="range"
-          min="1"
-          max="90"
+          min="0"
+          max={MAX_SECS}
           step="1"
-          value={shortMins}
+          value={$settings.time_short_break_secs}
           class="slider"
+          aria-label={m.timer_slider_short_break()}
           oninput={(e) =>
-            handleChange(
-              'time_short_break_secs',
-              (e.target as HTMLInputElement).valueAsNumber * 60
-            )}
+            handleChange('time_short_break_secs', (e.target as HTMLInputElement).valueAsNumber)}
         />
-        <div class="bar bar--short" style="width: {barWidth(shortMins, 1, 90)}"></div>
+        <div
+          class="bar bar--short"
+          style="width: {barWidth($settings.time_short_break_secs, 0, MAX_SECS)}"
+        ></div>
       </div>
+      <p class="duration-hint">{m.timer_break_duration_hint()}</p>
     </div>
   </div>
 
@@ -220,6 +203,8 @@
         <input
           class="slider-value"
           type="text"
+          aria-label={m.timer_slider_long_break()}
+          title={m.timer_break_duration_hint()}
           value={longEdit ?? formatMMSS($settings.time_long_break_secs)}
           onfocus={(e) => {
             longEdit = (e.target as HTMLInputElement).value;
@@ -258,16 +243,21 @@
       <div class="slider-wrap">
         <input
           type="range"
-          min="1"
-          max="90"
+          min="0"
+          max={MAX_SECS}
           step="1"
-          value={longMins}
+          value={$settings.time_long_break_secs}
           class="slider"
+          aria-label={m.timer_slider_long_break()}
           oninput={(e) =>
-            handleChange('time_long_break_secs', (e.target as HTMLInputElement).valueAsNumber * 60)}
+            handleChange('time_long_break_secs', (e.target as HTMLInputElement).valueAsNumber)}
         />
-        <div class="bar bar--long" style="width: {barWidth(longMins, 1, 90)}"></div>
+        <div
+          class="bar bar--long"
+          style="width: {barWidth($settings.time_long_break_secs, 0, MAX_SECS)}"
+        ></div>
       </div>
+      <p class="duration-hint">{m.timer_break_duration_hint()}</p>
     </div>
 
     <!-- Rounds -->
@@ -327,6 +317,13 @@
     justify-content: space-between;
     align-items: baseline;
     margin-bottom: 10px;
+  }
+
+  .duration-hint {
+    margin-top: 6px;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    color: var(--color-foreground-darker, var(--color-foreground));
   }
 
   .slider-label {

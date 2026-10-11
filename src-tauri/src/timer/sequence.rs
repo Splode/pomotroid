@@ -49,6 +49,7 @@ pub struct SequenceState {
     /// Unlike `work_round_number` this never resets at cycle boundaries,
     /// so it can be used as a session counter when long breaks are disabled.
     pub session_work_count: u32,
+    pub distraction_count: u32,
 }
 
 impl SequenceState {
@@ -59,6 +60,7 @@ impl SequenceState {
             work_round_number: 1,
             work_rounds_total,
             session_work_count: 1,
+            distraction_count: 0,
         }
     }
 
@@ -80,19 +82,22 @@ impl SequenceState {
             RoundType::Work => {
                 if self.work_round_number >= self.work_rounds_total {
                     // At the long-break point.
-                    if settings.long_breaks_enabled {
+                    if settings.long_breaks_enabled && settings.time_long_break_secs > 0 {
                         RoundType::LongBreak
-                    } else if settings.short_breaks_enabled {
+                    } else if !settings.long_breaks_enabled
+                        && settings.short_breaks_enabled
+                        && settings.time_short_break_secs > 0
+                    {
                         // Substitute a short break; set to 0 so the ShortBreak→Work arm
                         // increments it to 1, preserving the cycle-reset invariant.
                         self.work_round_number = 0;
                         RoundType::ShortBreak
                     } else {
-                        // Both breaks disabled: loop directly back to Work(1).
+                        // Break skipped: loop directly back to Work(1).
                         self.work_round_number = 1;
                         RoundType::Work
                     }
-                } else if settings.short_breaks_enabled {
+                } else if settings.short_breaks_enabled && settings.time_short_break_secs > 0 {
                     RoundType::ShortBreak
                 } else {
                     // Short breaks disabled: skip directly to the next work round.
@@ -113,10 +118,17 @@ impl SequenceState {
         // Increment the session counter every time we enter a new Work round.
         if self.current_round == RoundType::Work {
             self.session_work_count += 1;
+            self.distraction_count = 0;
         }
 
         let duration = self.current_duration_secs(settings);
         (self.current_round, duration)
+    }
+
+    pub fn record_distraction(&mut self) {
+        if self.current_round == RoundType::Work {
+            self.distraction_count = self.distraction_count.saturating_add(1);
+        }
     }
 
     /// Reset the sequence to the initial state (used by the Reset command).
@@ -125,6 +137,7 @@ impl SequenceState {
         self.previous_round = None;
         self.work_round_number = 1;
         self.session_work_count = 1;
+        self.distraction_count = 0;
     }
 }
 
@@ -158,6 +171,56 @@ mod tests {
             long_breaks_enabled,
             ..Settings::default()
         }
+    }
+
+    #[test]
+    fn distractions_count_focus_clicks_and_reset_for_the_next_focus_round() {
+        let s = settings(1500, 15, 30);
+        let mut seq = SequenceState::new(4);
+        seq.record_distraction();
+        assert_eq!(seq.distraction_count, 1);
+        seq.record_distraction();
+        assert_eq!(seq.distraction_count, 2);
+        assert_eq!(seq.advance(&s), (RoundType::ShortBreak, 15));
+        seq.record_distraction();
+        assert_eq!(seq.distraction_count, 2, "breaks retain the completed focus count");
+        assert_eq!(seq.advance(&s), (RoundType::Work, 1500));
+        assert_eq!(seq.distraction_count, 0);
+        seq.record_distraction();
+        seq.reset();
+        assert_eq!(seq.distraction_count, 0);
+    }
+
+    #[test]
+    fn zero_breaks_skip_directly_to_work_and_preserve_cycle_numbers() {
+        let s = settings(1500, 0, 0);
+        let mut seq = SequenceState::new(2);
+        seq.record_distraction();
+        assert_eq!(seq.advance(&s), (RoundType::Work, 1500));
+        assert_eq!(seq.work_round_number, 2);
+        assert_eq!(seq.session_work_count, 2);
+        assert_eq!(seq.distraction_count, 0);
+        assert_eq!(seq.advance(&s), (RoundType::Work, 1500));
+        assert_eq!(seq.work_round_number, 1);
+        assert_eq!(seq.session_work_count, 3);
+    }
+
+    #[test]
+    fn zero_short_break_still_allows_a_one_second_long_break() {
+        let s = settings(1500, 0, 1);
+        let mut seq = SequenceState::new(2);
+        assert_eq!(seq.advance(&s), (RoundType::Work, 1500));
+        assert_eq!(seq.advance(&s), (RoundType::LongBreak, 1));
+        assert_eq!(seq.advance(&s), (RoundType::Work, 1500));
+        assert_eq!(seq.work_round_number, 1);
+    }
+
+    #[test]
+    fn zero_long_break_skips_to_work_then_resets_the_cycle() {
+        let s = settings(1500, 7, 0);
+        let mut seq = SequenceState::new(1);
+        assert_eq!(seq.advance(&s), (RoundType::Work, 1500));
+        assert_eq!(seq.work_round_number, 1);
     }
 
     /// Simulate `n` full cycles (each cycle = work_rounds × work + breaks + long break)

@@ -15,6 +15,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
+    "test:duration": "node --experimental-strip-types --test tests/duration.test.ts",
     "paraglide:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide",
     "check": "npm run paraglide:compile && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "npm run paraglide:compile && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",

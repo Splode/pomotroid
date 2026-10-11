@@ -1,20 +1,13 @@
 <script lang="ts">
   import { fade } from 'svelte/transition';
-  import { timerToggle, timerRestartRound, timerSkip } from '$lib/ipc';
+  import { timerToggle, timerAddFiveMinutes, timerSkip } from '$lib/ipc';
   import { timerState } from '$lib/stores/timer';
+  import * as m from '$paraglide/messages.js';
 
   let state = $derived($timerState);
 </script>
 
 <div class="mini-controls">
-  <!-- Restart current round -->
-  <button class="btn-side" onclick={timerRestartRound} aria-label="Restart round">
-    <svg width="10" height="10" viewBox="0 0 16 16">
-      <polygon points="15,1 6,8 15,15" fill="currentColor" />
-      <rect x="1" y="1" width="3" height="14" rx="1" fill="currentColor" />
-    </svg>
-  </button>
-
   <!-- Play / Pause -->
   <button class="play-pause" onclick={timerToggle} aria-label={state.is_running ? 'Pause' : 'Play'}>
     {#key state.is_running}
@@ -32,6 +25,15 @@
       </span>
     {/key}
   </button>
+
+  <button
+    class="btn-side"
+    onclick={timerAddFiveMinutes}
+    aria-label={m.timer_add_five_minutes()}
+    onkeydown={(event) => {
+      if (event.key === ' ' || event.key === 'Enter') event.stopPropagation();
+    }}>+5</button
+  >
 
   <!-- Skip round -->
   <button class="btn-side" onclick={timerSkip} aria-label="Skip round">

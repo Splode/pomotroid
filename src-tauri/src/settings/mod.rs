@@ -392,6 +392,19 @@ mod tests {
     }
 
     #[test]
+    fn zero_and_sub_minute_breaks_survive_reload() {
+        let conn = setup();
+        seed_defaults(&conn).unwrap();
+        for seconds in [0, 1, 15, 59] {
+            save_setting(&conn, "time_short_break_secs", &seconds.to_string()).unwrap();
+            save_setting(&conn, "time_long_break_secs", &seconds.to_string()).unwrap();
+            let s = load(&conn).unwrap();
+            assert_eq!(s.time_short_break_secs, seconds);
+            assert_eq!(s.time_long_break_secs, seconds);
+        }
+    }
+
+    #[test]
     fn missing_keys_fall_back_to_defaults() {
         let conn = setup();
         // No seed — table is empty.

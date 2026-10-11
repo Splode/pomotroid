@@ -38,6 +38,7 @@ pub struct TimerSnapshot {
     /// Monotonically-increasing focus round count since last reset. Used as a
     /// session counter when long breaks are disabled.
     pub session_work_count: u32,
+    pub distraction_count: u32,
 }
 
 // ---------------------------------------------------------------------------
@@ -47,6 +48,7 @@ pub struct TimerSnapshot {
 struct TimerShared {
     elapsed_secs: u32,
     is_running: bool,
+    total_secs: Option<u32>,
 }
 
 // ---------------------------------------------------------------------------
@@ -82,6 +84,7 @@ impl TimerController {
         let shared = Arc::new(Mutex::new(TimerShared {
             elapsed_secs: 0,
             is_running: false,
+            total_secs: None,
         }));
 
         // Clone handles for the event-listener thread.
@@ -157,6 +160,15 @@ impl TimerController {
         self.engine.send(TimerCommand::Skip);
     }
 
+    pub fn record_distraction(&self) -> TimerSnapshot {
+        self.sequence.lock().unwrap().record_distraction();
+        self.get_snapshot()
+    }
+
+    pub fn add_five_minutes(&self) {
+        self.engine.send(TimerCommand::AddTime { seconds: 300 });
+    }
+
     pub fn suspend(&self) {
         self.engine.send(TimerCommand::Suspend);
     }
@@ -168,6 +180,7 @@ impl TimerController {
     /// Update the duration for the current round when settings change.
     /// Only takes effect after the next Start/Resume (current countdown is not interrupted).
     pub fn reconfigure(&self) {
+        self.shared.lock().unwrap().total_secs = None;
         let duration = {
             let seq = self.sequence.lock().unwrap();
             let settings = self.settings.lock().unwrap();
@@ -187,12 +200,13 @@ impl TimerController {
             round_type: seq.current_round.as_str().to_string(),
             previous_round_type: seq.previous_round.map(|r| r.as_str().to_string()).unwrap_or_default(),
             elapsed_secs: shared.elapsed_secs,
-            total_secs: seq.current_duration_secs(&settings),
+            total_secs: shared.total_secs.unwrap_or_else(|| seq.current_duration_secs(&settings)),
             is_running: shared.is_running,
             is_paused: !shared.is_running && shared.elapsed_secs > 0,
             work_round_number: seq.work_round_number,
             work_rounds_total: seq.work_rounds_total,
             session_work_count: seq.session_work_count,
+            distraction_count: seq.distraction_count,
         }
     }
 
@@ -246,7 +260,11 @@ fn listen_events(
         match event {
             TimerEvent::Started { total_secs } => {
                 log::info!("[timer] started total={total_secs}s");
-                shared.lock().unwrap().is_running = true;
+                {
+                    let mut s = shared.lock().unwrap();
+                    s.is_running = true;
+                    s.total_secs = Some(total_secs);
+                }
                 let _ = app.emit("timer:started", serde_json::json!({ "total_secs": total_secs }));
                 if let Some(ws) = app.try_state::<Arc<WsState>>() {
                     websocket::broadcast_started(&ws, total_secs);
@@ -259,6 +277,7 @@ fn listen_events(
                     let mut s = shared.lock().unwrap();
                     s.elapsed_secs = elapsed_secs;
                     s.is_running = true;
+                    s.total_secs = Some(total_secs);
                 }
                 let _ = app.emit(
                     "timer:tick",
@@ -268,13 +287,8 @@ fn listen_events(
                 // --- Session recording: start on first tick of a new round ---
                 if elapsed_secs == 1 && current_session_id.is_none() {
                     let rt = sequence.lock().unwrap().current_round.as_str().to_string();
-                    let total = {
-                        let seq = sequence.lock().unwrap();
-                        let s = settings.lock().unwrap();
-                        seq.current_duration_secs(&s)
-                    };
                     if let Ok(conn) = db.lock() {
-                        match queries::insert_session(&conn, &rt, total) {
+                        match queries::insert_session(&conn, &rt, total_secs) {
                             Ok(id) => current_session_id = Some(id),
                             Err(e) => log::error!("[timer] failed to record session: {e}"),
                         }
@@ -299,6 +313,29 @@ fn listen_events(
                     tray::update_icon(&tray, &rt, false, progress);
                     last_tray_progress = progress;
                 }
+            }
+
+            TimerEvent::DurationChanged { elapsed_secs, total_secs } => {
+                {
+                    let mut s = shared.lock().unwrap();
+                    s.elapsed_secs = elapsed_secs;
+                    s.total_secs = Some(total_secs);
+                }
+                if let Some(id) = current_session_id {
+                    if let Ok(conn) = db.lock() {
+                        if let Err(e) = conn.execute(
+                            "UPDATE sessions SET duration_secs = ?1 WHERE id = ?2",
+                            rusqlite::params![total_secs, id],
+                        ) {
+                            log::error!("[timer] failed to extend session: {e}");
+                        }
+                    }
+                }
+                let snapshot = build_snapshot(&sequence, &settings, &shared);
+                let progress = snapshot.elapsed_secs as f32 / snapshot.total_secs.max(1) as f32;
+                tray::update_icon(&tray, &snapshot.round_type, snapshot.is_paused, progress);
+                last_tray_progress = progress;
+                let _ = app.emit("timer:duration-changed", snapshot);
             }
 
             TimerEvent::Complete { skipped: was_skipped } => {
@@ -327,6 +364,7 @@ fn listen_events(
                     let mut s = shared.lock().unwrap();
                     s.elapsed_secs = 0;
                     s.is_running = false;
+                    s.total_secs = None;
                 }
 
                 // Arm the next round's duration without risking a late
@@ -408,11 +446,7 @@ fn listen_events(
 
                 // Show pause bars in tray.
                 let rt = sequence.lock().unwrap().current_round.as_str().to_string();
-                let total = {
-                    let seq = sequence.lock().unwrap();
-                    let s = settings.lock().unwrap();
-                    seq.current_duration_secs(&s)
-                };
+                let total = build_snapshot(&sequence, &settings, &shared).total_secs;
                 let progress = if total > 0 { elapsed_secs as f32 / total as f32 } else { 0.0 };
                 tray::update_icon(&tray, &rt, true, progress);
                 tray::update_menu_items(&tray, false, true);
@@ -428,11 +462,7 @@ fn listen_events(
 
                 // Restore arc in tray.
                 let rt = sequence.lock().unwrap().current_round.as_str().to_string();
-                let total = {
-                    let seq = sequence.lock().unwrap();
-                    let s = settings.lock().unwrap();
-                    seq.current_duration_secs(&s)
-                };
+                let total = build_snapshot(&sequence, &settings, &shared).total_secs;
                 let progress = if total > 0 { elapsed_secs as f32 / total as f32 } else { 0.0 };
                 tray::update_icon(&tray, &rt, false, progress);
                 last_tray_progress = progress;
@@ -441,6 +471,7 @@ fn listen_events(
 
             TimerEvent::Reset => {
                 log::debug!("[timer] idle");
+                sequence.lock().unwrap().distraction_count = 0;
                 // Abandon the active session (leave DB row as-is).
                 current_session_id = None;
 
@@ -448,6 +479,7 @@ fn listen_events(
                     let mut s = shared.lock().unwrap();
                     s.elapsed_secs = 0;
                     s.is_running = false;
+                    s.total_secs = None;
                 }
                 let snapshot = build_snapshot(&sequence, &settings, &shared);
                 let _ = app.emit("timer:reset", snapshot);
@@ -484,11 +516,7 @@ fn listen_events(
 
                 // Show pause bars while suspended.
                 let rt = sequence.lock().unwrap().current_round.as_str().to_string();
-                let total = {
-                    let seq = sequence.lock().unwrap();
-                    let s = settings.lock().unwrap();
-                    seq.current_duration_secs(&s)
-                };
+                let total = build_snapshot(&sequence, &settings, &shared).total_secs;
                 let progress = if total > 0 { elapsed_secs as f32 / total as f32 } else { 0.0 };
                 tray::update_icon(&tray, &rt, true, progress);
             }
@@ -509,11 +537,41 @@ fn build_snapshot(
         round_type: seq.current_round.as_str().to_string(),
         previous_round_type: seq.previous_round.map(|r| r.as_str().to_string()).unwrap_or_default(),
         elapsed_secs: sh.elapsed_secs,
-        total_secs: seq.current_duration_secs(&s),
+        total_secs: sh.total_secs.unwrap_or_else(|| seq.current_duration_secs(&s)),
         is_running: sh.is_running,
         is_paused: !sh.is_running && sh.elapsed_secs > 0,
         work_round_number: seq.work_round_number,
         work_rounds_total: seq.work_rounds_total,
         session_work_count: seq.session_work_count,
+        distraction_count: seq.distraction_count,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn extended_snapshots_keep_round_progress_count_and_configured_defaults() {
+        let settings = Arc::new(Mutex::new(Settings::default()));
+        let sequence = Arc::new(Mutex::new(SequenceState::new(4)));
+        let shared = Arc::new(Mutex::new(TimerShared {
+            elapsed_secs: 12,
+            is_running: false,
+            total_secs: None,
+        }));
+        sequence.lock().unwrap().distraction_count = 2;
+        for round in [RoundType::Work, RoundType::ShortBreak, RoundType::LongBreak] {
+            sequence.lock().unwrap().current_round = round;
+            let configured = sequence.lock().unwrap().current_duration_secs(&settings.lock().unwrap());
+            shared.lock().unwrap().total_secs = Some(configured + 300);
+            let snap = build_snapshot(&sequence, &settings, &shared);
+            assert_eq!(snap.total_secs - snap.elapsed_secs, configured + 288);
+            assert_eq!(snap.round_type, round.as_str());
+            assert_eq!(snap.distraction_count, 2);
+            assert!(snap.is_paused);
+            shared.lock().unwrap().total_secs = None;
+            assert_eq!(build_snapshot(&sequence, &settings, &shared).total_secs, configured);
+        }
     }
 }

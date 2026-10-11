@@ -4,14 +4,14 @@
   import { onMount } from 'svelte';
   import {
     timerToggle,
-    timerRestartRound,
-    timerSkip,
+    timerRecordDistraction,
     getTimerState,
     onTimerTick,
     onTimerPaused,
     onTimerResumed,
     onRoundChange,
     onTimerReset,
+    onTimerDurationChanged,
   } from '$lib/ipc';
   import { timerState } from '$lib/stores/timer';
   import { settings } from '$lib/stores/settings';
@@ -20,10 +20,10 @@
   import TimerDisplay from './TimerDisplay.svelte';
   import TimerFooter from './TimerFooter.svelte';
   import MiniControls from './MiniControls.svelte';
-  import Tooltip from './Tooltip.svelte';
   import type { UnlistenFn } from '@tauri-apps/api/event';
   import * as m from '$paraglide/messages.js';
   import { notificationShow } from '$lib/ipc';
+  import { error as logError } from '@tauri-apps/plugin-log';
 
   interface Props {
     isCompact?: boolean;
@@ -33,6 +33,14 @@
   let { isCompact = false, uiScale = 1 }: Props = $props();
 
   let state = $derived($timerState);
+
+  async function recordDistraction() {
+    try {
+      timerState.set(await timerRecordDistraction());
+    } catch (error) {
+      await logError(`[timer] failed to record distraction: ${error}`);
+    }
+  }
 
   function roundColor(rt: string): string {
     if (rt === 'work') return 'var(--color-focus-round)';
@@ -103,6 +111,9 @@
         }),
         await onTimerReset((snap) => {
           timerState.set(snap);
+        }),
+        await onTimerDurationChanged((snap) => {
+          timerState.set(snap);
         })
       );
     })();
@@ -115,30 +126,41 @@
 
 <div class="timer-outer" class:compact={isCompact}>
   <div class="timer" style="zoom: {uiScale}">
-    <!-- Dial + display stacked (display centered over dial) -->
+    <TimerDisplay {state} />
+
     <div class="dial-stack">
       <TimerDial snap={state} countdown={$settings.dial_countdown} />
-      <TimerDisplay {state} />
+      <button
+        class="distraction-counter"
+        class:has-count={state.distraction_count > 0}
+        onclick={recordDistraction}
+        disabled={state.round_type !== 'work'}
+        aria-label={m.timer_distraction_add()}
+        title={m.timer_distraction_hint()}
+        onkeydown={(event) => {
+          if (event.key === ' ' || event.key === 'Enter') event.stopPropagation();
+        }}
+      >
+        <span aria-live="polite" aria-atomic="true">
+          {#if state.distraction_count > 0}
+            <span aria-hidden="true">{state.distraction_count}</span>
+            <span class="sr-only">{m.timer_distraction_count({ n: state.distraction_count })}</span>
+          {:else if state.round_type === 'work'}
+            <span class="distraction-prompt">{m.timer_distraction_hit()}</span>
+            <span class="distraction-caption">{m.timer_distraction_when()}</span>
+          {:else}
+            <span class="distraction-caption">{roundLabel(state.round_type)}</span>
+          {/if}
+        </span>
+      </button>
     </div>
 
     {#if !isCompact}
-      <!-- Round type label sits below the dial as a normal flex child so it
-           does not affect the dial-stack height used to centre TimerDisplay. -->
       <div class="round-label" style="color: {roundColor(state.round_type)}">
         {roundLabel(state.round_type)}
       </div>
 
       <div class="controls-wrapper">
-        <!-- Back: restart current round -->
-        <Tooltip text={m.tooltip_restart_round()}>
-          <button class="btn-side" onclick={timerRestartRound} aria-label="Restart round">
-            <svg width="18" height="18" viewBox="0 0 16 16">
-              <polygon points="15,1 6,8 15,15" fill="currentColor" />
-              <rect x="1" y="1" width="3" height="14" rx="1" fill="currentColor" />
-            </svg>
-          </button>
-        </Tooltip>
-
         <!-- Play / Pause — icon fades when state changes -->
         <button
           class="play-pause"
@@ -160,19 +182,8 @@
             </span>
           {/key}
         </button>
-
-        <!-- Skip: advance to next round -->
-        <Tooltip text={m.tooltip_skip()}>
-          <button class="btn-side" onclick={timerSkip} aria-label="Skip round">
-            <svg width="18" height="18" viewBox="0 0 16 16">
-              <polygon points="1,1 10,8 1,15" fill="currentColor" />
-              <rect x="12" y="1" width="3" height="14" rx="1" fill="currentColor" />
-            </svg>
-          </button>
-        </Tooltip>
-
-        <TimerFooter snap={state} />
       </div>
+      <TimerFooter snap={state} />
     {/if}
   </div>
 
@@ -193,7 +204,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
+    width: 300px;
+  }
+
+  .compact .timer {
+    width: auto;
   }
 
   .dial-stack {
@@ -203,34 +219,70 @@
     justify-content: center;
   }
 
-  .controls-wrapper {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 4px 12px;
-  }
-  .controls-wrapper > :global(*) {
-    aspect-ratio: 1;
-  }
-
-  .btn-side {
-    background: none;
+  .distraction-counter {
+    position: absolute;
+    inset: 20px;
     border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-foreground);
+    font: inherit;
     cursor: pointer;
-    color: var(--color-foreground-darker, var(--color-foreground));
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    transition:
-      color var(--transition-default),
-      background var(--transition-default);
+    transition: background var(--transition-default);
   }
 
-  .btn-side:hover {
-    color: var(--color-foreground);
+  .distraction-counter:hover:not(:disabled) {
     background: var(--color-hover);
+  }
+
+  .distraction-counter:focus-visible {
+    outline: 2px solid var(--color-focus-round);
+    outline-offset: 4px;
+  }
+
+  .distraction-counter:disabled {
+    cursor: default;
+  }
+
+  .distraction-prompt,
+  .distraction-caption {
+    display: block;
+  }
+
+  .distraction-prompt {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .distraction-caption {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--color-foreground-darker, var(--color-foreground));
+  }
+
+  .has-count {
+    font-family: 'Mona Sans Mono', monospace;
+    font-size: 2.8rem;
+    font-weight: 300;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .controls-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .play-pause {

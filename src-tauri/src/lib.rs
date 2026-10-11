@@ -29,7 +29,7 @@ use commands::{
     sessions_clear,
     stats_get_detailed, stats_get_heatmap,
     themes_list,
-    timer_get_state, timer_reset, timer_restart_round, timer_skip, timer_toggle,
+    timer_add_five_minutes, timer_get_state, timer_record_distraction, timer_reset, timer_restart_round, timer_skip, timer_toggle,
     window_set_visibility,
 };
 
@@ -373,6 +373,8 @@ pub fn run() {
             timer_restart_round,
             timer_skip,
             timer_get_state,
+            timer_record_distraction,
+            timer_add_five_minutes,
             // Settings
             settings_get,
             settings_set,
