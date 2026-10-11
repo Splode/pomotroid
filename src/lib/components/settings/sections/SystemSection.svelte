@@ -220,6 +220,23 @@
     {/if}
   {/if}
 
+  <div class="group-heading">Power</div>
+
+  <SettingsToggle
+    label="Keep System Awake"
+    description="Prevent the PC from sleeping while a timer is running."
+    checked={$settings.prevent_sleep}
+    onclick={() => toggle('prevent_sleep', $settings.prevent_sleep)}
+  />
+  {#if $settings.prevent_sleep}
+    <SettingsToggle
+      label="Keep Screen On"
+      description="Also prevent the display from turning off."
+      checked={$settings.keep_screen_on}
+      onclick={() => toggle('keep_screen_on', $settings.keep_screen_on)}
+    />
+  {/if}
+
   <div class="group-heading">{m.system_group_window()}</div>
 
   <SettingsToggle

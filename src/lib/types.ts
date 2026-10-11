@@ -48,6 +48,8 @@ export interface Settings {
   language: string; // 'auto' | 'en' | 'es' | 'fr' | 'de' | 'ja'
   verbose_logging: boolean;
   check_for_updates: boolean;
+  prevent_sleep: boolean;
+  keep_screen_on: boolean;
   global_shortcuts_enabled: boolean;
   local_shortcut_toggle: string;
   local_shortcut_reset: string;
