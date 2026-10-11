@@ -90,6 +90,14 @@ const MIGRATION_6: &str = "
     INSERT INTO schema_version VALUES (6);
 ";
 
+/// Seeds the `remember_window_state` setting for users upgrading from a version
+/// that did not have this feature. Defaults to 'false' so the feature is opt-in
+/// and existing users are not surprised by a position change on first upgrade.
+const MIGRATION_7: &str = "
+    INSERT OR IGNORE INTO settings (key, value) VALUES ('remember_window_state', 'false');
+    INSERT INTO schema_version VALUES (7);
+";
+
 /// Apply any pending migrations. Each migration is wrapped in a transaction
 /// so a partial failure leaves the database unchanged.
 pub fn run(conn: &Connection) -> Result<()> {
@@ -131,6 +139,12 @@ pub fn run(conn: &Connection) -> Result<()> {
         log::info!("[db/migrations] MIGRATION_6 complete");
     }
 
+    if version < 7 {
+        log::info!("[db/migrations] applying MIGRATION_7: seed remember_window_state setting");
+        conn.execute_batch(&format!("BEGIN; {MIGRATION_7} COMMIT;"))?;
+        log::info!("[db/migrations] MIGRATION_7 complete");
+    }
+
     Ok(())
 }
 
@@ -166,7 +180,7 @@ mod tests {
         let v: i64 = conn
             .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
             .unwrap();
-        assert_eq!(v, 6);
+        assert_eq!(v, 7);
     }
 
     #[test]

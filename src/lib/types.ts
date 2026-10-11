@@ -56,6 +56,11 @@ export interface Settings {
   local_shortcut_volume_up: string;
   local_shortcut_mute: string;
   local_shortcut_fullscreen: string;
+  window_x: number | null;
+  window_y: number | null;
+  window_width: number | null;
+  window_height: number | null;
+  remember_window_state: boolean;
 }
 
 /** Returned by `check_update` — describes an available update. */

@@ -65,6 +65,9 @@ pub struct Settings {
     pub window_width: Option<u32>,
     /// Last known window height (physical pixels). `None` = use OS default.
     pub window_height: Option<u32>,
+    /// When true, the window's size and position are saved on move/resize and
+    /// restored on the next launch.
+    pub remember_window_state: bool,
 }
 
 impl Default for Settings {
@@ -124,6 +127,7 @@ impl Default for Settings {
             window_y: None,
             window_width: None,
             window_height: None,
+            remember_window_state: false,
         }
     }
 }
@@ -249,6 +253,7 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         window_y: parse_opt_i32(&map, "window_y"),
         window_width: parse_opt_u32(&map, "window_width"),
         window_height: parse_opt_u32(&map, "window_height"),
+        remember_window_state: parse_bool(&map, "remember_window_state", d.remember_window_state),
     })
 }
 

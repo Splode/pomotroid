@@ -236,6 +236,12 @@
       onclick={() => toggle('break_always_on_top', $settings.break_always_on_top)}
     />
   {/if}
+  <SettingsToggle
+    label={m.system_toggle_remember_window()}
+    description={m.system_toggle_remember_window_desc()}
+    checked={$settings.remember_window_state}
+    onclick={() => toggle('remember_window_state', $settings.remember_window_state)}
+  />
 
   <div class="group-heading">{m.system_group_data()}</div>
 

@@ -96,6 +96,15 @@ pub fn settings_set(
             settings::save_setting(&conn, "min_to_tray", "false").map_err(|e| e.to_string())?;
             settings::save_setting(&conn, "min_to_tray_on_close", "false").map_err(|e| e.to_string())?;
         }
+        // When remember_window_state is turned off, clear the stored coordinates
+        // immediately so the window reverts to OS-default position on next launch.
+        if key == "remember_window_state" && value == "false" {
+            conn.execute(
+                "DELETE FROM settings WHERE key IN ('window_x','window_y','window_width','window_height')",
+                [],
+            ).map_err(|e| e.to_string())?;
+            log::debug!("[settings] window coordinates cleared (remember_window_state disabled)");
+        }
         settings::load(&conn).map_err(|e| {
             log::error!("[settings] failed to reload after save: {e}");
             e.to_string()
@@ -247,6 +256,13 @@ pub fn settings_reset_defaults(
         conn.execute("DELETE FROM settings", [])
             .map_err(|e| e.to_string())?;
         settings::seed_defaults(&conn).map_err(|e| e.to_string())?;
+        // Also remove any stored window coordinates so the window returns to
+        // OS-default position after a full reset (seed_defaults does not seed
+        // these keys since they have no meaningful default).
+        conn.execute(
+            "DELETE FROM settings WHERE key IN ('window_x','window_y','window_width','window_height')",
+            [],
+        ).map_err(|e| e.to_string())?;
         settings::load(&conn).map_err(|e| e.to_string())?
     };
 

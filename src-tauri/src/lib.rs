@@ -15,6 +15,8 @@ use log::LevelFilter;
 use tauri::Manager;
 use tauri_plugin_log::{Builder as LogBuilder, RotationStrategy, Target, TargetKind};
 
+use std::sync::atomic::{AtomicBool, Ordering};
+
 use commands::{
     accessibility_trusted,
     tray_supported,
@@ -283,36 +285,50 @@ pub fn run() {
                 let _ = main_window.set_always_on_top(true);
             }
 
-            // Restore saved window position/size if all four values are present and
-            // the saved rectangle still intersects at least one connected monitor.
-            if let (Some(wx), Some(wy), Some(ww), Some(wh)) = (
-                initial_settings.window_x,
-                initial_settings.window_y,
-                initial_settings.window_width,
-                initial_settings.window_height,
-            ) {
-                let on_screen = app
-                    .available_monitors()
-                    .unwrap_or_default()
-                    .into_iter()
-                    .any(|m| {
-                        let mp = m.position();
-                        let ms = m.size();
-                        let mx0 = mp.x as i64;
-                        let my0 = mp.y as i64;
-                        let mx1 = mx0 + ms.width as i64;
-                        let my1 = my0 + ms.height as i64;
-                        let wx0 = wx as i64;
-                        let wy0 = wy as i64;
-                        let wx1 = wx0 + ww as i64;
-                        let wy1 = wy0 + wh as i64;
-                        wx0 < mx1 && wx1 > mx0 && wy0 < my1 && wy1 > my0
-                    });
-                if on_screen {
-                    let _ = main_window.set_position(tauri::PhysicalPosition::new(wx, wy));
-                    let _ = main_window.set_size(tauri::PhysicalSize::new(ww, wh));
+            // Startup-suppression flag: blocks the Moved/Resized window event
+            // handlers from writing to the DB until after the restore phase
+            // completes.  On Windows and Linux the OS fires those events when the
+            // window is first shown, which would otherwise overwrite any
+            // previously-saved position with the tauri.conf.json defaults.
+            let window_ready = Arc::new(AtomicBool::new(false));
+
+            // Restore saved window position/size if all four values are present,
+            // remember_window_state is enabled, and the saved rectangle still
+            // intersects at least one connected monitor.
+            if initial_settings.remember_window_state {
+                if let (Some(wx), Some(wy), Some(ww), Some(wh)) = (
+                    initial_settings.window_x,
+                    initial_settings.window_y,
+                    initial_settings.window_width,
+                    initial_settings.window_height,
+                ) {
+                    let on_screen = app
+                        .available_monitors()
+                        .unwrap_or_default()
+                        .into_iter()
+                        .any(|m| {
+                            let mp = m.position();
+                            let ms = m.size();
+                            let mx0 = mp.x as i64;
+                            let my0 = mp.y as i64;
+                            let mx1 = mx0 + ms.width as i64;
+                            let my1 = my0 + ms.height as i64;
+                            let wx0 = wx as i64;
+                            let wy0 = wy as i64;
+                            let wx1 = wx0 + ww as i64;
+                            let wy1 = wy0 + wh as i64;
+                            wx0 < mx1 && wx1 > mx0 && wy0 < my1 && wy1 > my0
+                        });
+                    if on_screen {
+                        let _ = main_window.set_position(tauri::PhysicalPosition::new(wx, wy));
+                        let _ = main_window.set_size(tauri::PhysicalSize::new(ww, wh));
+                    }
                 }
             }
+
+            // Allow the window event handlers to start persisting geometry now
+            // that the restore phase is complete.
+            window_ready.store(true, Ordering::SeqCst);
 
             // Persist window position/size on move and resize, and close child windows
             // when the main window is truly closed (not hidden to tray).
@@ -321,6 +337,7 @@ pub fn run() {
             let app_for_close = app.handle().clone();
             let db_for_pos = db.clone();
             let win_for_pos = main_window.clone();
+            let window_ready_for_event = Arc::clone(&window_ready);
             main_window.on_window_event(move |event| {
                 match event {
                     tauri::WindowEvent::CloseRequested { api, .. } => {
@@ -343,20 +360,45 @@ pub fn run() {
                         }
                     }
                     tauri::WindowEvent::Moved(pos) => {
-                        if let Ok(conn) = db_for_pos.lock() {
-                            let _ = settings::save_setting(&conn, "window_x", &pos.x.to_string());
-                            let _ = settings::save_setting(&conn, "window_y", &pos.y.to_string());
+                        // Ignore events fired during the startup/restore phase to
+                        // prevent the OS default position from overwriting saved values.
+                        if !window_ready_for_event.load(Ordering::SeqCst) {
+                            return;
+                        }
+                        let should_save = db_for_pos
+                            .lock()
+                            .ok()
+                            .and_then(|conn| settings::load(&conn).ok())
+                            .map(|s| s.remember_window_state)
+                            .unwrap_or(false);
+                        if should_save {
+                            if let Ok(conn) = db_for_pos.lock() {
+                                let _ = settings::save_setting(&conn, "window_x", &pos.x.to_string());
+                                let _ = settings::save_setting(&conn, "window_y", &pos.y.to_string());
+                            }
                         }
                     }
                     tauri::WindowEvent::Resized(size) => {
-                        if let Ok(conn) = db_for_pos.lock() {
-                            let _ = settings::save_setting(&conn, "window_width", &size.width.to_string());
-                            let _ = settings::save_setting(&conn, "window_height", &size.height.to_string());
-                            // Also capture position, since some window managers shift the
-                            // window origin when resizing.
-                            if let Ok(pos) = win_for_pos.outer_position() {
-                                let _ = settings::save_setting(&conn, "window_x", &pos.x.to_string());
-                                let _ = settings::save_setting(&conn, "window_y", &pos.y.to_string());
+                        // Ignore events fired during the startup/restore phase.
+                        if !window_ready_for_event.load(Ordering::SeqCst) {
+                            return;
+                        }
+                        let should_save = db_for_pos
+                            .lock()
+                            .ok()
+                            .and_then(|conn| settings::load(&conn).ok())
+                            .map(|s| s.remember_window_state)
+                            .unwrap_or(false);
+                        if should_save {
+                            if let Ok(conn) = db_for_pos.lock() {
+                                let _ = settings::save_setting(&conn, "window_width", &size.width.to_string());
+                                let _ = settings::save_setting(&conn, "window_height", &size.height.to_string());
+                                // Also capture position, since some window managers shift the
+                                // window origin when resizing.
+                                if let Ok(pos) = win_for_pos.outer_position() {
+                                    let _ = settings::save_setting(&conn, "window_x", &pos.x.to_string());
+                                    let _ = settings::save_setting(&conn, "window_y", &pos.y.to_string());
+                                }
                             }
                         }
                     }
