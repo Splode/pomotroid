@@ -149,5 +149,8 @@
   "tooltip_dial_countdown": "Lorsqu'activé, l'arc de progression compte à rebours vers zéro au lieu de se remplir.",
   "tooltip_auto_start_work": "Démarrer automatiquement la prochaine session de travail lorsqu'une pause se termine.",
   "tooltip_auto_start_break": "Démarrer automatiquement la pause lorsqu'une session de travail se termine.",
-  "tooltip_websocket": "Active un serveur WebSocket local pour les intégrations externes telles que les overlays de streaming. Désactivé par défaut."
+  "tooltip_websocket": "Active un serveur WebSocket local pour les intégrations externes telles que les overlays de streaming. Désactivé par défaut.",
+  "timer_rewind": "+1 min",
+  "tooltip_rewind": "Rend une minute à la session en cours, par exemple après une distraction.",
+  "aria_rewind": "Rendre une minute au minuteur"
 }

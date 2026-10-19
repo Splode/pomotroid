@@ -149,5 +149,8 @@
   "tooltip_dial_countdown": "Cuando está activado, el arco de progreso cuenta regresivamente hasta cero en lugar de llenarse.",
   "tooltip_auto_start_work": "Iniciar automáticamente la siguiente ronda de trabajo cuando termina un descanso.",
   "tooltip_auto_start_break": "Iniciar automáticamente el descanso cuando termina una ronda de trabajo.",
-  "tooltip_websocket": "Activa un servidor WebSocket local para integraciones externas como overlays de streaming. Desactivado por defecto."
+  "tooltip_websocket": "Activa un servidor WebSocket local para integraciones externas como overlays de streaming. Desactivado por defecto.",
+  "timer_rewind": "+1 min",
+  "tooltip_rewind": "Devuelve un minuto a la ronda actual, por ejemplo tras una distracción.",
+  "aria_rewind": "Devolver un minuto al temporizador"
 }

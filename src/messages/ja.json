@@ -149,5 +149,8 @@
   "tooltip_dial_countdown": "有効にすると、進捗アークがゼロに向かってカウントダウンします（塗りつぶしではなく）。",
   "tooltip_auto_start_work": "休憩終了後に次の作業ラウンドを自動的に開始する。",
   "tooltip_auto_start_break": "作業ラウンド終了後に休憩を自動的に開始する。",
-  "tooltip_websocket": "ストリームオーバーレイなどの外部統合用のローカルWebSocketサーバーを有効にします。デフォルトでは無効です。"
+  "tooltip_websocket": "ストリームオーバーレイなどの外部統合用のローカルWebSocketサーバーを有効にします。デフォルトでは無効です。",
+  "timer_rewind": "+1分",
+  "tooltip_rewind": "現在のラウンドに1分戻します（気が散ったときなど）。",
+  "aria_rewind": "タイマーに1分戻す"
 }

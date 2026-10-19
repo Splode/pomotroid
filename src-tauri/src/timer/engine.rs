@@ -30,6 +30,10 @@ pub enum TimerCommand {
     Suspend,
     /// OS wake detected: resume from the saved elapsed position.
     WakeResume,
+    /// Give back up to `secs` of the current round (e.g. after a distraction)
+    /// by moving the elapsed position backwards. The round's total duration,
+    /// type and running/paused phase are preserved. Clamped at zero.
+    Rewind { secs: u32 },
     Shutdown,
 }
 
@@ -42,6 +46,8 @@ pub enum TimerEvent {
     Resumed { elapsed_secs: u32 },
     Reset,
     Suspended { elapsed_secs: u32 },
+    /// Elapsed position moved backwards by a `Rewind` command.
+    Rewound { elapsed_secs: u32, total_secs: u32 },
 }
 
 /// Cheap-to-clone handle for sending commands to the engine thread.
@@ -150,7 +156,11 @@ fn run_loop(
 
             // -----------------------------------------------------------------
             Phase::Paused | Phase::Suspended => match cmd_rx.recv() {
-                Ok(TimerCommand::Resume | TimerCommand::WakeResume) => {
+                // `Start` is accepted here too: the controller sends Start when
+                // the shared elapsed position is 0 (e.g. paused before the first
+                // tick, or after rewinding a running round to 0:00). Treating it
+                // as Resume keeps the toggle from getting stuck in Paused.
+                Ok(TimerCommand::Resume | TimerCommand::WakeResume | TimerCommand::Start) => {
                     let _ = event_tx.send(TimerEvent::Resumed { elapsed_secs });
                     Transition::To(Phase::Running(RunningSegment {
                         start: Instant::now(),
@@ -178,6 +188,24 @@ fn run_loop(
                     // on the next Resume tick.
                     total_secs = d.max(elapsed_secs.saturating_add(1));
                     Transition::Stay
+                }
+                Ok(TimerCommand::Rewind { secs }) => {
+                    let rewound = elapsed_secs.saturating_sub(secs);
+                    if rewound == 0 {
+                        // Rewinding a paused round all the way back is the same
+                        // as restarting it: go Idle and emit Reset so the
+                        // listener, UI, tray and toggle all agree the round has
+                        // not started (Start is only accepted while Idle).
+                        elapsed_secs = 0;
+                        let _ = event_tx.send(TimerEvent::Reset);
+                        Transition::To(Phase::Idle)
+                    } else {
+                        if rewound != elapsed_secs {
+                            elapsed_secs = rewound;
+                            let _ = event_tx.send(TimerEvent::Rewound { elapsed_secs, total_secs });
+                        }
+                        Transition::Stay
+                    }
                 }
                 Ok(TimerCommand::Shutdown) | Err(_) => Transition::Break,
                 _ => Transition::Stay,
@@ -236,6 +264,20 @@ fn run_loop(
                         // running never causes an immediate spurious completion
                         // on the next tick.
                         total_secs = d.max(elapsed_secs.saturating_add(1));
+                        Transition::Stay
+                    }
+                    Ok(TimerCommand::Rewind { secs }) => {
+                        let rewound = elapsed_secs.saturating_sub(secs);
+                        if rewound != elapsed_secs {
+                            elapsed_secs = rewound;
+                            // Re-anchor the segment at the last tick boundary so
+                            // the sub-second tick phase is preserved and the
+                            // next tick continues counting from the new position.
+                            seg.start += tick_interval * seg.ticks;
+                            seg.ticks = 0;
+                            seg.elapsed_at_start = elapsed_secs;
+                            let _ = event_tx.send(TimerEvent::Rewound { elapsed_secs, total_secs });
+                        }
                         Transition::Stay
                     }
                     Ok(TimerCommand::Shutdown) => Transition::Break,
@@ -586,6 +628,197 @@ mod tests {
             matches!(events.last(), Some(TimerEvent::Complete { .. })),
             "timer must still complete after clamped Prime in Paused phase"
         );
+    }
+
+    /// Receive events until `pred` matches; returns everything received
+    /// (including the matching event last). Panics on timeout so a missing
+    /// event fails loudly instead of hanging the suite.
+    fn wait_for(
+        rx: &Receiver<TimerEvent>,
+        timeout: Duration,
+        pred: impl Fn(&TimerEvent) -> bool,
+    ) -> Vec<TimerEvent> {
+        let deadline = Instant::now() + timeout;
+        let mut events = Vec::new();
+        loop {
+            let remaining = deadline.saturating_duration_since(Instant::now());
+            match rx.recv_timeout(remaining) {
+                Ok(e) => {
+                    let done = pred(&e);
+                    events.push(e);
+                    if done {
+                        return events;
+                    }
+                }
+                Err(_) => panic!("timed out waiting for event; got {events:?}"),
+            }
+        }
+    }
+
+    fn tick_elapsed(events: &[TimerEvent]) -> Vec<u32> {
+        events
+            .iter()
+            .filter_map(|e| match e {
+                TimerEvent::Tick { elapsed_secs, .. } => Some(*elapsed_secs),
+                _ => None,
+            })
+            .collect()
+    }
+
+    #[test]
+    fn rewind_while_running_moves_elapsed_back_and_keeps_counting() {
+        let (handle, rx) = spawn(6, TICK);
+        handle.send(TimerCommand::Start);
+        wait_for(&rx, Duration::from_secs(2), |e| {
+            matches!(e, TimerEvent::Tick { elapsed_secs: 3, .. })
+        });
+        handle.send(TimerCommand::Rewind { secs: 2 });
+
+        let events = collect_until_complete(&rx, Duration::from_secs(2));
+        let (rewound_to, total) = events
+            .iter()
+            .find_map(|e| match e {
+                TimerEvent::Rewound { elapsed_secs, total_secs } => Some((*elapsed_secs, *total_secs)),
+                _ => None,
+            })
+            .expect("expected a Rewound event");
+        assert_eq!(total, 6, "rewind must not change the round's total duration");
+        // Another tick may land before the command is processed, so compare
+        // against the last position actually reached before the rewind.
+        let pos = events.iter().position(|e| matches!(e, TimerEvent::Rewound { .. })).unwrap();
+        let before = tick_elapsed(&events[..pos]).last().copied().unwrap_or(3);
+        assert_eq!(rewound_to, before - 2, "elapsed must move back by exactly 2");
+
+        // Ticks after the rewind continue one second at a time from the new
+        // position up to the unchanged total, then the round completes.
+        let after = tick_elapsed(&events[pos..]);
+        let expected: Vec<u32> = (rewound_to + 1..=6).collect();
+        assert_eq!(after, expected, "ticks after rewind must resume from the new position");
+        assert!(matches!(events.last(), Some(TimerEvent::Complete { skipped: false })));
+        assert!(!events.iter().any(|e| matches!(e, TimerEvent::Paused { .. } | TimerEvent::Reset)));
+    }
+
+    #[test]
+    fn rewind_while_running_clamps_at_zero_and_keeps_running() {
+        let (handle, rx) = spawn(4, TICK);
+        handle.send(TimerCommand::Start);
+        wait_for(&rx, Duration::from_secs(2), |e| {
+            matches!(e, TimerEvent::Tick { elapsed_secs: 2, .. })
+        });
+        handle.send(TimerCommand::Rewind { secs: 600 });
+
+        let events = collect_until_complete(&rx, Duration::from_secs(2));
+        assert!(
+            events.iter().any(|e| matches!(e, TimerEvent::Rewound { elapsed_secs: 0, total_secs: 4 })),
+            "rewinding past the start must clamp elapsed to 0; got {events:?}"
+        );
+        let pos = events.iter().position(|e| matches!(e, TimerEvent::Rewound { .. })).unwrap();
+        assert_eq!(tick_elapsed(&events[pos..]), vec![1, 2, 3, 4]);
+        assert!(!events.iter().any(|e| matches!(e, TimerEvent::Reset)), "running rewind must not reset");
+        assert!(matches!(events.last(), Some(TimerEvent::Complete { skipped: false })));
+    }
+
+    #[test]
+    fn rewind_while_paused_stays_paused_and_resumes_from_new_position() {
+        let (handle, rx) = spawn(8, TICK);
+        handle.send(TimerCommand::Start);
+        wait_for(&rx, Duration::from_secs(2), |e| {
+            matches!(e, TimerEvent::Tick { elapsed_secs: 4, .. })
+        });
+        handle.send(TimerCommand::Pause);
+        let paused_at = wait_for(&rx, Duration::from_secs(1), |e| matches!(e, TimerEvent::Paused { .. }))
+            .into_iter()
+            .find_map(|e| match e {
+                TimerEvent::Paused { elapsed_secs } => Some(elapsed_secs),
+                _ => None,
+            })
+            .unwrap();
+
+        handle.send(TimerCommand::Rewind { secs: 3 });
+        let ev = wait_for(&rx, Duration::from_secs(1), |e| matches!(e, TimerEvent::Rewound { .. }));
+        assert!(matches!(
+            ev.last(),
+            Some(TimerEvent::Rewound { elapsed_secs, total_secs: 8 }) if *elapsed_secs == paused_at - 3
+        ));
+
+        // Still paused: no ticks arrive.
+        std::thread::sleep(TICK * 4);
+        assert!(!drain(&rx).iter().any(|e| matches!(e, TimerEvent::Tick { .. })));
+
+        handle.send(TimerCommand::Resume);
+        let events = collect_until_complete(&rx, Duration::from_secs(2));
+        assert!(matches!(events.first(), Some(TimerEvent::Resumed { elapsed_secs }) if *elapsed_secs == paused_at - 3));
+        let expected: Vec<u32> = (paused_at - 3 + 1..=8).collect();
+        assert_eq!(tick_elapsed(&events), expected);
+        assert!(matches!(events.last(), Some(TimerEvent::Complete { skipped: false })));
+    }
+
+    #[test]
+    fn rewind_paused_round_to_zero_returns_to_idle() {
+        let (handle, rx) = spawn(5, TICK);
+        handle.send(TimerCommand::Start);
+        wait_for(&rx, Duration::from_secs(2), |e| {
+            matches!(e, TimerEvent::Tick { elapsed_secs: 2, .. })
+        });
+        handle.send(TimerCommand::Pause);
+        wait_for(&rx, Duration::from_secs(1), |e| matches!(e, TimerEvent::Paused { .. }));
+
+        handle.send(TimerCommand::Rewind { secs: 60 });
+        let ev = wait_for(&rx, Duration::from_secs(1), |e| {
+            matches!(e, TimerEvent::Reset | TimerEvent::Rewound { .. })
+        });
+        assert!(matches!(ev.last(), Some(TimerEvent::Reset)), "full rewind while paused must reset the round");
+
+        // Engine is Idle: Start begins a fresh full-length round.
+        handle.send(TimerCommand::Start);
+        let events = collect_until_complete(&rx, Duration::from_secs(2));
+        assert!(matches!(events.first(), Some(TimerEvent::Started { total_secs: 5 })));
+        assert_eq!(tick_elapsed(&events), vec![1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn rewind_while_idle_is_ignored() {
+        let (handle, rx) = spawn(5, TICK);
+        handle.send(TimerCommand::Rewind { secs: 60 });
+        std::thread::sleep(TICK * 2);
+        assert!(drain(&rx).is_empty(), "rewind while idle must emit nothing");
+
+        handle.send(TimerCommand::Start);
+        let events = collect_until_complete(&rx, Duration::from_secs(2));
+        assert_eq!(tick_elapsed(&events), vec![1, 2, 3, 4, 5], "idle rewind must not alter the next round");
+    }
+
+    #[test]
+    fn rewind_of_zero_seconds_emits_nothing() {
+        let (handle, rx) = spawn(10, TICK);
+        handle.send(TimerCommand::Start);
+        wait_for(&rx, Duration::from_secs(2), |e| {
+            matches!(e, TimerEvent::Tick { elapsed_secs: 1, .. })
+        });
+        handle.send(TimerCommand::Rewind { secs: 0 });
+        handle.send(TimerCommand::Pause);
+        let ev = wait_for(&rx, Duration::from_secs(1), |e| matches!(e, TimerEvent::Paused { .. }));
+        assert!(!ev.iter().any(|e| matches!(e, TimerEvent::Rewound { .. })));
+    }
+
+    #[test]
+    fn start_while_paused_resumes_instead_of_being_dropped() {
+        // The controller sends Start when the shared elapsed position is 0 —
+        // e.g. a running round rewound to 0:00 and then paused. The engine
+        // must resume rather than silently ignore the command.
+        let (handle, rx) = spawn(3, TICK);
+        handle.send(TimerCommand::Start);
+        wait_for(&rx, Duration::from_secs(2), |e| {
+            matches!(e, TimerEvent::Tick { elapsed_secs: 1, .. })
+        });
+        handle.send(TimerCommand::Rewind { secs: 5 });
+        handle.send(TimerCommand::Pause);
+        wait_for(&rx, Duration::from_secs(1), |e| matches!(e, TimerEvent::Paused { .. }));
+
+        handle.send(TimerCommand::Start);
+        let events = collect_until_complete(&rx, Duration::from_secs(2));
+        assert!(matches!(events.first(), Some(TimerEvent::Resumed { .. })), "got {events:?}");
+        assert!(matches!(events.last(), Some(TimerEvent::Complete { skipped: false })));
     }
 
     #[test]

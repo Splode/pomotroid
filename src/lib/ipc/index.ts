@@ -20,6 +20,8 @@ export const timerToggle = () => invoke<void>('timer_toggle');
 export const timerReset = () => invoke<void>('timer_reset');
 export const timerRestartRound = () => invoke<void>('timer_restart_round');
 export const timerSkip = () => invoke<void>('timer_skip');
+/** Give back up to `secs` seconds of the current round (moves elapsed time backwards). */
+export const timerRewind = (secs: number) => invoke<void>('timer_rewind', { secs });
 export const getTimerState = () => invoke<TimerState>('timer_get_state');
 
 // --- Settings commands ---
@@ -117,6 +119,11 @@ export const onTimerPaused = (
 export const onTimerResumed = (
   cb: (payload: { elapsed_secs: number }) => void
 ): Promise<UnlistenFn> => listen<{ elapsed_secs: number }>('timer:resumed', (e) => cb(e.payload));
+
+export const onTimerRewound = (
+  cb: (payload: { elapsed_secs: number; total_secs: number }) => void
+): Promise<UnlistenFn> =>
+  listen<{ elapsed_secs: number; total_secs: number }>('timer:rewound', (e) => cb(e.payload));
 
 export const onRoundChange = (cb: (state: TimerState) => void): Promise<UnlistenFn> =>
   listen<TimerState>('timer:round-change', (e) => cb(e.payload));

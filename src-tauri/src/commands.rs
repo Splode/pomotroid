@@ -47,6 +47,13 @@ pub fn timer_restart_round(timer: State<'_, TimerController>) {
     timer.restart_round();
 }
 
+/// Give back up to `secs` seconds of the current round (rewind the elapsed
+/// position). Total duration and running/paused state are preserved.
+#[tauri::command]
+pub fn timer_rewind(secs: u32, timer: State<'_, TimerController>) {
+    timer.rewind(secs);
+}
+
 /// Return a full snapshot of the current timer state.
 /// Called once on frontend mount to hydrate stores.
 #[tauri::command]

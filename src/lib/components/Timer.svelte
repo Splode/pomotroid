@@ -6,10 +6,12 @@
     timerToggle,
     timerRestartRound,
     timerSkip,
+    timerRewind,
     getTimerState,
     onTimerTick,
     onTimerPaused,
     onTimerResumed,
+    onTimerRewound,
     onRoundChange,
     onTimerReset,
   } from '$lib/ipc';
@@ -39,6 +41,11 @@
     if (rt === 'short-break') return 'var(--color-short-round)';
     return 'var(--color-long-round)';
   }
+
+  // Seconds given back per click of the rewind control.
+  const REWIND_STEP_SECS = 60;
+  // Nothing to give back until the round has some elapsed time.
+  let canRewind = $derived(state.elapsed_secs > 0);
 
   function roundLabel(rt: string): string {
     if (rt === 'work') return m.round_label_work();
@@ -80,6 +87,10 @@
             is_paused: false,
           }));
         }),
+        // Running/paused state is unchanged by a rewind; only the position moves.
+        await onTimerRewound(({ elapsed_secs, total_secs }) => {
+          timerState.update((s) => ({ ...s, elapsed_secs, total_secs }));
+        }),
         await onRoundChange((snap) => {
           timerState.set(snap);
           if ($settings.notifications_enabled) {
@@ -119,6 +130,21 @@
     <div class="dial-stack">
       <TimerDial snap={state} countdown={$settings.dial_countdown} />
       <TimerDisplay {state} />
+      {#if !isCompact}
+        <!-- Rewind: give time back to the current round (e.g. after a distraction). -->
+        <div class="rewind-slot">
+          <Tooltip text={m.tooltip_rewind()}>
+            <button
+              class="btn-rewind"
+              onclick={() => timerRewind(REWIND_STEP_SECS)}
+              disabled={!canRewind}
+              aria-label={m.aria_rewind()}
+            >
+              {m.timer_rewind()}
+            </button>
+          </Tooltip>
+        </div>
+      {/if}
     </div>
 
     {#if !isCompact}
@@ -201,6 +227,40 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  /* Sits inside the dial, just below the remaining-time readout. */
+  .rewind-slot {
+    position: absolute;
+    top: calc(50% + 2.1rem);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .btn-rewind {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-foreground-darker, var(--color-foreground));
+    font-size: 0.75rem;
+    /* Keep at least a 24px target (WCAG 2.5.8) without crowding the readout. */
+    min-height: 24px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition:
+      color var(--transition-default),
+      background var(--transition-default),
+      opacity var(--transition-default);
+  }
+
+  .btn-rewind:hover:not(:disabled) {
+    color: var(--color-foreground);
+    background: var(--color-hover);
+  }
+
+  .btn-rewind:disabled {
+    cursor: default;
+    opacity: 0.4;
   }
 
   .controls-wrapper {

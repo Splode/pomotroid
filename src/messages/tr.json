@@ -149,5 +149,8 @@
   "tooltip_dial_countdown": "Etkinleştirildiğinde, ilerleme yayı dolmak yerine sıfıra doğru geri sayar.",
   "tooltip_auto_start_work": "Bir mola bittiğinde sonraki çalışma turunu otomatik olarak başlat.",
   "tooltip_auto_start_break": "Bir çalışma turu tamamlandığında molayı otomatik olarak başlat.",
-  "tooltip_websocket": "Yayın yerleşimleri gibi harici entegrasyonlar için yerel bir WebSocket sunucusu etkinleştirir. Varsayılan olarak devre dışıdır."
+  "tooltip_websocket": "Yayın yerleşimleri gibi harici entegrasyonlar için yerel bir WebSocket sunucusu etkinleştirir. Varsayılan olarak devre dışıdır.",
+  "timer_rewind": "+1 dk",
+  "tooltip_rewind": "Mevcut tura bir dakika geri ekler, örneğin dikkatiniz dağıldıktan sonra.",
+  "aria_rewind": "Zamanlayıcıya bir dakika geri ekle"
 }

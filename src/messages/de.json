@@ -149,5 +149,8 @@
   "tooltip_dial_countdown": "Wenn aktiviert, zählt der Fortschrittsbogen auf null herunter, anstatt sich zu füllen.",
   "tooltip_auto_start_work": "Die nächste Arbeitsrunde automatisch starten, wenn eine Pause endet.",
   "tooltip_auto_start_break": "Die Pause automatisch starten, wenn eine Arbeitsrunde endet.",
-  "tooltip_websocket": "Aktiviert einen lokalen WebSocket-Server für externe Integrationen wie Stream-Overlays. Standardmäßig deaktiviert."
+  "tooltip_websocket": "Aktiviert einen lokalen WebSocket-Server für externe Integrationen wie Stream-Overlays. Standardmäßig deaktiviert.",
+  "timer_rewind": "+1 Min.",
+  "tooltip_rewind": "Gibt der aktuellen Runde eine Minute zurück, z. B. nach einer Ablenkung.",
+  "aria_rewind": "Dem Timer eine Minute zurückgeben"
 }

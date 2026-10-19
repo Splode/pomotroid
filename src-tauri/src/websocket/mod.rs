@@ -51,6 +51,13 @@ pub struct StartedPayload {
     pub total_secs: u32,
 }
 
+/// Payload for the `rewound` event.
+#[derive(Clone, serde::Serialize)]
+pub struct RewoundPayload {
+    pub elapsed_secs: u32,
+    pub total_secs: u32,
+}
+
 /// Events broadcast to all connected WebSocket clients.
 #[derive(Clone, serde::Serialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
@@ -60,6 +67,7 @@ pub enum WsEvent {
     Paused { payload: ElapsedPayload },
     Resumed { payload: ElapsedPayload },
     Reset,
+    Rewound { payload: RewoundPayload },
 }
 
 // ---------------------------------------------------------------------------
@@ -251,6 +259,13 @@ pub fn broadcast_reset(state: &Arc<WsState>) {
     let _ = state.broadcast_tx.send(WsEvent::Reset);
 }
 
+/// Broadcast a `rewound` event (elapsed time moved backwards) to all clients.
+pub fn broadcast_rewound(state: &Arc<WsState>, elapsed_secs: u32, total_secs: u32) {
+    let _ = state
+        .broadcast_tx
+        .send(WsEvent::Rewound { payload: RewoundPayload { elapsed_secs, total_secs } });
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -311,6 +326,15 @@ mod tests {
         let json = serde_json::to_string(&event).unwrap();
         assert!(json.contains("\"type\":\"resumed\""));
         assert!(json.contains("\"elapsed_secs\":180"));
+    }
+
+    #[test]
+    fn ws_event_rewound_serializes_correctly() {
+        let event = WsEvent::Rewound { payload: RewoundPayload { elapsed_secs: 120, total_secs: 1500 } };
+        let json = serde_json::to_string(&event).unwrap();
+        assert!(json.contains("\"type\":\"rewound\""));
+        assert!(json.contains("\"elapsed_secs\":120"));
+        assert!(json.contains("\"total_secs\":1500"));
     }
 
     #[test]

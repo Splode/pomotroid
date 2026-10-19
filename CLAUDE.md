@@ -49,6 +49,7 @@ Rust commands live in `src-tauri/src/commands.rs`. All commands return `Result<T
 - `timer:tick` — `{ elapsed_secs, total_secs }` — fires every second while running
 - `timer:paused` — `{ elapsed_secs }`
 - `timer:resumed` — `{ elapsed_secs }`
+- `timer:rewound` — `{ elapsed_secs, total_secs }` — elapsed moved backwards via `timer_rewind`; running/paused state unchanged
 - `timer:round-change` — full `TimerSnapshot`
 - `timer:reset` — full `TimerSnapshot` (used to sync frontend after settings changes)
 - `settings:changed` — full `Settings` object

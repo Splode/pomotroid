@@ -157,6 +157,14 @@ impl TimerController {
         self.engine.send(TimerCommand::Skip);
     }
 
+    /// Give back up to `secs` of the current round, e.g. after a distraction.
+    /// Moves the elapsed position backwards (never below zero) while keeping
+    /// the round's total duration and running/paused state. No-op when idle.
+    pub fn rewind(&self, secs: u32) {
+        log::info!("[timer] rewind {secs}s");
+        self.engine.send(TimerCommand::Rewind { secs });
+    }
+
     pub fn suspend(&self) {
         self.engine.send(TimerCommand::Suspend);
     }
@@ -472,6 +480,29 @@ fn listen_events(
                 tray::update_icon(&tray, &rt, false, 0.0);
                 last_tray_progress = -1.0;
                 tray::update_menu_items(&tray, false, false);
+            }
+
+            TimerEvent::Rewound { elapsed_secs, total_secs } => {
+                log::info!("[timer] rewound elapsed={elapsed_secs}s total={total_secs}s");
+                let is_paused = {
+                    let mut s = shared.lock().unwrap();
+                    s.elapsed_secs = elapsed_secs;
+                    !s.is_running
+                };
+                let _ = app.emit(
+                    "timer:rewound",
+                    serde_json::json!({ "elapsed_secs": elapsed_secs, "total_secs": total_secs }),
+                );
+                if let Some(ws) = app.try_state::<Arc<WsState>>() {
+                    websocket::broadcast_rewound(&ws, elapsed_secs, total_secs);
+                }
+
+                // Redraw the tray arc immediately (the 1% throttle only applies
+                // to forward progress from ticks).
+                let rt = sequence.lock().unwrap().current_round.as_str().to_string();
+                let progress = if total_secs > 0 { elapsed_secs as f32 / total_secs as f32 } else { 0.0 };
+                tray::update_icon(&tray, &rt, is_paused, progress);
+                last_tray_progress = progress;
             }
 
             TimerEvent::Suspended { elapsed_secs } => {
