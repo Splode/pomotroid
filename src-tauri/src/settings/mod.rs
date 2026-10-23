@@ -37,6 +37,19 @@ pub struct Settings {
     pub time_short_break_secs: u32,
     /// Long break duration in seconds.
     pub time_long_break_secs: u32,
+    /// Incremental focus mode: each completed work round lengthens the next one.
+    pub incremental_work_enabled: bool,
+    /// Seconds added to the work duration after each completed work round.
+    pub time_work_increment_secs: u32,
+    /// Hard ceiling for the escalated work duration in seconds.
+    pub time_work_max_secs: u32,
+    /// Incremental focus: restart the ladder from the base work duration when a
+    /// long break begins. When `false` the ladder keeps climbing across cycles.
+    pub incremental_reset_on_long_break: bool,
+    /// Incremental focus: restart the ladder from the base work duration when the
+    /// local calendar day changes. When `false` the ladder keeps climbing across
+    /// days until a manual reset.
+    pub incremental_reset_daily: bool,
     /// Audio volume in the 0.0–1.0 range.
     pub volume: f32,
     pub shortcut_toggle: String,
@@ -90,6 +103,11 @@ impl Default for Settings {
             time_work_secs: 25 * 60,
             time_short_break_secs: 5 * 60,
             time_long_break_secs: 15 * 60,
+            incremental_work_enabled: false,
+            time_work_increment_secs: 5 * 60,
+            time_work_max_secs: 90 * 60,
+            incremental_reset_on_long_break: true,
+            incremental_reset_daily: true,
             volume: 1.0,
             #[cfg(target_os = "macos")]
             shortcut_toggle: "Super+Shift+1".to_string(),
@@ -213,6 +231,27 @@ pub fn load(conn: &Connection) -> Result<Settings> {
         time_work_secs: parse_u32(&map, "time_work_secs", d.time_work_secs),
         time_short_break_secs: parse_u32(&map, "time_short_break_secs", d.time_short_break_secs),
         time_long_break_secs: parse_u32(&map, "time_long_break_secs", d.time_long_break_secs),
+        incremental_work_enabled: parse_bool(
+            &map,
+            "incremental_work_enabled",
+            d.incremental_work_enabled,
+        ),
+        time_work_increment_secs: parse_u32(
+            &map,
+            "time_work_increment_secs",
+            d.time_work_increment_secs,
+        ),
+        time_work_max_secs: parse_u32(&map, "time_work_max_secs", d.time_work_max_secs),
+        incremental_reset_on_long_break: parse_bool(
+            &map,
+            "incremental_reset_on_long_break",
+            d.incremental_reset_on_long_break,
+        ),
+        incremental_reset_daily: parse_bool(
+            &map,
+            "incremental_reset_daily",
+            d.incremental_reset_daily,
+        ),
         // DB stores 0–100; convert to 0.0–1.0.
         volume: (parse_u32(&map, "volume", (d.volume * 100.0) as u32) as f32 / 100.0)
             .clamp(0.0, 1.0),

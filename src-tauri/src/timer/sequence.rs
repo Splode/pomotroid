@@ -49,6 +49,24 @@ pub struct SequenceState {
     /// Unlike `work_round_number` this never resets at cycle boundaries,
     /// so it can be used as a session counter when long breaks are disabled.
     pub session_work_count: u32,
+    /// Work rounds finished since the current ladder began. Drives the
+    /// incremental focus mode. It restarts at the base duration whenever a
+    /// ladder reset fires — the start of a long break, a new calendar day, or a
+    /// manual reset — unless the matching setting turns that trigger off, in
+    /// which case the ladder keeps climbing across cycles and days.
+    pub work_rounds_completed: u32,
+    /// Local calendar date (`"YYYY-MM-DD"`) the ladder was last touched on, used
+    /// to detect a day rollover. `None` until the first rollover check.
+    pub ladder_day: Option<String>,
+}
+
+/// Result of a day-rollover check (see [`SequenceState::check_day_rollover`]).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct DayRollover {
+    /// The calendar day changed since the ladder was last touched.
+    pub day_changed: bool,
+    /// The ladder restarted from the base duration as a result.
+    pub reset: bool,
 }
 
 impl SequenceState {
@@ -59,16 +77,57 @@ impl SequenceState {
             work_round_number: 1,
             work_rounds_total,
             session_work_count: 1,
+            work_rounds_completed: 0,
+            ladder_day: None,
         }
     }
 
     /// Duration of the current round in seconds, taken from settings.
+    ///
+    /// In incremental focus mode a work round is lengthened by
+    /// `time_work_increment_secs` for every work round already completed in the
+    /// current ladder, capped at `time_work_max_secs` and never shorter than the
+    /// configured base duration. Break durations are never escalated.
     pub fn current_duration_secs(&self, settings: &Settings) -> u32 {
         match self.current_round {
-            RoundType::Work => settings.time_work_secs,
+            RoundType::Work => self.work_duration_secs(settings),
             RoundType::ShortBreak => settings.time_short_break_secs,
             RoundType::LongBreak => settings.time_long_break_secs,
         }
+    }
+
+    /// The work duration that applies to the current ladder position.
+    pub fn work_duration_secs(&self, settings: &Settings) -> u32 {
+        let base = settings.time_work_secs;
+        if !settings.incremental_work_enabled || settings.time_work_increment_secs == 0 {
+            return base;
+        }
+        let step = settings
+            .time_work_increment_secs
+            .saturating_mul(self.work_rounds_completed);
+        base.saturating_add(step).min(settings.time_work_max_secs.max(base))
+    }
+
+    /// How many increments have been applied to the work duration right now.
+    /// Used by the frontend to show the current step on the ladder.
+    pub fn work_increment_steps(&self, settings: &Settings) -> u32 {
+        if !settings.incremental_work_enabled || settings.time_work_increment_secs == 0 {
+            return 0;
+        }
+        self.work_rounds_completed
+    }
+
+    /// True when the current work duration has reached the configured ceiling
+    /// and further rounds will no longer grow.
+    pub fn work_duration_at_cap(&self, settings: &Settings) -> bool {
+        if !settings.incremental_work_enabled || settings.time_work_increment_secs == 0 {
+            return false;
+        }
+        let cap = settings.time_work_max_secs.max(settings.time_work_secs);
+        let uncapped = settings
+            .time_work_secs
+            .saturating_add(settings.time_work_increment_secs.saturating_mul(self.work_rounds_completed));
+        uncapped >= cap
     }
 
     /// Advance to the next round.  Returns `(next_round_type, duration_secs)`.
@@ -76,6 +135,7 @@ impl SequenceState {
     /// Call this when the engine fires `TimerEvent::Complete`.
     pub fn advance(&mut self, settings: &Settings) -> (RoundType, u32) {
         self.previous_round = Some(self.current_round);
+        let left_work_round = self.current_round == RoundType::Work;
         self.current_round = match self.current_round {
             RoundType::Work => {
                 if self.work_round_number >= self.work_rounds_total {
@@ -110,6 +170,20 @@ impl SequenceState {
             }
         };
 
+        // A completed work round extends the ladder for the rounds that follow.
+        // Counted before the duration is computed so the very next work round
+        // already reflects the increment.
+        if left_work_round {
+            self.work_rounds_completed = self.work_rounds_completed.saturating_add(1);
+        }
+
+        // A long break starting is the cycle boundary. By default it restarts
+        // the ladder, so every cycle begins at the base duration. When the user
+        // turns that off the ladder carries across cycles and keeps climbing.
+        if self.current_round == RoundType::LongBreak && settings.incremental_reset_on_long_break {
+            self.work_rounds_completed = 0;
+        }
+
         // Increment the session counter every time we enter a new Work round.
         if self.current_round == RoundType::Work {
             self.session_work_count += 1;
@@ -119,12 +193,48 @@ impl SequenceState {
         (self.current_round, duration)
     }
 
+    /// Restart the ladder from the base duration, keeping the round and cycle
+    /// counters untouched. Used by the manual "Reset Focus Ladder" action and by
+    /// the long-break / day rollover triggers.
+    ///
+    /// `today` (when known) is recorded as the ladder's current day so a
+    /// rollover is measured from now on. Returns true when the step counter
+    /// actually changed.
+    pub fn reset_ladder(&mut self, today: Option<&str>) -> bool {
+        if let Some(day) = today {
+            self.ladder_day = Some(day.to_string());
+        }
+        let changed = self.work_rounds_completed != 0;
+        self.work_rounds_completed = 0;
+        changed
+    }
+
+    /// Restart the ladder when the local calendar day changes.
+    ///
+    /// The current day is always recorded, so the next rollover is measured from
+    /// today. When `incremental_reset_daily` is off the extra day is noted but
+    /// the ladder is left climbing — turning the setting back on later will
+    /// apply a reset on the next check.
+    pub fn check_day_rollover(&mut self, settings: &Settings, today: &str) -> DayRollover {
+        let previous = self.ladder_day.replace(today.to_string());
+        match previous {
+            Some(day) if day != today => DayRollover {
+                day_changed: true,
+                reset: settings.incremental_reset_daily && self.reset_ladder(Some(today)),
+            },
+            // First observation of a day, or still the same day: nothing to do.
+            _ => DayRollover::default(),
+        }
+    }
+
     /// Reset the sequence to the initial state (used by the Reset command).
     pub fn reset(&mut self) {
         self.current_round = RoundType::Work;
         self.previous_round = None;
         self.work_round_number = 1;
         self.session_work_count = 1;
+        self.work_rounds_completed = 0;
+        self.ladder_day = None;
     }
 }
 
@@ -445,5 +555,341 @@ mod tests {
         let (rt, _) = seq.advance(&s);
         assert_eq!(rt, RoundType::Work);
         assert_eq!(seq.work_round_number, 1, "counter resets to 1");
+    }
+
+    // -----------------------------------------------------------------------
+    // Incremental focus mode
+    // -----------------------------------------------------------------------
+
+    /// Settings with incremental focus enabled: 5 min base, +5 min per round, 20 min cap.
+    fn incremental_settings() -> Settings {
+        Settings {
+            time_work_secs: 5 * 60,
+            time_short_break_secs: 5 * 60,
+            time_long_break_secs: 15 * 60,
+            long_break_interval: 4,
+            incremental_work_enabled: true,
+            time_work_increment_secs: 5 * 60,
+            time_work_max_secs: 20 * 60,
+            ..Settings::default()
+        }
+    }
+
+    #[test]
+    fn incremental_disabled_keeps_flat_duration() {
+        let s = Settings {
+            time_work_secs: 5 * 60,
+            time_short_break_secs: 5 * 60,
+            time_long_break_secs: 15 * 60,
+            long_break_interval: 2,
+            incremental_work_enabled: false,
+            time_work_increment_secs: 5 * 60,
+            time_work_max_secs: 20 * 60,
+            ..Settings::default()
+        };
+        let mut seq = SequenceState::new(2);
+
+        assert_eq!(seq.current_duration_secs(&s), 5 * 60);
+        for _ in 0..6 {
+            let (rt, dur) = seq.advance(&s);
+            if rt == RoundType::Work {
+                assert_eq!(dur, 5 * 60, "work duration must stay flat when the feature is off");
+            }
+        }
+    }
+
+    #[test]
+    fn incremental_escalates_work_rounds_and_caps() {
+        let s = incremental_settings();
+        let mut seq = SequenceState::new(6);
+
+        // Round 1 starts at the base duration.
+        assert_eq!(seq.current_duration_secs(&s), 300, "first round is the base duration");
+
+        // Each Work round is 5 min longer than the previous, until the 20 min cap.
+        let expected_work = [300u32, 600, 900, 1200, 1200, 1200];
+        for (i, want) in expected_work.iter().enumerate() {
+            if i > 0 {
+                // Advance Work → ShortBreak → Work.
+                let (rt, dur) = seq.advance(&s);
+                assert_eq!(rt, RoundType::ShortBreak);
+                assert_eq!(dur, 300, "break durations are never escalated");
+                seq.advance(&s);
+            }
+            assert_eq!(
+                seq.current_round,
+                RoundType::Work,
+                "step {i}: expected to be on a work round"
+            );
+            assert_eq!(
+                seq.current_duration_secs(&s),
+                *want,
+                "step {i}: unexpected work duration"
+            );
+        }
+    }
+
+    #[test]
+    fn incremental_ladder_resets_after_long_break() {
+        let s = incremental_settings();
+        let mut seq = SequenceState::new(2);
+
+        assert_eq!(seq.current_duration_secs(&s), 300);
+
+        seq.advance(&s); // → ShortBreak
+        let (rt, dur) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(dur, 600, "second work round gains one increment");
+
+        let (rt, _dur) = seq.advance(&s);
+        assert_eq!(rt, RoundType::LongBreak, "long break at the cycle boundary");
+        assert_eq!(
+            seq.work_rounds_completed, 0,
+            "the ladder restarts as soon as the long break begins"
+        );
+
+        let (rt, dur) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(dur, 300, "a new cycle restarts at the base duration");
+        assert_eq!(seq.work_rounds_completed, 0, "ladder stays at the base");
+    }
+
+    #[test]
+    fn incremental_ladder_survives_long_breaks_when_reset_is_off() {
+        let s = Settings {
+            incremental_reset_on_long_break: false,
+            ..incremental_settings()
+        };
+        let mut seq = SequenceState::new(2);
+
+        seq.advance(&s); // Work(1) → ShortBreak
+        let (rt, dur) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(dur, 600);
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::LongBreak);
+        assert_eq!(
+            seq.work_rounds_completed, 2,
+            "the ladder keeps its steps across the long break"
+        );
+
+        // Leaving the long break continues the ladder instead of restarting it.
+        let (rt, dur) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(dur, 900, "the next cycle continues climbing");
+        assert_eq!(seq.work_rounds_completed, 2);
+    }
+
+    #[test]
+    fn incremental_ladder_climbs_across_cycles_until_the_cap() {
+        let s = Settings {
+            incremental_reset_on_long_break: false,
+            ..incremental_settings()
+        };
+        let mut seq = SequenceState::new(1); // every work round ends in a long break
+
+        // 5 → 10 → 15 → 20 (cap) → 20 → 20 …
+        let expected = [300u32, 600, 900, 1200, 1200, 1200];
+        for (i, want) in expected.iter().enumerate() {
+            if i > 0 {
+                seq.advance(&s); // → LongBreak
+                let (rt, dur) = seq.advance(&s);
+                assert_eq!(rt, RoundType::Work);
+                assert_ne!(dur, 0);
+            }
+            assert_eq!(
+                seq.current_duration_secs(&s),
+                *want,
+                "step {i}: the ladder must keep climbing across cycles"
+            );
+        }
+        assert!(seq.work_duration_at_cap(&s));
+        assert_eq!(seq.work_increment_steps(&s), 5, "capped rounds still count steps");
+    }
+
+    #[test]
+    fn incremental_ladder_resets_on_manual_reset() {
+        let s = incremental_settings();
+        let mut seq = SequenceState::new(8);
+
+        seq.advance(&s); // → ShortBreak
+        seq.advance(&s); // → Work (600s)
+        assert_eq!(seq.current_duration_secs(&s), 600);
+
+        seq.reset();
+        assert_eq!(seq.work_rounds_completed, 0);
+        assert_eq!(seq.current_duration_secs(&s), 300, "reset returns to the base duration");
+    }
+
+    #[test]
+    fn reset_ladder_keeps_the_round_counters() {
+        let s = incremental_settings();
+        let mut seq = SequenceState::new(8);
+
+        seq.advance(&s); // → ShortBreak
+        seq.advance(&s); // → Work(2), ladder at 600s
+        assert_eq!(seq.work_round_number, 2);
+        assert_eq!(seq.session_work_count, 2);
+        assert_eq!(seq.work_rounds_completed, 1);
+
+        assert!(seq.reset_ladder(Some("2026-05-01")), "the ladder had steps to clear");
+
+        assert_eq!(seq.work_rounds_completed, 0, "ladder restarts at the base");
+        assert_eq!(seq.current_duration_secs(&s), 300);
+        assert_eq!(seq.work_round_number, 2, "round counter is untouched");
+        assert_eq!(seq.session_work_count, 2, "session counter is untouched");
+        assert_eq!(seq.current_round, RoundType::Work, "round type is untouched");
+        assert_eq!(seq.ladder_day.as_deref(), Some("2026-05-01"));
+
+        assert!(!seq.reset_ladder(Some("2026-05-01")), "nothing left to reset");
+    }
+
+    #[test]
+    fn day_rollover_resets_the_ladder_when_enabled() {
+        let s = incremental_settings();
+        let mut seq = SequenceState::new(8);
+
+        seq.advance(&s); // → ShortBreak
+        seq.advance(&s); // → Work(2), ladder at 600s
+        assert_eq!(seq.work_rounds_completed, 1);
+
+        // Same day: no change.
+        let first = seq.check_day_rollover(&s, "2026-05-01");
+        assert_eq!(first, DayRollover { day_changed: false, reset: false });
+        assert_eq!(seq.work_rounds_completed, 1);
+
+        // A new day restarts the ladder.
+        let rollover = seq.check_day_rollover(&s, "2026-05-02");
+        assert_eq!(rollover, DayRollover { day_changed: true, reset: true });
+        assert_eq!(seq.work_rounds_completed, 0, "a new day starts at the base duration");
+        assert_eq!(seq.current_duration_secs(&s), 300);
+        assert_eq!(seq.ladder_day.as_deref(), Some("2026-05-02"));
+
+        // And the new day is remembered.
+        let again = seq.check_day_rollover(&s, "2026-05-02");
+        assert_eq!(again, DayRollover { day_changed: false, reset: false });
+    }
+
+    #[test]
+    fn day_rollover_keeps_the_ladder_when_daily_reset_is_off() {
+        let s = Settings {
+            incremental_reset_daily: false,
+            ..incremental_settings()
+        };
+        let mut seq = SequenceState::new(8);
+        // The ladder is tagged with today on its first check.
+        let _ = seq.check_day_rollover(&s, "2026-05-01");
+
+        seq.advance(&s); // → ShortBreak
+        seq.advance(&s); // → Work(2), ladder at 600s
+
+        let rollover = seq.check_day_rollover(&s, "2026-05-02");
+        assert_eq!(
+            rollover,
+            DayRollover { day_changed: true, reset: false },
+            "the day is recorded but the ladder is left alone"
+        );
+        assert_eq!(seq.work_rounds_completed, 1, "the ladder keeps climbing");
+        assert_eq!(seq.current_duration_secs(&s), 600);
+        assert_eq!(seq.ladder_day.as_deref(), Some("2026-05-02"));
+
+        // Turning the setting back on applies the missed reset on the next day.
+        let s2 = incremental_settings();
+        let rollover = seq.check_day_rollover(&s2, "2026-05-03");
+        assert_eq!(rollover, DayRollover { day_changed: true, reset: true });
+        assert_eq!(seq.work_rounds_completed, 0);
+    }
+
+    #[test]
+    fn day_rollover_ignores_the_ladder_when_it_is_already_at_zero() {        let s = incremental_settings();
+        let mut seq = SequenceState::new(8);
+        let _ = seq.check_day_rollover(&s, "2026-05-01");
+
+        let rollover = seq.check_day_rollover(&s, "2026-05-02");
+        assert_eq!(
+            rollover,
+            DayRollover { day_changed: true, reset: false },
+            "an untouched ladder has nothing to restart"
+        );
+        assert_eq!(seq.ladder_day.as_deref(), Some("2026-05-02"));
+    }
+
+    #[test]
+    fn incremental_never_shrinks_below_base_when_cap_is_smaller() {
+        let s = Settings {
+            time_work_secs: 25 * 60,
+            incremental_work_enabled: true,
+            time_work_increment_secs: 5 * 60,
+            time_work_max_secs: 10 * 60, // misconfigured: cap below the base
+            long_break_interval: 4,
+            ..Settings::default()
+        };
+        let seq = SequenceState::new(4);
+        assert_eq!(
+            seq.current_duration_secs(&s),
+            25 * 60,
+            "cap below the base duration must not shorten the work round"
+        );
+    }
+
+    #[test]
+    fn incremental_steps_and_cap_flags_track_the_ladder() {
+        let s = incremental_settings();
+        let mut seq = SequenceState::new(5);
+
+        assert_eq!(seq.work_increment_steps(&s), 0);
+        assert!(!seq.work_duration_at_cap(&s));
+
+        // Work(1)→SB→Work(2)→SB→Work(3)→SB→Work(4)→SB→Work(5)→Long → Work(1)
+        // — a full cycle, which restarts the ladder.
+        for _ in 0..10 {
+            seq.advance(&s);
+        }
+        assert_eq!(seq.current_round, RoundType::Work);
+        assert_eq!(seq.work_round_number, 1, "back at the start of a new cycle");
+        assert_eq!(seq.work_increment_steps(&s), 0, "ladder restarts each cycle");
+        assert!(!seq.work_duration_at_cap(&s));
+        assert_eq!(seq.current_duration_secs(&s), 300);
+
+        // Walk part-way into the next cycle and confirm the cap has engaged.
+        // Three work→break pairs from Work(1) land on Work(4).
+        for _ in 0..3 {
+            seq.advance(&s); // Work(n) → ShortBreak
+            seq.advance(&s); // ShortBreak → Work(n+1)
+        }
+        assert_eq!(seq.current_round, RoundType::Work);
+        assert_eq!(seq.work_round_number, 4, "three work rounds completed this cycle");
+        assert_eq!(seq.work_increment_steps(&s), 3);
+        assert!(seq.work_duration_at_cap(&s), "300 + 300×3 reaches the 1200 s cap");
+        assert_eq!(seq.work_duration_secs(&s), 1200);
+    }
+
+    #[test]
+    fn work_round_finishing_after_midnight_does_not_extend_the_new_ladder() {
+        // Mirrors how the timer event listener composes these calls when a work
+        // round that started yesterday completes just after midnight.
+        let s = incremental_settings();
+        let mut seq = SequenceState::new(4);
+        let _ = seq.check_day_rollover(&s, "2026-05-01");
+
+        seq.advance(&s); // Work(1) → ShortBreak
+        seq.advance(&s); // → Work(2), ladder at 600 s
+        assert_eq!(seq.work_rounds_completed, 1);
+
+        // Midnight passes while the second work round is still running.
+        let rollover = seq.check_day_rollover(&s, "2026-05-02");
+        assert!(rollover.reset, "the new day restarts the ladder");
+
+        let (rt, _) = seq.advance(&s);
+        assert_eq!(rt, RoundType::ShortBreak);
+        // The listener drops the step that the finished round had just added.
+        seq.reset_ladder(Some("2026-05-02"));
+
+        // So the first work round of the new day runs at the base duration.
+        let (rt, dur) = seq.advance(&s);
+        assert_eq!(rt, RoundType::Work);
+        assert_eq!(dur, 300, "the new day starts at the base duration");
+        assert_eq!(seq.work_increment_steps(&s), 0);
     }
 }

@@ -10,3 +10,4 @@ thumbs.db
 *.cert
 .svelte-kit/
 build/
+.tmp/
