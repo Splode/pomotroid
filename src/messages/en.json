@@ -24,6 +24,8 @@
   "timer_toggle_long_breaks_desc": "Skip the long break at the end of each cycle.",
   "timer_toggle_countdown": "Countdown Dial",
   "timer_toggle_countdown_desc": "Arc starts full and subtracts as time passes.",
+  "timer_toggle_dial_direction": "Reverse Dial Direction",
+  "timer_toggle_dial_direction_desc": "Reverses the direction in which the timer dial moves. Applies to both elapsed and countdown mode.",
   "timer_reset": "Reset",
   "timer_reset_defaults": "Reset to Defaults",
   "appearance_group_mode": "Mode",

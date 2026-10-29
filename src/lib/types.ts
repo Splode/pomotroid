@@ -45,6 +45,7 @@ export interface Settings {
   theme_light: string;
   theme_dark: string;
   dial_countdown: boolean;
+  dial_direction: boolean;
   language: string; // 'auto' | 'en' | 'es' | 'fr' | 'de' | 'ja'
   verbose_logging: boolean;
   check_for_updates: boolean;

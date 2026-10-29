@@ -8,8 +8,8 @@ use tauri::{AppHandle, Emitter, Manager, State};
 use std::sync::Arc;
 
 use crate::audio::{self, AudioManager};
-use crate::notifications;
 use crate::db::{queries, DbState};
+use crate::notifications;
 use crate::settings::{self, Settings};
 use crate::shortcuts;
 use crate::themes::{self, Theme};
@@ -94,7 +94,8 @@ pub fn settings_set(
         // restore from.
         if key == "tray_icon_enabled" && value == "false" {
             settings::save_setting(&conn, "min_to_tray", "false").map_err(|e| e.to_string())?;
-            settings::save_setting(&conn, "min_to_tray_on_close", "false").map_err(|e| e.to_string())?;
+            settings::save_setting(&conn, "min_to_tray_on_close", "false")
+                .map_err(|e| e.to_string())?;
         }
         settings::load(&conn).map_err(|e| {
             log::error!("[settings] failed to reload after save: {e}");
@@ -135,16 +136,17 @@ pub fn settings_set(
         if let Some(window) = app.get_webview_window("main") {
             let snap = timer.get_snapshot();
             let is_break = snap.round_type != "work";
-            let effective_aot = new_settings.always_on_top
-                && !(new_settings.break_always_on_top && is_break);
+            let effective_aot =
+                new_settings.always_on_top && !(new_settings.break_always_on_top && is_break);
             let _ = window.set_always_on_top(effective_aot);
         }
     }
 
     // Sync tray countdown mode when the dial setting changes, then immediately
     // re-render the icon so it matches the dial without waiting for a timer event.
-    if key == "dial_countdown" {
+    if matches!(key.as_str(), "dial_countdown" | "dial_direction") {
         *tray_state.countdown_mode.lock().unwrap() = new_settings.dial_countdown;
+        *tray_state.reverse_direction.lock().unwrap() = new_settings.dial_direction;
         let snap = timer.get_snapshot();
         let progress = if snap.total_secs > 0 {
             snap.elapsed_secs as f32 / snap.total_secs as f32
@@ -195,7 +197,14 @@ pub fn settings_set(
     }
 
     // Re-register global shortcuts when any shortcut key changes or the enabled flag toggles.
-    if matches!(key.as_str(), "shortcut_toggle" | "shortcut_reset" | "shortcut_skip" | "shortcut_restart" | "global_shortcuts_enabled") {
+    if matches!(
+        key.as_str(),
+        "shortcut_toggle"
+            | "shortcut_reset"
+            | "shortcut_skip"
+            | "shortcut_restart"
+            | "global_shortcuts_enabled"
+    ) {
         shortcuts::register_all(&app, &new_settings);
     }
 
@@ -252,6 +261,7 @@ pub fn settings_reset_defaults(
 
     timer.apply_settings(new_settings.clone());
     *tray_state.countdown_mode.lock().unwrap() = new_settings.dial_countdown;
+    *tray_state.reverse_direction.lock().unwrap() = new_settings.dial_direction;
 
     // Broadcast a reset snapshot so the frontend dial and display reflect the
     // restored default durations without requiring the user to manually reset.
@@ -306,10 +316,7 @@ pub fn settings_reset_defaults(
 /// List all available themes (17 bundled + any user-created ones).
 #[tauri::command]
 pub fn themes_list(app: AppHandle) -> Result<Vec<Theme>, String> {
-    let data_dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| e.to_string())?;
+    let data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
     Ok(themes::list_all(&data_dir))
 }
 
@@ -351,7 +358,11 @@ pub fn stats_get_detailed(db: State<'_, DbState>) -> Result<DetailedStats, Strin
         log::error!("[stats] failed to query streak: {e}");
         e.to_string()
     })?;
-    Ok(DetailedStats { today, week, streak })
+    Ok(DetailedStats {
+        today,
+        week,
+        streak,
+    })
 }
 
 /// Heatmap data + lifetime totals for the All Time tab.
@@ -433,10 +444,7 @@ pub fn audio_set_custom(
     std::fs::create_dir_all(&audio_dir).map_err(|e| e.to_string())?;
 
     let src = std::path::Path::new(&src_path);
-    let ext = src
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("mp3");
+    let ext = src.extension().and_then(|e| e.to_str()).unwrap_or("mp3");
 
     // Remove any existing custom file for this slot (preserves zero orphans).
     if let Ok(entries) = std::fs::read_dir(&audio_dir) {
@@ -510,8 +518,11 @@ pub fn audio_clear_custom(
     // Remove the persisted display name.
     let name_key = cue_to_name_key(&cue)?;
     let conn = db.lock().map_err(|e| e.to_string())?;
-    conn.execute("DELETE FROM settings WHERE key = ?1", rusqlite::params![name_key])
-        .map_err(|e| e.to_string())?;
+    conn.execute(
+        "DELETE FROM settings WHERE key = ?1",
+        rusqlite::params![name_key],
+    )
+    .map_err(|e| e.to_string())?;
 
     log::info!("[audio] custom sound cleared cue={cue}");
     Ok(())
@@ -538,7 +549,8 @@ pub fn audio_get_custom_info(
         settings::get_setting(&conn, key).or_else(|| stored.clone())
     };
     info.work_alert = override_name(&info.work_alert, "custom_work_alert_name");
-    info.short_break_alert = override_name(&info.short_break_alert, "custom_short_break_alert_name");
+    info.short_break_alert =
+        override_name(&info.short_break_alert, "custom_short_break_alert_name");
     info.long_break_alert = override_name(&info.long_break_alert, "custom_long_break_alert_name");
 
     Ok(info)
@@ -749,8 +761,8 @@ pub struct HeatmapStats {
 
 #[cfg(test)]
 mod tests {
-    use rusqlite::Connection;
     use crate::db::migrations;
+    use rusqlite::Connection;
 
     fn setup() -> Connection {
         let conn = Connection::open_in_memory().unwrap();
@@ -759,24 +771,31 @@ mod tests {
     }
 
     fn seed_sessions(conn: &Connection) {
-        conn.execute_batch("
+        conn.execute_batch(
+            "
             INSERT INTO sessions (started_at, ended_at, round_type, duration_secs, completed)
             VALUES (1000, 1060, 'work', 60, 1),
                    (2000, 2300, 'short-break', 300, 1);
-        ").unwrap();
+        ",
+        )
+        .unwrap();
     }
 
     #[test]
     fn sessions_clear_removes_all_rows() {
         let conn = setup();
         seed_sessions(&conn);
-        let before: i64 = conn.query_row("SELECT COUNT(*) FROM sessions", [], |r| r.get(0)).unwrap();
+        let before: i64 = conn
+            .query_row("SELECT COUNT(*) FROM sessions", [], |r| r.get(0))
+            .unwrap();
         assert_eq!(before, 2);
 
         let n = conn.execute("DELETE FROM sessions", []).unwrap();
         assert_eq!(n, 2);
 
-        let after: i64 = conn.query_row("SELECT COUNT(*) FROM sessions", [], |r| r.get(0)).unwrap();
+        let after: i64 = conn
+            .query_row("SELECT COUNT(*) FROM sessions", [], |r| r.get(0))
+            .unwrap();
         assert_eq!(after, 0);
     }
 
@@ -787,4 +806,3 @@ mod tests {
         assert_eq!(n, 0);
     }
 }
-

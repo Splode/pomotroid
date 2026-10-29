@@ -110,6 +110,7 @@ pub fn run() {
 
             // Sync tray state from saved settings.
             *tray_state.countdown_mode.lock().unwrap() = initial_settings.dial_countdown;
+            *tray_state.reverse_direction.lock().unwrap() = initial_settings.dial_direction;
             let tray_theme_name = match initial_settings.theme_mode.as_str() {
                 "dark" => &initial_settings.theme_dark,
                 _ => &initial_settings.theme_light,
@@ -234,9 +235,7 @@ pub fn run() {
                         // register it with NSApplication. This causes macOS to
                         // auto-populate it with all standard window-management items.
                         unsafe {
-                            let ns_app_class = AnyClass::get(
-                                std::ffi::CStr::from_bytes_with_nul_unchecked(b"NSApplication\0"),
-                            );
+                            let ns_app_class = AnyClass::get(c"NSApplication");
                             if let Some(cls) = ns_app_class {
                                 let ns_app: *mut AnyObject =
                                     msg_send![cls, sharedApplication];

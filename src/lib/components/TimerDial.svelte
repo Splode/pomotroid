@@ -9,9 +9,10 @@
   interface Props {
     snap: TimerState;
     countdown?: boolean;
+    dial_direction?: boolean;
   }
 
-  let { snap, countdown = false }: Props = $props();
+  let { snap, countdown = false, dial_direction = false }: Props = $props();
 
   // SVG constants (matching original Pomotroid geometry)
   const CIRCUMFERENCE = 691.15; // 2π × 110 ≈ 691.15
@@ -29,6 +30,9 @@
   // Track previous round to detect round changes and snap the animation.
   // Not reactive — only used for comparison inside $effect.
   let prevRound = $state<string>('');
+
+  // Reverse the direction the arc moves by mirroring the SVG around its vertical axis.
+  const direction = $derived(dial_direction ? -1 : 1);
 
   $effect(() => {
     const rt = snap.round_type;
@@ -49,7 +53,7 @@
   });
 </script>
 
-<svg class="dial" viewBox="0 0 230 230" aria-hidden="true">
+<svg class="dial" viewBox="0 0 230 230" aria-hidden="true" style:transform="scaleX({direction})">
   <!-- Background track -->
   <path
     class="track"

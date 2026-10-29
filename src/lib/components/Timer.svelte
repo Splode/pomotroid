@@ -117,7 +117,11 @@
   <div class="timer" style="zoom: {uiScale}">
     <!-- Dial + display stacked (display centered over dial) -->
     <div class="dial-stack">
-      <TimerDial snap={state} countdown={$settings.dial_countdown} />
+      <TimerDial
+        snap={state}
+        countdown={$settings.dial_countdown}
+        dial_direction={$settings.dial_direction}
+      />
       <TimerDisplay {state} />
     </div>
 

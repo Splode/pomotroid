@@ -309,6 +309,12 @@
     checked={$settings.dial_countdown}
     onclick={() => toggle('dial_countdown', $settings.dial_countdown)}
   />
+  <SettingsToggle
+    label={m.timer_toggle_dial_direction()}
+    description={m.timer_toggle_dial_direction_desc()}
+    checked={$settings.dial_direction}
+    onclick={() => toggle('dial_direction', $settings.dial_direction)}
+  />
 </div>
 
 <style>
