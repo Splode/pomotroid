@@ -24,6 +24,7 @@
   import type { UnlistenFn } from '@tauri-apps/api/event';
   import * as m from '$paraglide/messages.js';
   import { notificationShow } from '$lib/ipc';
+  import { openBreakShield, closeBreakShield } from '$lib/utils/breakShield';
 
   interface Props {
     isCompact?: boolean;
@@ -82,6 +83,14 @@
         }),
         await onRoundChange((snap) => {
           timerState.set(snap);
+          if (snap.round_type === 'short-break' || snap.round_type === 'long-break') {
+            if ($settings.fullscreen_break_shield) {
+              openBreakShield();
+            }
+          } else {
+            closeBreakShield();
+          }
+
           if ($settings.notifications_enabled) {
             let title: string;
             let body: string;
@@ -103,6 +112,7 @@
         }),
         await onTimerReset((snap) => {
           timerState.set(snap);
+          closeBreakShield();
         })
       );
     })();

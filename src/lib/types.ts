@@ -56,6 +56,7 @@ export interface Settings {
   local_shortcut_volume_up: string;
   local_shortcut_mute: string;
   local_shortcut_fullscreen: string;
+  fullscreen_break_shield: boolean;
 }
 
 /** Returned by `check_update` — describes an available update. */

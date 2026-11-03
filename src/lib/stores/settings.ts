@@ -43,6 +43,7 @@ const defaults: Settings = {
   local_shortcut_volume_up: 'ArrowUp',
   local_shortcut_mute: 'm',
   local_shortcut_fullscreen: 'F11',
+  fullscreen_break_shield: false,
 };
 
 export const settings = writable<Settings>(defaults);
