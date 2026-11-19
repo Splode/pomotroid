@@ -243,6 +243,10 @@
     justify-content: center;
     width: 48px;
     height: 48px;
+    /* Center within its grid cell. Without this, WebKit (macOS) places the
+       fixed-size button at the start of the cell, so it renders up and to the
+       left of the skip/restart buttons (#470). */
+    place-self: center;
     border-radius: 50%;
     border: 2px solid var(--color-foreground-darker, var(--color-foreground));
     transition:
