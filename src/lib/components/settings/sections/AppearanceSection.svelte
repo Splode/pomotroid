@@ -22,12 +22,6 @@
     $settings.theme_mode === 'dark' || ($settings.theme_mode === 'auto' && osDark)
   );
 
-  //let selectedLightTheme = $derived(themes.find((t) => t.name === $settings.theme_light));
-  //let selectedDarkTheme = $derived(themes.find((t) => t.name === $settings.theme_dark));
-
-  //function togglePicker(picker: 'light' | 'dark') {
-  //  openPicker = openPicker === picker ? null : picker;
-  //}
   let selectedName = $derived(lightIsActive ? $settings.theme_light : $settings.theme_dark);
 
   function selectTheme(theme: Theme) {
