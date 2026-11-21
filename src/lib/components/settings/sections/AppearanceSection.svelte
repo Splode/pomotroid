@@ -10,8 +10,7 @@
 
   let themes = $state<Theme[]>([]);
   let osDark = $state(window.matchMedia('(prefers-color-scheme: dark)').matches);
-  // Accordion: at most one picker open at a time.
-  // let openPicker = $state<'light' | 'dark' | null>(null);
+
 
   // Light picker is active when mode='light', or mode='auto' and OS is light.
   let lightIsActive = $derived(
@@ -199,89 +198,6 @@
     background: color-mix(in oklch, var(--color-accent) 18%, transparent);
     color: var(--color-accent);
     font-weight: 600;
-  }
-
-  /* Collapsible picker groups */
-  .picker-group {
-    margin: 8px 20px 0;
-    border: 1px solid var(--color-separator);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-
-  .picker-group:last-child {
-    margin-bottom: 12px;
-  }
-
-  .picker-trigger {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding: 9px 12px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    gap: 8px;
-    transition: background 0.12s;
-  }
-
-  .picker-trigger:hover {
-    background: color-mix(in oklch, var(--color-background) 88%, var(--color-foreground) 12%);
-  }
-
-  .picker-trigger.open {
-    border-bottom: 1px solid var(--color-separator);
-  }
-
-  .trigger-label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--color-foreground-darker, var(--color-foreground));
-    opacity: 0.7;
-    flex-shrink: 0;
-  }
-
-  .trigger-preview {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    flex: 1;
-    justify-content: flex-end;
-    min-width: 0;
-  }
-
-  .preview-swatches {
-    display: flex;
-    gap: 3px;
-    flex-shrink: 0;
-    padding: 4px 6px;
-    border-radius: 4px;
-  }
-
-  .preview-name {
-    font-size: 0.8rem;
-    color: var(--color-foreground-darker, var(--color-foreground));
-    opacity: 0.8;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-  }
-
-  .chevron {
-    flex-shrink: 0;
-    color: var(--color-foreground-darker, var(--color-foreground));
-    opacity: 0.5;
-    transition: transform 0.15s;
-  }
-
-  .chevron.rotated {
-    transform: rotate(180deg);
   }
 
   /* Theme list */
